@@ -10,16 +10,20 @@ export const sourceRoot = __dirname;
 export const DEFAULTS = JSON.parse(fs.readFileSync(path.join(sourceRoot, 'assets/defaults.json'), 'utf8'));
 export const isObject = (value: unknown): value is Json => value !== null && typeof value === 'object' && !Array.isArray(value);
 export const exists = (file: string): boolean => { try { fs.lstatSync(file); return true; } catch (error: any) { if (error.code === 'ENOENT') return false; throw error; } };
-export const expand = (file: string): string => file === '~' ? os.homedir() : /^~[/\\]/.test(file) ? path.join(os.homedir(), file.slice(2)) : file;
+export const expand = (file: string): string => file === '~' ? os.homedir() : /^~[/\\]/.test(file) ? os.homedir() + path.sep + file.slice(2) : file;
 // realpath must resolve existing symlink parents even when the last components do not exist.
 export function canonical(file: string, depth = 0): string {
   if (depth > 64) throw new Error('Too many symbolic links');
-  const absolute = path.resolve(expand(file));
+  const expanded = expand(file);
+  // Let realpath see '..' after symlinks; lexical path.resolve would change its meaning.
+  const absolute = path.isAbsolute(expanded) ? expanded : process.cwd() + path.sep + expanded;
   try { return fs.realpathSync.native(absolute); } catch (error: any) {
     if (!['ENOENT', 'ENOTDIR'].includes(error.code)) throw error;
   }
-  if (exists(absolute) && fs.lstatSync(absolute).isSymbolicLink())
-    return canonical(path.resolve(path.dirname(absolute), fs.readlinkSync(absolute)), depth + 1);
+  if (exists(absolute) && fs.lstatSync(absolute).isSymbolicLink()) {
+    const link = fs.readlinkSync(absolute);
+    return canonical(path.isAbsolute(link) ? link : path.dirname(absolute) + path.sep + link, depth + 1);
+  }
   const parent = path.dirname(absolute);
   return parent === absolute ? absolute : path.join(canonical(parent, depth + 1), path.basename(absolute));
 }
@@ -29,12 +33,12 @@ export function within(root: string, file: string): boolean {
 }
 export function safePath(root: string, ...parts: string[]): string {
   root = canonical(root);
-  const file = path.resolve(root, ...parts);
+  const file = parts.reduce((parent, part) => path.isAbsolute(part) ? part : parent + path.sep + part, root);
   if (!within(root, canonical(file))) throw new Error('Path escapes its storage root: ' + file);
   return file;
 }
 export function codexHome(home?: string): string {
-  return canonical(home ? path.join(expand(home), '.codex') : process.env.CODEX_HOME || path.join(os.homedir(), '.codex'));
+  return canonical(home ? path.join(canonical(home), '.codex') : process.env.CODEX_HOME || path.join(os.homedir(), '.codex'));
 }
 export function readJson(file: string): any {
   try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (error) { throw new Error(`Cannot read JSON ${file}: ${error}`); }

@@ -68,7 +68,7 @@ export function install(args: InstallArgs, source = sourceRoot): Json {
   const codex = codexHome(args.home), manifest = path.join(codex, 'harness/install.json'), agents = path.join(codex, 'AGENTS.md');
   if (exists(path.join(codex, 'AGENTS.override.md'))) throw new Error('AGENTS.override.md would shadow the bootstrap; resolve this existing override before installation');
   const content = readAgents(agents), state = loadOwned(manifest, agents, content);
-  let target = args.skills_dir ? path.resolve(expand(args.skills_dir), 'codex-harness') : state?.target || path.join(user, '.agents/skills/codex-harness');
+  let target = args.skills_dir ? expand(args.skills_dir) + path.sep + 'codex-harness' : state?.target || path.join(user, '.agents/skills/codex-harness');
   rejectSymlink(target, 'Skill target');
   target = canonical(target); source = canonical(source);
   if (state && target !== state.target) throw new Error('Uninstall before changing the skill target');

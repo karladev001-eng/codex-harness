@@ -115,3 +115,12 @@ test('CLI rejects malformed commands/options and missing required base', t => {
 test('measurement preserves microseconds near datetime year limit', () => {
   assert.equal(r.measurement({ ...sample(), start: '9999-12-31T23:59:59.000001Z', end: '9999-12-31T23:59:59.000002Z' }).elapsed_seconds, 0.000001);
 });
+test('canonical paths resolve symlinks before parent traversal, including missing tails', { skip: process.platform === 'win32' }, t => {
+  const f = fixture(t), actual = path.join(f.base, 'actual'), nested = path.join(actual, 'nested');
+  fs.mkdirSync(nested, { recursive: true }); fs.symlinkSync(nested, path.join(f.project, 'link'), 'dir');
+  const input = f.project + '/link/..';
+  assert.equal(lib.canonical(input), actual);
+  assert.equal(lib.canonical(input + '/missing/tail'), path.join(actual, 'missing/tail'));
+  assert.equal(run(['status', '--project', input, '--home', f.home]).data.local_root, lib.localRoot(actual, f.home));
+  assert.throws(() => lib.safePath(f.project, 'link/../missing'), /escapes/);
+});
