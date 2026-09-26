@@ -18,7 +18,7 @@ Treat a definition reached from the resolved entrypoint as **connected**. List a
 Keep these categories distinct in the result:
 
 - **Definitions:** rules, role documents, and workflows. For each requested item, give its short name and purpose; rules also need applicability and record location, roles need responsibility and rule references, and workflows need order and review/completion conditions.
-- **Configured state:** settings that explicitly enable or disable orchestration features. For a Codex Harness installation, a confirmed read-only `runtime.py status --project <project>` may provide this. Do not run arbitrary referenced scripts.
+- **Configured state:** settings that explicitly enable or disable orchestration features. For a Codex Harness installation, a confirmed read-only `node "<skill-dir>/runtime.js" status --project <project>` may provide this. Do not run arbitrary referenced scripts.
 - **Recorded state:** task documents or other records such as `implementing`. State their source and do not call them live activity.
 - **Observed live state:** report it only from an available read-only host status/API for the requested project. If unavailable, out of scope, or inconclusive, say **unconfirmed**. File timestamps, `active=true`, and recorded task state are not live evidence.
 
