@@ -30,7 +30,7 @@ python3 scripts/harness.py install
 
 個人用の設定や認証情報はGitに含めません。別のPCではCodexのログイン・ツール接続を個別に設定してください。
 
-Git clone をせず、既存プロジェクトに `create-rulebooks`、`create-subagent`、`create-harness` の3スキルだけを入れる方法は、[Authoring Skills の導入手順](authoring-skills/INSTALL.md)を参照してください。これはハーネス本体とは別の、Markdownだけで構成されたスキル群です。
+Git clone をせず、既存プロジェクトに作成用の `create-rulebooks`、`create-subagent`、`create-harness` と確認用の `inspect-harness` を入れる方法は、[Authoring Skills の導入手順](authoring-skills/INSTALL.md)を参照してください。これはハーネス本体とは別の、Markdownだけで構成された4スキルです。
 
 ## 動作と設定
 
