@@ -105,3 +105,5 @@ python3 scripts/harness.py --help
 ## 参考
 
 [everything-claude-code](https://github.com/worldflowai/everything-claude-code) のタスク別オーケストレーション、構造化された引継ぎ、独立レビューを参考にしています。実装・指示文は独自に作成し、Claude固有の設定やhooksをそのまま移植していません。
+
+今のハーネスのルールとエージェント一覧を見せてほしい場合は、`inspect-harness` を使います。
