@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "enabled": true,
+  "delegation": true,
+  "review": true,
+  "persistence": true,
+  "measurement": true,
+  "max_agents": 3,
+  "models": {
+    "deterministic": {"model": "gpt-5.6-luna", "reasoning_effort": "medium"},
+    "standard": {"model": "gpt-5.6-terra", "reasoning_effort": "medium"},
+    "complex": {"model": "gpt-6-astra", "reasoning_effort": "high"},
+    "review": {"model": "gpt-5.6-sol", "reasoning_effort": "high"}
+  }
+}
