@@ -6,7 +6,7 @@ TypeScriptへの移行と、コンパイル済みnpm tarballによる非公開Gi
 
 ## 自動テスト
 
-`npm test`：39件成功。Node.js 22.23.3でも同じ39件が成功しました。Nodeの実行パスを明示して検証しており、npxの起動先バージョンも確認します。
+実装担当の報告では `npm test` が39件成功し、Node.js 22.23.3でも同じ39件が成功しました。統合worktreeでもNode.js 26.9.0で `npm ci`、`npm test` を実行し、39件すべてが成功しました。Nodeの実行パスを明示して検証しており、npxの起動先バージョンも確認します。
 
 - 設定の階層、型、schema、全OFF時の無書込み、既存の保存先ハッシュ
 - 依存関係の欠落・循環、永続化OFF、Windows形式を含む不正scope、欠けた末尾を持つシンボリックリンクからの逸脱防止
@@ -25,16 +25,16 @@ TypeScriptへの移行と、コンパイル済みnpm tarballによる非公開Gi
 
 ## 配布物
 
-`npm pack` がビルドを実行し、`karladev001-eng-codex-harness-0.2.0.tgz` を生成します。中にはCLI、自己完結した `dist/skill/`、manifestを含む `dist/plugins/codex-harness/`、4 authoringスキルと文書が入ります。ソースの `.py`、TypeScriptソース、node_modulesは配布に含みません。
+統合検証で `npm pack --pack-destination /private/tmp/harness-typescript-integrated` を実行し、`/private/tmp/harness-typescript-integrated/karladev001-eng-codex-harness-0.2.0.tgz` を生成しました（SHA-256: `11b80020e6afe4722c08fdf985e09000c51f8a06528c14f98f767e041cf44023`）。中にはCLI、自己完結した `dist/skill/`、manifestを含む `dist/plugins/codex-harness/`、4 authoringスキルと文書が入ります。ソースの `.py`、TypeScriptソース、node_modulesは配布に含みません。`npm ls --omit=dev --depth=0` は空で、実行時production依存がないことも確認しました。
 
 パッケージは `private: true` です。公開npmへのpublishはせず、非公開GitHub Releaseから認証付きで取得して `npx --yes --package ./archive.tgz codex-harness ...` で使います。Releaseへの添付・実際の個人ホームへの更新は、独立レビュー・統合後の配布工程で行います。この実装検証では個人ホームを変更していません。
 
 ## CI・制約
 
-`.github/workflows/test.yml` にNode.js 22のubuntu-latest、windows-latest、macos-latestで `npm ci`、`npm test`、`npm pack` を行うmatrixを追加しました。CI結果は実行後に確認する必要があり、このローカル検証記録はWindows/Linux成功を主張しません。symlink作成権限に依存する4テストはWindowsでスキップします。
+`.github/workflows/test.yml` にNode.js 22のubuntu-latest、windows-latest、macos-latestで `npm ci`、`npm test`、`npm pack` を行うmatrixを追加しました。private branch CI run [36236798775](https://github.com/karladev001-eng/harness/actions/runs/36236798775) は、いずれのOSでもstep開始前に停止しました。GitHubは最近のアカウント支払い失敗、またはspending limit増額が必要と報告しました。請求設定は変更していません。このためWindows/Linuxは未検証です。symlink作成権限に依存する4テストはWindowsでスキップします。
 
-- Windows/LinuxでのCI結果、別物理PC上のCodex検出・新規セッション再開はこの時点では未確認。
-- 新しい独立レビュー・統合検証は調整担当の記録で確定する。
+- Windows/LinuxでのCI結果、別物理PC上のCodex検出・新規セッション再開は未確認。
+- 実装の独立レビューはPASS。統合検証はNode.js 26.9.0で `npm ci`、39件の `npm test`、`npm pack`、standalone/plug-in同梱物の確認をPASSとする。最終整合性レビュー、private GitHub配布、実個人ホームの安全な更新は調整担当のdelivery工程で保留する。
 - 旧版の実エージェント並列・独立レビュー・再開の結果は歴史的証拠として保持し、今回のモデル実行検証とは扱わない。
 - 利用枠削減、大規模アプリ品質、競合解消性能は未計測。
 
