@@ -1,14 +1,14 @@
 # Authoring Skills
 
-`create-rulebooks`、`create-subagent`、`create-harness` は、規則、再利用可能な担当定義、作業の調整手順をMarkdownとして作成・更新する独立スキル群です。既存の `plugins/codex-harness/`、runtime、モデル設定、導入スクリプトには依存せず、変更もしません。
+`create-rulebooks`、`create-subagent`、`create-harness` は、規則、再利用可能な担当定義、作業の調整手順をMarkdownとして作成・更新する独立スキルです。`inspect-harness` はそれらと既存のCodex Harness構成を読み取り専用で確認します。作成用3スキルと確認用1スキルは、既存の `plugins/codex-harness/`、runtime、モデル設定、導入スクリプトに依存せず、変更もしません。
 
 ## 導入
 
-既存プロジェクトへ Git clone なしで3スキルを導入する場合は、[INSTALL.md](INSTALL.md) を使います。対象プロジェクトをCodexで開いて依頼する方法と、macOS/Linux・Windows PowerShell向けの手動手順を載せています。
+既存プロジェクトへ Git clone なしで4スキルを導入する場合は、[INSTALL.md](INSTALL.md) を使います。対象プロジェクトをCodexで開いて依頼する方法と、macOS/Linux・Windows PowerShell向けの手動手順を載せています。
 
-この3スキルはOS固有のコードを含まないMarkdownです。ただし、利用先のCodexがスキルに対応している必要があります。macOSでの導入は検証済みですが、WindowsとLinuxの実機ではまだ検証していません。PythonやGitを使う既存のCodex Harness本体とは別の製品です。
+この4スキルはOS固有のコードを含まないMarkdownです。ただし、利用先のCodexがスキルに対応している必要があります。macOSでの導入は作成用3スキルについて検証済みですが、WindowsとLinuxの実機ではまだ検証していません。PythonやGitを使う既存のCodex Harness本体とは別の製品です。
 
-各スキルのフォルダをそのまま個人用スキル領域へコピーして使えます。3つを併用する場合は、まず `create-harness` で最小構成と索引を作り、必要に応じて他の2スキルで定義を追加します。入口は、明示指定、`AGENTS.md` などが参照する既存索引、既定の `HARNESS.md` の順に解決します。新規プロジェクトに読込入口がない場合は、利用者が対象索引を読むか、「運用可能にして」と依頼された場合だけ最小の `AGENTS.md` 参照を作ります。入口の内容や上位指示は壊さず、明示された名称・場所を優先します。
+各スキルのフォルダをそのまま個人用スキル領域へコピーして使えます。作成用3スキルを併用する場合は、まず `create-harness` で最小構成と索引を作り、必要に応じて他の2スキルで定義を追加します。`inspect-harness` は現在の構成、規則、担当、手順、記録と確認可能な状態を変更せずに説明します。入口は、明示指定、`AGENTS.md` などが参照する既存索引、既定の `HARNESS.md` の順に解決します。新規プロジェクトに読込入口がない場合は、利用者が対象索引を読むか、「運用可能にして」と依頼された場合だけ最小の `AGENTS.md` 参照を作ります。入口の内容や上位指示は壊さず、明示された名称・場所を優先します。
 
 既定の配置は次のとおりです。実際に使う定義がないフォルダは作りません。
 
