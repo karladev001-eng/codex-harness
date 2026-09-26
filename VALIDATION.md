@@ -25,7 +25,7 @@ TypeScriptへの移行と、コンパイル済みnpm tarballによる非公開Gi
 
 ## 配布物
 
-統合検証で `npm pack --pack-destination /private/tmp/harness-typescript-integrated` を実行し、`/private/tmp/harness-typescript-integrated/karladev001-eng-codex-harness-0.2.0.tgz` を生成しました（SHA-256: `11b80020e6afe4722c08fdf985e09000c51f8a06528c14f98f767e041cf44023`）。中にはCLI、自己完結した `dist/skill/`、manifestを含む `dist/plugins/codex-harness/`、4 authoringスキルと文書が入ります。ソースの `.py`、TypeScriptソース、node_modulesは配布に含みません。`npm ls --omit=dev --depth=0` は空で、実行時production依存がないことも確認しました。
+統合検証で `npm pack --pack-destination /private/tmp/harness-typescript-integrated` を実行し、`/private/tmp/harness-typescript-integrated/karladev001-eng-codex-harness-0.2.0.tgz` を生成しました。中にはCLI、自己完結した `dist/skill/`、manifestを含む `dist/plugins/codex-harness/`、4 authoringスキルと文書が入ります。ソースの `.py`、TypeScriptソース、node_modulesは配布に含みません。`npm ls --omit=dev --depth=0` は空で、実行時production依存がないことも確認しました。Release用のchecksumは配布物とは別の `SHA256SUMS.txt` で提供します。
 
 パッケージは `private: true` です。公開npmへのpublishはせず、非公開GitHub Releaseから認証付きで取得して `npx --yes --package ./archive.tgz codex-harness ...` で使います。Releaseへの添付・実際の個人ホームへの更新は、独立レビュー・統合後の配布工程で行います。この実装検証では個人ホームを変更していません。
 
