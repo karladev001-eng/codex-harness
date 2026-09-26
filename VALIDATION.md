@@ -6,7 +6,7 @@ TypeScriptへの移行と、コンパイル済みnpm tarballによる非公開Gi
 
 ## 自動テスト
 
-`npm test`：38件成功。Node.js 22.23.3でも同じ38件が成功しました。Nodeの実行パスを明示して検証しており、npxの起動先バージョンも確認します。
+`npm test`：39件成功。Node.js 22.23.3でも同じ39件が成功しました。Nodeの実行パスを明示して検証しており、npxの起動先バージョンも確認します。
 
 - 設定の階層、型、schema、全OFF時の無書込み、既存の保存先ハッシュ
 - 依存関係の欠落・循環、永続化OFF、Windows形式を含む不正scope、欠けた末尾を持つシンボリックリンクからの逸脱防止
@@ -31,7 +31,7 @@ TypeScriptへの移行と、コンパイル済みnpm tarballによる非公開Gi
 
 ## CI・制約
 
-`.github/workflows/test.yml` にNode.js 22のubuntu-latest、windows-latest、macos-latestで `npm ci`、`npm test`、`npm pack` を行うmatrixを追加しました。CI結果は実行後に確認する必要があり、このローカル検証記録はWindows/Linux成功を主張しません。symlink作成権限に依存する3テストはWindowsでスキップします。
+`.github/workflows/test.yml` にNode.js 22のubuntu-latest、windows-latest、macos-latestで `npm ci`、`npm test`、`npm pack` を行うmatrixを追加しました。CI結果は実行後に確認する必要があり、このローカル検証記録はWindows/Linux成功を主張しません。symlink作成権限に依存する4テストはWindowsでスキップします。
 
 - Windows/LinuxでのCI結果、別物理PC上のCodex検出・新規セッション再開はこの時点では未確認。
 - 新しい独立レビュー・統合検証は調整担当の記録で確定する。
