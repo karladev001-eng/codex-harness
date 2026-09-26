@@ -1,0 +1,33 @@
+{
+  "name": "@karladev001-eng/codex-harness",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Portable Codex harness and independent Markdown authoring skills",
+  "license": "UNLICENSED",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "codex-harness": "dist/skill/runtime.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "SPEC.md",
+    "VALIDATION.md",
+    "authoring-skills/README.md",
+    "authoring-skills/INSTALL.md",
+    "docs/adr",
+    "docs/history"
+  ],
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "test": "npm run build && node scripts/test.cjs",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.9.0"
+  }
+}

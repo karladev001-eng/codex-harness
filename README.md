@@ -8,23 +8,24 @@
 
 ## 必要な環境
 
-- Python 3.9以上（標準ライブラリのみ）
+- Node.js 22以上とnpm（実行時の追加依存なし。TypeScriptコンパイラとPythonは利用者には不要）
 - Git（隔離した並列実装に使用）
 - スキルとサブエージェントを利用できるCodexアプリ
 - 親の会話を渡さない起動、モデル指定、担当別作業ディレクトリを扱える実行環境
 
-モデルやサブエージェントの利用可否はアカウント・ホストで異なります。補助ツールの診断だけでモデル利用権を保証するものではありません。Windowsでは環境に応じて `python3` を `py -3` に読み替えてください。macOS以外の実機検証状況はVALIDATION.mdに記載します。
+モデルやサブエージェントの利用可否はアカウント・ホストで異なります。補助ツールの診断だけでモデル利用権を保証するものではありません。Windows PowerShellでも `node` と `npx` を使います。macOS以外の実機検証状況はVALIDATION.mdに記載します。
 
 ## 別のPCに導入する
 
-ハーネス本体はこのリポジトリをGitで取得、またはフォルダごとコピーしてから、リポジトリのルートで実行します。配布元は非公開リポジトリのため、取得にはアクセス権が必要です。
+非公開GitHub Releaseのコンパイル済みnpm tarballを取得します。GitHubアクセス権と認証済みGitHub CLI（`gh auth login`）が必要です。リポジトリのcloneや公開npmレジストリへの公開は不要です。macOS/LinuxとWindows PowerShellで同じコマンドを使えます。
 
 ```sh
-python3 scripts/harness.py doctor
-python3 scripts/harness.py install
+gh release download v0.2.0 --repo karladev001-eng/harness --pattern "*.tgz"
+npx --yes --package ./karladev001-eng-codex-harness-0.2.0.tgz codex-harness doctor
+npx --yes --package ./karladev001-eng-codex-harness-0.2.0.tgz codex-harness install
 ```
 
-セットアップは自己完結したスキルを個人用スキル領域へコピーし、Codexの個人用AGENTS.mdに小さな入口を追加します。既存の設定・指示は保持します。**この導入経路は単体スキルの登録です。プラグイン一覧への登録とは別です。** 配布用プラグインは `plugins/codex-harness/` にあります。
+セットアップは自己完結したJavaScript実行物・Markdown・assetsを `~/.agents/skills/codex-harness` へコピーし、Codexの個人用AGENTS.mdに小さな入口を追加します。入口は恒久的な導入先の `runtime.js` を参照し、npxキャッシュに依存しません。既存の設定・指示は保持します。**この導入経路は単体スキルの登録です。プラグイン一覧への登録とは別です。** コンパイル済みプラグインもtarball内の `dist/plugins/codex-harness/` に含まれます。開発元の `plugins/` はMarkdown・manifestのソースで、単独では実行用配布物ではありません。
 
 導入後は新しいCodexタスクで実装を依頼してください。通常のコード変更依頼に適用し、委譲された子エージェントは担当作業だけを行います。ハーネスのプラグイン版と単体スキル版を重複して有効化しないでください。
 
@@ -35,7 +36,7 @@ Git clone をせず、既存プロジェクトに作成用の `create-rulebooks`
 ## 動作と設定
 
 ```sh
-python3 scripts/harness.py status --project /path/to/project
+node "$HOME/.agents/skills/codex-harness/runtime.js" status --project "/path/to/project"
 ```
 
 設定は、標準値 → 個人設定 → プロジェクトの `.harness.json` の順で上書きします。個人設定は通常 `~/.codex/harness/settings.json`、`CODEX_HOME` が設定されている場合はその配下です。
@@ -83,10 +84,10 @@ python3 scripts/harness.py status --project /path/to/project
 
 ## 更新・削除
 
-更新先のGitタグまたはコミットへ移動し、`install` を再実行します。管理対象のファイルがユーザーにより編集されている場合は、上書きを拒否します。前の版へ戻す場合も、該当版へ移動して再導入します。
+更新先Releaseのtarballを取得し、そのパッケージの `install` を再実行します。旧Python版のschema-1所有記録も読み取り、未編集の導入はPythonを実行せず移行します。管理対象のファイルや入口が編集されていれば、更新・解除を拒否します。更新前のスキルと指示は `$CODEX_HOME/harness/backups/` に残ります。JavaScript版同士の差し戻しは希望するReleaseの `install` を使います。旧Python版へ戻す場合はJavaScript版で解除してから旧版の手順を使います。
 
 ```sh
-python3 scripts/harness.py uninstall
+npx --yes --package ./karladev001-eng-codex-harness-0.2.0.tgz codex-harness uninstall
 ```
 
 解除するのはハーネス所有の入口とスキルです。個人設定、プロジェクト仕様、ADRは残ります。
@@ -94,9 +95,13 @@ python3 scripts/harness.py uninstall
 ## 開発・検証
 
 ```sh
-python3 -m unittest discover -s tests -v
-python3 scripts/harness.py --help
+npm ci
+npm test
+node dist/skill/runtime.js --help
+npm pack
 ```
+
+開発にはTypeScriptのdevDependenciesを使います。`npm pack` は先にビルドし、コンパイル済みJavaScript・4 authoringスキル・プラグインを格納します。`private: true` によりnpm公開は拒否されます。tarballを非公開GitHub Releaseへ添付して配布します。
 
 テストは一時ホームと使い捨てGitリポジトリで行い、実際のCodex設定は変更しません。`--home` オプションで導入先のユーザーホームを隔離できます。実際の引数は各サブコマンドの `--help` を参照してください。
 

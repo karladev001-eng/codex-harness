@@ -11,7 +11,7 @@ description: Coordinate Codex coding tasks through compact specifications, isola
 
 委譲プロンプトに `HARNESS_WORKER` がある場合、割り当てられた役割だけを実行し、この調整手順や子の起動を繰り返さない。
 
-最初に、このSKILL.mdと同じディレクトリの `runtime.py` を使い、`python3 <skill-dir>/runtime.py status --project <absolute-project-path>` を実行する。Python実行名はホストに合わせる。設定不備は報告し、黙って有効化しない。個人設定、プロジェクト設定、上位の指示、ユーザーの指定を確認する。
+最初に、このSKILL.mdと同じディレクトリの `runtime.js` を使い、`node "<skill-dir>/runtime.js" status --project <absolute-project-path>` を実行する。Node.js 22以上を使い、空白を含むパスはホストのシェルに合わせて引用する。設定不備は報告し、黙って有効化しない。個人設定、プロジェクト設定、上位の指示、ユーザーの指定を確認する。
 
 - `active=false`：状態確認で終了し、通常の作業へ戻る。追加の委譲・文書・レビュー・計測は行わない。
 - `delegation=false`：メインが実装可能。`review=true` の独立レビューは残す。
