@@ -12,6 +12,12 @@
 
 この依頼は、4スキルをプロジェクトへ配置するだけです。ハーネスの規則、担当定義、実行手順を新たに生成する作業は、導入後に各スキルへ依頼します。`inspect-harness` は構成を変更せずに確認します。導入後は、そのプロジェクトを開いたままスキルを使う依頼をします。
 
+### 作成用3スキルへ確認用スキルを追加する
+
+すでに `create-rulebooks`、`create-subagent`、`create-harness` が同じ導入先にある場合は、それらを削除または再導入する必要はありません。`--path` を `authoring-skills/inspect-harness` だけにして、同じ `--dest` へ追加します。Codexには次のように依頼できます。
+
+> 既存の作成用3スキルを残したまま、Codex標準の skill-installer で `authoring-skills/inspect-harness` だけを同じ `.agents/skills` へ download 方式で追加してください。`--ref main` を使い、既存のスキルを上書きせず、競合時は停止して報告してください。
+
 ## 手動で導入する
 
 導入先に同名の `create-rulebooks`、`create-subagent`、`create-harness`、`inspect-harness` がないことを先に確認してください。標準ヘルパーは同名の導入先を自動マージせず、既存の場合は上書きを拒否して停止します。必要なら、内容を比較して別の場所へ退避するなど、利用者が判断してから再実行してください。
