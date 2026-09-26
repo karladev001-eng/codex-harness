@@ -1,0 +1,55 @@
+{
+  "id": "harness-v1",
+  "goal": "仕様に基づく移植可能なCodexハーネスv1の実装",
+  "non_goals": [],
+  "acceptance_criteria": [
+    {
+      "id": 1,
+      "text": "機能切替・引継ぎ・分離worktree・計測を検証する"
+    },
+    {
+      "id": 2,
+      "text": "個人設定を保全して導入・更新・解除できる"
+    },
+    {
+      "id": 3,
+      "text": "実装と独立レビューを行い検証結果を記録する"
+    }
+  ],
+  "owned_paths": [
+    "plugins/codex-harness",
+    "scripts",
+    "tests"
+  ],
+  "dependencies": [],
+  "spec_revision": "1",
+  "code_base_revision": null,
+  "constraints": [],
+  "source_references": [
+    "SPEC.md"
+  ],
+  "open_questions": [],
+  "state": "done",
+  "completion": {
+    "summary": "ローカルv1実装・独立レビュー・導入完了",
+    "checks": [
+      "22 automated tests passed",
+      "official plugin and skill validators passed",
+      "two Luna no-history workers implemented in isolated worktrees",
+      "independent review and integration passed",
+      "fresh reviewer detected two seeded defects after packet-only resume"
+    ],
+    "review": "PASS — local v1 acceptance",
+    "evidence": [
+      "VALIDATION.md",
+      "README.md",
+      "SPEC.md"
+    ],
+    "limitations": [
+      "Windows/Linux and another physical PC unverified",
+      "quota savings unmeasured",
+      "orchestration is instruction-based"
+    ],
+    "code_revision": "uncommitted initial delivery; no Git repository initialized"
+  }
+}
