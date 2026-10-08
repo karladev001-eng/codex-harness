@@ -1,6 +1,6 @@
 {
   "name": "codex-harness",
-  "version": "0.2.0",
+  "version": "0.4.1",
   "description": "Portable specification-driven parallel implementation and independent review for Codex.",
   "author": {
     "name": "Local developer"

@@ -5,7 +5,8 @@ import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 
 export type Json = Record<string, any>;
-export const FLAGS = ['delegation', 'review', 'persistence', 'measurement'] as const;
+export const LEGACY_FLAGS = ['delegation', 'review', 'persistence', 'measurement'] as const;
+export const FLAGS = [...LEGACY_FLAGS, 'improvement_loop'] as const;
 export const sourceRoot = __dirname;
 export const DEFAULTS = JSON.parse(fs.readFileSync(path.join(sourceRoot, 'assets/defaults.json'), 'utf8'));
 export const isObject = (value: unknown): value is Json => value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -54,14 +55,46 @@ export function mergeSettings(base: Json, override: unknown): Json {
   }
   return base;
 }
-export function settings(project: string, home?: string): Json {
+// Resolve configuration and model origins together so provenance cannot diverge from values.
+export function resolveSettings(project: string, home?: string): { config: Json; model_selection: Json } {
   const result = structuredClone(DEFAULTS);
-  for (const file of [path.join(codexHome(home), 'harness/settings.json'), path.join(project, '.harness.json')])
-    if (fs.existsSync(file)) mergeSettings(result, readJson(file));
+  const pins: Json = {};
+  let explicitLoop = false;
+  for (const [source, file] of [
+    ['personal', path.join(codexHome(home), 'harness/settings.json')],
+    ['project', path.join(project, '.harness.json')],
+  ]) {
+    if (!fs.existsSync(file)) continue;
+    const override = readJson(file);
+    mergeSettings(result, override);
+    explicitLoop ||= Object.hasOwn(override, 'improvement_loop');
+    if (isObject(override.models)) for (const [role, mapping] of Object.entries(override.models))
+      if (isObject(mapping) && Object.hasOwn(mapping, 'model')) pins[role] = { source, path: file };
+  }
+  // Before 0.4, the four disabled features meant inactive. Preserve that opt-out
+  // unless a layer explicitly sets the new feature, including an explicit true.
+  if (!explicitLoop && LEGACY_FLAGS.every(key => result[key] === false)) result.improvement_loop = false;
   if (result.schema_version !== 1 || result.max_agents < 1) throw new Error('Unsupported schema_version or invalid max_agents');
+  if (!['auto', 'fixed'].includes(result.model_selection)) throw new Error('Invalid model_selection: expected auto or fixed');
   for (const role of Object.values(result.models) as Json[])
     if (!role.model.trim() || !['none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max', 'ultra'].includes(role.reasoning_effort)) throw new Error('Invalid model mapping');
-  return result;
+  const preferences = result.preferences;
+  if ((preferences.repository || preferences.project_key) &&
+      (!/^[A-Za-z0-9][A-Za-z0-9-]*\/[A-Za-z0-9_.-]+$/.test(preferences.repository) ||
+       !/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(preferences.project_key) ||
+       !preferences.branch.trim() || /[\x00-\x20\x7f]/.test(preferences.branch)))
+    throw new Error('preferences requires valid repository, branch and project_key');
+  return { config: result, model_selection: {
+    mode: result.model_selection,
+    resolution: result.model_selection === 'auto' ? 'host-launch' : 'configured',
+    catalog_checked: false,
+    config_models: 'configured baselines; not dynamically resolved host selections',
+    pinned_roles: Object.keys(pins).sort(),
+    pins,
+  } };
+}
+export function settings(project: string, home?: string): Json {
+  return resolveSettings(project, home).config;
 }
 export const active = (config: Json): boolean => config.enabled && FLAGS.some(key => config[key]);
 export function taskId(value: unknown): string {

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Codex Harness — 公開に向けた入口の整理 / 仕様v2</title>
+<link rel="stylesheet" href="/Users/kan/.agents/skills/codex-harness/authoring-skills/codex-html-plan/runtime/htmlplan.css">
+<script src="/Users/kan/.agents/skills/codex-harness/authoring-skills/codex-html-plan/runtime/htmlplan.js" defer></script>
+<style data-mock-shared>
+.readme{font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1f2328;background:#fff;padding:26px;border:1px solid #d1d9e0;border-radius:6px;box-sizing:border-box}.readme *{box-sizing:border-box}.readme h1{font-size:29px;line-height:1.35;border-bottom:1px solid #d1d9e0;padding-bottom:10px;margin:0 0 15px}.readme h2{font-size:21px;border-bottom:1px solid #d1d9e0;padding-bottom:7px;margin:25px 0 12px}.readme p{margin:10px 0}.readme ul{padding-left:24px;margin:10px 0}.readme table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.5}.readme th,.readme td{padding:9px 11px;border:1px solid #d1d9e0;text-align:left;vertical-align:top}.readme tbody tr:nth-child(even){background:#f6f8fa}.readme code{font-family:ui-monospace,SFMono-Regular,monospace;font-size:13px}.readme pre{background:#f6f8fa;border-radius:6px;padding:16px;overflow-wrap:anywhere;white-space:pre-wrap;line-height:1.6}.readme .lead{font-size:20px;font-weight:600}.readme .muted{color:#59636e;font-size:13px}.readme .proposed{color:#0969da;text-decoration:underline;text-decoration-style:dotted}.readme .flow{font-family:ui-monospace,monospace;padding:10px 14px;background:#f6f8fa;border-radius:6px}.readme .small{font-size:13px}
+</style>
+</head>
+<body data-plan-id="repository-public-readiness" data-version="2" data-scope="S1–S5のドキュメント・案内・最小限の配布整合修正（公開・push・ライセンス変更除外）" data-approval="pending" data-persistence="off">
+<header>
+<h1>Codex Harnessの入口を整える</h1>
+<p>公開に向けたリポジトリ整理 · repository-public-readiness · 仕様v2 · 実装承認待ち</p>
+<details class="thread"><summary>ユーザーの依頼</summary><doc-quote via="prompt" from="ユーザー">このハーネスを公開して他のユーザーが見ても、内容や導入方法がわかりやすいように、リポジトリを整えて欲しいです。まだ公開はしなくていいです。他の公開されているハーネスやスキルなどのように綺麗にまとめて欲しいです。</doc-quote></details>
+</header>
+<main>
+<section class="plan-overview">
+<h2>全体像</h2>
+<p>初めて読む人が、何ができるか、自分に合う導入方法、最初の依頼までを判断できる入口を作る。READMEは短く、詳細は目的別ガイドへ移し、設計・検証・開発履歴は別の入口を保つ。主要機能は仕様と承認・分業とレビュー・改善ループ・ナレッジベース・保存資料の検索。Chrome拡張とRaycast検索はそれぞれ独立した関連ツールとして紹介・説明・導入を案内する。</p>
+<p><strong>読む順番:</strong> 何ができる → 用途を選ぶ → 必要環境 → 導入 → 最初の依頼 → 詳細設定。</p>
+<p><strong>5つの変更:</strong> S1 README再構成 / S2 本体/スキルの導入と関連ツール / S3 文書索引と5スキル / S4 説明・配布整合 / S5 メンテナンス案内。言語は明示指定を優先し、なければ普段の会話言語を使う。今回は日本語。実装は承認後、文書整理 → 最小整合修正 → 一時環境で検証 → 初見役と独立レビューの順に進める。</p>
+<p><strong>維持するもの:</strong> 製品API、承認動作、モデル既定、所有管理、既存履歴、UNLICENSED/private=true、同梱LICENSE/UPSTREAM。公開・push・ライセンス変更は対象外。</p>
+<p>仕様と承認の正本: <a href="repository-public-readiness.md">TASK / 仕様v2</a>。HTML内の回答・コピーは送信も承認記録もしない。保存OFF。</p>
+</section>
+<h2>確定仕様案（承認前）</h2>
+<doc-plan>
+<doc-claim id="S1">
+<p>S1: READMEを目的・用途選択・初回利用が分かる短い入口にする。</p>
+<doc-mock w="840" frame="none" thumbnail label="提案 · README全体の見え方" caption="全体の縮小図。Markdownの見出し・表・コードだけで構成する。"><template><article class="readme">
+<h1>Codex Harness</h1><p class="lead" data-ref="opening">仕様を確認してから、実装へ。</p>
+<p>仕様と明示承認を中心に、分業・独立レビュー・改善ループを組み合わせるCodex向けのハーネスです。ナレッジベースの保存資料を検索・参照し、必要なスキルだけを使うこともできます。</p>
+<ul><li><strong>仕様と承認:</strong> 変更範囲と受入条件を先に確認する。</li><li><strong>実装と独立レビュー:</strong> 担当を分けて変更と条件を確認する。</li><li><strong>改善ループ:</strong> フィードバックから指針を整え、次回に使う。</li><li><strong>ナレッジベースと検索:</strong> 保存資料から候補を探し、必要な本文・画像を参照する。</li><li><strong>再利用できるスキル:</strong> ルール・役割・計画をMarkdownで整える。</li></ul>
+<p class="flow">仕様 → 承認 → 実装 → 独立レビュー</p>
+<h2>自分に合う使い方を選ぶ</h2><table><thead><tr><th>使い方</th><th>向いている用途</th><th>次に読む</th></tr></thead><tbody><tr><td>ハーネス本体</td><td>仕様・分業・レビューを通して使う</td><td><span class="proposed">導入ガイド（提案）</span></td></tr><tr><td>スキルのみ</td><td>ルールや役割を作成・確認する</td><td><span class="proposed">スキル一覧（再構成案）</span></td></tr></tbody></table>
+<h2>関連ツール — それぞれ独立して導入</h2><table><thead><tr><th>ツール</th><th>できること</th><th>次に読む</th></tr></thead><tbody><tr><td>Chrome拡張</td><td>Web資料の本文・メモ・画像を保存する</td><td><span class="proposed">紹介・仕組み・導入（提案）</span></td></tr><tr><td>Raycast検索</td><td>同じ保存資料を利用者が探す。Mac向け</td><td><span class="proposed">紹介・仕組み・導入（再構成案）</span></td></tr></tbody></table><p class="small">本体の必須依存ではなく、自動登録もしません。各ツールの前提条件・初回利用・更新/解除は個別の手引きへ。</p>
+<h2>クイックスタート — 手元のcheckoutから</h2><p>Node.js 22以上・npm・Gitと、スキル/サブエージェントを使えるCodex環境が必要です。</p><pre><code>npm ci
+npm run build
+node dist/skill/runtime.js doctor
+node dist/skill/runtime.js install</code></pre><p class="small">installは個人用スキルとAGENTSの入口を更新します。ローカルtarballからの導入は詳細ガイドで分けて案内します。</p>
+<h2>最初の依頼</h2><pre><code>この変更の仕様と受入条件を整理して、
+実装前に確認できるようにしてください。</code></pre>
+<h2>スキルと詳細資料</h2><p>create-rulebooks / create-subagent / create-harness / inspect-harness / codex-html-plan</p><p><span class="proposed">docs索引（提案）</span> · <span class="proposed">導入（提案）</span> · <span class="proposed">設定（提案）</span> · <span class="proposed">困ったとき（提案）</span></p><p><span class="proposed">改善ループ（提案）</span> · <span class="proposed">ナレッジベース（提案）</span> · <span class="proposed">保存資料の検索（提案）</span></p>
+<h2>対応状況・出典</h2><p class="small">OSごとの実機検証はVALIDATIONを参照。配布はローカルcheckout/アーカイブを前提とします。全体の公開ライセンスは未決定。同梱のApache-2.0由来部分はLICENSE/UPSTREAMを保持します。</p>
+<p class="muted">READMEの構成案です。点線の資料名は将来文書の提案で、リンクは無効です。</p>
+</article></template><doc-pin ref="opening" title="入口の説明">短い一文と主要機能で目的を伝える。</doc-pin></doc-mock>
+<doc-claim id="S1-detail"><p>冒頭と作業フローはGitHubのMarkdownで読みやすく示す。</p>
+<doc-mock w="460" frame="none" label="提案 · 冒頭の詳細" caption="読みやすい幅で冒頭とフローを確認する。"><template><article class="readme"><h1>Codex Harness</h1><p class="lead">仕様を確認してから、実装へ。</p><p>仕様と明示承認を中心に、分業・独立レビュー・改善ループを組み合わせるCodex向けのハーネスです。</p><ul><li><strong>仕様と承認</strong> — 範囲と受入条件を確認</li><li><strong>実装と独立レビュー</strong> — 担当を分けて検証</li><li><strong>改善ループ</strong> — フィードバックを次回へ</li><li><strong>ナレッジベースと検索</strong> — 保存資料の候補から必要な箇所へ</li><li><strong>再利用できるスキル</strong> — ルール・役割・計画を整備</li></ul><pre><code>仕様 → 承認 → 実装 → 独立レビュー</code></pre><p class="muted">利用枠の削減効果や未公開の配布先は示さない。</p></article></template></doc-mock>
+</doc-claim></doc-claim>
+<doc-claim id="S2"><p>S2: 本体/スキルの導入と、Chrome/Raycastの独立した案内を分ける。</p>
+<doc-mock w="460" frame="none" label="提案 · 導入部分の詳細" caption="必要な環境と導入先を用途ごとに示す。"><template><article class="readme"><h2 style="margin-top:0">自分に合う使い方を選ぶ</h2><table><thead><tr><th>経路</th><th>導入と影響</th></tr></thead><tbody><tr><td>本体</td><td>Node.js 22+。個人用スキルとAGENTS入口を更新</td></tr><tr><td>スキルのみ</td><td>必要な5スキルから選択。本体は有効化しない</td></tr></tbody></table><h2>関連ツール</h2><table><thead><tr><th>ツール</th><th>独立した紹介・説明・導入</th></tr></thead><tbody><tr><td>Chrome拡張</td><td>資料を収集・保存。Knowledge CLIと連携</td></tr><tr><td>Raycast検索</td><td>利用者が保存資料を検索。Mac向け</td></tr></tbody></table><p class="small">各手引きに前提条件・初回利用・更新/解除を記す。本体の必須依存・自動導入ではありません。</p><p><span class="proposed">Chrome拡張ガイド（提案）</span><br><span class="proposed">Raycast検索ガイド（再構成案）</span></p><h2>checkoutから始める</h2><pre><code>npm ci
+npm run build
+node dist/skill/runtime.js doctor
+node dist/skill/runtime.js install</code></pre><p class="small">installは個人用環境を更新します。</p><p><span class="proposed">導入・更新・解除（提案）</span><br><span class="proposed">ローカルtarballの導入（提案）</span></p><p class="muted">点線の資料名は構成案。クリックできません。</p></article></template></doc-mock>
+<doc-claim id="S2-rules"><p>導入から解除までと競合時の扱いを揃える。</p><doc-code lang="text" title="提案: 導入ガイドの確認項目"><script type="text/plain">
+入手経路: 手元のcheckout / 受領したローカルtarball
+利用手順: 導入 → 確認 → 初回依頼 → 更新 → 解除
+競合時:   未所有/編集済みファイルは所有管理規則に従う
+OS表記:   macOS/Linux と PowerShell を分ける
+公開前提: Releaseやnpm公開を入手経路に含めない
+</script></doc-code></doc-claim>
+<doc-claim id="S2-dependencies"><p>ハーネスと各ツールは共通Knowledge基盤との関係を明示する。</p><doc-flow caption="提案: 連携構成。Chrome/Raycastは個別導入、同期先は明示設定する。"><script type="text/plain">
+chrome = Chrome拡張 / 資料収集
+cli = Knowledge CLI
+store = ローカル保存資料 [db]
+raycast = Raycast / 人が検索
+harness = ハーネス / 資料参照
+sync = 設定したGitHub同期先
+| chrome | raycast |
+| cli | harness |
+| store | sync |
+chrome -> cli : 保存
+cli -> store : 読み書き
+raycast -> cli : 検索
+harness -> cli : 検索・取得
+store -> sync : 明示設定・認証
+</script></doc-flow><doc-note tone="info">保存資料と制作指針は別の情報。各入口の設定・保存先・同期/認証の前提をガイドへ記す。</doc-note></doc-claim></doc-claim>
+<doc-claim id="S3"><p>S3: 改善・ナレッジ・検索の専用ガイドと5スキルの索引を整える。</p>
+<doc-tree caption="提案構成。既存SPEC/VALIDATIONと履歴は役割を保つ。"><script type="text/plain">
+README.md                       # 初見向けの入口
+  docs/README.md                # 目的別索引
+    guides/installation.md      # 導入・更新・解除
+    guides/configuration.md     # 設定・機能切替
+    guides/workflow.md          # 仕様からレビュー
+    guides/improvement-loop.md  # フィードバックから次回適用
+    guides/knowledge-base.md    # 保存資料・同期・取得版/鮮度
+    guides/search.md            # 候補検索から必要箇所取得
+    guides/troubleshooting.md   # つまずきの確認
+    maintainers/releasing.md    # 配布物作成・検証
+    maintainers/publication.md  # 将来公開の判断
+  authoring-skills/README.md    # 5スキルと成果物
+  authoring-skills/INSTALL.md   # 単独導入
+  knowledge/README.md           # 共通基盤と関連ツール索引
+  knowledge/extension/README.md # Chrome拡張の独立導入
+  integrations/raycast-knowledge/README.md # Raycast検索の独立導入
+</script></doc-tree>
+<doc-note tone="info">移動前の入口と重要な説明を維持する。ADR/TASK/benchmarksを削除せず、公開向け案内と開発履歴を分ける。</doc-note>
+<doc-claim id="S3-feature-guides"><p>3つの主要機能は仕組み・設定・利用例まで説明する。</p><doc-code lang="text" title="提案: 専用ガイドの内容"><script type="text/plain">
+改善ループ:
+  フィードバック → 候補と指針 → 適用範囲 → 次回
+  ON/OFF・保存先・訂正/忘却 / 未評価を成功と扱わない
+ナレッジベース:
+  本文・メモ・画像・生成説明 / ローカル保存と設定した同期
+  認証・保存先・取得版/鮮度 / 制作指針とは別に扱う
+検索:
+  文字検索の少数候補 → 説明カード → 必要な本文/画像 → 出典
+  自動参照の条件と明示依頼を区別 / ベクトル意味検索ではない
+</script></doc-code></doc-claim></doc-claim>
+<doc-claim id="S4"><p>S4: 版・実装状況・スキル数と配布内容を一致させる。</p>
+<doc-code lang="text" title="提案: 整合修正と検証"><script type="text/plain">
+版・help     : 古い0.4.0例 → 現行版 / 4スキル → 5スキル
+機能説明     : 資料収集等の古い未実装説明を更新
+package.files: ガイドの同梱と既存配布テストを更新
+文書リンク   : 入口・移動対象・同梱文書の相対リンクを検証
+</script></doc-code>
+<doc-note tone="info">入力は現行CLI・コード・配布設定。出力は文書と最小整合修正。リンク切れや配布漏れがあれば完了としない。</doc-note></doc-claim>
+<doc-claim id="S5"><p>S5: 変更提案と公開前に残る判断を案内する。</p>
+<doc-tree caption="提案: メンテナンス用の入口。"><script type="text/plain">
+CONTRIBUTING.md                  # 開発・検証・変更提案
+  .github/ISSUE_TEMPLATE/         # 再現手順・期待結果
+  .github/pull_request_template.md # 変更内容・検証
+THIRD_PARTY_NOTICES.md           # 同梱/参考資料とライセンス
+  docs/maintainers/publication.md # 公開候補と未決定事項
+</script></doc-tree>
+<doc-note tone="info">読者向け例を汎用パスにする。個人設定や作業履歴は書き換えない。受付URL、メール、対応時間は作らない。</doc-note></doc-claim>
+<doc-claim aux="shared"><p>検証は一時環境で行い、未検証の環境を明記する。</p><doc-flow caption="提案: 実ホームを変更せず、文書と配布の両方を確認する。"><script type="text/plain">
+temp = 一時ホーム・プロジェクト
+checks = コマンド・リンク・配布・回帰
+review = 初見の導線確認・独立レビュー
+| temp |
+| checks |
+| review |
+temp -> checks : 検証
+checks -> review : 証拠
+</script></doc-flow></doc-claim>
+<doc-claim aux="scope"><p>公開・ライセンス変更・履歴改変・実ホームへの導入は行わない。</p><p>GitHub設定変更、push、PR作成、Release/npm publish、履歴や実験成果物の一括削除、製品機能追加、Web公開も対象外。</p></doc-claim>
+</doc-plan>
+<section class="acceptance"><h2>受入条件</h2><ol>
+<li>目的・主機能・導入先・次の資料を冒頭で判断できる。<a href="#S1">S1</a></li>
+<li>本体/スキル導入とChrome拡張/Raycast検索の紹介・説明・独立導入を分け、導入→確認→初回利用→更新/解除を案内する。<a href="#S2">S2</a></li>
+<li>版・5スキル・依存・実装状況が一致し、未公開配布を入手可能と書かない。<a href="#S2">S2</a> / <a href="#S4">S4</a></li>
+<li>改善・ナレッジ・検索に専用案内/利用例を置き、保存・認証・機能切替・同期・検索の依存が現行実装と一致する。索引・相互リンク・既存入口を維持し、本文とモックが対応する。<a href="#S1">S1</a> / <a href="#S3">S3</a></li>
+<li>一時環境で実行例・リンク・npm pack・関連回帰テストを確認する。<a href="#S4">S4</a></li>
+<li>汎用例・内部履歴・公開待ち判断・同梱ライセンスを明示する。<a href="#S5">S5</a></li>
+<li>外部公開・push・設定変更・ライセンス変更・履歴削除・実ホーム導入を行わない。<a href="#S5">S5</a></li>
+<li>初見の導線確認・独立レビューを受け、未検証OS等を報告する。<a href="#S1">S1–S5</a></li>
+</ol></section>
+<section class="unresolved" id="unresolved"><h2>未解決事項</h2>
+<p><strong>なし。</strong>言語はユーザー回答で解決済み。明示指定があればその言語、なければ普段の会話言語を使う。今回は日本語。実装承認は独立してpending。</p>
+<p><strong>今回から除外:</strong> 将来の公開ライセンスと履歴/実験成果物の公開範囲。<a href="#S5">S5</a>で残る判断として記す。現状を維持し、今回の整理開始を妨げない。</p>
+<p><strong>実装承認は別:</strong> 仕様v2・S1–S5の文書/案内/最小整合修正について、チャットで明示承認を受けるまで本実装を開始しない。回答だけでは承認にならない。</p>
+</section>
+<section class="related-docs"><h2>関連ドキュメント</h2><table><thead><tr><th>ID / 種別</th><th>役割</th></tr></thead><tbody>
+<tr><td><a href="repository-public-readiness.md">repository-public-readiness / TASK</a></td><td>仕様v2・受入条件・承認根拠の正本</td></tr>
+<tr><td><a href="codex-html-plan.md">codex-html-plan / TASK</a></td><td>対話型仕様と承認分離の作成記録</td></tr>
+<tr><td><a href="../project-map.md">project-map / 索引</a></td><td>既存プロジェクトの構成と記録への入口</td></tr>
+<tr><td><a href="../../adr/0001-portable-skill-harness.md">0001 / ADR</a></td><td>可搬型ハーネスの既存構成判断</td></tr>
+<tr><td><a href="../../adr/0002-github-knowledge-base.md">0002 / ADR</a></td><td>ナレッジ基盤の設計経緯</td></tr>
+<tr><td><a href="../../adr/0003-github-improvement-records.md">0003 / ADR</a></td><td>改善記録と資料の区別</td></tr>
+<tr><td><a href="../../adr/0004-chrome-knowledge-capture.md">0004 / ADR</a></td><td>Chrome資料収集の保存設計</td></tr>
+<tr><td><a href="../../adr/0006-knowledge-retrieval.md">0006 / ADR</a></td><td>文字検索・説明カード・必要箇所の取得</td></tr>
+</tbody></table><p>ADRの歴史的な未実装表記は現状の断定に使わず、後続ADRと現行コードを優先する。HTMLは単一ファイルでオフライン閲覧できる。関連Markdownは別ファイルのため、共有時は相対配置を保つ。モック内の未来文書は「提案」と表示しリンクを無効にしている。</p></section>
+</main></body></html>

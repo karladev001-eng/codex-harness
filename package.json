@@ -1,6 +1,6 @@
 {
   "name": "@karladev001-eng/codex-harness",
-  "version": "0.2.0",
+  "version": "0.4.1",
   "private": true,
   "description": "Portable Codex harness and independent Markdown authoring skills",
   "license": "UNLICENSED",
@@ -19,12 +19,26 @@
     "authoring-skills/README.md",
     "authoring-skills/INSTALL.md",
     "docs/adr",
-    "docs/history"
+    "docs/history",
+    "knowledge/README.md",
+    "CONTRIBUTING.md",
+    "THIRD_PARTY_NOTICES.md",
+    "docs/README.md",
+    "docs/guides",
+    "docs/maintainers",
+    "knowledge/extension/README.md",
+    "integrations/raycast-knowledge/README.md",
+    "integrations/raycast-knowledge/package.json",
+    "plugins/codex-harness/skills/harness/SKILL.md",
+    "plugins/codex-harness/skills/harness/references",
+    "plugins/codex-harness/skills/harness/assets",
+    "authoring-skills"
   ],
   "scripts": {
     "build": "node scripts/build.cjs",
     "test": "npm run build && node scripts/test.cjs",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "check:docs": "node scripts/check-doc-links.cjs"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

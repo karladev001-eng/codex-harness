@@ -15,7 +15,7 @@ test('nested settings, exact types and validation', t => {
   write(path.join(f.project, '.harness.json'), { max_agents: 2 });
   const cfg = lib.settings(f.project, f.home);
   assert.equal(cfg.max_agents, 2); assert.deepEqual(cfg.models.standard, { model: 'custom', reasoning_effort: 'medium' });
-  for (const bad of [{ review: 1 }, { unknown: true }, { schema_version: 2 }, { max_agents: 0 }, { max_agents: 1.1 }, { models: [] }, { models: null }, { models: { standard: { reasoning_effort: 'invalid' } } }]) {
+  for (const bad of [{ review: 1 }, { improvement_loop: 1 }, { improvement_loop: null }, { model_selection: true }, { model_selection: 'latest' }, { unknown: true }, { schema_version: 2 }, { max_agents: 0 }, { max_agents: 1.1 }, { models: [] }, { models: null }, { models: { standard: { reasoning_effort: 'invalid' } } }]) {
     write(path.join(f.project, '.harness.json'), bad); assert.equal(command(f, 'status').code, 2);
   }
 });
@@ -123,4 +123,48 @@ test('canonical paths resolve symlinks before parent traversal, including missin
   assert.equal(lib.canonical(input + '/missing/tail'), path.join(actual, 'missing/tail'));
   assert.equal(run(['status', '--project', input, '--home', f.home]).data.local_root, lib.localRoot(actual, f.home));
   assert.throws(() => lib.safePath(f.project, 'link/../missing'), /escapes/);
+});
+
+test('loop defaults and old all-off compatibility follow layered explicit opt-in', t => {
+  const f = fixture(t), personal = path.join(f.home, '.codex/harness/settings.json'), project = path.join(f.project, '.harness.json');
+  assert.equal(command(f, 'status').data.config.improvement_loop, true);
+  write(personal, { delegation: false, review: false });
+  write(project, { persistence: false, measurement: false });
+  let status = command(f, 'status').data;
+  assert.equal(status.active, false); assert.equal(status.config.improvement_loop, false);
+  const before = tree(f.base);
+  assert.equal(command(f, 'measure', 'record', '--input', 'missing').data.active, false);
+  assert.deepEqual(tree(f.base), before);
+  write(personal, { delegation: false, review: false, improvement_loop: true });
+  status = command(f, 'status').data;
+  assert.equal(status.active, true); assert.equal(status.config.improvement_loop, true);
+  write(project, { persistence: false, measurement: false, improvement_loop: false });
+  assert.equal(command(f, 'status').data.active, false);
+  write(personal, { improvement_loop: false }); write(project, {});
+  status = command(f, 'status').data;
+  assert.equal(status.active, true); assert.equal(status.config.persistence, true);
+  assert.equal(command(f, ...create).code, 0, 'loop OFF does not disable task persistence');
+});
+test('model origins share effective settings resolution; effort-only overrides do not pin', t => {
+  const f = fixture(t), personal = path.join(f.home, '.codex/harness/settings.json'), project = path.join(f.project, '.harness.json');
+  write(personal, { model_selection: 'fixed', models: { standard: { model: 'personal-model' }, review: { reasoning_effort: 'medium' } } });
+  write(project, { model_selection: 'auto', models: { standard: { reasoning_effort: 'high' }, complex: { model: 'project-model' } } });
+  const before = tree(f.base), result = command(f, 'status').data;
+  assert.deepEqual(result.config, lib.settings(f.project, f.home));
+  assert.equal(result.config.models.standard.model, 'personal-model');
+  assert.equal(result.config.models.standard.reasoning_effort, 'high');
+  assert.equal(result.model_selection.mode, 'auto'); assert.equal(result.model_selection.resolution, 'host-launch');
+  assert.equal(result.model_selection.catalog_checked, false);
+  assert.deepEqual(result.model_selection.pinned_roles, ['complex', 'standard']);
+  assert.deepEqual(result.model_selection.pins.standard, { source: 'personal', path: personal });
+  assert.deepEqual(result.model_selection.pins.complex, { source: 'project', path: project });
+  assert.deepEqual(tree(f.base), before, 'status must not write or probe models');
+  write(project, { model_selection: 'fixed', models: { standard: { model: 'project-pin' } } });
+  const fixed = command(f, 'status').data;
+  assert.equal(fixed.model_selection.resolution, 'configured');
+  assert.equal(fixed.config.models.standard.model, 'project-pin');
+  assert.deepEqual(fixed.model_selection.pins.standard, { source: 'project', path: project });
+  fs.unlinkSync(personal); fs.unlinkSync(project);
+  assert.equal(command(f, 'status').data.model_selection.mode, 'auto');
+  assert.deepEqual(command(f, 'status').data.model_selection.pinned_roles, []);
 });

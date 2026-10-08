@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "資料を保存 — Knowledge Capture",
+  "version": "0.1.0",
+  "description": "閲覧中の資料をPCの送信待ちへ保存し、設定した非公開GitHubへ送ります。",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "nativeMessaging"
+  ],
+  "background": {
+    "service_worker": "worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "資料を保存"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'"
+  },
+  "commands": {
+    "save-page": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+      "description": "閲覧中の資料を保存するパネルを開く"
+    }
+  }
+}

@@ -1,5 +1,28 @@
 # 検証記録
 
+## 現行の読み方
+
+この文書は日付・版ごとの検証証拠です。古い件数、4スキル表記、非公開GitHub Releaseの提案、当時の未実装範囲はその時点の記録として保持します。現在の使い方は[文書索引](docs/README.md)、ローカル配布は[保守ガイド](docs/maintainers/releasing.md)へ。現行packageは0.4.1で、5スキルとKnowledge/Chrome/Raycastの実装があります。実装の存在、隔離試験、実機での登録、長期効果をそれぞれ区別してください。
+
+Knowledgeの隔離試験は[運用ガイドの検証範囲](docs/guides/knowledge-operations.md#検証範囲)、検索の契約は[ADR 0006](docs/adr/0006-knowledge-retrieval.md)、個別の現機確認はsource checkoutの `docs/harness/tasks/activate-knowledge-memory.md` と `docs/harness/tasks/raycast-knowledge.md` に記録されています。ここからWindows/Linux・別PC・全サービスの網羅取得・長期効果を確認済みとは扱いません。最新の公開準備の検証は実行後に追記し、過去の結果を現在版の再実行として扱わないでください。
+
+## 2026-10-08: 公開向け文書とローカル配布の整合
+
+実施環境: macOS / Darwin arm64、Node.js 26.10.0、package 0.4.1。`private: true` / `UNLICENSED`は維持。以下は現在checkoutを使った新しい検証で、過去の結果とは別です。
+
+- `npm test`: 158件PASS、失敗・skipなし。ログ `/tmp/public-package-npm-test.log`。文書レビュー修正後は実tarballのpackage試験だけを再実行し、1件PASS（`/tmp/public-package-recheck.log`）。
+- `npm run check:docs`: 公開向け入口・目的別ガイド・移動元・sourceスキル・ビルド済みstandalone/plugin/Knowledgeの167文書、788相対リンク/見出し、欠落0。ADR・過去検証本文は対象外、現行入口からの参照先は実在を確認。checkout専用のTASK/benchmarks/project-mapは実行配布へ一括収録しない。
+- package試験は実際の `npm pack` を展開し、アーカイブ内の現行リンクと恒久導入後の文書自己完結性を確認。別プロジェクト・隔離npm cache・一時homeでoffline npxのdoctor/status/install/再install（unchanged）/uninstall、全5 authoring・codex-html-plan単体・従来4スキルの導入/解除、旧JavaScript版からの更新を実行。実ホームとネットワークを使用しない。
+- Knowledge CLIはinstalledコピーで一時stateのstatus（configured=false）を確認。checkout外の追加例ではdist CLIのconfigure/status/既知library指定による再設定、runtimeのdoctor/status/5スキルhelpを確認。configureはローカル設定のみで、外部GitHubへの保存・pullは行っていない。
+- LaunchAgent XMLは一時ファイルへの生成と `plutil -lint` が成功。bootoutと恒久解除を文書で区別し、自分が作成したplistをLaunchAgents外へ退避する手順を案内。実LaunchAgentの登録・解除は実行していない。
+- `npm pack --pack-destination /tmp/public-package-final`: ローカルtarballを作成。公開向けガイド・出典・個別LICENSE・Knowledge独立拡張を収録。Raycast READMEとmanifestは案内/権利表記のため同梱し、Raycast実行src/依存・個人設定・TASK/benchmarksは収録しない。Knowledge READMEの相対リンクはinstalled/plugin/独立distの配置ごとにビルド時に変換する。
+
+文書レビューでは新規KBのconfigure→初回GitHub保存成功→pullと、既存KBへの既知library指定configure→pullを分けた。実装のconfigure/初回送信/pullの契約と既存fake GitHub試験を根拠とし、実GitHubの初期化を再実行した証拠とは扱わない。
+
+今回未検証: Node.js 22での再実行、Windows/Linux/別PCの実機、実Chrome/Raycast登録と更新、実GitHub認証/書込/同期、実Codexチャットでのスキル検出、実LaunchAgentのログイン後の動作、長期効果。公開・push・Release・npm publish・実個人ホームへの導入は行っていない。
+
+## 2026-09-26: TypeScript移行の履歴
+
 実施日: 2026-09-26 / macOS arm64 / Node.js 26.9.0、22.23.3 / npm 12.0.2。
 
 TypeScriptへの移行と、コンパイル済みnpm tarballによる非公開GitHub配布を検証しています。旧Python版の確認結果は [2026-09-21の記録](docs/history/validation-python-v1.md) に保持しています。
@@ -39,3 +62,50 @@ TypeScriptへの移行と、コンパイル済みnpm tarballによる非公開Gi
 - 利用枠削減、大規模アプリ品質、競合解消性能は未計測。
 
 状態遷移・レビュー判定・エージェント上限はスキルの運用手順であり、補助CLIによる強制ではありません。利用枠残量はアカウント共通で、タスク単位の正確な費用として扱いません。
+
+## 制作改善ループの追加検証（2026-10-02）
+
+`npm test` は40件すべて成功。新規テストは、制作改善の参照・雛形が実際のnpm tarball内のstandaloneスキルとプラグインの両方に入り、一時ホームへの導入で利用でき、既存導入の更新・解除を経ても `status.local_root/creative/preferences.md` のバイトが保持されることを確認した。既存の入口編集・所有ファイル編集の拒否も通過した。実個人ホームの導入更新はこの実装担当の検証には含めていない。
+
+指示手順と雛形を使った手動シナリオ確認（実ユーザーの嗜好・長期効果の実測ではない）：
+
+| 入力・状況 | 期待される遷移 |
+| --- | --- |
+| 「今回は前置きを削って」 | 今回限定の候補。作品内で適用し、次回試用はno |
+| 「今後、社内報告は結論から」 | 明示・社内報告限定のactive指針 |
+| 同じturnを再開時に読み直す | 根拠IDは増えず、昇格支持にも加えない |
+| 別作品で候補を暫定試用し無反応 | 試用結果はunknown、評価根拠はnull。昇格しない |
+| 「今回は物語風」 | 現在の指示を優先。既存の文体指針と矛盾しても今回へ強制しない |
+| 「この好みを忘れて」 | 指針・候補・試用・再生成可能な観察を削除。同一会話から自動再抽出しない |
+| `active=false` / `persistence=false` | 前者は追加処理なし。後者は既存ファイルを読まず会話内だけで処理 |
+| `measurement=false` | 好みの明示根拠はpersistenceに従い保持可。利用集計は保存しない |
+| 純粋な文書・UI制作 / コードを含む制作 | 前者はコード用委譲・Git工程を要求しない。後者は既存レビュー工程を維持 |
+
+同時更新の排他、破損・参照切れ、実際の制作を重ねた好みの改善は手順として定義したが、ライブの複数セッションや実ユーザーフィードバックでは未検証。改善効果は推測しない。
+
+## 0.3.0 ローカル配布の移行検証
+
+2026-10-02に `npm test` の42件がPASSしました。0.2.0のJavaScript版（コミット `82586eda58699e6d44e656689586e220befe41af`）のソースをコンパイルした固定fixtureで旧インストーラを実行し、実際のschema-2所有記録・旧bootstrap・旧モデル既定・制作改善ループ未搭載から最新版へ更新しました。個人設定とプロジェクトの明示モデル上書き、OFF設定、無関係なAGENTSのバイト列、保存済み制作の好みを保持し、再installが `unchanged` になることを確認しています。旧Python版schema-1の移行・編集済み管理ファイルの保護・失敗時の復元も既存テストでPASSしました。
+
+実際の0.3.0 tarballを一時ディレクトリへ作成し、リポジトリ外のnpxで新規導入と旧JavaScript版からの更新を検証しました。新規導入先の実効設定はLuna/low、Sol 6.1/medium・highで、制作改善ループの入口・参照・雛形を含みます。テストは一時ホームを用い、GitHubへの公開や実ホーム更新は行っていません。この確認はmacOS上のローカル配布検証であり、他OSでの実機検証や長期的な制作改善効果を示すものではありません。
+
+
+## 0.4.0 改善ループ切替とホストモデル選択
+
+`npm test` は47件PASS（失敗・skipなし）。新旧all-offと新キー明示trueの優先順位、設定の型/enum検証、個人/プロジェクトのmodel pin由来、effort-only非pin、statusの設定解決一致とno-writeを確認しました。旧0.3.0の実配布tgzから取り出した自己完結JavaScriptをfixtureにして更新し、保存済み記憶・明示設定・旧all-offを保持する3ケースもPASSです。0.4.0の実tarballを一時領域へ作り、リポジトリ外でoffline npx導入/更新/解除と新defaults/statusを確認しました。実ホームの更新と最終配布物の保存はこのテストの対象外です。
+
+モデルauto選択は実際の子起動ツールの候補・対応effort・後継根拠を親が確認する指示ベース手順です。runtimeは外部APIや認証を追加せず、statusもモデルを起動・動的解決しません。改善ループOFFの記憶自動読書き停止はエージェントが読む手順で定義しました。将来の後継モデルの起動成功、カタログのアクセス権保証、他OSの実機動作、長期的な改善効果は未検証です。
+
+## GitHub制作改善記録（2026-10-04）
+
+`npm test` は67件すべて成功（既存47件＋preferences隔離検証20件）。buildしたstandalone/plugin双方とnpm tarballに `preferences.js` が含まれ、installerの必須inventoryでも欠損検出する。実npxでlocal preferences CLIが動作することを確認した。
+
+偽GitHub transportと隔離したhome/projectで、private repository・branch検証、SHA条件付き作成/更新、local revision CAS、別保存先cache分離、独立PCの競合、PUTのrace、送信成功後応答消失の再試行認識、PUT成功後local acknowledgement保存失敗のpending保持、unknown lock/corrupt state拒否を検証した。認証/アクセス/通信失敗の初回nullとstale cache fallback、offline pending、Unicode/壊れたbase64、current cache/pendingからの忘却対象除去を確認した。
+
+明示migrationは旧原本保持、異なるremote拒否、失敗後を含むmarkerによる再取込拒否を確認した。persistence OFFではファイル・transportに触れず、loop/measurement OFFでも明示管理が可能。statusは本文・通信・書込なし。ghは偽実行ファイルでhostname固定とstdin JSONを検証し、実GitHubへのテスト書込は行っていない。
+
+実保存先の接続・実記録の移行、Windowsでの実運用、長期効果、Git履歴/別PC古いコピーの完全消去は未検証。ページ収集・検索・拡張機能は対象外。
+
+独立レビュー第1巡の回帰修正では、移行後の忘却→GitHub設定削除でも旧local read/write/syncをretirement markerで拒否し、旧原本を保持することを確認した。migration draft保存のrename失敗は既存cache有/無の双方でdisk上のpendingだけを返す。retirement保存失敗では本物のpendingを保持し、syncもmarker確保前に通信・送信しない。PUT時点で本文なしretirement markerが存在することと、送信失敗後もlocal原本が復活しないことを確認した。statusの本文・marker読取なしも維持している。
+
+独立レビュー第2巡では、WindowsのFlushFileBuffersに必要な書込権限を持つ `r+` で既存retirement markerを開き、truncateせずflushするよう修正した。readonly descriptorのflushを拒否する隔離fakeでmigrate直後のsync・その後のsync成功、open flags、marker本文保持を検証した。Windows実機での運用確認は引き続き未実施。

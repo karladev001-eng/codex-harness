@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:codex-harness:knowledge:capture:v1",
+  "title": "Knowledge capture operation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "operation_id", "captured_at", "source", "content", "note", "tags"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "operation_id": {"type": "string", "format": "uuid"},
+    "captured_at": {"type": "string", "format": "date-time"},
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["url", "title", "kind", "details", "limitations"],
+      "properties": {
+        "url": {"type": "string", "format": "uri"}, "title": {"type": "string"},
+        "kind": {"enum": ["page", "youtube", "github", "x"]},
+        "details": {"type": "object"}, "limitations": {"type": "array", "items": {"type": "string"}},
+        "viewport": {"type": "object"}
+      }
+    },
+    "content": {"type": "object", "additionalProperties": false, "required": ["text", "headings", "selection"], "properties": {"text": {"type": "string"}, "headings": {"type": "array", "items": {"type": "string"}}, "selection": {"type": "string"}}},
+    "note": {"type": "string"}, "tags": {"type": "array", "maxItems": 30, "items": {"type": "string"}},
+    "html": {"type": "string"}, "screenshot": {"type": "string", "pattern": "^data:image/jpeg;base64,"}
+  }
+}
