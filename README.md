@@ -43,18 +43,15 @@ Knowledgeの同期にはGit・GitHub CLIと設定済みの非公開リポジト�
 
 ## クイックスタート
 
-手元にあるcheckoutのルートで実行します。`install` は個人環境へ導入する操作です。
+**GitHub Packagesの非公開npm配布を準備中です。まだregistryから入手できる状態とは案内していません。** 現行版は **0.4.2**。配布開始後は、各PCで[初回認証](docs/guides/installation.md#github-packagesの初回認証)を済ませ、ホームなどpackage.jsonのない場所から次の1コマンドを実行します。初回導入と更新は同じコマンドです。
 
 ```sh
-npm ci
-npm run build
-node dist/skill/runtime.js doctor --project .
-node dist/skill/runtime.js install
+npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@latest -- codex-harness install
 ```
 
-既定では `~/.agents/skills/codex-harness` に本体を置き、`$CODEX_HOME/AGENTS.md`（未設定なら `~/.codex/AGENTS.md`）へ入口を追加します。既存の指示・設定は保持します。これは単体スキルの導入で、プラグイン一覧への登録とは別です。
+`latest`は配布者が指定する安定版です。取得したCLIが本体を `~/.agents/skills/codex-harness` にコピーし、`$CODEX_HOME/AGENTS.md`（未設定なら `~/.codex/AGENTS.md`）へ恒久runtimeの入口を追加します。既存の指示・設定・制作記憶を保持します。同版は `unchanged`、未編集の旧版は更新します。npm cacheを消した後も導入先runtimeを使えます。
 
-受け取ったローカルtarballからの導入、PowerShellの書き方、確認・更新・解除・競合時の対応は[導入ガイド](docs/guides/installation.md)にあります。現在のパッケージ版は **0.4.1**、`private: true`・`UNLICENSED`です。公開npmや入手可能なGitHub Releaseを前提にしていません。
+現在使える[ローカルtarball経路](docs/guides/installation.md#受け取ったローカルtarballから導入)も維持しています。認証・確認・版固定・解除・PowerShell・競合対応は[導入ガイド](docs/guides/installation.md)、clone/cdからの開発手順は[CONTRIBUTING](CONTRIBUTING.md)へ。ソースcheckoutの `private: true`・`UNLICENSED` を維持し、配布用stagingだけにGitHub Packages向けmanifestを生成します。実配布・一般公開・ライセンス変更はまだ行っていません。
 
 ## 最初の依頼
 

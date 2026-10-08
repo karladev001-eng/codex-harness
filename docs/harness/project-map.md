@@ -26,3 +26,5 @@
 - [codex-html-planの計画](tasks/codex-html-plan.md): Codex用の対話型HTML仕様スキル。仕様v2の実装・導入完了。[完成サンプル](../../authoring-skills/codex-html-plan/examples/task-board.plan.html)と開き方は計画の完了記録を参照。
 
 - [公開向けリポジトリ整理の仕様案](tasks/repository-public-readiness.md): README・導入導線・詳細ガイドの整理。仕様v2/承認済み・整備完了。外部公開は対象外。
+
+- [npm配布の仕様と検証](tasks/npm-distribution.md): clone不要の導入・更新。仕様v2（GitHub Packages非公開）・N1–N4の準備完了、159テストと独立レビューPASS。実配布は別工程。

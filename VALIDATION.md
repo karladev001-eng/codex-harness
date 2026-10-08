@@ -2,9 +2,23 @@
 
 ## 現行の読み方
 
-この文書は日付・版ごとの検証証拠です。古い件数、4スキル表記、非公開GitHub Releaseの提案、当時の未実装範囲はその時点の記録として保持します。現在の使い方は[文書索引](docs/README.md)、ローカル配布は[保守ガイド](docs/maintainers/releasing.md)へ。現行packageは0.4.1で、5スキルとKnowledge/Chrome/Raycastの実装があります。実装の存在、隔離試験、実機での登録、長期効果をそれぞれ区別してください。
+この文書は日付・版ごとの検証証拠です。古い件数、4スキル表記、非公開GitHub Releaseの提案、当時の未実装範囲はその時点の記録として保持します。現在の使い方は[文書索引](docs/README.md)、ローカル配布は[保守ガイド](docs/maintainers/releasing.md)へ。現行packageは0.4.2で、5スキルとKnowledge/Chrome/Raycastの実装があります。実装の存在、隔離試験、実機での登録、長期効果をそれぞれ区別してください。
 
 Knowledgeの隔離試験は[運用ガイドの検証範囲](docs/guides/knowledge-operations.md#検証範囲)、検索の契約は[ADR 0006](docs/adr/0006-knowledge-retrieval.md)、個別の現機確認はsource checkoutの `docs/harness/tasks/activate-knowledge-memory.md` と `docs/harness/tasks/raycast-knowledge.md` に記録されています。ここからWindows/Linux・別PC・全サービスの網羅取得・長期効果を確認済みとは扱いません。最新の公開準備の検証は実行後に追記し、過去の結果を現在版の再実行として扱わないでください。
+
+## 2026-10-08: 0.4.2 非公開npm配布の準備と隔離registry検証
+
+実施環境: macOS / Darwin 25.6.0 arm64、Node.js 26.10.0、npm 11.19.1、package 0.4.2。Node.js 22以上の要件を満たす環境で実行。GitHub Packagesの非公開配布を準備し、ソースの `private: true` / `UNLICENSED`は維持しています。
+
+- `npm test`: 159件PASS、失敗・skipなし。ログ `/tmp/npm-distribution-npm-test-final.log`。制作記憶fixtureを実localRootへ揃えた後、registry代表試験を再実行して1件PASS（`/tmp/npm-distribution-registry-test-final.log`）。API・モデル・既存所有管理の契約は変更していません。
+- 新しいstage generatorは既存pack選択の275ファイルを新規ディレクトリへ収録。stagingだけにGitHub Packages固定registry、関連repository、0.4.2のmanifestを生成し、privateフラグ・scripts・dev/runtime依存を収録しません。既存ファイル/ディレクトリへの出力拒否とバイト保持を試験。pack一覧の取得にも一時home/config/cacheとofflineを使います。
+- 127.0.0.1限定HTTP registry、一時home、空のuser/global npmrc、一時npm cache、package.jsonのない空白・日本語を含むcwdで実npm execを実行。初回、同版unchanged、古いpackument/cacheからlatest新版、版固定による差し戻し・再更新、解除、authoring単体導入/解除を確認。設定・正規の制作記憶・プロジェクト設定・無関係なAGENTSを保持します。
+- 401/403/404/通信resetは空の専用cacheと未cache版で取得を失敗させ、既存homeの全ファイルが変わらないことを確認。編集済みSKILLは取得後も更新拒否。実npm cache削除後も恒久runtimeのstatusが動き、AGENTS入口がcacheを参照しないことを確認。既存package/install試験で詳細なrollback、全5スキル、アーカイブ/恒久コピーの文書リンクを確認しています。
+- npm 11では通信障害後にpackument cacheへfallbackする場合を観測。通信障害だけで必ずCLI起動を止めるとの保証ではなく、npm取得全体がエラー終了した場合にCLIが実行されないことを検証しました。
+- `npm run stage:registry` とstagingの `npm publish --dry-run --ignore-scripts --offline` が成功（275ファイル）。dry-runは認証なしの警告を出し、実送信なし。最終成果物は `/tmp/npm-distribution-integrated/karladev001-eng-codex-harness-0.4.2.tgz` にローカルpackとして保存。stage自体に取得時build/AGENTS変更hookはありません。
+- `npm run check:docs` は現行source/ビルド済みの167文書、806相対リンク/見出しで欠落0（`/tmp/npm-distribution-docs-final.log`）。最終packの展開後も同じ文書検査で欠落0（`/tmp/npm-distribution-artifact-check.json`）。README、本体/単独導入、保守ガイドを「配布準備中」とし、PCごとのclassic PAT/read:packages認証、npm execによる更新/固定/解除、checkoutはclone/cdから案内しています。
+
+通常sandboxはlocalhost待受を拒否したため、承認済みloopback試験に限りauto-reviewで許可された追加権限を使用しました。一時サーバーは終了後停止、一時試験ファイルは削除。実GitHub Packagesへの接続・配布登録・公開・token入力/発行・実ホーム導入・push・ライセンス変更は行っていません。0.4.2の未使用確認、対象packageの非公開状態/アクセス/送信権限は実配布前の別工程です。Windows/Linux・別物理PC・Node.js 22実機・実GitHub認証/registryの挙動は今回未検証です。過去のCI停止記録から他OSの成功を推定しません。
 
 ## 2026-10-08: 公開向け文書とローカル配布の整合
 

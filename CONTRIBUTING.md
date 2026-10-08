@@ -4,9 +4,11 @@
 
 ## 開発環境
 
-Node.js 22以上・npm・Gitを用意し、手元のcheckoutのルートで実行します。
+Node.js 22以上・npm・Gitを用意し、アクセス権のあるリポジトリをcloneしてルートへ移動します。
 
 ```sh
+git clone https://github.com/karladev001-eng/harness.git
+cd harness
 npm ci
 npm run build
 npm test

@@ -1,6 +1,6 @@
 {
   "name": "@karladev001-eng/codex-harness",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "private": true,
   "description": "Portable Codex harness and independent Markdown authoring skills",
   "license": "UNLICENSED",
@@ -38,6 +38,7 @@
     "build": "node scripts/build.cjs",
     "test": "npm run build && node scripts/test.cjs",
     "prepack": "npm run build",
+    "stage:registry": "npm run build && node scripts/stage-registry.cjs",
     "check:docs": "node scripts/check-doc-links.cjs"
   },
   "devDependencies": {

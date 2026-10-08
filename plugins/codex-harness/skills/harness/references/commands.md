@@ -24,11 +24,21 @@ node "<runtime>" measure record --project <project> --input <measurement.json>
 
 ## 配布と導入
 
-Node.js 22以上。配布元で作成したコンパイル済みtarballを対象PCへコピーして使う。新規導入と旧版更新は同じ `install` 操作。0.4.1のGitHub Release公開は前提にしない。実行時のPython・TypeScriptコンパイラ・追加npm依存は不要。
+Node.js 22以上。GitHub Packages非公開npm配布は準備中。配布開始後はPCごとにnpm login（classic PATのread:packagesとpackageアクセス権）を済ませ、次を実行する。tokenは対話入力のみとし、チャット/リポジトリ/引数へ貼らない。
 
 ```sh
-npx --yes --package ./karladev001-eng-codex-harness-0.4.1.tgz codex-harness install
-npx --yes --package ./karladev001-eng-codex-harness-0.4.1.tgz codex-harness authoring install --project "/path/to/project"
+npm login --scope=@karladev001-eng --auth-type=legacy --registry=https://npm.pkg.github.com
+npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@latest -- codex-harness install
+npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@latest -- codex-harness authoring install --project "/path/to/project"
+```
+
+初回・更新は同じコマンド。確認は恒久runtimeのstatus/doctor、版固定は@latestを配布済み版へ置換、解除はinstallをuninstallへ置換する。取得失敗ではCLIは実行されない。401/403は認証/権限、404は未配布/名前/版/権限、通信失敗は接続を確認し、ホームでnpm ciは行わない。
+
+現在は配布元で作成したコンパイル済みtarballを対象PCへコピーして使える。新規導入と旧版更新は同じ `install` 操作。0.4.2のGitHub Release公開は前提にしない。実行時のPython・TypeScriptコンパイラ・追加npm依存は不要。
+
+```sh
+npx --yes --package ./karladev001-eng-codex-harness-0.4.2.tgz codex-harness install
+npx --yes --package ./karladev001-eng-codex-harness-0.4.2.tgz codex-harness authoring install --project "/path/to/project"
 ```
 
 更新後の `status` の `config.models` で設定基準値を確認する。`model_selection` はmode/resolution/pinned_roles/pinsを返し、autoはhost-launch時の解決、catalog_checked=falseである。statusは読取のみ・ネットワークなしで、動的なモデル選択結果を返さない。個人設定・プロジェクト設定と制作の好みは保持され、明示モデル設定は新しい既定を隠す。新しい既定を使う項目だけ利用者が上書きから削除する。

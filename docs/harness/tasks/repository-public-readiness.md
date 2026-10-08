@@ -191,3 +191,5 @@ open "docs/harness/tasks/repository-public-readiness.plan.html"
 - 今回の変更は公開入口・目的別ガイド・保守文書・テンプレートと、help/配布/リンク検証の最小修正。既存未コミット変更は保持し、削除なし。commit IDは新規なし。外部公開/push/ライセンス変更/実ホーム導入なし。
 - 制約: 実施はmacOS arm64 / Node26.10。今回のNode22再実行、Windows/Linux/別PC実機、実Chrome/Raycast/GitHub/Codex検出、LaunchAgent再ログイン、長期効果は未検証。現行ガイドの可読性とローカル配布整合が今回の完了範囲。
 - ユーザーの成果物評価は未受領。テスト/レビューPASSをユーザー評価や長期改善効果に置き換えない。
+
+- 後続: [npmのみの導入・更新](npm-distribution.md)。仕様v2（GitHub Packages非公開）・N1–N4の準備完了、実配布は別工程。完了済みの本計画と承認範囲を分ける。

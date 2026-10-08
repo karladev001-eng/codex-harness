@@ -24,7 +24,7 @@
 ## 開発・保守をする
 
 - [CONTRIBUTING](../CONTRIBUTING.md)：開発環境、検証、変更提案
-- [ローカル配布物の作成](maintainers/releasing.md)
+- [非公開npm配布の準備とローカル配布物の作成](maintainers/releasing.md)
 - [公開前に残る判断](maintainers/publication.md)
 - [出典と個別ライセンス](../THIRD_PARTY_NOTICES.md)
 
