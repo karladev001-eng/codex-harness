@@ -8,17 +8,17 @@ const { fixture, root, run, tree, write } = require('./helpers.cjs');
 test('packed release runs through actual npx outside repo without compiler/network/Python', { timeout: 120000 }, t => {
   const f = fixture(t), npm = process.env.npm_execpath;
   assert.ok(npm && fs.existsSync(npm), 'Run packaging tests using npm test');
-  const env = { ...process.env, PATH: path.dirname(process.execPath) + path.delimiter + process.env.PATH, npm_config_cache: path.join(f.base, 'npm cache'), npm_config_offline: 'true', npm_config_audit: 'false', npm_config_fund: 'false' };
+  const env = { ...require('./npm-fixture.cjs').npmEnvironment(f), npm_config_offline: 'true' };
   function invoke(script, args, cwd) {
     const result = spawnSync(process.execPath, [script, ...args], { encoding: 'utf8', cwd, env, timeout: 90000 });
     assert.ifError(result.error); assert.equal(result.status, 0, result.stderr + result.stdout); return result.stdout;
   }
   const packResult = JSON.parse(invoke(npm, ['pack', '--ignore-scripts', '--json', '--pack-destination', f.base], root));
   const packed = Array.isArray(packResult) ? packResult[0] : Object.values(packResult)[0];
-  assert.equal(packed.version, '0.4.1');
-  assert.equal(require('../package-lock.json').version, '0.4.1');
-  assert.equal(require('../package-lock.json').packages[''].version, '0.4.1');
-  assert.equal(JSON.parse(fs.readFileSync(path.join(root, 'dist/plugins/codex-harness/.codex-plugin/plugin.json'), 'utf8')).version, '0.4.1');
+  assert.equal(packed.version, '0.4.2');
+  assert.equal(require('../package-lock.json').version, '0.4.2');
+  assert.equal(require('../package-lock.json').packages[''].version, '0.4.2');
+  assert.equal(JSON.parse(fs.readFileSync(path.join(root, 'dist/plugins/codex-harness/.codex-plugin/plugin.json'), 'utf8')).version, '0.4.2');
   const archive = path.join(f.base, packed.filename), files = packed.files.map(file => file.path);
   assert.ok(files.includes('dist/skill/runtime.js'));
   assert.ok(files.includes('dist/skill/preferences.js'));

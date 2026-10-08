@@ -1,0 +1,33 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>npmで導入と更新 — 仕様v2</title><link rel="stylesheet" href="../../../authoring-skills/codex-html-plan/runtime/htmlplan.css"><script src="../../../authoring-skills/codex-html-plan/runtime/htmlplan.js" defer></script></head>
+<body data-plan-id="npm-distribution" data-version="2" data-scope="N1–N4: GitHub Packages非公開配布の準備・npm導入更新案内・隔離検証（実配布・公開・push・ライセンス変更除外）" data-approval="pending" data-persistence="off">
+<header><h1>npmだけで導入・更新する</h1><p>npm-distribution · 仕様v2 · 実装承認待ち</p></header><main>
+<h2>全体像</h2><p>Node.jsとnpmを用意したPCで、ホームから一つのコマンドを実行してハーネスを導入・更新する。手動clone・利用者側のビルド・tarball転送を不要にする。</p><p>各PCでGitHub Packagesへの初回認証 → npmがビルド済み配布版を取得 → 既存installで恒久導入 → 同じコマンドで更新。設定と記憶は保持し、編集済みの管理ファイルは上書きせず停止する。</p><p>実装順は配布物の生成 → 案内 → 一時registryからの導入/更新試験。配布先はGitHub Packages・非公開に確定。実registryへの送信は別工程。<a href="npm-distribution.md">仕様・承認の正本</a>。</p>
+<h2>仕様案</h2><doc-plan>
+<doc-claim id="N1"><p>N1: 配布元でビルド済みのregistry配布物を作る。</p><doc-code lang="text" title="提案: 配布の構成"><script type="text/plain">source checkout（private:trueを維持）
+  → build + 選択収録 + 別staging manifest
+  → ローカル検証済みtarball
+  → 別途指示後、GitHub Packagesへ非公開配布
+</script></doc-code><p>stagingだけでpublish禁止フラグを外す。取得時のprepare/postinstallやAGENTS自動書込hookは追加しない。次版0.4.2を提案。registryはnpm.pkg.github.com、名前は@karladev001-eng/codex-harness。非公開の既存リポジトリに関連付ける。送信前にpackageの非公開状態・権限と版の未使用を確認する。</p></doc-claim>
+<doc-claim id="N2"><p>N2: 初回と更新を同じnpm execコマンドで行う。</p><doc-code lang="sh" title="提案: GitHub Packagesへの認証・配布完了後の導入/更新"><script type="text/plain">npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@latest -- codex-harness install
+</script></doc-code><p>同じ版はunchanged、新版は既存の所有管理に従って更新。@latestを具体版へ置換すれば版固定、installをuninstallへ置換すれば解除。取得したCLIはnpm cacheで動き、本体は恒久配置へコピーされる。cache削除後も利用できる。</p></doc-claim>
+<doc-claim id="N3"><p>N3: READMEから初回・更新・認証・解除を辿れるようにする。</p><doc-code lang="text" title="提案: 利用者の入口"><script type="text/plain">npm経路（配布前は準備中と明記）
+  初回認証（各PC）:
+npm login --scope=@karladev001-eng --auth-type=legacy --registry=https://npm.pkg.github.com
+  → 導入/更新 → 確認 → 解除
+ローカルtarball経路（引き続き利用可能）
+開発者のcheckout経路（clone/cdから記載）
+</script></doc-code><p>単独スキルには同じ取得方式でauthoring installを使う。各PCでnpm loginとpackage権限を説明。401/403・404・通信失敗と、取得後の所有管理競合を分ける。tokenはチャットやコマンド引数へ貼らせない。</p></doc-claim>
+<doc-claim id="N4"><p>N4: 公開せずに実際のnpm経路を隔離検証する。</p><doc-code lang="text" title="提案: 受入試験"><script type="text/plain">localhost registry + 一時home/cache
+package.jsonのない場所 → 初回導入
+古いcache + 新latest → 更新
+同版再実行 / 版固定 / 単独スキル / 解除
+認証失敗 / 未配布 / 編集済み拒否
+cache削除後 → 恒久runtimeで確認
+</script></doc-code><p>Node/npm/OSの実行版を記録し、他OS未実行は明記。製品画面の変更はないためコマンドを展示する。既存package/install試験を再利用する。</p></doc-claim>
+<doc-claim aux="scope"><p>対象外: 実registry配布・公開設定・push・ライセンス変更・実PC導入・Chrome/Raycast登録・自動更新サービス。</p><p>現在の依頼は仕様作成として扱う。過去の承認やpush指示は新しい配布工程へ流用しない。</p></doc-claim>
+</doc-plan>
+<h2>受入条件</h2><ol><li>clone/build/手動転送なしでpackage.jsonのない場所から導入・更新できる（N1/N2/N4）。</li><li>古いcacheから新版取得、版固定、同版再実行、解除が動く（N2/N4）。</li><li>設定/記憶/無関係AGENTSを保持し、失敗や編集済み競合で既存導入を壊さない（N2/N3/N4）。</li><li>配布元でのみビルドし、秘密/実状態/内部実験と取得時自動hookを配布しない（N1）。</li><li>初回/更新/確認/解除/認証を案内し、配布前のコマンドを利用可能と書かない（N3）。</li><li>実配布や実環境変更を行わず、未検証を明示する（全体）。</li></ol>
+<h2>未解決事項</h2><p>実装準備N1–N4について、なし。ユーザー回答「非公開の方針でいきましょう」によりGitHub Packagesの非公開配布へ確定。実装承認は独立してpending。</p><p>実配布前に非公開状態・権限・version未使用・認証を確認する。実registryへの送信は今回の承認範囲外。</p>
+<h2>承認</h2><p>未承認 / pending。仕様v2・N1–N4の明示承認後に実装する。HTMLの操作は回答/承認の文案作成だけで、送信も承認記録もしない。</p>
+<h2>関連記録・出典</h2><ul><li><a href="npm-distribution.md">npm-distribution / TASK正本・開くコマンド</a></li><li><a href="repository-public-readiness.md">前提のリポジトリ整備</a></li><li><a href="../../adr/0001-portable-skill-harness.md">構成・配布ADR</a></li><li><a href="../../guides/installation.md">現行の導入</a></li><li><a href="https://docs.npmjs.com/cli/v11/commands/npm-exec/">npm exec公式資料</a></li><li><a href="https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry">GitHub Packages公式資料</a></li><li><a href="https://docs.npmjs.com/cli/v11/configuring-npm/package-json/#private">npm private/publishConfig公式資料</a></li></ul>
+</main></body></html>
