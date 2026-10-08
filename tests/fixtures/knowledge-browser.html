@@ -1,0 +1,52 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>Knowledge real DOM fixtures</title></head><body><h1>実DOM取得検証</h1><pre id="results">実行中</pre><div id="frames"></div><h2>Popup mock transport</h2><label>保存応答 <select id="mode"><option value="sent">GitHub保存済み</option><option value="pending">PC送信待ち</option><option value="error">PC接続エラー</option></select></label><label><input id="blocked" type="checkbox">制限ページ</label><label><input id="hold" type="checkbox">送信を保留</label><button id="finish">保留送信を完了</button><button id="reopen">Popupを開き直す</button><button id="close">Popupを閉じる</button><output id="metrics"></output><output id="badge"></output><button id="long-note">長い日本語メモを入れる</button><button id="short-note">メモを短くする</button><iframe id="popup" style="width:340px;height:420px;border:1px solid #ddd" title="Popup mock"></iframe>
+<script type="module">
+import { extractPage } from '/extract.js';
+import { handleMessage } from '/worker.js';
+const results=[];
+function check(condition, label){if(!condition)throw Error(label);results.push('PASS '+label);document.querySelector('#results').textContent=results.join('\n');}
+async function dom(html,url){const frame=document.createElement('iframe');frame.style='width:600px;height:400px';document.querySelector('#frames').append(frame);await new Promise(resolve=>{frame.onload=resolve;frame.srcdoc=html;});const win=frame.contentWindow; const run=new Function('document','window','location','innerWidth','innerHeight','devicePixelRatio','scrollX','scrollY','Node','performance','return ('+extractPage.toString()+')(true)');return run(win.document,win,{href:url},600,400,1,0,0,win.Node,win.performance);}
+try{
+const page=await dom('<article><h1>見出し</h1><p>本文です</p><script>window.secret=1<\/script><form><input value="PRIVATE"><textarea>PRIVATE</textarea></form><p onclick="evil()" style="color:red"><a href="javascript:evil()">参照</a></p><iframe src="https://example.invalid"></iframe></article>','https://example.com/article');
+check(page.content.text.includes('本文です'),'一般本文/見出しを取得');check(page.content.headings[0]==='見出し','見出し保持');check(!/script|onclick|PRIVATE|javascript:|iframe|style=/i.test(page.html),'HTMLから能動要素/フォーム値/属性を除去');
+const x=await dom('<article><a href="https://x.com/alice/status/123"><time datetime="2026-10-01">日付</time></a><div data-testid="User-Name">Alice</div><div data-testid="tweetText">対象の一投稿</div><div role="link"><a href="https://x.com/bob/status/99"><time>quoted</time></a><div data-testid="tweetText">引用投稿</div></div></article><article><a href="https://x.com/bob/status/456"><time>other</time></a><div data-testid="tweetText">関連おすすめ投稿</div></article>','https://x.com/alice/status/123');
+check(x.content.text==='対象の一投稿','X対象投稿と一致、引用/おすすめを混ぜない');check(x.source.details.published_at==='2026-10-01','Xの投稿日時を分離');
+const quoteOnly=await dom('<article><a href="https://x.com/alice/status/123"><time>own</time></a><div role="link"><a href="https://x.com/bob/status/99"><time>quote</time></a><div data-testid="tweetText">引用本文</div></div></article>','https://x.com/alice/status/123');check(quoteOnly.content.text==='','本文なしの投稿に引用本文を代入しない');
+const mismatch=await dom('<article><a href="https://x.com/bob/status/456"><time>other</time></a><div data-testid="tweetText">無関係</div></article>','https://x.com/alice/status/123');check(mismatch.content.text===''&&mismatch.source.limitations.some(s=>s.includes('一意')),'X対象不在は不足を記録');
+const yt=await dom('<ytd-watch-metadata><h1>動画タイトル</h1><div id="channel-name">Channel</div><div id="description">表示済み概要</div></ytd-watch-metadata><ytd-transcript-segment-renderer><span class="segment-timestamp">1:20</span><span class="segment-text">表示済み字幕</span></ytd-transcript-segment-renderer>','https://www.youtube.com/watch?v=abcdefghijk&t=80');check(yt.source.details.video_id==='abcdefghijk'&&yt.source.details.transcript[0].text==='表示済み字幕','YouTube ID/表示文字起こし');
+const github=await dom('<p itemprop="about">Repository description</p><article class="markdown-body"><h1>README</h1><p>README本文</p></article>','https://github.com/owner/repo');check(github.content.text.includes('README本文')&&github.source.details.repository==='owner/repo','GitHub README DOM fallback');
+const japanese=await dom('<article>'+ '界'.repeat(100000)+'</article>','https://example.com/large');check(new TextEncoder().encode(japanese.content.text).length<=200000&&japanese.source.limitations.some(s=>s.includes('切り詰め')),'UTF8容量制限と不足記録');
+document.querySelector('#results').dataset.state='passed';
+const storage={}, listeners=[], waiting=[];let saveCount=0;
+const api={
+  action:{setBadgeText:async({text})=>{document.querySelector('#badge').textContent='Badge: '+text;},setBadgeBackgroundColor:async()=>{}},
+  storage:{onChanged:{addListener:fn=>listeners.push(fn)},local:{
+    get:async keys=>Object.fromEntries((Array.isArray(keys)?keys:[keys]).map(key=>[key,structuredClone(storage[key])])),
+    set:async values=>{const changes={};for(const [key,value] of Object.entries(values)){changes[key]={newValue:structuredClone(value)};storage[key]=structuredClone(value);}setTimeout(()=>listeners.forEach(fn=>fn(changes,'local')),0);},
+    remove:async key=>{delete storage[key];}
+  }},
+  runtime:{connectNative:()=>{
+    let receive,disconnect,closed=false;
+    return{onMessage:{addListener:fn=>receive=fn},onDisconnect:{addListener:fn=>disconnect=fn},disconnect:()=>{closed=true;},postMessage:message=>{
+      const finish=()=>{if(closed)return;const mode=document.querySelector('#mode').value;
+        if(mode==='error'){api.runtime.lastError={message:'mock disconnected'};disconnect();api.runtime.lastError=undefined;return;}
+        receive(message.action==='save'?{state:mode,durable:true,operation_id:message.capture.operation_id}:message.action==='sync'?{results:[{state:mode,reason:mode==='pending'?'GH_REQUEST_FAILED':undefined,operation_id:message.operation_id}]}:{pending:0});
+      };
+      if(message.action==='save'){saveCount++;window.lastSaved=structuredClone(message.capture);}
+      if(document.querySelector('#hold').checked)waiting.push(finish);else setTimeout(finish,100);
+    }};
+  }},
+  tabs:{query:async()=>[{id:1,windowId:1,url:document.querySelector('#blocked').checked?'chrome://settings':'https://example.com/article'}],captureVisibleTab:async()=> 'data:image/jpeg;base64,YWJj'},
+  scripting:{executeScript:async request=>request.func.name==='extractPage'?[{result:{...structuredClone(page),html:request.args[0]?page.html:'',document_url:'https://example.com/article',time_origin:1}}]:[{result:{url:'https://example.com/article',time:1}}]}
+};
+window.chromeMock={...api,runtime:{sendMessage:message=>handleMessage(api,message)}};
+const frame=document.querySelector('#popup');
+async function reopen(){listeners.splice(0);let popup=await(await fetch('/popup.html')).text();popup=popup.replace('<script type="module" src="popup.js">','<script>window.chrome=parent.chromeMock;<\/script><script type="module" src="/popup.js">').replace('href="popup.css"','href="/popup.css"');frame.srcdoc=popup;}
+document.querySelector('#reopen').onclick=reopen;
+document.querySelector('#close').onclick=()=>{listeners.splice(0);frame.srcdoc='';};
+document.querySelector('#finish').onclick=()=>{document.querySelector('#hold').checked=false;waiting.splice(0).forEach(fn=>fn());};
+document.querySelector('#long-note').onclick=()=>{frame.contentDocument.querySelector('#note').value='界'.repeat(17000);};
+document.querySelector('#short-note').onclick=()=>{frame.contentDocument.querySelector('#note').value='短くしたメモ';};
+setInterval(()=>{const body=frame.contentDocument?.body;const height=body?.scrollHeight||0;frame.style.height=Math.max(25,height)+'px';document.querySelector('#metrics').textContent=`Popup ${body?.getBoundingClientRect().width||0} × ${height}px / 保存 ${saveCount}回 / 拡張待ち ${storage.pending?'あり':'なし'}`;},100);
+await reopen();
+}catch(error){document.querySelector('#results').textContent=results.join('\n')+'\nFAIL '+error.message;document.querySelector('#results').dataset.state='failed';}
+</script></body></html>

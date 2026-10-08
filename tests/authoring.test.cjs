@@ -7,7 +7,7 @@ const { fixture, write, tree, root, run } = require('./helpers.cjs');
 const lib = require('../dist/skill/lib.js');
 function args(f, action = 'install', skill = []) { return { project: f.project, action, skill }; }
 
-test('four authoring skills install/update/uninstall independently with no activation', t => {
+test('five authoring skills install/update/uninstall independently with no activation', t => {
   const f = fixture(t); write(path.join(f.project, 'AGENTS.md'), 'Keep instructions\r\n'); write(path.join(f.project, '.harness.json'), '{"enabled":false}\n');
   const result = authoring(args(f)); assert.equal(result.status, 'installed'); assert.deepEqual(result.skills, SKILLS);
   for (const name of SKILLS) assert.deepEqual(lib.inventory(path.join(result.root, name)), lib.inventory(path.join(root, 'authoring-skills', name)));
@@ -20,6 +20,16 @@ test('four authoring skills install/update/uninstall independently with no activ
   assert.equal(authoring(args(f, 'uninstall')).status, 'not_installed');
   assert.equal(fs.existsSync(path.join(result.root, '.codex-harness-authoring.json')), false);
   assert.equal(fs.readFileSync(path.join(f.project, '.harness.json'), 'utf8'), '{"enabled":false}\n');
+});
+test('legacy four-skill selection and codex-html-plan standalone install remain supported', t => {
+  const f = fixture(t), legacy = ['create-rulebooks', 'create-subagent', 'create-harness', 'inspect-harness'];
+  const result = authoring(args(f, 'install', legacy)); assert.deepEqual(result.skills, legacy);
+  assert.equal(fs.existsSync(path.join(result.root, 'codex-html-plan')), false);
+  assert.equal(authoring(args(f, 'install', ['codex-html-plan'])).skills[0], 'codex-html-plan');
+  const htmlPlan = path.join(result.root, 'codex-html-plan');
+  for (const file of ['LICENSE', 'runtime/pack.mjs', 'examples/task-board.plan.html']) assert.equal(fs.existsSync(path.join(htmlPlan, file)), true, file);
+  assert.equal(authoring(args(f, 'uninstall', ['codex-html-plan'])).status, 'uninstalled');
+  assert.equal(authoring(args(f, 'uninstall', legacy)).status, 'uninstalled');
 });
 test('authoring preflights all targets and preserves unowned collisions', t => {
   const f = fixture(t); write(path.join(f.project, '.agents/skills/inspect-harness/SKILL.md'), 'user skill'); const before = tree(f.base);
@@ -43,6 +53,11 @@ test('authoring update is transactionally rolled back when manifest write fails'
 test('authoring incomplete source rejected before any project mutation', t => {
   const f = fixture(t), source = path.join(f.base, 'release'); lib.copySkill(path.join(root, 'authoring-skills'), source); fs.unlinkSync(path.join(source, 'create-harness/assets/workflow.md'));
   const before = tree(f.project); assert.throws(() => authoring(args(f), source), /incomplete/); assert.deepEqual(tree(f.project), before);
+});
+test('incomplete codex-html-plan source is rejected before any project mutation', t => {
+  const f = fixture(t), source = path.join(f.base, 'release'); lib.copySkill(path.join(root, 'authoring-skills'), source);
+  fs.unlinkSync(path.join(source, 'codex-html-plan/runtime/pack.mjs'));
+  const before = tree(f.project); assert.throws(() => authoring(args(f), source), /incomplete: codex-html-plan: runtime\/pack\.mjs/); assert.deepEqual(tree(f.project), before);
 });
 test('authoring explicit skills-dir supports personal path and subset', t => {
   const f = fixture(t), destination = path.join(f.home, '.codex/skills');

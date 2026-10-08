@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>資料を保存</title><link rel="stylesheet" href="popup.css"></head>
+<body><main><header><span class="eyebrow">KNOWLEDGE CAPTURE</span><h1 id="heading">この資料を残す</h1></header>
+<div id="editor"><section id="preview" hidden><h2 id="title"></h2><p id="url"></p></section>
+<label for="note">メモ <span>任意</span></label><textarea id="note" rows="2" maxlength="20000" placeholder="後で見返したいこと"></textarea>
+<button id="save" disabled>保存する <span class="shortcut">⌘ / Ctrl ↵</span></button>
+<details id="details"><summary>タグ・保存オプション・取得内容</summary><label for="tags">タグ <span>カンマ区切り</span></label><input id="tags" type="text" maxlength="2000" placeholder="デザイン, 読みたい"><section class="options"><label><input id="screenshot" type="checkbox" checked> 表示範囲の画像</label><label><input id="html" type="checkbox" checked> HTML構造</label></section><p id="scope"></p><details><summary>取得本文を確認</summary><pre id="body"></pre></details><ul id="limitations"></ul><p class="footnote">画像は表示範囲のみ。未取得部分は記録します。PC送信待ちはPCツールの <code>retry</code> で再送できます。</p></details></div>
+<p id="status" role="status" aria-live="polite">ページの取得中…</p><button id="acquire" class="secondary" hidden>取得し直す</button><button id="retry" class="secondary" hidden>拡張の送信待ちを再送</button></main><script type="module" src="popup.js"></script></body></html>

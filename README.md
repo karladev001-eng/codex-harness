@@ -1,116 +1,110 @@
 # Codex Harness
 
-仕様を中心に引き継ぎ、軽量モデルによる実装と独立レビューを組み合わせる、個人用Codexハーネスです。独立したタスクはGit worktreeで隔離して並列実行します。
+Codexで仕様を共有し、実装・独立レビュー・制作の改善を進めるための実行手順とローカル補助ツールです。保存した資料を必要な分だけ検索・取得し、次の作業へ引き継げます。
 
-**これはCodexが読む実行手順とローカル補助ツールです。常駐型の自動実行サービスではありません。** モデル起動・並列化・レビューはCodexの利用可能なツールで行います。利用枠の削減効果は未計測です。
+## できること
 
-仕様の正本は [SPEC.md](SPEC.md) です。全体構成の判断は [ADR](docs/adr/0001-portable-skill-harness.md)、検証結果は [VALIDATION.md](VALIDATION.md) を参照してください。
+- **仕様と承認** — 実装前に範囲・受入条件を示し、UIには視覚モックを添えます。
+- **実装と独立レビュー** — 担当へ必要な情報だけを渡し、Git worktreeで独立したコード作業を隔離します。
+- **改善ループ** — UI・文書へのフィードバックを、用途を限った候補・制作指針として次回へ使います。
+- **ナレッジベースと検索** — 保存した本文・メモ・画像・説明から少数の候補を探し、必要な箇所だけ読みます。
+- **再利用可能な5スキル** — ルール・担当・調整手順の作成、構成の確認、HTML計画の提示を個別に使えます。
+
+```text
+仕様・モック → 明示承認 → 実装 → 独立レビュー → 統合・検証
+     ↑                保存した判断・資料・制作指針を次回に参照
+```
+
+Codexが手順を読み、利用可能なツールで担当の起動やレビューを行います。常駐の自動実行サービスではなく、CLIが承認やモデル起動を機械的に強制するものでもありません。
+
+## 自分に合う使い方を選ぶ
+
+| 使い方 | 向いている用途 | 導入と次に読む資料 |
+| --- | --- | --- |
+| ハーネス本体 | 仕様・分業・レビュー・改善を通して使う | [導入ガイド](docs/guides/installation.md)。個人用スキルとAGENTSの入口を登録 |
+| スキルのみ | 必要なルール、担当、計画を作成・確認する | [5スキルの一覧](authoring-skills/README.md)と[単独導入](authoring-skills/INSTALL.md)。本体を有効化しない |
+
+### 関連ツール
+
+| ツール | できること | 独立した紹介・説明・導入 |
+| --- | --- | --- |
+| Chrome拡張 | 表示したページの資料とメモを収集・保存する | [Chrome拡張ガイド](knowledge/extension/README.md)。macOS/Windows向け |
+| Raycast検索 | 利用者が保存資料を検索し、元ページを開く | [Raycast検索ガイド](integrations/raycast-knowledge/README.md)。macOS向け |
+
+どちらも個別に導入します。本体の必須依存ではなく、本体installによるChrome/Raycastへの自動登録も行いません。連携先は[共通Knowledge基盤](knowledge/README.md)です。
 
 ## 必要な環境
 
-- Node.js 22以上とnpm（実行時の追加依存なし。TypeScriptコンパイラとPythonは利用者には不要）
-- Git（隔離した並列実装に使用）
-- スキルとサブエージェントを利用できるCodexアプリ
-- 親の会話を渡さない起動、モデル指定、担当別作業ディレクトリを扱える実行環境
+本体にはNode.js **22以上**・npmと、スキルに対応したCodexが必要です。コードの隔離にはGit、分業にはサブエージェント・モデル指定・担当別作業場所を扱えるホストを使います。実行時の追加npm依存、Python、利用者側のTypeScriptコンパイルは不要です。
 
-モデルやサブエージェントの利用可否はアカウント・ホストで異なります。補助ツールの診断だけでモデル利用権を保証するものではありません。Windows PowerShellでも `node` と `npx` を使います。macOS以外の実機検証状況はVALIDATION.mdに記載します。
+Knowledgeの同期にはGit・GitHub CLIと設定済みの非公開リポジトリ、説明生成にはログイン済みCodex CLIを追加で使います。利用権とモデル候補はホストごとに確認します。macOS以外の実機状況は[検証記録](VALIDATION.md)を参照してください。
 
-## 別のPCに導入する
+<a id="別のpcに導入する"></a>
 
-非公開GitHub Releaseのコンパイル済みnpm tarballを取得します。GitHubアクセス権と認証済みGitHub CLI（`gh auth login`）が必要です。リポジトリのcloneや公開npmレジストリへの公開は不要です。macOS/LinuxとWindows PowerShellで同じコマンドを使えます。
+## クイックスタート
 
-```sh
-gh release download v0.2.0 --repo karladev001-eng/harness --pattern "*.tgz"
-npx --yes --package ./karladev001-eng-codex-harness-0.2.0.tgz codex-harness doctor
-npx --yes --package ./karladev001-eng-codex-harness-0.2.0.tgz codex-harness install
-```
-
-セットアップは自己完結したJavaScript実行物・Markdown・assetsを `~/.agents/skills/codex-harness` へコピーし、Codexの個人用AGENTS.mdに小さな入口を追加します。入口は恒久的な導入先の `runtime.js` を参照し、npxキャッシュに依存しません。既存の設定・指示は保持します。**この導入経路は単体スキルの登録です。プラグイン一覧への登録とは別です。** コンパイル済みプラグインもtarball内の `dist/plugins/codex-harness/` に含まれます。開発元の `plugins/` はMarkdown・manifestのソースで、単独では実行用配布物ではありません。
-
-導入後は新しいCodexタスクで実装を依頼してください。通常のコード変更依頼に適用し、委譲された子エージェントは担当作業だけを行います。ハーネスのプラグイン版と単体スキル版を重複して有効化しないでください。
-
-個人用の設定や認証情報はGitに含めません。別のPCではCodexのログイン・ツール接続を個別に設定してください。
-
-Git clone をせず、既存プロジェクトに作成用の `create-rulebooks`、`create-subagent`、`create-harness` と確認用の `inspect-harness` を入れる方法は、[Authoring Skills の導入手順](authoring-skills/INSTALL.md)を参照してください。これはハーネス本体とは別の、Markdownだけで構成された4スキルです。
-
-## 動作と設定
-
-```sh
-node "$HOME/.agents/skills/codex-harness/runtime.js" status --project "/path/to/project"
-```
-
-設定は、標準値 → 個人設定 → プロジェクトの `.harness.json` の順で上書きします。個人設定は通常 `~/.codex/harness/settings.json`、`CODEX_HOME` が設定されている場合はその配下です。
-
-```json
-{
-  "schema_version": 1,
-  "enabled": true,
-  "delegation": true,
-  "review": true,
-  "persistence": true,
-  "measurement": true,
-  "max_agents": 3
-}
-```
-
-- `delegation`：実装を子エージェントへ委譲。ON時は小変更でも委譲します。
-- `review`：すべての実装を独立レビューし、統合後の整合性も確認します。
-- `persistence`：仕様・タスク進捗・重要な判断をプロジェクトに保存します。
-- `measurement`：明示的に取得できた利用情報・時間・手戻りを記録します。
-- `max_agents`：実装・調査・レビューが共有する子の同時稼働上限。ホスト上限を超えません。
-
-`enabled: false`、または４機能をすべてOFFにすると、状態確認だけで通常の作業へ戻ります。追加の分業・記録・計測を行わず、過去の成果物は削除しません。
-
-メインには `gpt-6-astra` を希望します。ただし、このスキルからメインのホストモデルは自動変更できません。ホストの現在値が異なる場合は、その差を報告します。子の標準割当は `deterministic` が `gpt-6-luna/low`、`standard` が `gpt-6-sol/medium`、`complex` と `review` が `gpt-6-sol/high` です。
-
-子はまず作業の性質でモデルを選びます。答えと確認方法が明確な作業や範囲を絞った調査は、複数ファイルでもLunaを選べます。開かれた設計・構成判断、重要なレビュー、リスクの高い問題はSolです。その後、必要な品質に応じて推論強度を独立に選びます。単純で客観的に確認できる作業は `low`、通常は `medium`、厳密な検討やレビューは `high`、例外的な品質が必要な場合だけ理由付きで `xhigh` または `max` を使います。モデルが対応する強度に限ります。`models` 設定とユーザーの明示指定を確認し、選択したモデル・強度と理由をタスクに記録します。利用できない値へ黙って代替しません。
-
-## 作業の流れ
-
-1. メインが目的、受入条件、対象範囲、依存関係を確定します。
-2. 独立したタスクを、履歴を引き継がない実装担当へ割り当てます。
-3. 担当ごとのworktreeで実装と必要なテストを行います。
-4. 別担当が実際の差分と受入条件をレビューします。
-5. 統合担当が承認済み変更をまとめ、結合検証と統合後レビューを行います。
-6. 完了条件を満たした時点で、結果と証拠への参照を保存します。
-
-未コミットの変更を勝手に捨てたり、stashしたりしません。新しいworktreeへ含める必要がある変更は、ユーザーが選んだチェックポイントを使います。Gitを使っていないプロジェクトは順次実行します。
-
-修正・再レビューは２巡までとし、解決しない場合はメインへ判断を戻します。外部へのpush、PR作成、マージは別途依頼された範囲でのみ行います。
-
-## 記録とPC間の引継ぎ
-
-`docs/harness/` にタスク仕様、主要ファイルへの案内、ADRを保存します。全フォルダへのREADME生成や、全会話のコピーは行いません。長い実行ログと計測値はPC内に保存します。
-
-別PCへ移る前にコードとタスク記録を保存・同期し、新しいCodexタスクで対象タスクIDからの再開を依頼してください。起動中のエージェントやworktreeは同期されません。自動compactと会話削除はv1の対象外です。
-
-## 更新・削除
-
-更新先Releaseのtarballを取得し、そのパッケージの `install` を再実行します。旧Python版のschema-1所有記録も読み取り、未編集の導入はPythonを実行せず移行します。管理対象のファイルや入口が編集されていれば、更新・解除を拒否します。更新前のスキルと指示は `$CODEX_HOME/harness/backups/` に残ります。JavaScript版同士の差し戻しは希望するReleaseの `install` を使います。旧Python版へ戻す場合はJavaScript版で解除してから旧版の手順を使います。
-
-```sh
-npx --yes --package ./karladev001-eng-codex-harness-0.2.0.tgz codex-harness uninstall
-```
-
-解除するのはハーネス所有の入口とスキルです。個人設定、プロジェクト仕様、ADRは残ります。
-
-## 開発・検証
+手元にあるcheckoutのルートで実行します。`install` は個人環境へ導入する操作です。
 
 ```sh
 npm ci
-npm test
-node dist/skill/runtime.js --help
-npm pack
+npm run build
+node dist/skill/runtime.js doctor --project .
+node dist/skill/runtime.js install
 ```
 
-開発にはTypeScriptのdevDependenciesを使います。`npm pack` は先にビルドし、コンパイル済みJavaScript・4 authoringスキル・プラグインを格納します。`private: true` によりnpm公開は拒否されます。tarballを非公開GitHub Releaseへ添付して配布します。
+既定では `~/.agents/skills/codex-harness` に本体を置き、`$CODEX_HOME/AGENTS.md`（未設定なら `~/.codex/AGENTS.md`）へ入口を追加します。既存の指示・設定は保持します。これは単体スキルの導入で、プラグイン一覧への登録とは別です。
 
-テストは一時ホームと使い捨てGitリポジトリで行い、実際のCodex設定は変更しません。`--home` オプションで導入先のユーザーホームを隔離できます。実際の引数は各サブコマンドの `--help` を参照してください。
+受け取ったローカルtarballからの導入、PowerShellの書き方、確認・更新・解除・競合時の対応は[導入ガイド](docs/guides/installation.md)にあります。現在のパッケージ版は **0.4.1**、`private: true`・`UNLICENSED`です。公開npmや入手可能なGitHub Releaseを前提にしていません。
 
-利用枠の比較は通常実行とハーネス実行を、同じ開始状態のタスクで実施します。他の作業と重なった記録や利用枠のリセットをまたぐ記録は比較から除きます。未知の値は欠測として扱い、トークン数から利用枠へ換算しません。
+## 最初の依頼
 
-## 参考
+導入後は新しいCodexチャットで、対象プロジェクトを開いて依頼します。
 
-[everything-claude-code](https://github.com/worldflowai/everything-claude-code) のタスク別オーケストレーション、構造化された引継ぎ、独立レビューを参考にしています。実装・指示文は独自に作成し、Claude固有の設定やhooksをそのまま移植していません。
+> この機能を追加したいです。まず仕様と受入条件を説明してください。画面変更があるのでモックも提示してください。
 
-今のハーネスのルールとエージェント一覧を見せてほしい場合は、`inspect-harness` を使います。
+> 今後の社内報告は結論から始めてください。今回の修正と、次回にも使う制作指針を分けて扱ってください。
+
+> 保存資料から「カード」の例を3件探し、必要な本文と画像を確認して、出典と取得時点を示してください。
+
+## スキル一覧
+
+| スキル | 用途 |
+| --- | --- |
+| `create-rulebooks` | 継続して使う規則をMarkdownにする |
+| `create-subagent` | 再利用可能な担当定義を作る |
+| `create-harness` | 規則・担当・ワークフローを最小の索引でつなぐ |
+| `inspect-harness` | 既存の構成を読み取り専用で確認する |
+| `codex-html-plan` | 仕様・モック・未解決事項を単一HTMLで提示する |
+
+呼出し例と成果物は[スキル一覧](authoring-skills/README.md)を参照してください。
+
+## 詳しい使い方
+
+<a id="動作と設定"></a>
+<a id="作業の流れ"></a>
+<a id="制作フィードバックから学ぶ"></a>
+<a id="githubで制作の記憶を共有する"></a>
+<a id="記録とpc間の引継ぎ"></a>
+<a id="更新削除"></a>
+
+- [設定](docs/guides/configuration.md)：機能のON/OFF、モデル、保存先
+- [作業の流れ](docs/guides/workflow.md)：仕様・承認・担当・レビュー・引継ぎ
+- [改善ループ](docs/guides/improvement-loop.md)：フィードバック、指針、訂正・忘却、GitHub共有
+- [ナレッジベース](docs/guides/knowledge-base.md)：保存形式・認証・同期・取得版と鮮度
+- [保存資料の検索](docs/guides/search.md)：候補→カード→本文・画像の段階取得
+- [トラブルシューティング](docs/guides/troubleshooting.md)：診断と競合・未送信への対応
+- [文書索引](docs/README.md)：利用者・開発者・保守者ごとの入口
+
+## 対応状況
+
+ローカルCLI、5スキル、改善記録、Knowledgeの同期・文字検索・本文/画像取得、Chrome拡張、Raycast検索の実装があります。検証は[VALIDATION.md](VALIDATION.md)に日付と対象を分けて記載します。利用枠削減、長期的な制作改善、すべてのOS・別PCでの動作は確認済みとは扱いません。ベクトル意味検索、自動compact、会話削除は実装対象外です。
+
+<a id="開発検証"></a>
+<a id="参考"></a>
+<a id="chromeから資料を保存する"></a>
+
+## 開発・出典・ライセンス
+
+開発は[CONTRIBUTING.md](CONTRIBUTING.md)、配布物は[リリース手順](docs/maintainers/releasing.md)、将来公開時の判断は[公開前の整理](docs/maintainers/publication.md)を参照してください。[SPEC.md](SPEC.md)は実装仕様、[ADR](docs/adr/0001-portable-skill-harness.md)とタスク記録は設計・開発の履歴です。
+
+全体への利用ライセンスは未付与です。`codex-html-plan`のApache-2.0由来部分など、個別の出典とライセンスは[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)に分けて示します。

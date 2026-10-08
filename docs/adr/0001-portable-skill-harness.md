@@ -25,4 +25,7 @@ Codexアプリ内でメインの文脈を小さく保ち、軽い実装担当と
 ## 参照
 
 - [仕様](../../SPEC.md)
+- [関連スキル: codex-html-plan](../harness/tasks/codex-html-plan.md) — 単独利用できるHTML仕様スキル（仕様v2・実装導入完了）。[承認前HTMLモック](../harness/previews/codex-html-plan.html)は履歴、完成サンプルと起動方法はTASKの完了記録を参照。これは本ADRの採用済み決定の変更ではない。
 - [参考のオーケストレーション](https://github.com/worldflowai/everything-claude-code/blob/main/commands/orchestrate.md)
+
+- [関連する案内整備案](../harness/tasks/repository-public-readiness.md): 現行の配布構成を初見向けに説明する仕様v2。承認済みの案内整備を完了し、本ADRの採用済み判断を変更しない。

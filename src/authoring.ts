@@ -2,10 +2,15 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { canonical, copySkill, equalFiles, exists, inventory, isObject, Json, readJson, rejectSymlink, safePath, sourceRoot, within } from './lib';
 
-export const SKILLS = ['create-rulebooks', 'create-subagent', 'create-harness', 'inspect-harness'];
+export const SKILLS = ['create-rulebooks', 'create-subagent', 'create-harness', 'inspect-harness', 'codex-html-plan'];
 const REQUIRED: Record<string, string[]> = {
   'create-rulebooks': ['SKILL.md', 'assets/rulebook.md'], 'create-subagent': ['SKILL.md', 'assets/subagent.md'],
   'create-harness': ['SKILL.md', 'assets/harness-index.md', 'assets/workflow.md'], 'inspect-harness': ['SKILL.md'],
+  'codex-html-plan': [
+    'SKILL.md', 'UPSTREAM.md', 'LICENSE', 'agents/openai.yaml', 'runtime/htmlplan.js', 'runtime/htmlplan.css', 'runtime/pack.mjs',
+    'references/blocks.md', 'references/workflow.md', 'examples/task-board.src.html', 'examples/task-board.plan.html',
+    'examples/records/ADR-07.md', 'examples/records/TASK-42.md', 'examples/records/EXP-03.md', 'examples/records/index.md',
+  ],
 };
 export function authoring(args: Json, source = path.join(sourceRoot, 'authoring-skills')): Json {
   const project = canonical(args.project || '.');
