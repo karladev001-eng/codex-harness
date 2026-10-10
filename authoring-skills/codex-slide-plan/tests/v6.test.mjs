@@ -122,3 +122,37 @@ test('identical title and message appear once on the canvas with message comment
     assert.match(html,/data-target="\{&quot;kind&quot;:&quot;message&quot;,&quot;slideId&quot;:&quot;S01&quot;/);
     assert.match(html,/<p class="slide-message"[^>]*data-target="\{&quot;kind&quot;:&quot;message&quot;,&quot;slideId&quot;:&quot;S02&quot;/);
 });
+
+// Bounded CSS cascade evaluator: static style verification, not a browser render.
+// It catches geometry restrictions on the canvas at any specificity/order.
+function canvasDimensions(css,mode,width,height) {
+    const rules=[...css.replace(/\/\*[\s\S]*?\*\//g,'').matchAll(/([^{}]+)\{([^{}]*)\}/g)];
+    const properties={};
+    for (const [order,rule] of rules.entries()) for (const raw of rule[1].split(',')) {
+        const selector=raw.trim();
+        if (!/(?:^|[ >])\.slide$/.test(selector)) continue;
+        if (selector.includes('.zoomed') && mode!=='zoom') continue;
+        const specificity=(selector.match(/\./g)??[]).length;
+        for (const declaration of rule[2].split(';')) {
+            const [,name,value]=declaration.match(/^\s*([a-z-]+)\s*:\s*(.+)\s*$/)??[];
+            if (!['width','height','max-width','max-height','min-width','min-height'].includes(name)) continue;
+            const current=properties[name];
+            if (!current || specificity>current.specificity || (specificity===current.specificity&&order>=current.order)) properties[name]={value:value.trim(),specificity,order};
+        }
+    }
+    const number=(value,fallback)=>value==='var(--canvas-width)'?width:value==='var(--canvas-height)'?height:value==='none'?Infinity:/^\d+(?:\.\d+)?px$/.test(value??'')?parseFloat(value):fallback;
+    const dimension=(axis,fixed)=>Math.max(number(properties['min-'+axis]?.value,0),Math.min(number(properties[axis]?.value,fixed),number(properties['max-'+axis]?.value,Infinity)));
+    return {width:dimension('width',width),height:dimension('height',height)};
+}
+test('complete CSS cascade preserves 1280px canvas geometry in review/standalone/zoom for both ratios',async()=>{
+    const css=await fs.readFile(path.join(skill,'scripts/style.css'),'utf8');
+    for (const height of [720,960]) for (const mode of ['review','standalone','zoom']) {
+        assert.deepEqual(canvasDimensions(css,mode,1280,height),{width:1280,height});
+    }
+    // Prove this regression catches the historical higher-specificity clamp.
+    assert.equal(canvasDimensions(css+'\n.zoomed .slide{max-width:1200px;margin:auto}','zoom',1280,720).width,1200);
+    const beforeFixed=css.slice(0,css.indexOf('/* Only the frame'));
+    for (const rule of beforeFixed.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+        if (/(?:^|[ >])\.slide$/.test(rule[1].trim())) assert.fail(`Document CSS still constrains canvas: ${rule[1]}`);
+    }
+});
