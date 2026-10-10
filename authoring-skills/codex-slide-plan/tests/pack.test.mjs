@@ -250,3 +250,34 @@ test('explicit legacy working-copy migration retains originals/IDs/design and re
     await assert.rejects(migrate(f.file,path.join(f.temp,'alias/unsafe')), /symlink/);
     assert.deepEqual(await fs.readFile(f.file),bytes);
 });
+
+
+test('page-only concept labels stay visible independently of slide citations', async t => {
+    const f = await fixture(t), d = uncheck(structuredClone(f.deck));
+    d.sources.push({id:'slide-concept',kind:'concept',title:'Page-level assumption',label:'仮値（非実測）',checkedAt:'2026-10-10'});
+    d.slides[0].sourceIds = ['slide-concept']; d.slides[0].elements[0].sourceIds = [];
+    await save(f,d); const output = await build(f.file,f.out);
+    for (const file of ['review.html','output/slides.html']) {
+        const html = await fs.readFile(path.join(output.directory,'A',file),'utf8');
+        const page = html.match(/<section class="slide[^>]+data-slide-id="S01"[\s\S]*?<\/section>/)[0];
+        assert.match(page, /<p class="data-context">仮値（非実測）<\/p>/);
+        assert.doesNotMatch(page, /<footer class="source-strip">/);
+    }
+});
+
+test('displayed asset-only provenance and its derived inputs are reachable in page review', async t => {
+    const f = await fixture(t), d = uncheck(structuredClone(f.deck));
+    d.sources.push({id:'image-web',kind:'web',title:'Special image provenance',url:'https://example.com/special-image',author:'Fixture author',date:'2026-10-10',location:'Image credit',scope:'Synthetic regression record, no live fetch',checkedAt:'2026-10-10',verified:true});
+    d.sources.push({id:'asset-concept',kind:'concept',title:'Asset concept',label:'素材は概念図（非実測）',checkedAt:'2026-10-10'});
+    d.sources.push({id:'asset-derived',kind:'derived',title:'Derived image provenance',inputIds:['image-web'],formula:'Fixture derivation',code:'scripts/aggregate.mjs',output:'data/illustrative.csv',unit:'概念',population:'Synthetic image',missing:'No measurements',checkedAt:'2026-10-10'});
+    d.assets[0].sourceIds=['asset-derived','asset-concept']; d.slides[1].sourceIds=['brief']; d.slides[1].elements[0].sourceIds=[];
+    await save(f,d); const output = await build(f.file,f.out);
+    const html = await fs.readFile(path.join(output.directory,'A/review.html'),'utf8');
+    const page = html.slice(html.indexOf('<details class="page" id="page-S02"'),html.indexOf('<details class="page" id="page-S03"'));
+    assert.match(page, /href="https:\/\/example.com\/special-image"/);
+    assert.match(page, /source-asset-derived-S02/); assert.match(page, /source-asset-concept-S02/);
+    const slides = await fs.readFile(path.join(output.directory,'A/output/slides.html'),'utf8');
+    const visibleSlide = slides.match(/<section class="slide[^>]+data-slide-id="S02"[\s\S]*?<\/section>/)[0];
+    assert.match(visibleSlide, /<p class="data-context">素材は概念図（非実測）<\/p>/);
+    assert.doesNotMatch(visibleSlide, /<footer class="source-strip">/);
+});
