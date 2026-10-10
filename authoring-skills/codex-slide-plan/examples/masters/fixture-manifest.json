@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "origin": "Independently authored synthetic OOXML test inputs. No user master provided.",
+  "generator": "scripts/make-fixtures.py",
+  "ratios": [
+    [
+      4,
+      3
+    ],
+    [
+      16,
+      9
+    ]
+  ],
+  "renderStatus": "Actual LibreOffice source PNGs and separate source-render.json evidence added; HTML browser appearance remains unverified.",
+  "files": [
+    "standard-4x3/assets/logo.png",
+    "standard-4x3/deck.json",
+    "standard-4x3/master-inspection.json",
+    "standard-4x3/references/source-render.png",
+    "standard-4x3/references/standard-4x3.potx",
+    "standard-4x3/references/standard-4x3.pptx",
+    "standard-4x3/source-render.json",
+    "wide-16x9/assets/logo.png",
+    "wide-16x9/deck.json",
+    "wide-16x9/master-inspection.json",
+    "wide-16x9/references/source-render.png",
+    "wide-16x9/references/wide-16x9.potx",
+    "wide-16x9/references/wide-16x9.pptx",
+    "wide-16x9/source-render.json"
+  ]
+}

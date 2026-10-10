@@ -1,0 +1,250 @@
+{
+  "schemaVersion": 1,
+  "id": "master-wide-16x9",
+  "revision": "r1",
+  "title": "Master reference fixture",
+  "purpose": "Compare a synthetic master with an HTML design",
+  "audience": "Skill maintainers",
+  "message": "Master geometry and colors can be recorded and reconstructed.",
+  "expectedOutcome": "Identify structural matches and visual limitations.",
+  "requestedSlides": 1,
+  "chapters": [
+    {
+      "id": "intro",
+      "title": "Reference"
+    }
+  ],
+  "unresolved": [
+    "Source rendering and HTML visual comparison must be recorded separately."
+  ],
+  "sources": [
+    {
+      "id": "synthetic",
+      "kind": "concept",
+      "title": "Independent OOXML test fixture",
+      "label": "概念図・synthetic fixture",
+      "checkedAt": "2026-10-10"
+    }
+  ],
+  "assets": [
+    {
+      "id": "fixture-logo",
+      "file": "assets/logo.png",
+      "origin": "Deterministic two-color synthetic fixture test mark",
+      "license": "Fixture only; no real brand represented",
+      "regenerate": "python3 scripts/make-fixtures.py --out NEW_DIR",
+      "sourceIds": [
+        "synthetic"
+      ],
+      "slideIds": [
+        "S01"
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "id": "A",
+      "themeId": "fixture-master-theme",
+      "storyId": "decision",
+      "layouts": {
+        "S01": "fixture-master-layout"
+      }
+    }
+  ],
+  "catalog": {
+    "themes": [
+      {
+        "id": "fixture-master-theme",
+        "name": "Extracted synthetic master theme",
+        "background": "#f8fafc",
+        "ink": "#182c46",
+        "accent": "#c54163",
+        "muted": "#54647a",
+        "font": "Arial, sans-serif",
+        "ratio": [
+          16,
+          9
+        ],
+        "padding": 8,
+        "footer": ""
+      }
+    ],
+    "layouts": [
+      {
+        "id": "fixture-master-layout",
+        "version": "v1",
+        "name": "Master title and body",
+        "purpose": "Fixture master geometry comparison",
+        "structure": "Title, body and source logo at OOXML geometry",
+        "hideKicker": true,
+        "titleBox": {
+          "x": 8.0,
+          "y": 10.0,
+          "width": 76.0,
+          "height": 15.0
+        },
+        "canvas": {
+          "slots": [
+            {
+              "elementId": "body",
+              "x": 8.0,
+              "y": 35.0,
+              "width": 76.0,
+              "height": 38.0
+            },
+            {
+              "elementId": "logo",
+              "x": 88.0,
+              "y": 8.0,
+              "width": 5.0,
+              "height": 8.888889
+            }
+          ]
+        },
+        "messageBox": {
+          "x": 8,
+          "y": 85,
+          "width": 76,
+          "height": 5
+        }
+      }
+    ]
+  },
+  "slides": [
+    {
+      "id": "S01",
+      "chapter": "intro",
+      "role": "design reference",
+      "title": "Master reference fixture",
+      "message": "Synthetic master reference",
+      "talkingPoints": [
+        "Compare the source geometry and logo before accepting the reconstruction."
+      ],
+      "transition": "End of the one-slide fixture.",
+      "seconds": 30,
+      "notes": "Synthetic fixture. No factual result or real company branding.",
+      "sourceIds": [
+        "synthetic"
+      ],
+      "layoutId": "fixture-master-layout",
+      "paragraphs": [
+        {
+          "id": "P01",
+          "text": "This synthetic source contains a master, layout and theme. The HTML design records their relationship and keeps visual verification separate from structural checks.",
+          "sourceIds": [
+            "synthetic"
+          ]
+        }
+      ],
+      "elements": [
+        {
+          "id": "body",
+          "kind": "text",
+          "text": "A synthetic fixture for geometry and color checks.\nCompare the source master with the HTML design.",
+          "sourceIds": [
+            "synthetic"
+          ]
+        },
+        {
+          "id": "logo",
+          "kind": "image",
+          "assetId": "fixture-logo",
+          "alt": "Synthetic two-color fixture logo",
+          "sourceIds": [
+            "synthetic"
+          ]
+        }
+      ]
+    }
+  ],
+  "files": [
+    "references/wide-16x9.pptx"
+  ],
+  "master": {
+    "status": "reconstructed HTML design reference",
+    "input": {
+      "path": "references/wide-16x9.pptx",
+      "sha256": "6ac608487d60f4585fc28fb5fa8ef90499f3bf83dfa58a3b78077e95909cf323"
+    },
+    "masterMapping": [
+      {
+        "source": "ppt/slideMasters/slideMaster1.xml",
+        "themeId": "fixture-master-theme"
+      }
+    ],
+    "layoutMapping": [
+      {
+        "source": "ppt/slideLayouts/slideLayout1.xml",
+        "htmlLayoutId": "fixture-master-layout",
+        "slideId": "S01"
+      }
+    ],
+    "design": {
+      "ratio": [
+        16,
+        9
+      ],
+      "colors": {
+        "background": "#f8fafc",
+        "ink": "#182c46",
+        "accent": "#c54163",
+        "muted": "#54647a"
+      },
+      "fonts": [
+        "Arial"
+      ],
+      "logos": [
+        {
+          "sourcePart": "ppt/media/logo.png",
+          "assetId": "fixture-logo",
+          "sha256": "ca56104bdc5bbe4e28f776cc27dbe7d141014ffbb3a584a813bdf2be42d13fae",
+          "geometry": {
+            "x": 88.0,
+            "y": 8.0,
+            "width": 5.0,
+            "height": 8.888889
+          }
+        }
+      ],
+      "geometry": {
+        "title": {
+          "x": 8.0,
+          "y": 10.0,
+          "width": 76.0,
+          "height": 15.0
+        },
+        "body": {
+          "x": 8.0,
+          "y": 35.0,
+          "width": 76.0,
+          "height": 38.0
+        },
+        "logo": {
+          "x": 88.0,
+          "y": 8.0,
+          "width": 5.0,
+          "height": 8.888889
+        }
+      }
+    },
+    "substitutions": [
+      "Native PPTX master/layout becomes ordinary HTML theme and rectangle slots.",
+      "Browser may substitute Arial; actual installed font is not guaranteed.",
+      "Native text margins are zero; HTML has its own text formatting."
+    ],
+    "comparison": {
+      "structural": "Tested source OOXML -> canonical deck -> actual pack output (ratios/colors/rectangles/logo SHA-256).",
+      "tolerances": {
+        "ratioAbsolute": 1e-06,
+        "geometryPercentagePoints": 0.001,
+        "colorChannel": 0,
+        "logoSHA256": "exact"
+      },
+      "sourceVisual": "Actual LibreOffice source render inspected; see source-render.json. PowerPoint and exact font resolution unverified.",
+      "htmlVisual": "unverified; local-file browser access unavailable"
+    },
+    "unverified": [
+      "Visual equality, font metrics, paragraph wrapping, shadow/effects and inherited styles."
+    ]
+  }
+}
