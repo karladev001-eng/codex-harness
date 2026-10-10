@@ -2,7 +2,7 @@
 
 ## 現行の読み方
 
-この文書は日付・版ごとの検証証拠です。古い件数、4スキル表記、非公開GitHub Releaseの提案、当時の未実装範囲はその時点の記録として保持します。現在の使い方は[文書索引](docs/README.md)、ローカル配布は[保守ガイド](docs/maintainers/releasing.md)へ。現行packageは0.4.2で、5スキルとKnowledge/Chrome/Raycastの実装があります。実装の存在、隔離試験、実機での登録、長期効果をそれぞれ区別してください。
+この文書は日付・版ごとの検証証拠です。古い件数、4スキル表記、非公開GitHub Releaseの提案、当時の未実装範囲はその時点の記録として保持します。現在の使い方は[文書索引](docs/README.md)、ローカル配布は[保守ガイド](docs/maintainers/releasing.md)へ。配布対象のnpm package 0.4.2には5スキルとKnowledge/Chrome/Raycastの実装があります。このcheckoutでは6つ目のcodex-slide-planを追加していますが、まだ配布していません。実装の存在、隔離試験、実機での登録、長期効果をそれぞれ区別してください。
 
 Knowledgeの隔離試験は[運用ガイドの検証範囲](docs/guides/knowledge-operations.md#検証範囲)、検索の契約は[ADR 0006](docs/adr/0006-knowledge-retrieval.md)、個別の現機確認はsource checkoutの `docs/harness/tasks/activate-knowledge-memory.md` と `docs/harness/tasks/raycast-knowledge.md` に記録されています。ここからWindows/Linux・別PC・全サービスの網羅取得・長期効果を確認済みとは扱いません。最新の公開準備の検証は実行後に追記し、過去の結果を現在版の再実行として扱わないでください。
 
@@ -16,7 +16,7 @@ Knowledgeの隔離試験は[運用ガイドの検証範囲](docs/guides/knowledg
 - 初見の制作試行ではbriefとCSVから4ページの案A/Bを作成し、r1からr3まで改訂しました。最新正本のvalidate/buildが成功し、A/Bとも警告0。独立の試行記録には実在しない聴衆評価やブラウザ操作を成功扱いしていません。
 - 構造の照合と原本fixture PNGの目視確認は完了。HTMLのブラウザ表示・狭幅・操作・保存/読込は未検証です。実際の利用者用マスターは提供されていないため、独自fixtureのみを使いました。
 
-これらは隔離した一時ディレクトリ・homeでのテストです。実ホームへの導入、npm公開、pushは行っていません。ブラウザでの検証は、file URLの拒否後に別経路で迂回していません。
+これらは隔離した一時ディレクトリ・homeでのテストです。実ホームへの導入、npm公開、pushは行っていません。ブラウザの描画・実操作結果は今回の受入証拠に含めていません。
 
 ## 2026-10-08: 0.4.2 非公開npm配布の準備と隔離registry検証
 
