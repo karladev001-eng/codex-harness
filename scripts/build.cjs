@@ -9,7 +9,7 @@ if (compiled.status !== 0) process.exit(compiled.status || 1);
 for (const name of ['SKILL.md', 'assets', 'references']) {
   fs.cpSync(path.join(root, 'plugins/codex-harness/skills/harness', name), path.join(target, name), { recursive: true });
 }
-for (const name of ['create-rulebooks', 'create-subagent', 'create-harness', 'inspect-harness', 'codex-html-plan']) {
+for (const name of ['create-rulebooks', 'create-subagent', 'create-harness', 'inspect-harness', 'codex-html-plan', 'codex-slide-plan']) {
   fs.cpSync(path.join(root, 'authoring-skills', name), path.join(target, 'authoring-skills', name), { recursive: true });
 }
 // The installed skill owns a complete CLI; no checkout-relative dependency.

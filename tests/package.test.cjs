@@ -34,7 +34,17 @@ test('packed release runs through actual npx outside repo without compiler/netwo
   for (const file of ['SKILL.md', 'UPSTREAM.md', 'LICENSE', 'runtime/pack.mjs', 'runtime/htmlplan.js', 'runtime/htmlplan.css', 'references/blocks.md', 'references/workflow.md', 'examples/task-board.src.html', 'examples/task-board.plan.html', 'examples/records/ADR-07.md', 'examples/records/TASK-42.md', 'examples/records/EXP-03.md', 'examples/records/index.md']) {
     assert.ok(files.includes('dist/skill/authoring-skills/codex-html-plan/' + file), file);
   }
-  assert.equal(files.some(file => /(?:node_modules|^src\/|\.py$)/.test(file)), false);
+  for (const file of ['SKILL.md', 'agents/openai.yaml', 'references/schema.md', 'references/workflow.md', 'references/masters.md', 'templates/catalog.json', 'scripts/pack.mjs', 'scripts/review.js', 'scripts/style.css', 'scripts/inspect-master.py', 'scripts/make-fixtures.py', 'examples/deck.json']) {
+    assert.ok(files.includes('dist/skill/authoring-skills/codex-slide-plan/' + file), file);
+  }
+  const allowedPython = new Set([
+    'authoring-skills/codex-slide-plan/scripts/inspect-master.py', 'authoring-skills/codex-slide-plan/scripts/make-fixtures.py',
+    'dist/skill/authoring-skills/codex-slide-plan/scripts/inspect-master.py', 'dist/skill/authoring-skills/codex-slide-plan/scripts/make-fixtures.py',
+    'dist/plugins/codex-harness/skills/harness/authoring-skills/codex-slide-plan/scripts/inspect-master.py',
+    'dist/plugins/codex-harness/skills/harness/authoring-skills/codex-slide-plan/scripts/make-fixtures.py',
+  ]);
+  for (const file of allowedPython) assert.ok(files.includes(file), file);
+  assert.equal(files.some(file => /(?:node_modules|^src\/)/.test(file) || (/\.py$/.test(file) && !allowedPython.has(file))), false);
   for (const file of ['README.md', 'CONTRIBUTING.md', 'THIRD_PARTY_NOTICES.md', 'docs/README.md', 'docs/guides/installation.md', 'docs/guides/knowledge-operations.md', 'docs/maintainers/releasing.md', 'knowledge/extension/README.md', 'integrations/raycast-knowledge/README.md', 'integrations/raycast-knowledge/package.json', 'authoring-skills/codex-html-plan/LICENSE', 'plugins/codex-harness/skills/harness/references/roles.md']) assert.ok(files.includes(file), file);
   assert.equal(files.some(file => /^(?:docs\/harness|benchmarks|integrations\/raycast-knowledge\/(?:src|node_modules))\//.test(file)), false);
   const unpacked = path.join(f.base, 'unpacked'); fs.mkdirSync(unpacked);
@@ -71,10 +81,13 @@ test('packed release runs through actual npx outside repo without compiler/netwo
   assert.match(fs.readFileSync(path.join(installed.target, 'SKILL.md'), 'utf8'), /references\/creative-loop\.md/);
   assert.equal(fs.statSync(path.join(installed.target, 'assets/creative-preferences.md')).isFile(), true);
   assert.equal(packaged('install', '--home', f.home).status, 'unchanged');
-  const skillResult = packaged('authoring', 'install', '--project', f.project); assert.equal(skillResult.skills.length, 5);
+  const skillResult = packaged('authoring', 'install', '--project', f.project); assert.equal(skillResult.skills.length, 6);
   for (const file of ['LICENSE', 'runtime/pack.mjs', 'examples/task-board.plan.html']) assert.equal(fs.existsSync(path.join(f.project, '.agents/skills/codex-html-plan', file)), true, file);
   assert.equal(fs.existsSync(path.join(f.project, 'AGENTS.md')), false); assert.equal(fs.existsSync(path.join(f.project, '.git')), false);
   assert.equal(packaged('authoring', 'uninstall', '--project', f.project).status, 'uninstalled');
+  const slidesOnly = packaged('authoring', 'install', '--project', f.project, '--skill', 'codex-slide-plan'); assert.deepEqual(slidesOnly.skills, ['codex-slide-plan']);
+  for (const file of ['SKILL.md', 'scripts/pack.mjs', 'examples/deck.json']) assert.equal(fs.existsSync(path.join(f.project, '.agents/skills/codex-slide-plan', file)), true, file);
+  assert.equal(packaged('authoring', 'uninstall', '--project', f.project, '--skill', 'codex-slide-plan').status, 'uninstalled');
   const htmlOnly = packaged('authoring', 'install', '--project', f.project, '--skill', 'codex-html-plan'); assert.deepEqual(htmlOnly.skills, ['codex-html-plan']);
   assert.equal(fs.existsSync(path.join(f.project, '.agents/skills/create-harness')), false);
   assert.equal(packaged('authoring', 'uninstall', '--project', f.project, '--skill', 'codex-html-plan').status, 'uninstalled');
@@ -83,6 +96,12 @@ test('packed release runs through actual npx outside repo without compiler/netwo
   const oldResult = packaged('authoring', 'install', '--project', oldProject, ...oldSkills.flatMap(name => ['--skill', name])); assert.deepEqual(oldResult.skills, oldSkills);
   assert.equal(fs.existsSync(path.join(oldProject, '.agents/skills/codex-html-plan')), false);
   assert.equal(packaged('authoring', 'uninstall', '--project', oldProject).status, 'uninstalled');
+  const previousFiveProject = path.join(f.base, 'previous five skills'); fs.mkdirSync(previousFiveProject);
+  const previousFive = [...oldSkills, 'codex-html-plan'];
+  const previousFiveInstall = packaged('authoring', 'install', '--project', previousFiveProject, ...previousFive.flatMap(name => ['--skill', name])); assert.deepEqual(previousFiveInstall.skills, previousFive);
+  const upgradedSkills = packaged('authoring', 'install', '--project', previousFiveProject); assert.deepEqual(upgradedSkills.skills, ['codex-slide-plan']);
+  assert.equal(fs.existsSync(path.join(previousFiveProject, '.agents/skills/codex-html-plan/SKILL.md')), true);
+  assert.equal(packaged('authoring', 'uninstall', '--project', previousFiveProject).status, 'uninstalled');
   assert.equal(packaged('uninstall', '--home', f.home).status, 'uninstalled');
   require('./legacy-js.cjs').installLegacyJs(f);
   assert.equal(packaged('install', '--home', f.home).status, 'installed');
