@@ -1,0 +1,608 @@
+{
+  "schemaVersion": 1,
+  "input": {
+    "name": "wide-16x9.pptx",
+    "sha256": "6ac608487d60f4585fc28fb5fa8ef90499f3bf83dfa58a3b78077e95909cf323",
+    "bytes": 5230,
+    "format": "pptx",
+    "originalChanged": false
+  },
+  "limits": {
+    "archiveBytes": 67108864,
+    "entries": 2048,
+    "partBytes": 8388608,
+    "totalBytes": 67108864,
+    "compressionRatio": 1000,
+    "xmlNodes": 100000,
+    "xmlDepth": 128
+  },
+  "page": {
+    "widthEmu": 9144000,
+    "heightEmu": 5143500,
+    "ratio": [
+      16,
+      9
+    ],
+    "catalogRatio": [
+      16,
+      9
+    ],
+    "type": null
+  },
+  "masters": [
+    {
+      "part": "ppt/slideMasters/slideMaster1.xml",
+      "kind": "sldMaster",
+      "name": "Fixture master",
+      "attributes": {},
+      "background": {
+        "kind": "srgbClr",
+        "value": "f8fafc",
+        "transforms": [],
+        "hex": "#f8fafc"
+      },
+      "backgroundReference": null,
+      "colorMap": {
+        "accent1": "accent1",
+        "accent2": "accent2",
+        "accent3": "accent3",
+        "accent4": "accent4",
+        "accent5": "accent5",
+        "accent6": "accent6",
+        "bg1": "lt1",
+        "bg2": "lt2",
+        "folHlink": "folHlink",
+        "hlink": "hlink",
+        "tx1": "dk1",
+        "tx2": "dk2"
+      },
+      "relationships": [
+        {
+          "id": "rId1",
+          "type": "slideLayout",
+          "target": "../slideLayouts/slideLayout1.xml",
+          "part": "ppt/slideLayouts/slideLayout1.xml",
+          "external": false
+        },
+        {
+          "id": "rId2",
+          "type": "theme",
+          "target": "../theme/theme1.xml",
+          "part": "ppt/theme/theme1.xml",
+          "external": false
+        },
+        {
+          "id": "rId3",
+          "type": "image",
+          "target": "../media/logo.png",
+          "part": "ppt/media/logo.png",
+          "external": false
+        }
+      ],
+      "shapes": [
+        {
+          "kind": "sp",
+          "id": "2",
+          "name": "Master title",
+          "placeholder": {
+            "type": "title",
+            "idx": "2"
+          },
+          "geometry": {
+            "emu": {
+              "x": 731520,
+              "y": 514350,
+              "width": 6949440,
+              "height": 771525
+            },
+            "percent": {
+              "x": 8.0,
+              "y": 10.0,
+              "width": 76.0,
+              "height": 15.0
+            },
+            "rotation": 0.0,
+            "flipH": false,
+            "flipV": false
+          },
+          "fill": null,
+          "text": "Click to edit master title",
+          "textBody": {
+            "wrap": "square",
+            "lIns": "0",
+            "rIns": "0",
+            "tIns": "0",
+            "bIns": "0"
+          },
+          "textStyles": [
+            {
+              "attributes": {
+                "lang": "en-US",
+                "sz": "3200"
+              },
+              "color": {
+                "kind": "srgbClr",
+                "value": "182c46",
+                "transforms": [],
+                "hex": "#182c46"
+              },
+              "fonts": [
+                {
+                  "script": "latin",
+                  "typeface": "Arial"
+                }
+              ]
+            },
+            {
+              "attributes": {
+                "lang": "en-US",
+                "sz": "3200"
+              },
+              "color": null,
+              "fonts": []
+            }
+          ]
+        },
+        {
+          "kind": "sp",
+          "id": "3",
+          "name": "Master body",
+          "placeholder": {
+            "type": "body",
+            "idx": "3"
+          },
+          "geometry": {
+            "emu": {
+              "x": 731520,
+              "y": 1800225,
+              "width": 6949440,
+              "height": 1954530
+            },
+            "percent": {
+              "x": 8.0,
+              "y": 35.0,
+              "width": 76.0,
+              "height": 38.0
+            },
+            "rotation": 0.0,
+            "flipH": false,
+            "flipV": false
+          },
+          "fill": null,
+          "text": "Click to edit master body",
+          "textBody": {
+            "wrap": "square",
+            "lIns": "0",
+            "rIns": "0",
+            "tIns": "0",
+            "bIns": "0"
+          },
+          "textStyles": [
+            {
+              "attributes": {
+                "lang": "en-US",
+                "sz": "2200"
+              },
+              "color": {
+                "kind": "srgbClr",
+                "value": "182c46",
+                "transforms": [],
+                "hex": "#182c46"
+              },
+              "fonts": [
+                {
+                  "script": "latin",
+                  "typeface": "Arial"
+                }
+              ]
+            },
+            {
+              "attributes": {
+                "lang": "en-US",
+                "sz": "2200"
+              },
+              "color": null,
+              "fonts": []
+            }
+          ]
+        },
+        {
+          "kind": "pic",
+          "id": "4",
+          "name": "Synthetic fixture logo",
+          "placeholder": null,
+          "geometry": {
+            "emu": {
+              "x": 8046720,
+              "y": 411480,
+              "width": 457200,
+              "height": 457200
+            },
+            "percent": {
+              "x": 88.0,
+              "y": 8.0,
+              "width": 5.0,
+              "height": 8.888889
+            },
+            "rotation": 0.0,
+            "flipH": false,
+            "flipV": false
+          },
+          "fill": null,
+          "text": "",
+          "textBody": null,
+          "textStyles": [],
+          "image": {
+            "id": "rId3",
+            "type": "image",
+            "target": "../media/logo.png",
+            "part": "ppt/media/logo.png",
+            "external": false,
+            "sha256": "ca56104bdc5bbe4e28f776cc27dbe7d141014ffbb3a584a813bdf2be42d13fae",
+            "bytes": 112
+          },
+          "crop": null,
+          "logoCandidate": true,
+          "logoConfirmed": false
+        }
+      ],
+      "textStyles": "<ns0:txStyles xmlns:ns0=\"http://schemas.openxmlformats.org/presentationml/2006/main\"><ns0:titleStyle /><ns0:bodyStyle /><ns0:otherStyle /></ns0:txStyles>"
+    }
+  ],
+  "layouts": [
+    {
+      "part": "ppt/slideLayouts/slideLayout1.xml",
+      "kind": "sldLayout",
+      "name": "Title and body",
+      "attributes": {
+        "type": "obj",
+        "preserve": "1"
+      },
+      "background": null,
+      "backgroundReference": null,
+      "colorMap": null,
+      "relationships": [
+        {
+          "id": "rId1",
+          "type": "slideMaster",
+          "target": "../slideMasters/slideMaster1.xml",
+          "part": "ppt/slideMasters/slideMaster1.xml",
+          "external": false
+        }
+      ],
+      "shapes": [],
+      "textStyles": null
+    }
+  ],
+  "themes": [
+    {
+      "part": "ppt/theme/theme1.xml",
+      "name": "Synthetic fixture",
+      "colors": {
+        "dk1": {
+          "kind": "srgbClr",
+          "value": "182c46",
+          "transforms": [],
+          "hex": "#182c46"
+        },
+        "lt1": {
+          "kind": "srgbClr",
+          "value": "f8fafc",
+          "transforms": [],
+          "hex": "#f8fafc"
+        },
+        "dk2": {
+          "kind": "srgbClr",
+          "value": "54647a",
+          "transforms": [],
+          "hex": "#54647a"
+        },
+        "lt2": {
+          "kind": "srgbClr",
+          "value": "FFFFFF",
+          "transforms": [],
+          "hex": "#ffffff"
+        },
+        "accent1": {
+          "kind": "srgbClr",
+          "value": "c54163",
+          "transforms": [],
+          "hex": "#c54163"
+        },
+        "accent2": {
+          "kind": "srgbClr",
+          "value": "365C85",
+          "transforms": [],
+          "hex": "#365c85"
+        },
+        "accent3": {
+          "kind": "srgbClr",
+          "value": "39856C",
+          "transforms": [],
+          "hex": "#39856c"
+        },
+        "accent4": {
+          "kind": "srgbClr",
+          "value": "8C6DB1",
+          "transforms": [],
+          "hex": "#8c6db1"
+        },
+        "accent5": {
+          "kind": "srgbClr",
+          "value": "B7862A",
+          "transforms": [],
+          "hex": "#b7862a"
+        },
+        "accent6": {
+          "kind": "srgbClr",
+          "value": "7A8B9D",
+          "transforms": [],
+          "hex": "#7a8b9d"
+        },
+        "hlink": {
+          "kind": "srgbClr",
+          "value": "145FCC",
+          "transforms": [],
+          "hex": "#145fcc"
+        },
+        "folHlink": {
+          "kind": "srgbClr",
+          "value": "743BA0",
+          "transforms": [],
+          "hex": "#743ba0"
+        }
+      },
+      "fonts": {
+        "majorFont": [
+          {
+            "script": "latin",
+            "typeface": "Arial"
+          },
+          {
+            "script": "ea",
+            "typeface": ""
+          },
+          {
+            "script": "cs",
+            "typeface": ""
+          }
+        ],
+        "minorFont": [
+          {
+            "script": "latin",
+            "typeface": "Arial"
+          },
+          {
+            "script": "ea",
+            "typeface": ""
+          },
+          {
+            "script": "cs",
+            "typeface": ""
+          }
+        ]
+      },
+      "unresolved": [
+        "Effect/fill style matrix is recorded only as source XML; it is not mapped into CSS"
+      ],
+      "formatScheme": "<ns0:fmtScheme xmlns:ns0=\"http://schemas.openxmlformats.org/drawingml/2006/main\" name=\"Fixture\"><ns0:fillStyleLst><ns0:solidFill><ns0:schemeClr val=\"phClr\" /></ns0:solidFill></ns0:fillStyleLst><ns0:lnStyleLst><ns0:ln w=\"6350\"><ns0:solidFill><ns0:schemeClr val=\"phClr\" /></ns0:solidFill><ns0:prstDash val=\"solid\" /></ns0:ln></ns0:lnStyleLst><ns0:effectStyleLst><ns0:effectStyle><ns0:effectLst /></ns0:effectStyle></ns0:effectStyleLst><ns0:bgFillStyleLst><ns0:solidFill><ns0:schemeClr val=\"phClr\" /></ns0:solidFill></ns0:bgFillStyleLst></ns0:fmtScheme>"
+    }
+  ],
+  "slides": [
+    {
+      "part": "ppt/slides/slide1.xml",
+      "kind": "sld",
+      "name": null,
+      "attributes": {},
+      "background": null,
+      "backgroundReference": null,
+      "colorMap": null,
+      "relationships": [
+        {
+          "id": "rId1",
+          "type": "slideLayout",
+          "target": "../slideLayouts/slideLayout1.xml",
+          "part": "ppt/slideLayouts/slideLayout1.xml",
+          "external": false
+        }
+      ],
+      "shapes": [
+        {
+          "kind": "sp",
+          "id": "2",
+          "name": "Slide title",
+          "placeholder": {
+            "type": "title",
+            "idx": "2"
+          },
+          "geometry": {
+            "emu": {
+              "x": 731520,
+              "y": 514350,
+              "width": 6949440,
+              "height": 771525
+            },
+            "percent": {
+              "x": 8.0,
+              "y": 10.0,
+              "width": 76.0,
+              "height": 15.0
+            },
+            "rotation": 0.0,
+            "flipH": false,
+            "flipV": false
+          },
+          "fill": null,
+          "text": "Master reference fixture",
+          "textBody": {
+            "wrap": "square",
+            "lIns": "0",
+            "rIns": "0",
+            "tIns": "0",
+            "bIns": "0"
+          },
+          "textStyles": [
+            {
+              "attributes": {
+                "lang": "en-US",
+                "sz": "3200"
+              },
+              "color": {
+                "kind": "srgbClr",
+                "value": "182c46",
+                "transforms": [],
+                "hex": "#182c46"
+              },
+              "fonts": [
+                {
+                  "script": "latin",
+                  "typeface": "Arial"
+                }
+              ]
+            },
+            {
+              "attributes": {
+                "lang": "en-US",
+                "sz": "3200"
+              },
+              "color": null,
+              "fonts": []
+            }
+          ]
+        },
+        {
+          "kind": "sp",
+          "id": "3",
+          "name": "Slide body",
+          "placeholder": {
+            "type": "body",
+            "idx": "3"
+          },
+          "geometry": {
+            "emu": {
+              "x": 731520,
+              "y": 1800225,
+              "width": 6949440,
+              "height": 1954530
+            },
+            "percent": {
+              "x": 8.0,
+              "y": 35.0,
+              "width": 76.0,
+              "height": 38.0
+            },
+            "rotation": 0.0,
+            "flipH": false,
+            "flipV": false
+          },
+          "fill": null,
+          "text": "A synthetic fixture for geometry and color checks.\nCompare the source master with the HTML design.",
+          "textBody": {
+            "wrap": "square",
+            "lIns": "0",
+            "rIns": "0",
+            "tIns": "0",
+            "bIns": "0"
+          },
+          "textStyles": [
+            {
+              "attributes": {
+                "lang": "en-US",
+                "sz": "2200"
+              },
+              "color": {
+                "kind": "srgbClr",
+                "value": "182c46",
+                "transforms": [],
+                "hex": "#182c46"
+              },
+              "fonts": [
+                {
+                  "script": "latin",
+                  "typeface": "Arial"
+                }
+              ]
+            },
+            {
+              "attributes": {
+                "lang": "en-US",
+                "sz": "2200"
+              },
+              "color": null,
+              "fonts": []
+            }
+          ]
+        }
+      ],
+      "textStyles": null
+    }
+  ],
+  "renderStatus": {
+    "status": "unverified",
+    "reason": "This inspector does not render PPTX/POTX or verify actual slide appearance."
+  },
+  "mapping": {
+    "status": "proposed-not-applied",
+    "themeSuggestion": {
+      "id": "master-reference",
+      "name": "Synthetic fixture",
+      "background": "#f8fafc",
+      "ink": "#182c46",
+      "accent": "#c54163",
+      "muted": "#54647a",
+      "font": "Arial, sans-serif",
+      "ratio": [
+        16,
+        9
+      ],
+      "padding": 8.0,
+      "footer": ""
+    },
+    "masterPart": "ppt/slideMasters/slideMaster1.xml",
+    "themePart": "ppt/theme/theme1.xml",
+    "logoCandidates": [
+      {
+        "part": "ppt/slideMasters/slideMaster1.xml",
+        "shapeId": "4",
+        "name": "Synthetic fixture logo",
+        "image": {
+          "id": "rId3",
+          "type": "image",
+          "target": "../media/logo.png",
+          "part": "ppt/media/logo.png",
+          "external": false,
+          "sha256": "ca56104bdc5bbe4e28f776cc27dbe7d141014ffbb3a584a813bdf2be42d13fae",
+          "bytes": 112
+        },
+        "geometry": {
+          "emu": {
+            "x": 8046720,
+            "y": 411480,
+            "width": 457200,
+            "height": 457200
+          },
+          "percent": {
+            "x": 88.0,
+            "y": 8.0,
+            "width": 5.0,
+            "height": 8.888889
+          },
+          "rotation": 0.0,
+          "flipH": false,
+          "flipV": false
+        },
+        "confirmed": false
+      }
+    ],
+    "requiresConfirmation": [
+      "Select master/layout and confirm inherited placeholder geometry",
+      "Confirm logo identity and usage permission",
+      "Confirm fonts/substitutions, margins, colors and visual comparison"
+    ]
+  },
+  "warnings": [
+    "Structural inspection only. Source slide rendering and font availability remain unverified.",
+    "No native PowerPoint master structure, animation or round-trip editing is preserved.",
+    "Geometry is local to each shape. Placeholder inheritance, group transforms, effects and color transforms need manual review."
+  ]
+}

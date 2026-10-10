@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "input": {
+    "path": "references/standard-4x3.pptx",
+    "sha256": "a9e6062f61eafe254f19a55da9d9bbd968386402dccfba84745befee7d01d798"
+  },
+  "render": {
+    "status": "actual-source-rendered-and-inspected",
+    "renderer": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+    "rasterizer": "Poppler pdftoppm, 100 dpi",
+    "commands": [
+      "soffice --headless --convert-to pdf --outdir NEW_TEMP_DIRECTORY references/standard-4x3.pptx",
+      "pdftoppm -png -r 100 -singlefile NEW_TEMP_DIRECTORY/standard-4x3.pdf NEW_TEMP_DIRECTORY/source-render"
+    ],
+    "intermediatePdfSHA256": "a2c88dc8818af3dea6b9810600f8fdda23bf388e358d3cc572cf8b5f56d92fbe",
+    "image": "references/source-render.png",
+    "imageSHA256": "19c29ce9dc19c64f10118d9c6cd16fc683a25d566f70d5444e5612a66b3dfc23",
+    "pixelDimensions": [
+      1000,
+      750
+    ],
+    "inspected": "Title, body, light background and synthetic two-color mark are visible at the expected locations.",
+    "warnings": [
+      "Fontconfig cache warnings occurred; exact Arial resolution unverified.",
+      "LibreOffice rendering is not PowerPoint rendering."
+    ]
+  },
+  "htmlComparison": {
+    "structural": "Passed actual pack output tests for ratio, theme colors, rectangles and logo digest.",
+    "visual": "unverified; local-file browser access unavailable",
+    "tolerances": {
+      "ratioAbsolute": 1e-06,
+      "geometryPercentagePoints": 0.001,
+      "colorChannel": 0,
+      "logoSHA256": "exact"
+    },
+    "intentionalDifferences": [
+      "HTML adds a short summary and a visible synthetic-source footer.",
+      "Native paragraph layout and font metrics are not preserved."
+    ]
+  }
+}
