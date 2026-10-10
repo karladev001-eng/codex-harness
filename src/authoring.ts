@@ -14,9 +14,12 @@ const REQUIRED: Record<string, string[]> = {
     'examples/records/ADR-07.md', 'examples/records/TASK-42.md', 'examples/records/EXP-03.md', 'examples/records/index.md',
   ],
   'codex-slide-plan': [
-    'SKILL.md', 'agents/openai.yaml', 'references/schema.md', 'references/workflow.md', 'references/masters.md',
+    'SKILL.md', 'agents/openai.yaml', 'references/schema.md', 'references/workflow.md', 'references/quality-review.md', 'references/masters.md',
     'scripts/legacy-v1.json', 'scripts/pack.mjs', 'scripts/review.js', 'scripts/style.css', 'scripts/inspect-master.py',
-    'scripts/make-fixtures.py', 'examples/deck.json',
+    'scripts/make-fixtures.py', 'examples/deck.json', 'examples/deck-revised.json',
+    'examples/visual-first/generate-example.mjs', 'examples/visual-first/references/r2-deck.json',
+    'examples/visual-first/scripts/aggregate.mjs', 'examples/visual-first/data/brief.md',
+    'examples/visual-first/data/measurements.csv', 'examples/visual-first/assets/comparison.svg',
   ],
 };
 function releaseAuthoringSource(): string | null {

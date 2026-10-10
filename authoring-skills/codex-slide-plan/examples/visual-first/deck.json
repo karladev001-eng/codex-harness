@@ -339,7 +339,7 @@
         "revision": "r3",
         "variantId": "A",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "pending",
@@ -372,7 +372,7 @@
         "revision": "r3",
         "variantId": "A",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "pending",
@@ -405,7 +405,7 @@
         "revision": "r3",
         "variantId": "A",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "pending",
@@ -438,7 +438,7 @@
         "revision": "r3",
         "variantId": "A",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "pending",
@@ -471,11 +471,11 @@
         "revision": "r3",
         "variantId": "A",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "verified",
-      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewer": "Codex integration worker semantic re-review",
       "reviewMode": "self",
       "checkedAt": "2026-10-10",
       "verification": "semantic",
@@ -483,7 +483,7 @@
         "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
         "operatingSystem": "macOS",
         "runtime": "Node.js 26.10.0",
-        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+        "finalCheck": "Regenerated r3 after renderer integration; reread A/B story.md and script.md (identical wording), deck.json, brief.md, measurements.csv, summary.json, and comparison.svg. One-message-per-page, flow, virtual-value limits, and 40/25 means, 15-second difference, 37.5% reduction were rechecked. Content and artifact hashes match the reviewed version; renderer hash was updated after this semantic re-review."
       },
       "evidence": [],
       "checks": [
@@ -510,11 +510,11 @@
         "revision": "r3",
         "variantId": "A",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "verified",
-      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewer": "Codex integration worker semantic re-review",
       "reviewMode": "self",
       "checkedAt": "2026-10-10",
       "verification": "semantic",
@@ -522,7 +522,7 @@
         "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
         "operatingSystem": "macOS",
         "runtime": "Node.js 26.10.0",
-        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+        "finalCheck": "Regenerated r3 after renderer integration; reread A/B story.md and script.md (identical wording), deck.json, brief.md, measurements.csv, summary.json, and comparison.svg. One-message-per-page, flow, virtual-value limits, and 40/25 means, 15-second difference, 37.5% reduction were rechecked. Content and artifact hashes match the reviewed version; renderer hash was updated after this semantic re-review."
       },
       "evidence": [],
       "checks": [
@@ -549,11 +549,11 @@
         "revision": "r3",
         "variantId": "A",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "verified",
-      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewer": "Codex integration worker semantic re-review",
       "reviewMode": "self",
       "checkedAt": "2026-10-10",
       "verification": "semantic",
@@ -561,7 +561,7 @@
         "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
         "operatingSystem": "macOS",
         "runtime": "Node.js 26.10.0",
-        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+        "finalCheck": "Regenerated r3 after renderer integration; reread A/B story.md and script.md (identical wording), deck.json, brief.md, measurements.csv, summary.json, and comparison.svg. One-message-per-page, flow, virtual-value limits, and 40/25 means, 15-second difference, 37.5% reduction were rechecked. Content and artifact hashes match the reviewed version; renderer hash was updated after this semantic re-review."
       },
       "evidence": [],
       "checks": [
@@ -588,11 +588,11 @@
         "revision": "r3",
         "variantId": "A",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "verified",
-      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewer": "Codex integration worker semantic re-review",
       "reviewMode": "self",
       "checkedAt": "2026-10-10",
       "verification": "semantic",
@@ -600,7 +600,7 @@
         "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
         "operatingSystem": "macOS",
         "runtime": "Node.js 26.10.0",
-        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+        "finalCheck": "Regenerated r3 after renderer integration; reread A/B story.md and script.md (identical wording), deck.json, brief.md, measurements.csv, summary.json, and comparison.svg. One-message-per-page, flow, virtual-value limits, and 40/25 means, 15-second difference, 37.5% reduction were rechecked. Content and artifact hashes match the reviewed version; renderer hash was updated after this semantic re-review."
       },
       "evidence": [],
       "checks": [
@@ -626,11 +626,11 @@
         "revision": "r3",
         "variantId": "A",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "verified",
-      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewer": "Codex integration worker semantic re-review",
       "reviewMode": "self",
       "checkedAt": "2026-10-10",
       "verification": "semantic",
@@ -638,7 +638,7 @@
         "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
         "operatingSystem": "macOS",
         "runtime": "Node.js 26.10.0",
-        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+        "finalCheck": "Regenerated r3 after renderer integration; reread A/B story.md and script.md (identical wording), deck.json, brief.md, measurements.csv, summary.json, and comparison.svg. One-message-per-page, flow, virtual-value limits, and 40/25 means, 15-second difference, 37.5% reduction were rechecked. Content and artifact hashes match the reviewed version; renderer hash was updated after this semantic re-review."
       },
       "evidence": [],
       "checks": [
@@ -689,7 +689,7 @@
         "revision": "r3",
         "variantId": "B",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "pending",
@@ -722,7 +722,7 @@
         "revision": "r3",
         "variantId": "B",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "pending",
@@ -755,7 +755,7 @@
         "revision": "r3",
         "variantId": "B",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "pending",
@@ -788,7 +788,7 @@
         "revision": "r3",
         "variantId": "B",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "pending",
@@ -821,11 +821,11 @@
         "revision": "r3",
         "variantId": "B",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "verified",
-      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewer": "Codex integration worker semantic re-review",
       "reviewMode": "self",
       "checkedAt": "2026-10-10",
       "verification": "semantic",
@@ -833,7 +833,7 @@
         "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
         "operatingSystem": "macOS",
         "runtime": "Node.js 26.10.0",
-        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+        "finalCheck": "Regenerated r3 after renderer integration; reread A/B story.md and script.md (identical wording), deck.json, brief.md, measurements.csv, summary.json, and comparison.svg. One-message-per-page, flow, virtual-value limits, and 40/25 means, 15-second difference, 37.5% reduction were rechecked. Content and artifact hashes match the reviewed version; renderer hash was updated after this semantic re-review."
       },
       "evidence": [],
       "checks": [
@@ -860,11 +860,11 @@
         "revision": "r3",
         "variantId": "B",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "verified",
-      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewer": "Codex integration worker semantic re-review",
       "reviewMode": "self",
       "checkedAt": "2026-10-10",
       "verification": "semantic",
@@ -872,7 +872,7 @@
         "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
         "operatingSystem": "macOS",
         "runtime": "Node.js 26.10.0",
-        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+        "finalCheck": "Regenerated r3 after renderer integration; reread A/B story.md and script.md (identical wording), deck.json, brief.md, measurements.csv, summary.json, and comparison.svg. One-message-per-page, flow, virtual-value limits, and 40/25 means, 15-second difference, 37.5% reduction were rechecked. Content and artifact hashes match the reviewed version; renderer hash was updated after this semantic re-review."
       },
       "evidence": [],
       "checks": [
@@ -899,11 +899,11 @@
         "revision": "r3",
         "variantId": "B",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "verified",
-      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewer": "Codex integration worker semantic re-review",
       "reviewMode": "self",
       "checkedAt": "2026-10-10",
       "verification": "semantic",
@@ -911,7 +911,7 @@
         "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
         "operatingSystem": "macOS",
         "runtime": "Node.js 26.10.0",
-        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+        "finalCheck": "Regenerated r3 after renderer integration; reread A/B story.md and script.md (identical wording), deck.json, brief.md, measurements.csv, summary.json, and comparison.svg. One-message-per-page, flow, virtual-value limits, and 40/25 means, 15-second difference, 37.5% reduction were rechecked. Content and artifact hashes match the reviewed version; renderer hash was updated after this semantic re-review."
       },
       "evidence": [],
       "checks": [
@@ -938,11 +938,11 @@
         "revision": "r3",
         "variantId": "B",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "verified",
-      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewer": "Codex integration worker semantic re-review",
       "reviewMode": "self",
       "checkedAt": "2026-10-10",
       "verification": "semantic",
@@ -950,7 +950,7 @@
         "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
         "operatingSystem": "macOS",
         "runtime": "Node.js 26.10.0",
-        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+        "finalCheck": "Regenerated r3 after renderer integration; reread A/B story.md and script.md (identical wording), deck.json, brief.md, measurements.csv, summary.json, and comparison.svg. One-message-per-page, flow, virtual-value limits, and 40/25 means, 15-second difference, 37.5% reduction were rechecked. Content and artifact hashes match the reviewed version; renderer hash was updated after this semantic re-review."
       },
       "evidence": [],
       "checks": [
@@ -976,11 +976,11 @@
         "revision": "r3",
         "variantId": "B",
         "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
-        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
         "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
       },
       "status": "verified",
-      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewer": "Codex integration worker semantic re-review",
       "reviewMode": "self",
       "checkedAt": "2026-10-10",
       "verification": "semantic",
@@ -988,7 +988,7 @@
         "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
         "operatingSystem": "macOS",
         "runtime": "Node.js 26.10.0",
-        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+        "finalCheck": "Regenerated r3 after renderer integration; reread A/B story.md and script.md (identical wording), deck.json, brief.md, measurements.csv, summary.json, and comparison.svg. One-message-per-page, flow, virtual-value limits, and 40/25 means, 15-second difference, 37.5% reduction were rechecked. Content and artifact hashes match the reviewed version; renderer hash was updated after this semantic re-review."
       },
       "evidence": [],
       "checks": [
