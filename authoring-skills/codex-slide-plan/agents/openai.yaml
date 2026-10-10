@@ -1,0 +1,4 @@
+interface:
+  display_name: "codex-slide-plan"
+  short_description: "話の流れ・発表原稿・出典を揃え、HTMLスライドと箇所指定レビューを作る"
+  default_prompt: "$codex-slide-plan を使い、目的と聞き手に合うスライド案・発表原稿・HTMLレビューを作成してください。"
