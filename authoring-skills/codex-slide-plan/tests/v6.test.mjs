@@ -156,3 +156,23 @@ test('complete CSS cascade preserves 1280px canvas geometry in review/standalone
         if (/(?:^|[ >])\.slide$/.test(rule[1].trim())) assert.fail(`Document CSS still constrains canvas: ${rule[1]}`);
     }
 });
+
+test('same-identity evidence failure blocks the scope even beside a valid verified record',async t=>{
+    const f=await fixture(t);await fs.mkdir(path.join(f.input,'evidence'));
+    const pathName='evidence/synthetic.png',bytes=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jX1cAAAAASUVORK5CYII=','base64');
+    await fs.writeFile(path.join(f.input,pathName),bytes);f.deck.files.push(pathName);
+    const good=record(f.deck,{},'visual');good.evidence=[{path:pathName,sha256:hash(bytes)}];f.deck.reviews=[good];good.identity=await identity(f);
+    const missing={...structuredClone(good),id:'visual-evidence-unavailable',evidence:[{path:'evidence/missing.png',sha256:hash(bytes)}]};
+    f.deck.files.push('evidence/missing.png');f.deck.reviews.push(missing);
+    await fs.writeFile(path.join(f.input,'deck.json'),JSON.stringify(f.deck));
+    const result=await build(path.join(f.input,'deck.json'),path.join(f.root,'output'));
+    const report=result.reviews[0],scope=report.scopes.find(s=>s.kind==='visual'&&s.slideId===good.slideId);
+    assert.equal(report.records[0].effectiveStatus,'verified');assert.equal(report.records[1].stale,false);
+    assert.equal(report.records[1].effectiveStatus,'pending');assert.match(report.records[1].evidenceIssues[0],/ENOENT/);
+    assert.equal(scope.status,'pending');
+    // Old renderer/content records remain outside current scope decisions.
+    missing.identity.rendererHash=hash('old renderer');
+    const stale=reviewReport(f.deck,'A',good.identity.rendererHash,{'visual-evidence-unavailable':['missing']},good.identity.artifactHash);
+    assert.equal(stale.records[1].stale,true);
+    assert.equal(stale.scopes.find(s=>s.kind==='visual'&&s.slideId===good.slideId).status,'verified');
+});

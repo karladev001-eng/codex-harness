@@ -117,7 +117,7 @@ export function reviewReport(deck, variantId, renderer, evidenceIssues = {}, art
     });
     const scopes = [...deck.slides.flatMap(s => ['visual','page'].map(kind => ({kind, slideId:s.id}))), {kind:'flow'}].map(scope => {
         const matching = records.filter(r => r.kind === scope.kind && r.slideId === scope.slideId);
-        const current = matching.filter(r => !r.stale && !r.evidenceIssues.length);
+        const current = matching.filter(r => !r.stale);
         const effectiveStatus = current.some(r => r.effectiveStatus === 'changes') ? 'changes' : current.length && current.every(r => r.effectiveStatus === 'verified') ? 'verified' : 'pending';
         return {...scope, status:effectiveStatus};
     });
