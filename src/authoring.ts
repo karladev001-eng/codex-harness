@@ -18,8 +18,10 @@ const REQUIRED: Record<string, string[]> = {
     'scripts/legacy-v1.json', 'scripts/pack.mjs', 'scripts/review.js', 'scripts/style.css', 'scripts/inspect-master.py',
     'scripts/make-fixtures.py', 'examples/deck.json', 'examples/deck-revised.json',
     'examples/visual-first/generate-example.mjs', 'examples/visual-first/references/r2-deck.json',
+    'examples/visual-first/references/revision-notes.md', 'examples/visual-first/references/semantic-review.json',
     'examples/visual-first/scripts/aggregate.mjs', 'examples/visual-first/data/brief.md',
-    'examples/visual-first/data/measurements.csv', 'examples/visual-first/assets/comparison.svg',
+    'examples/visual-first/data/measurements.csv', 'examples/visual-first/data/summary.json',
+    'examples/visual-first/assets/comparison.svg',
   ],
 };
 function releaseAuthoringSource(): string | null {
