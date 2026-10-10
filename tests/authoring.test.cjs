@@ -32,7 +32,7 @@ test('legacy four-skill selection and standalone skill installs remain supported
   assert.equal(authoring(args(f, 'uninstall', legacy)).status, 'uninstalled');
   const slides = authoring(args(f, 'install', ['codex-slide-plan'])); assert.deepEqual(slides.skills, ['codex-slide-plan']);
   const slidePlan = path.join(slides.root, 'codex-slide-plan');
-  for (const file of ['SKILL.md', 'references/schema.md', 'references/workflow.md', 'references/quality-review.md', 'references/masters.md', 'scripts/legacy-v1.json', 'scripts/pack.mjs', 'scripts/review.js', 'scripts/style.css', 'scripts/inspect-master.py', 'scripts/make-fixtures.py', 'examples/deck.json', 'examples/deck-revised.json', 'examples/visual-first/generate-example.mjs', 'examples/visual-first/references/r2-deck.json', 'examples/visual-first/scripts/aggregate.mjs', 'examples/visual-first/data/brief.md', 'examples/visual-first/data/measurements.csv', 'examples/visual-first/assets/comparison.svg'])
+  for (const file of ['SKILL.md', 'references/schema.md', 'references/workflow.md', 'references/quality-review.md', 'references/masters.md', 'scripts/legacy-v1.json', 'scripts/pack.mjs', 'scripts/review.js', 'scripts/style.css', 'scripts/inspect-master.py', 'scripts/make-fixtures.py', 'examples/deck.json', 'examples/deck-revised.json', 'examples/visual-first/generate-example.mjs', 'examples/visual-first/references/r2-deck.json', 'examples/visual-first/references/revision-notes.md', 'examples/visual-first/references/semantic-review.json', 'examples/visual-first/scripts/aggregate.mjs', 'examples/visual-first/data/brief.md', 'examples/visual-first/data/measurements.csv', 'examples/visual-first/data/summary.json', 'examples/visual-first/assets/comparison.svg'])
     assert.equal(fs.existsSync(path.join(slidePlan, file)), true, file);
   assert.equal(authoring(args(f, 'uninstall', ['codex-slide-plan'])).status, 'uninstalled');
 });
@@ -83,6 +83,24 @@ test('codex-slide-plan install rejects a missing required review guide before pr
   const before = tree(f.project);
   assert.throws(() => authoring(args(f, 'install', ['codex-slide-plan']), source), /incomplete: codex-slide-plan:.*references\/quality-review\.md/);
   assert.deepEqual(tree(f.project), before);
+});
+test('codex-slide-plan install rejects missing visual-first generator dependencies before project mutation', t => {
+  for (const missing of [
+    'references/revision-notes.md',
+    'references/semantic-review.json',
+    'data/summary.json',
+    'assets/comparison.svg',
+  ]) {
+    const f = fixture(t), source = path.join(f.base, 'release'); lib.copySkill(path.join(root, 'authoring-skills'), source);
+    fs.unlinkSync(path.join(source, 'codex-slide-plan/examples/visual-first', missing));
+    const before = tree(f.project);
+    assert.throws(() => authoring(args(f, 'install', ['codex-slide-plan']), source), error => {
+      assert.match(error.message, /incomplete: codex-slide-plan:/);
+      assert.ok(error.message.includes(`examples/visual-first/${missing}`), error.message);
+      return true;
+    });
+    assert.deepEqual(tree(f.project), before);
+  }
 });
 test('authoring explicit skills-dir supports personal path and subset', t => {
   const f = fixture(t), destination = path.join(f.home, '.codex/skills');
