@@ -22,7 +22,7 @@ Codexが手順を読み、利用可能なツールで担当の起動やレビュ
 | 使い方 | 向いている用途 | 導入と次に読む資料 |
 | --- | --- | --- |
 | ハーネス本体 | 仕様・分業・レビュー・改善を通して使う | [導入ガイド](docs/guides/installation.md)。個人用スキルとAGENTSの入口を登録 |
-| スキルのみ | 必要なルール、担当、計画を作成・確認する | [6スキルの一覧](authoring-skills/README.md)と[単独導入](authoring-skills/INSTALL.md)。本体を有効化しない |
+| スキルのみ | 必要なルール、担当、計画を作成・確認する | [既定5スキルと任意追加の一覧](authoring-skills/README.md)と[単独導入](authoring-skills/INSTALL.md)。本体を有効化しない |
 
 ### 関連ツール
 
@@ -43,9 +43,9 @@ Knowledgeの同期にはGit・GitHub CLIと設定済みの非公開リポジト�
 
 ## クイックスタート
 
-**GitHub Packagesの非公開npm配布を準備中です。まだregistryから入手できる状態とは案内していません。** 現行版は **0.4.2**。配布開始後は、各PCで[初回認証](docs/guides/installation.md#github-packagesの初回認証)を済ませ、ホームなどpackage.jsonのない場所から次の1コマンドを実行します。初回導入と更新は同じコマンドです。
+**2026-10-10にGitHub Packagesへ非公開npm版0.4.2を配布しました。** 現行配布版は **0.4.2**（既定5スキル）。各PCで[初回認証](docs/guides/installation.md#github-packagesの初回認証)を済ませ、ホームなどpackage.jsonのない場所から次の1コマンドを実行します。初回導入と更新は同じコマンドです。
 
-`codex-slide-plan` は現在のcheckoutに追加されています。既存の0.4.2 tarballには含まれず、次の配布版まではcheckoutから導入してください。
+`codex-slide-plan` は任意追加スキルです。本体install/updateと指定なしのauthoring操作では配置・更新・削除しません。現行0.4.2には含まれず、対応版の配布後に `--skill codex-slide-plan` で単独導入できます。現行の `@latest` から導入できるとは案内していません。[別PC向けの導入手順](authoring-skills/INSTALL.md#codex-slide-planを任意追加する対応版の配布後)を参照してください。
 
 ```sh
 npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@latest -- codex-harness install
@@ -53,7 +53,7 @@ npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@
 
 `latest`は配布者が指定する安定版です。取得したCLIが本体を `~/.agents/skills/codex-harness` にコピーし、`$CODEX_HOME/AGENTS.md`（未設定なら `~/.codex/AGENTS.md`）へ恒久runtimeの入口を追加します。既存の指示・設定・制作記憶を保持します。同版は `unchanged`、未編集の旧版は更新します。npm cacheを消した後も導入先runtimeを使えます。
 
-現在使える[ローカルtarball経路](docs/guides/installation.md#受け取ったローカルtarballから導入)も維持しています。認証・確認・版固定・解除・PowerShell・競合対応は[導入ガイド](docs/guides/installation.md)、clone/cdからの開発手順は[CONTRIBUTING](CONTRIBUTING.md)へ。ソースcheckoutの `private: true`・`UNLICENSED` を維持し、配布用stagingだけにGitHub Packages向けmanifestを生成します。実配布・一般公開・ライセンス変更はまだ行っていません。
+現在使える[ローカルtarball経路](docs/guides/installation.md#受け取ったローカルtarballから導入)も維持しています。認証・確認・版固定・解除・PowerShell・競合対応は[導入ガイド](docs/guides/installation.md)、clone/cdからの開発手順は[CONTRIBUTING](CONTRIBUTING.md)へ。ソースcheckoutの `private: true`・`UNLICENSED` を維持し、配布用stagingだけにGitHub Packages向けmanifestを生成します。非公開npm配布を行い、一般公開・ライセンス変更は行っていません。
 
 ## 最初の依頼
 
@@ -74,7 +74,7 @@ npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@
 | `create-harness` | 規則・担当・ワークフローを最小の索引でつなぐ |
 | `inspect-harness` | 既存の構成を読み取り専用で確認する |
 | `codex-html-plan` | 仕様・モック・未解決事項を単一HTMLで提示する |
-| `codex-slide-plan` | 話の流れ、発表原稿、出典とデザイン案をHTMLスライド・レビューにまとめる |
+| `codex-slide-plan`（任意追加） | 話の流れ、発表原稿、出典とデザイン案をHTMLスライド・レビューにまとめる |
 
 呼出し例と成果物は[スキル一覧](authoring-skills/README.md)を参照してください。
 

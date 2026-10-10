@@ -9,7 +9,7 @@ if (compiled.status !== 0) process.exit(compiled.status || 1);
 for (const name of ['SKILL.md', 'assets', 'references']) {
   fs.cpSync(path.join(root, 'plugins/codex-harness/skills/harness', name), path.join(target, name), { recursive: true });
 }
-for (const name of ['create-rulebooks', 'create-subagent', 'create-harness', 'inspect-harness', 'codex-html-plan', 'codex-slide-plan']) {
+for (const name of ['create-rulebooks', 'create-subagent', 'create-harness', 'inspect-harness', 'codex-html-plan']) {
   fs.cpSync(path.join(root, 'authoring-skills', name), path.join(target, 'authoring-skills', name), { recursive: true });
 }
 // The installed skill owns a complete CLI; no checkout-relative dependency.
@@ -32,6 +32,7 @@ function installedTarget(source) {
   if (destinations.has(source)) return destinations.get(source);
   const pluginSource = path.join(root, 'plugins/codex-harness/skills/harness');
   if (source.startsWith(pluginSource + path.sep)) return path.join(target, path.relative(pluginSource, source));
+  if (source.startsWith(path.join(root, 'authoring-skills/codex-slide-plan') + path.sep)) return path.join(documentation, 'authoring-skills/INSTALL.md');
   if (source.startsWith(path.join(root, 'authoring-skills') + path.sep)) return path.join(target, path.relative(root, source));
   return path.join(documentation, path.relative(root, source));
 }
@@ -40,6 +41,13 @@ for (const file of [...docFiles, 'knowledge/README.md']) {
   fs.mkdirSync(path.dirname(destination), { recursive: true });
   if (file.endsWith('.md')) fs.writeFileSync(destination, relocate(fs.readFileSync(source, 'utf8'), source, destination, installedTarget));
   else fs.copyFileSync(source, destination);
+}
+
+// References may link to reader guides; rebase those links before copying the plugin.
+const referenceSource = path.join(root, 'plugins/codex-harness/skills/harness/references');
+for (const source of walk(referenceSource).filter(file => file.endsWith('.md'))) {
+  const destination = path.join(target, 'references', path.relative(referenceSource, source));
+  fs.writeFileSync(destination, relocate(fs.readFileSync(source, 'utf8'), source, destination, installedTarget));
 }
 
 const plugin = path.join(root, 'dist/plugins/codex-harness');

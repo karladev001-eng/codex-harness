@@ -22,12 +22,6 @@ export const REQUIRED_SOURCE_FILES = [
   'authoring-skills/codex-html-plan/examples/task-board.src.html', 'authoring-skills/codex-html-plan/examples/task-board.plan.html',
   'authoring-skills/codex-html-plan/examples/records/ADR-07.md', 'authoring-skills/codex-html-plan/examples/records/TASK-42.md',
   'authoring-skills/codex-html-plan/examples/records/EXP-03.md', 'authoring-skills/codex-html-plan/examples/records/index.md',
-  'authoring-skills/codex-slide-plan/SKILL.md', 'authoring-skills/codex-slide-plan/agents/openai.yaml',
-  'authoring-skills/codex-slide-plan/references/schema.md', 'authoring-skills/codex-slide-plan/references/workflow.md',
-  'authoring-skills/codex-slide-plan/references/masters.md', 'authoring-skills/codex-slide-plan/templates/catalog.json',
-  'authoring-skills/codex-slide-plan/scripts/pack.mjs', 'authoring-skills/codex-slide-plan/scripts/review.js',
-  'authoring-skills/codex-slide-plan/scripts/style.css', 'authoring-skills/codex-slide-plan/scripts/inspect-master.py',
-  'authoring-skills/codex-slide-plan/scripts/make-fixtures.py', 'authoring-skills/codex-slide-plan/examples/deck.json',
 ];
 export interface InstallArgs { home?: string; skills_dir?: string }
 export function bootstrap(target: string): string {
@@ -89,7 +83,7 @@ export function install(args: InstallArgs, source = sourceRoot): Json {
   if (state && target !== state.target) throw new Error('Uninstall before changing the skill target');
   if (!state && (exists(target) || content.includes(START) || content.includes(END))) throw new Error('Unowned skill target or AGENTS.md markers already exist');
   if (within(source, target) || within(target, source)) throw new Error('Skill source and installation target must not overlap');
-  const files = inventory(source), missing = REQUIRED_SOURCE_FILES.filter(file => !Object.hasOwn(files, file));
+  const files = Object.fromEntries(Object.entries(inventory(source)).filter(([file]) => !file.startsWith('authoring-skills/codex-slide-plan/'))), missing = REQUIRED_SOURCE_FILES.filter(file => !Object.hasOwn(files, file));
   if (missing.length) throw new Error('Source skill is incomplete; missing: ' + missing.sort().join(', '));
   const block = bootstrap(target);
   if (state && equalFiles(state.files, files) && state.block === block) return { status: 'unchanged', target };
@@ -111,7 +105,8 @@ export function install(args: InstallArgs, source = sourceRoot): Json {
   const staged = path.join(temporary, 'skill'), previous = path.join(temporary, 'previous');
   let installed = false;
   try {
-    copySkill(source, staged);
+    // Even a previous bundled release must not place the optional skill under core.
+    fs.cpSync(source, staged, { recursive: true, filter: file => path.basename(file) !== '__pycache__' && path.relative(source, file) !== path.join('authoring-skills', 'codex-slide-plan') });
     if (exists(target)) fs.renameSync(target, previous);
     fs.renameSync(staged, target); installed = true;
     fs.writeFileSync(agents, updated, 'utf8');
