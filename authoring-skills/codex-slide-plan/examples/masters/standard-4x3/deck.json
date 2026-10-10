@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "master-standard-4x3",
   "revision": "r1",
   "title": "Master reference fixture",
@@ -45,71 +45,11 @@
     {
       "id": "A",
       "themeId": "fixture-master-theme",
-      "storyId": "decision",
       "layouts": {
         "S01": "fixture-master-layout"
       }
     }
   ],
-  "catalog": {
-    "themes": [
-      {
-        "id": "fixture-master-theme",
-        "name": "Extracted synthetic master theme",
-        "background": "#f8fafc",
-        "ink": "#182c46",
-        "accent": "#c54163",
-        "muted": "#54647a",
-        "font": "Arial, sans-serif",
-        "ratio": [
-          4,
-          3
-        ],
-        "padding": 8,
-        "footer": ""
-      }
-    ],
-    "layouts": [
-      {
-        "id": "fixture-master-layout",
-        "version": "v1",
-        "name": "Master title and body",
-        "purpose": "Fixture master geometry comparison",
-        "structure": "Title, body and source logo at OOXML geometry",
-        "hideKicker": true,
-        "titleBox": {
-          "x": 8.0,
-          "y": 10.0,
-          "width": 76.0,
-          "height": 15.0
-        },
-        "canvas": {
-          "slots": [
-            {
-              "elementId": "body",
-              "x": 8.0,
-              "y": 35.0,
-              "width": 76.0,
-              "height": 38.0
-            },
-            {
-              "elementId": "logo",
-              "x": 88.0,
-              "y": 8.0,
-              "width": 5.0,
-              "height": 6.666667
-            }
-          ]
-        },
-        "messageBox": {
-          "x": 8,
-          "y": 85,
-          "width": 76,
-          "height": 5
-        }
-      }
-    ]
-  },
   "slides": [
     {
       "id": "S01",
@@ -245,6 +185,65 @@
     },
     "unverified": [
       "Visual equality, font metrics, paragraph wrapping, shadow/effects and inherited styles."
+    ]
+  },
+  "design": {
+    "themes": [
+      {
+        "id": "fixture-master-theme",
+        "name": "Extracted synthetic master theme",
+        "background": "#f8fafc",
+        "ink": "#182c46",
+        "accent": "#c54163",
+        "muted": "#54647a",
+        "font": "Arial, sans-serif",
+        "ratio": [
+          4,
+          3
+        ],
+        "padding": 8,
+        "footer": ""
+      }
+    ],
+    "layouts": [
+      {
+        "id": "fixture-master-layout",
+        "version": "v1",
+        "name": "Master title and body",
+        "purpose": "Fixture master geometry comparison",
+        "structure": "Title, body and source logo at OOXML geometry",
+        "hideKicker": true,
+        "titleBox": {
+          "x": 8.0,
+          "y": 10.0,
+          "width": 76.0,
+          "height": 15.0
+        },
+        "canvas": {
+          "slots": [
+            {
+              "elementId": "body",
+              "x": 8.0,
+              "y": 35.0,
+              "width": 76.0,
+              "height": 38.0
+            },
+            {
+              "elementId": "logo",
+              "x": 88.0,
+              "y": 8.0,
+              "width": 5.0,
+              "height": 6.666667
+            }
+          ]
+        },
+        "messageBox": {
+          "x": 8,
+          "y": 85,
+          "width": 76,
+          "height": 5
+        }
+      }
     ]
   }
 }

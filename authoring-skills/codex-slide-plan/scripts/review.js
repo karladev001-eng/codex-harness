@@ -33,7 +33,7 @@
             return false;
         if (target.paragraphId && !slide?.paragraphs.some(p => p.id === target.paragraphId))
             return false;
-        if (target.findingId && !data.coherence?.findings.some(f => f.id === target.findingId))
+        if (target.findingId && !data.coherence?.findings?.some(f => f.id === target.findingId))
             return false;
         if (target.sourceId && !data.sources.some(s => s.id === target.sourceId))
             return false;
@@ -58,19 +58,16 @@
     const pages = [...doc.querySelectorAll('.slide-page')], review = doc.body.dataset.mode === 'review';
     const $ = id => doc.getElementById(id), status = message => { if ($('feedback-status'))
         $('feedback-status').textContent = message; };
-    function showTab(key) { doc.querySelectorAll('[role=tab]').forEach(t => { const active = t.getAttribute('aria-controls') === key; t.setAttribute('aria-selected', String(active)); t.tabIndex = active ? 0 : -1; $(t.getAttribute('aria-controls')).hidden = !active; }); }
-    function showPage(index) { currentPage = Math.max(0, Math.min(index, pages.length - 1)); pages.forEach((p, i) => p.hidden = !all && i !== currentPage); $('page-indicator').textContent = all ? `全${pages.length}枚` : `${currentPage + 1} / ${pages.length}`; doc.querySelectorAll('[data-jump-slide]').forEach(b => b.setAttribute('aria-current', b.dataset.jumpSlide === data.slides[currentPage].id ? 'true' : 'false')); }
-    function jump(id, paragraphId) { const i = data.slides.findIndex(s => s.id === id); if (i < 0) {
-        status('未対応: スライドがありません');
-        return;
-    } all = false; showPage(i); if (review)
-        showTab('slides'); if (paragraphId) {
-        const paragraph = pages[i].querySelector(`[data-target*='"paragraphId":"${paragraphId}"']`);
-        if (paragraph) {
-            paragraph.focus();
-            paragraph.scrollIntoView?.({ block: 'center' });
-        }
-    } }
+    function showPage(index) { currentPage = Math.max(0, Math.min(index, pages.length - 1)); pages.forEach((p, i) => p.hidden = !all && i !== currentPage); if ($('page-indicator')) $('page-indicator').textContent = all ? `全${pages.length}枚` : `${currentPage + 1} / ${pages.length}`; }
+    function jump(id, paragraphId) {
+        const i = data.slides.findIndex(s => s.id === id);
+        if (i < 0) { status('スライドがありません'); return; }
+        if (review) {
+            const page = $('page-' + id); page.open = true;
+            if (paragraphId) { const paragraph = [...page.querySelectorAll('[data-target]')].find(el => JSON.parse(el.dataset.target).paragraphId === paragraphId); paragraph?.focus(); paragraph?.scrollIntoView?.({block:'center'}); }
+            else page.scrollIntoView?.({block:'start'});
+        } else { all = false; showPage(i); }
+    }
     function persist() { if (!persistence)
         return; try {
         global.localStorage.setItem(storageKey(identity), JSON.stringify({ schemaVersion: 1, identity, comments }));
@@ -95,7 +92,7 @@
                 warning.textContent = '未対応・対象が消滅しています。自動適用しません。';
                 item.append(warning);
             }
-            for (const [name, action] of [['編集', () => { editId = c.id; select(c.target, c.quote); $('replacement').value = c.replacement; $('intent').value = c.intent; }], ['削除', () => { comments = comments.filter(x => x.id !== c.id); if (editId === c.id)
+            for (const [name, action] of [['編集', () => { editId = c.id; select(c.target, c.quote, true); $('replacement').value = c.replacement; $('intent').value = c.intent; }], ['削除', () => { comments = comments.filter(x => x.id !== c.id); if (editId === c.id)
                         cancelEdit(); paintComments(); persist(); }]]) {
                 const b = doc.createElement('button');
                 b.textContent = name;
@@ -106,16 +103,18 @@
             $('comment-list').append(item);
         });
         $('request-text').value = requestText(identity, comments);
+        $('comment-count').textContent = `コメント ${comments.length}件`;
     }
-    function select(target, quote = '') {
+    function select(target, quote = '', editing = false) {
+        if (!editing) cancelEdit();
         selected = JSON.parse(JSON.stringify(target));
         if (selected.slideId && !selected.page)
             selected.page = data.slides.findIndex(s => s.id === selected.slideId) + 1;
         if (selected.slideId)
             jump(selected.slideId, selected.paragraphId);
-        else
-            showTab('slides');
-        $('selected-target').textContent = JSON.stringify(selected, null, 2);
+        $('selected-target').textContent = `${selected.page ? selected.page + 'ページ · ' : ''}${kindLabels[selected.kind]}`;
+        $('target-details').textContent = JSON.stringify(selected, null, 2);
+        $('image-region').hidden = !selected.elementId || !['image','diagram'].includes(data.slides.find(s => s.id === selected.slideId)?.elements.find(e => e.id === selected.elementId)?.kind);
         $('quote').value = quote;
         $('region-fields').hidden = !selected.region;
         if (selected.region)
@@ -124,18 +123,22 @@
         doc.querySelectorAll('.selected-target').forEach(e => e.classList.remove('selected-target'));
         const element = [...doc.querySelectorAll('[data-target]')].find(e => JSON.stringify(JSON.parse(e.dataset.target)) === JSON.stringify(target));
         element?.classList.add('selected-target');
+        if (!$('comment-editor').open) $('comment-editor').showModal();
+        $('intent').focus();
     }
     function cancelEdit() { editId = null; $('replacement').value = ''; $('intent').value = ''; }
-    async function copy(textValue) { $('request-text').value = textValue; try {
+    async function copy(textValue) { $('request-text').value = textValue; if (!$('response-sheet').open) $('response-sheet').showModal(); try {
         if (!global.navigator?.clipboard?.writeText)
             throw Error('clipboard非対応');
         await global.navigator.clipboard.writeText(textValue);
         status('コピーしました。チャットへ貼り戻してください。');
+        $('copy-status').textContent = 'コピーしました。';
     }
     catch {
         $('request-text').focus();
         $('request-text').select();
         status('自動コピーできません。選択した依頼文を手動でコピーしてください。');
+        $('copy-status').textContent = '選択した修正回答を手動でコピーしてください。';
     } }
     function download(name, textValue, type) { const blob = new Blob([textValue], { type }), url = URL.createObjectURL(blob), a = doc.createElement('a'); a.href = url; a.download = name; doc.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
     async function importFeedback(file) {
@@ -161,26 +164,17 @@
         }
     }
     if (review) {
-        const tabs = [...doc.querySelectorAll('[role=tab]')];
-        tabs.forEach((t, i) => { t.addEventListener('click', () => showTab(t.getAttribute('aria-controls'))); t.addEventListener('keydown', e => { let n; if (e.key === 'ArrowRight')
-            n = (i + 1) % tabs.length; if (e.key === 'ArrowLeft')
-            n = (i + tabs.length - 1) % tabs.length; if (e.key === 'Home')
-            n = 0; if (e.key === 'End')
-            n = tabs.length - 1; if (n !== undefined) {
-            e.preventDefault();
-            showTab(tabs[n].getAttribute('aria-controls'));
-            tabs[n].focus();
-        } }); });
-        doc.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => { doc.querySelectorAll('[data-view]').forEach(t => t.setAttribute('aria-pressed', String(t === b))); for (const v of ['flow', 'script', 'checks'])
-            $('view-' + v).hidden = v !== b.dataset.view; }));
+        doc.querySelectorAll('[data-pick-slide]').forEach(b => b.addEventListener('click', () => select({kind:'slide',slideId:b.dataset.pickSlide}, 'ページ全体')));
+        $('comment-editor').addEventListener('cancel', cancelEdit);
+        doc.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => $(b.dataset.close).close()));
         doc.addEventListener('click', e => { if (suppressTargetClick) {
             suppressTargetClick = false;
             return;
-        } const el = e.target.closest?.('[data-target]'); if (el && !e.target.closest('a,button,input,textarea') && !regionDrag)
-            select(JSON.parse(el.dataset.target), el.innerText ?? el.textContent); });
+        } const el = e.target.closest?.('[data-target]'); if (el && !e.target.closest('a,button,input,textarea,summary') && !regionDrag)
+            select(JSON.parse(el.dataset.target), global.getSelection?.().toString() || el.innerText || el.textContent); });
         doc.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('[data-target]')) {
             e.preventDefault();
-            select(JSON.parse(e.target.dataset.target), e.target.innerText ?? e.target.textContent);
+            select(JSON.parse(e.target.dataset.target), global.getSelection?.().toString() || e.target.innerText || e.target.textContent);
         } });
         // Only image pixels are region targets. This does not imply original PPTX object mapping.
         doc.querySelectorAll('[data-region-image]').forEach(img => {
@@ -211,7 +205,8 @@
                 cancelEdit();
                 paintComments();
                 persist();
-                status('コメントを追加しました。チャットへ送信していません。');
+                status('コメントを保存しました。');
+                $('comment-editor').close();
             }
             catch (error) {
                 status(error.message);
@@ -267,33 +262,30 @@
         }
         if (!review)
             return;
+        if (action === 'respond') { $('request-text').value = requestText(identity, comments); $('copy-status').textContent = ''; $('response-sheet').showModal(); }
+        if (action === 'image-region') { selected.kind = 'region'; selected.region = {x:0,y:0,width:1,height:1}; $('region-fields').hidden = false; $('target-details').textContent = JSON.stringify(selected, null, 2); for (const k of ['x','y','width','height']) doc.querySelector(`[name=region-${k}]`).value = selected.region[k]; }
         if (action === 'copy')
             copy(requestText(identity, comments));
         if (action === 'save-md')
             download(`${identity.deckId}-${identity.revision}-${identity.variantId}-feedback.md`, requestText(identity, comments), 'text/markdown;charset=utf-8');
         if (action === 'save-json')
             download(`${identity.deckId}-${identity.revision}-${identity.variantId}-feedback.json`, JSON.stringify({ schemaVersion: 1, identity, comments }, null, 2), 'application/json');
-        if (action === 'cancel-edit')
-            cancelEdit();
+        if (action === 'cancel-edit') { cancelEdit(); $('comment-editor').close(); }
     });
     doc.querySelectorAll('[data-copy-location]').forEach(b => b.addEventListener('click', () => copy(b.dataset.copyLocation)));
     doc.addEventListener('keydown', e => { if (e.target.closest('input,textarea,select,[contenteditable]') || e.target.closest('[role=tab]'))
-        return; if (e.key === 'ArrowRight') {
+        return; if (!review && e.key === 'ArrowRight') {
         e.preventDefault();
         all = false;
         showPage(currentPage + 1);
-    } if (e.key === 'ArrowLeft') {
+    } if (!review && e.key === 'ArrowLeft') {
         e.preventDefault();
         all = false;
         showPage(currentPage - 1);
     } if (e.key === 'Escape')
         doc.querySelector('.zoomed')?.classList.remove('zoomed'); });
-    showPage(0);
-    if (review && global.location?.hash?.startsWith('#source-'))
-        showTab('assets');
-    if (review) global.addEventListener('hashchange', () => {
-        if (global.location.hash.startsWith('#source-')) showTab('assets');
-    });
+    if (!review) showPage(0);
+    if (review) { const openHash = () => { const id = global.location?.hash?.slice(1); if (id?.startsWith('page-')) jump(id.slice(5)); }; openHash(); global.addEventListener('hashchange', openHash); }
     api.state = () => ({ identity, comments: JSON.parse(JSON.stringify(comments)), currentPage, selected, persistence });
     api.importFeedback = importFeedback;
 })(typeof window === 'undefined' ? globalThis : window);
