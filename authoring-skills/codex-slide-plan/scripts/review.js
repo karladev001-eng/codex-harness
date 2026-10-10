@@ -1,7 +1,7 @@
 /* Original offline review UI. No LLM, network, automatic application or approval recording. */
 (function (global) {
     'use strict';
-    const kindLabels = { purpose: '目的', audience: '聞き手', message: '要旨', chapter: '章', title: '見出し', element: '要素', cell: '表セル', series: 'グラフ系列', notes: 'ノート', paragraph: '原稿段落', finding: '確認指摘', source: '出典', region: '画像領域' };
+    const kindLabels = { slide: 'スライド全体', purpose: '目的', audience: '聞き手', message: '要旨', chapter: '章', title: '見出し', element: '要素', cell: '表セル', series: 'グラフ系列', notes: 'ノート', paragraph: '原稿段落', finding: '確認指摘', source: '出典', region: '画像領域' };
     function storageKey(identity) { return ['codex-slide-plan', identity.deckId, identity.revision, identity.variantId, identity.contentHash].map(encodeURIComponent).join(':'); }
     function sameIdentity(a, b) { return ['deckId', 'revision', 'variantId', 'contentHash'].every(k => a?.[k] === b?.[k]); }
     function validateRegion(r) { return r && ['x', 'y', 'width', 'height'].every(k => Number.isFinite(r[k]) && r[k] >= 0 && r[k] <= 1) && r.width > 0 && r.height > 0 && r.x + r.width <= 1.001 && r.y + r.height <= 1.001; }

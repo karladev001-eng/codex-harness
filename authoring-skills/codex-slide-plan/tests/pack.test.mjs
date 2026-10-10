@@ -145,3 +145,69 @@ test('feedback maps stable target after reorder, never applies mismatched versio
     checked = feedbackCheck(f.deck, feedback);
     assert.equal(checked.comments[1].status, '未対応・対象消滅');
 });
+
+// These regressions exercise produced links/style attributes, not validator wording alone.
+test('original downloads reject URI/control filenames before any HTML output', async (t) => {
+    const f = await fixture(t);
+    for (const filename of ['javascript:alert(1).png', 'java\tscript:alert(1).png', 'assets/line\nbreak.png']) {
+        const original = path.join(f.input, filename);
+        await fs.writeFile(original, 'original-file');
+        const deck = uncheck(structuredClone(f.deck));
+        deck.assets[0].originals = [filename];
+        await save(f, deck);
+        await assert.rejects(build(f.file, f.out), /Unsafe path/);
+        await assert.rejects(fs.stat(path.join(f.out, deck.revision)), /ENOENT/);
+        assert.equal(await fs.readFile(original, 'utf8'), 'original-file');
+    }
+    const deck = uncheck(structuredClone(f.deck));
+    const safeName = 'assets/図の原本 & copy.png';
+    await fs.writeFile(path.join(f.input, safeName), 'original-file');
+    deck.assets[0].originals = [safeName];
+    await save(f, deck);
+    const result = await build(f.file, f.out);
+    const html = await fs.readFile(path.join(result.directory, 'A/review.html'), 'utf8');
+    const downloadLinks = [...html.matchAll(/href="([^"<>]+)" download/g)].map(m => m[1]);
+    assert.ok(downloadLinks.includes('./assets/' + encodeURIComponent('図の原本 & copy.png')));
+    for (const href of downloadLinks) assert.equal(new URL(href, 'https://local.invalid/review.html').origin, 'https://local.invalid');
+});
+test('quoted Japanese and accented font names survive one escaped style attribute', async (t) => {
+    const f = await fixture(t);
+    const deck = uncheck(structuredClone(f.deck));
+    const font = '"游ゴシック", "源ノ角ゴシック", "Café Sans", sans-serif';
+    deck.catalog.themes = [{id:'japanese', name:'持込書体', background:'#ffffff', ink:'#243246', accent:'#176b70', muted:'#566777', ratio:[16,9], font}];
+    deck.variants[0].themeId = 'japanese';
+    await save(f, deck);
+    const result = await build(f.file, f.out);
+    const html = await fs.readFile(path.join(result.directory, 'A/output/slides.html'), 'utf8');
+    const slide = html.match(/<section class="slide[^>]+>/)[0];
+    const attributes = [...slide.matchAll(/([a-z-]+)="([^"]*)"/g)];
+    assert.deepEqual(attributes.map(m=>m[1]).sort(), ['aria-label','class','data-slide-id','data-target','style','tabindex']);
+    const decodedStyle = attributes.find(m=>m[1]==='style')[2].replaceAll('&quot;', '"').replaceAll('&#39;', "'").replaceAll('&amp;', '&');
+    assert.ok(decodedStyle.includes('--slide-font:' + font + ';'));
+    for (const injected of ['Arial; color:red', 'Arial" onmouseover="alert(1)', 'Arial\nserif', 'url(https://example.com)']) {
+        deck.catalog.themes[0].font = injected;
+        await assert.rejects(validateDeck(deck), /Unsafe theme font/);
+    }
+});
+
+test('whole-page target preserves specific title/element targets and selected POTX originals', async (t) => {
+    const f = await fixture(t);
+    const deck = uncheck(structuredClone(f.deck));
+    const original = Buffer.from([0x50,0x4b,0x03,0x04,0,17,29,31]);
+    await fs.mkdir(path.join(f.input, 'references'));
+    await fs.writeFile(path.join(f.input, 'references/template.potx'), original);
+    deck.files.push('references/template.potx');
+    await save(f, deck);
+    const result = await build(f.file, f.out);
+    const variant = path.join(result.directory, 'A');
+    const html = await fs.readFile(path.join(variant, 'review.html'), 'utf8');
+    const pageTag = html.match(/<section class="slide[^>]+data-slide-id="S01"[^>]+>/)[0];
+    const target = JSON.parse(pageTag.match(/data-target="([^"]*)"/)[1].replaceAll('&quot;', '"'));
+    assert.deepEqual(target, {kind:'slide', slideId:'S01', page:1});
+    assert.match(html, /data-target="\{&quot;kind&quot;:&quot;title&quot;,&quot;slideId&quot;:&quot;S01&quot;/);
+    assert.match(html, /data-target="\{&quot;kind&quot;:&quot;element&quot;,&quot;slideId&quot;:&quot;S01&quot;/);
+    assert.deepEqual(await fs.readFile(path.join(variant, 'references/template.potx')), original);
+    const copied = await bundle(variant, path.join(f.temp, 'shared'));
+    assert.deepEqual(await fs.readFile(path.join(copied.directory, 'references/template.potx')), original);
+    assert.deepEqual(await fs.readFile(path.join(f.input, 'references/template.potx')), original);
+});

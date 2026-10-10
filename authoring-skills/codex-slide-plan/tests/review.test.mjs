@@ -38,3 +38,12 @@ test('runtime has no automatic external send; user strings are painted as text',
     assert.doesNotMatch(code, /\bfetch\s*\(|XMLHttpRequest|sendBeacon|eval\s*\(/);
     assert.doesNotMatch(code, /\.innerHTML\s*=/);
 });
+
+test('whole-slide comments are accepted without weakening specific target validation', () => {
+    const whole = {id:'page-note', target:{kind:'slide', slideId:'S01', page:1}, quote:'ページ全体', replacement:'', intent:'余白と読む順を調整する'};
+    assert.deepEqual(api.cleanComment(whole), whole);
+    assert.equal(api.targetExists(whole.target, data), true);
+    assert.equal(api.targetExists({...whole.target, slideId:'deleted'}, data), false);
+    assert.match(api.requestText(identity, [whole]), /スライド全体/);
+    assert.throws(()=>api.cleanComment({...whole, target:{...whole.target, kind:'unknown'}}), /種別/);
+});
