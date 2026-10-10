@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "comparison-demo",
   "revision": "r1",
   "title": "比較の数字と条件を一緒に読む",
@@ -44,7 +44,6 @@
       "notes": "説明用仮値を実績として読まない。",
       "transition": "まず比較に必要な条件を整理します。",
       "seconds": 30,
-      "layoutId": "cover",
       "sourceIds": [
         "brief"
       ],
@@ -79,7 +78,6 @@
       "notes": "初稿は略語の説明が不足。指摘C01を段落に対応。",
       "transition": "ここから本番導入の判断へ進みます。",
       "seconds": 45,
-      "layoutId": "background",
       "sourceIds": [
         "brief",
         "concept-flow"
@@ -119,7 +117,6 @@
       "notes": "系列と表の行を同じ元データへ対応。",
       "transition": "例の見方を次の確認手順にまとめます。",
       "seconds": 60,
-      "layoutId": "result-chart",
       "sourceIds": [
         "illustrative-data",
         "comparison-derived"
@@ -191,7 +188,29 @@
             "illustrative-data"
           ]
         }
-      ]
+      ],
+      "layout": {
+        "grid": {
+          "columns": 2,
+          "rows": 1,
+          "slots": [
+            {
+              "elementId": "runtime-chart",
+              "row": 1,
+              "column": 1,
+              "rowSpan": 1,
+              "columnSpan": 1
+            },
+            {
+              "elementId": "runtime-table",
+              "row": 1,
+              "column": 2,
+              "rowSpan": 1,
+              "columnSpan": 1
+            }
+          ]
+        }
+      }
     },
     {
       "id": "S04",
@@ -206,7 +225,6 @@
       "notes": "具体的担当や期日は次の作業で決める。",
       "transition": "以上です。どの条件を実測で確認するか相談します。",
       "seconds": 35,
-      "layoutId": "closing",
       "sourceIds": [
         "concept-flow"
       ],
@@ -239,13 +257,11 @@
     {
       "id": "A",
       "name": "標準の結果表示",
-      "storyId": "teaching",
       "themeId": "calm"
     },
     {
       "id": "B",
       "name": "独自配置を比較",
-      "storyId": "teaching",
       "themeId": "editorial",
       "layouts": {
         "S03": "custom-evidence-map"
@@ -330,7 +346,35 @@
     "data/illustrative.csv",
     "scripts/aggregate.mjs"
   ],
-  "catalog": {
+  "design": {
+    "themes": [
+      {
+        "id": "calm",
+        "background": "#ffffff",
+        "ink": "#243246",
+        "accent": "#176b70",
+        "muted": "#566777",
+        "font": "Arial, sans-serif",
+        "ratio": [
+          16,
+          9
+        ],
+        "padding": 6
+      },
+      {
+        "id": "editorial",
+        "background": "#fffdf8",
+        "ink": "#2d4156",
+        "accent": "#374c62",
+        "muted": "#5e6872",
+        "font": "Georgia, serif",
+        "ratio": [
+          16,
+          9
+        ],
+        "padding": 7
+      }
+    ],
     "layouts": [
       {
         "id": "custom-evidence-map",
@@ -377,7 +421,7 @@
   },
   "coherence": {
     "revision": "r1",
-    "contentHash": "d94b18b6921b897e4386da99fb9f1e7fe6f1ba3208e16eaf3de5bbfe9b67d15e",
+    "contentHash": "7b1883b3a691e9f9a8990dd0ac4b9d636d78a429b7becabb7f12e58e9ba64ee1",
     "reviewer": "Codex sample editorial review",
     "checkedAt": "2026-10-10",
     "checks": [

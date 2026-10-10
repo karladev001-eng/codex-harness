@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { build, bundle, contentHash, feedbackCheck, hash, provenance, validateDeck, safeRead } from '../scripts/pack.mjs';
+import { build, bundle, contentHash, feedbackCheck, hash, provenance, validateDeck, safeRead, migrate } from '../scripts/pack.mjs';
 const skill = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 async function fixture(t) {
     const temp = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'slide-plan-test-')));
@@ -16,11 +16,10 @@ async function fixture(t) {
 }
 async function save(f, deck = f.deck) { await fs.writeFile(f.file, JSON.stringify(deck, null, 2)); }
 function uncheck(deck) { delete deck.coherence; return deck; }
-test('sample, revised script and catalogue retain canonical identities; stale check is rejected', async (t) => {
+test('sample and revised script retain canonical identities; stale check is rejected', async (t) => {
     const f = await fixture(t);
     const { catalog } = await validateDeck(f.deck);
-    assert.equal(catalog.stories.length, 4);
-    assert.equal(catalog.layouts.length, 11);
+    assert.equal(catalog.layouts.length, 3);
     const revised = JSON.parse(await fs.readFile(path.join(f.input, 'deck-revised.json'), 'utf8'));
     await validateDeck(revised);
     assert.deepEqual(revised.slides.map(s => s.id), f.deck.slides.map(s => s.id));
@@ -34,7 +33,8 @@ test('immutable build, semantic tables, provenance and portable explicitly selec
     const slideHTML = await fs.readFile(path.join(a, 'output/slides.html'), 'utf8');
     const reviewHTML = await fs.readFile(path.join(a, 'review.html'), 'utf8');
     assert.match(slideHTML, /<table>/);
-    assert.match(slideHTML, /source-illustrative-data/);
+    assert.doesNotMatch(slideHTML, /<footer class="source-strip">/);
+    assert.match(slideHTML, /仮値（実測ではない）/);
     assert.doesNotMatch(slideHTML, /<form id="comment-form"|<p>制作の未解決事項/);
     assert.match(reviewHTML, /S02-P01/);
     assert.match(reviewHTML, /元データ/);
@@ -127,7 +127,7 @@ test('custom layout executes distinct placement and rejects unsafe coordinates/c
     d.requestedSlides = 3;
     await assert.rejects(validateDeck(d), /Requested slide count/);
     d.requestedSlides = 4;
-    d.catalog.layouts[0].grid.slots[0].column = 3;
+    d.design.layouts[0].grid.slots[0].column = 3;
     await assert.rejects(validateDeck(d), /escapes grid/);
 });
 test('feedback maps stable target after reorder, never applies mismatched versions or deleted objects', async (t) => {
@@ -174,8 +174,8 @@ test('quoted Japanese and accented font names survive one escaped style attribut
     const f = await fixture(t);
     const deck = uncheck(structuredClone(f.deck));
     const font = '"游ゴシック", "源ノ角ゴシック", "Café Sans", sans-serif';
-    deck.catalog.themes = [{id:'japanese', name:'持込書体', background:'#ffffff', ink:'#243246', accent:'#176b70', muted:'#566777', ratio:[16,9], font}];
-    deck.variants[0].themeId = 'japanese';
+    deck.design.themes = [{id:'japanese', name:'持込書体', background:'#ffffff', ink:'#243246', accent:'#176b70', muted:'#566777', ratio:[16,9], font}];
+    for (const v of deck.variants) v.themeId = 'japanese';
     await save(f, deck);
     const result = await build(f.file, f.out);
     const html = await fs.readFile(path.join(result.directory, 'A/output/slides.html'), 'utf8');
@@ -185,7 +185,7 @@ test('quoted Japanese and accented font names survive one escaped style attribut
     const decodedStyle = attributes.find(m=>m[1]==='style')[2].replaceAll('&quot;', '"').replaceAll('&#39;', "'").replaceAll('&amp;', '&');
     assert.ok(decodedStyle.includes('--slide-font:' + font + ';'));
     for (const injected of ['Arial; color:red', 'Arial" onmouseover="alert(1)', 'Arial\nserif', 'url(https://example.com)']) {
-        deck.catalog.themes[0].font = injected;
+        deck.design.themes[0].font = injected;
         await assert.rejects(validateDeck(deck), /Unsafe theme font/);
     }
 });
@@ -210,4 +210,43 @@ test('whole-page target preserves specific title/element targets and selected PO
     const copied = await bundle(variant, path.join(f.temp, 'shared'));
     assert.deepEqual(await fs.readFile(path.join(copied.directory, 'references/template.potx')), original);
     assert.deepEqual(await fs.readFile(path.join(f.input, 'references/template.potx')), original);
+});
+
+test('new creation needs no catalogue or selected layout and citations are explicit', async t => {
+    const f = await fixture(t), d = uncheck(structuredClone(f.deck));
+    delete d.variants; delete d.design; for (const s of d.slides) delete s.layout;
+    await save(f, d); const first = await build(f.file, f.out);
+    assert.deepEqual(first.variants, ['A']);
+    const html = await fs.readFile(path.join(first.directory, 'A/review.html'), 'utf8');
+    assert.doesNotMatch(html, /role="tab"|template-card|class="catalog"/);
+    const rows = [...html.matchAll(/<details class="page"[^>]*>/g)]; assert.equal(rows.length, d.slides.length);
+    assert.ok(rows.every(m => !/\bopen\b/.test(m[0])));
+    assert.match(html, /<dialog id="comment-editor"/); assert.match(html, /<dialog id="response-sheet"/);
+    assert.doesNotMatch(await fs.readFile(path.join(first.directory,'A/output/slides.html'),'utf8'), /<footer class="source-strip">/);
+    d.revision = 'r3'; d.slides[2].citations = 'slide'; await save(f,d);
+    const second = await build(f.file,f.out);
+    const slides = await fs.readFile(path.join(second.directory,'A/output/slides.html'),'utf8');
+    assert.match(slides, /<footer class="source-strip">/); assert.match(slides, /review.html#page-S03/);
+    assert.match(slides, /仮値（実測ではない）/); assert.match(slides, /同じ入力を使う想定の2方法/);
+});
+
+test('explicit legacy working-copy migration retains originals/IDs/design and refuses unsafe output', async t => {
+    const f = await fixture(t), bytes = await fs.readFile(path.join(skill,'tests/fixtures/legacy-v2.json'));
+    await fs.writeFile(f.file,bytes); const old = JSON.parse(bytes);
+    await assert.rejects(build(f.file,f.out), /explicit migrate/);
+    const output = path.join(f.temp,'working'); const result = await migrate(f.file,output);
+    assert.equal(result.originalChanged,false); assert.deepEqual(await fs.readFile(f.file),bytes);
+    const d = JSON.parse(await fs.readFile(path.join(output,'deck.json'),'utf8'));
+    assert.deepEqual(d.slides,old.slides); assert.deepEqual(d.assets,old.assets); assert.deepEqual(d.sources,old.sources);
+    assert.equal(d.catalog,undefined); assert.equal(d.coherence,undefined); assert.equal(d.design.themes.length,2);
+    assert.equal(d.migration.originalSHA256,hash(bytes)); assert.deepEqual(d.migration.preservedCoherence,old.coherence);
+    assert.deepEqual(await fs.readFile(path.join(output,'references/legacy-deck.json')),bytes);
+    assert.deepEqual(await fs.readFile(path.join(output,'assets/flow.svg')),await fs.readFile(path.join(f.input,'assets/flow.svg')));
+    const built = await build(path.join(output,'deck.json'),path.join(f.temp,'migrated-output'));
+    assert.deepEqual(built.warnings,[]); assert.match(await fs.readFile(path.join(built.directory,'B/output/slides.html'),'utf8'), /grid-row:1\/span 2;grid-column:1\/span 2/);
+    await assert.rejects(migrate(f.file,output), /EEXIST/);
+    await assert.rejects(migrate(f.file,path.join(f.input,'working')), /overlap/);
+    await fs.symlink(f.temp,path.join(f.temp,'alias'));
+    await assert.rejects(migrate(f.file,path.join(f.temp,'alias/unsafe')), /symlink/);
+    assert.deepEqual(await fs.readFile(f.file),bytes);
 });

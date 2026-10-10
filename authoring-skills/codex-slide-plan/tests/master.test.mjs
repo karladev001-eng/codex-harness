@@ -52,7 +52,7 @@ test('independent 4:3 and 16:9 source structures map into real HTML output',asyn
     assert.equal(report.renderStatus.status,'unverified');assert.equal(report.mapping.status,'proposed-not-applied');assert.equal(report.mapping.logoCandidates[0].confirmed,false);
     assert.equal(report.mapping.logoCandidates[0].image.sha256,digest(await fs.readFile(path.join(root,'assets/logo.png'))));
     const deck=JSON.parse(await fs.readFile(path.join(root,'deck.json'),'utf8'));
-    for(const key of ['background','ink','accent','muted','font','ratio']) assert.deepEqual(deck.catalog.themes[0][key],report.mapping.themeSuggestion[key]);
+    for(const key of ['background','ink','accent','muted','font','ratio']) assert.deepEqual(deck.design.themes[0][key],report.mapping.themeSuggestion[key]);
     // Compare OOXML, recorded mapping and the actual runtime output, rather than a mock renderer.
     const output=await build(path.join(root,'deck.json'),path.join(tmp,'html-'+name));
     const html=await fs.readFile(path.join(output.directory,'A/output/slides.html'),'utf8');
