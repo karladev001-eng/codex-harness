@@ -291,6 +291,9 @@
     showPage(0);
     if (review && global.location?.hash?.startsWith('#source-'))
         showTab('assets');
+    if (review) global.addEventListener('hashchange', () => {
+        if (global.location.hash.startsWith('#source-')) showTab('assets');
+    });
     api.state = () => ({ identity, comments: JSON.parse(JSON.stringify(comments)), currentPage, selected, persistence });
     api.importFeedback = importFeedback;
 })(typeof window === 'undefined' ? globalThis : window);
