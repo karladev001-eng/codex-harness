@@ -43,9 +43,9 @@ Knowledgeの同期にはGit・GitHub CLIと設定済みの非公開リポジト�
 
 ## クイックスタート
 
-**2026-10-10にGitHub Packagesへ非公開npm版0.4.2を配布しました。** 現行配布版は **0.4.2**（既定5スキル）。各PCで[初回認証](docs/guides/installation.md#github-packagesの初回認証)を済ませ、ホームなどpackage.jsonのない場所から次の1コマンドを実行します。初回導入と更新は同じコマンドです。
+2026-10-10にGitHub Packagesへ非公開npm版0.4.2を配布しました。**0.4.3では既定5スキルと任意追加のcodex-slide-planを収録します。** registryからの取得には指定版の配布完了とpackageアクセス権が必要です。各PCで[初回認証](docs/guides/installation.md#github-packagesの初回認証)を済ませ、ホームなどpackage.jsonのない場所から次の1コマンドを実行します。初回導入と更新は同じコマンドです。
 
-`codex-slide-plan` は任意追加スキルです。本体install/updateと指定なしのauthoring操作では配置・更新・削除しません。現行0.4.2には含まれず、対応版の配布後に `--skill codex-slide-plan` で単独導入できます。現行の `@latest` から導入できるとは案内していません。[別PC向けの導入手順](authoring-skills/INSTALL.md#codex-slide-planを任意追加する対応版の配布後)を参照してください。
+`codex-slide-plan` は任意追加スキルです。本体install/updateと指定なしのauthoring操作では配置・更新・削除しません。0.4.3のnpmパッケージまたはtgzから `--skill codex-slide-plan` で単独導入します。[別PC向けの導入手順](authoring-skills/INSTALL.md#codex-slide-planを任意追加する)を参照してください。
 
 ```sh
 npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@latest -- codex-harness install

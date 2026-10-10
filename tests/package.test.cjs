@@ -16,10 +16,11 @@ test('packed release runs through actual npx outside repo without compiler/netwo
   }
   const packResult = JSON.parse(invoke(npm, ['pack', '--ignore-scripts', '--json', '--pack-destination', f.base], root));
   const packed = Array.isArray(packResult) ? packResult[0] : Object.values(packResult)[0];
-  assert.equal(packed.version, '0.4.2');
-  assert.equal(require('../package-lock.json').version, '0.4.2');
-  assert.equal(require('../package-lock.json').packages[''].version, '0.4.2');
-  assert.equal(JSON.parse(fs.readFileSync(path.join(root, 'dist/plugins/codex-harness/.codex-plugin/plugin.json'), 'utf8')).version, '0.4.2');
+  const version = require('../package.json').version;
+  assert.equal(packed.version, version);
+  assert.equal(require('../package-lock.json').version, version);
+  assert.equal(require('../package-lock.json').packages[''].version, version);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(root, 'dist/plugins/codex-harness/.codex-plugin/plugin.json'), 'utf8')).version, version);
   const archive = path.join(f.base, packed.filename), files = packed.files.map(file => file.path);
   assert.ok(files.includes('dist/skill/runtime.js'));
   assert.ok(files.includes('dist/skill/preferences.js'));

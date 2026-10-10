@@ -29,7 +29,7 @@ test('GitHub staging and actual npm exec lifecycle through isolated loopback reg
   const current = stageRegistry(path.join(f.base, 'current stage'), npm);
   const staged = JSON.parse(fs.readFileSync(path.join(current.directory, 'package.json')));
   assert.equal(require('../package.json').private, true); assert.equal(staged.private, undefined);
-  assert.equal(staged.version, '0.4.2'); assert.equal(staged.license, 'UNLICENSED');
+  assert.equal(staged.version, require('../package.json').version); assert.equal(staged.license, 'UNLICENSED');
   assert.equal(staged.name, '@karladev001-eng/codex-harness');
   assert.equal(staged.publishConfig.registry, 'https://npm.pkg.github.com');
   assert.equal(staged.repository.url, 'git+https://github.com/karladev001-eng/harness.git');
@@ -43,7 +43,7 @@ test('GitHub staging and actual npm exec lifecycle through isolated loopback reg
   write(path.join(old, 'package.json'), { ...staged, version: '0.4.1' });
   fs.appendFileSync(path.join(old, 'dist/skill/SKILL.md'), '\nOld registry fixture marker\n');
   const archives = {};
-  for (const [version, directory] of [['0.4.1', old], ['0.4.2', current.directory]]) {
+  for (const [version, directory] of [['0.4.1', old], [staged.version, current.directory]]) {
     const packed = success(await command(npm, ['pack', '--ignore-scripts', '--offline', '--json', '--pack-destination', f.base], directory))[0];
     assert.equal(packed.files.some(file => /^(?:src|scripts|tests|docs\/harness|benchmarks|node_modules)\//.test(file.path)), false);
     const extracted = path.join(f.base, 'extracted ' + version); fs.mkdirSync(extracted);
@@ -91,17 +91,17 @@ test('GitHub staging and actual npm exec lifecycle through isolated loopback reg
   const initialHome = tree(f.home);
   assert.equal(success(await exec('latest', 'install')).status, 'unchanged'); assert.deepEqual(tree(f.home), initialHome);
   assert.ok(requests.includes('/archive/0.4.1.tgz'), 'old release is populated in the real npm cache');
-  latest = '0.4.2'; const requestIndex = requests.length;
+  latest = staged.version; const requestIndex = requests.length;
   assert.equal(success(await exec('latest', 'install')).status, 'installed');
   assert.ok(requests.slice(requestIndex).some(url => decodeURIComponent(url).includes(staged.name)), 'prefer-online refreshes a long-lived old packument');
-  assert.ok(requests.includes('/archive/0.4.2.tgz'));
+  assert.ok(requests.includes('/archive/' + staged.version + '.tgz'));
   assert.doesNotMatch(fs.readFileSync(path.join(initial.target, 'SKILL.md'), 'utf8'), /Old registry fixture marker/);
   for (const [index, file] of [settings, memory, projectSettings].entries()) assert.deepEqual(fs.readFileSync(file), preserved[index]);
   assert.ok(fs.readFileSync(agents, 'utf8').startsWith('\uFEFF# Keep personal instructions\r\n日本語'));
   assert.equal(success(await exec('latest', 'install')).status, 'unchanged');
   assert.equal(success(await exec('0.4.1', 'install')).status, 'installed');
   assert.match(fs.readFileSync(path.join(initial.target, 'SKILL.md'), 'utf8'), /Old registry fixture marker/);
-  assert.equal(success(await exec('0.4.2', 'install')).status, 'installed');
+  assert.equal(success(await exec(staged.version, 'install')).status, 'installed');
   // Force a genuine acquisition error with an uncached version; no CLI can run.
   for (const error of [401, 403, 404, 'communication']) {
     const before = tree(f.home); failure = error;

@@ -2,9 +2,20 @@
 
 ## 現行の読み方
 
-この文書は日付・版ごとの検証証拠です。古い件数、4スキル表記、非公開GitHub Releaseの提案、当時の未実装範囲はその時点の記録として保持します。現在の使い方は[文書索引](docs/README.md)、ローカル配布は[保守ガイド](docs/maintainers/releasing.md)へ。配布対象のnpm package 0.4.2には5スキルとKnowledge/Chrome/Raycastの実装があります。このcheckoutには任意追加のcodex-slide-planがあり、対応版はまだ配布していません。本体導入と指定なしのauthoring操作は既定5スキルだけを対象にします。実装の存在、隔離試験、実機での登録、長期効果をそれぞれ区別してください。
+この文書は日付・版ごとの検証証拠です。古い件数、4スキル表記、非公開GitHub Releaseの提案、当時の未実装範囲はその時点の記録として保持します。現在の使い方は[文書索引](docs/README.md)、ローカル配布は[保守ガイド](docs/maintainers/releasing.md)へ。0.4.3では既定5スキルとKnowledge/Chrome/Raycastの実装に加え、任意追加codex-slide-planの導入元を収録します。registry送信・実導入の結果は実施後の記録で確認してください。本体導入と指定なしのauthoring操作は既定5スキルだけを対象にします。実装の存在、隔離試験、実機での登録、長期効果をそれぞれ区別してください。
 
 Knowledgeの隔離試験は[運用ガイドの検証範囲](docs/guides/knowledge-operations.md#検証範囲)、検索の契約は[ADR 0006](docs/adr/0006-knowledge-retrieval.md)、個別の現機確認はsource checkoutの `docs/harness/tasks/activate-knowledge-memory.md` と `docs/harness/tasks/raycast-knowledge.md` に記録されています。ここからWindows/Linux・別PC・全サービスの網羅取得・長期効果を確認済みとは扱いません。最新の公開準備の検証は実行後に追記し、過去の結果を現在版の再実行として扱わないでください。
+
+## 2026-10-11: 0.4.3のリリース候補検証
+
+ソースのpackage/package-lock/pluginを0.4.3へ同期し、`private: true` / `UNLICENSED`を維持。実装は承認済みのcodex-slide-plan v6と任意導入の契約を使い、新機能は追加していません。以下の検証は一時home/projectと配布候補のtgzを対象にします。実registry送信・実ホーム導入・pushの成功記録は別工程です。
+
+- `npm test`: **170/170 PASS**（失敗・skipなし）、macOS / Node.js 26.10.0 / npm 11.19.1。package/lock/pluginとstagingの版一致、任意スキル導入・更新・編集済み拒否・既定操作による保持を含みます。版期待はソースmanifest参照へ変更し、旧版fixtureは保持しました。
+- `node --test --test-timeout=60000 authoring-skills/codex-slide-plan/tests/*.test.mjs`: **38/38 PASS**、bundled Node.js 24.19.0 / Python 3.12.14を明示。初回のNode.js 26.10.0 / Command Line Tools Python 3.9はmaster expansion fixtureのstdin転送で待機し、試験用プロセスだけを終了しました。初回をPASSとは扱いません。実装・試験内容は変更せず、上記環境で1.07秒で完了しました。
+- `npm run check:docs`: **176文書・830リンク、エラー0**。build後のstandalone/plugin文書も含みます。
+- stage generatorは既存packのallowlistだけを収録し、`private`・scripts・devDependenciesを除くmanifestをstagingに生成することを170件の試験内で確認しました。ソースのpublish禁止と個人設定の除外を維持します。
+
+実HTMLのブラウザ描画・狭幅・実操作は引き続き未検証です。DOM/構造/生成テストを見た目審査のPASSとして扱いません。Windows/Linux・別PC・Node.js 22実機・実Codexチャットでのスキル検出も未確認です。
 
 ## 2026-10-10: codex-slide-plan v4の導入分離・tarball統合検証
 
