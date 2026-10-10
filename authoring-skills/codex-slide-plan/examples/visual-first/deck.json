@@ -1,0 +1,1034 @@
+{
+  "schemaVersion": 2,
+  "id": "batch-comparison",
+  "revision": "r3",
+  "title": "平均時間の差を読み、実運用で確かめる",
+  "language": "ja",
+  "purpose": "現行と改善案の平均処理時間を共有し、実運用で確かめる条件を整理する",
+  "audience": "開発者と非技術部門の合同会議",
+  "message": "演習の平均差15秒を読み、実測条件を決める",
+  "expectedOutcome": "平均時間の差を理解し、仮想値と実運用の効果を区別できる",
+  "durationSeconds": 180,
+  "timing": {
+    "charactersPerMinute": 300
+  },
+  "requestedSlides": 4,
+  "citations": "review",
+  "chapters": [
+    {
+      "id": "purpose",
+      "title": "目的と条件"
+    },
+    {
+      "id": "result",
+      "title": "平均時間の比較"
+    },
+    {
+      "id": "limits",
+      "title": "比較の限界"
+    },
+    {
+      "id": "next",
+      "title": "実運用での確認"
+    }
+  ],
+  "unresolved": [
+    "実運用の入力データ量と測定範囲は未指定。今回の仮想値から本番効果を確定しない。"
+  ],
+  "slides": [
+    {
+      "id": "S01",
+      "chapter": "purpose",
+      "role": "比較する目的と前提を共有する",
+      "title": "同じPC・各3回の演習用仮想値で比較する",
+      "message": "同じPC・各3回の演習用仮想値で比較する",
+      "talkingPoints": [
+        "バッチ処理はデータをまとめて処理すること",
+        "現行と改善案の時間を比較する",
+        "今回は演習用の仮想値"
+      ],
+      "notes": "比較する条件だけを短いラベルで示す。バッチ処理の説明は原稿へ置く。",
+      "transition": "条件をそろえて、次に平均時間を見ます。",
+      "seconds": 40,
+      "sourceIds": [
+        "brief",
+        "measurements"
+      ],
+      "elements": [
+        {
+          "id": "conditions",
+          "kind": "list",
+          "items": [
+            "同じPC",
+            "各3回の平均",
+            "演習用仮想値"
+          ],
+          "sourceIds": [
+            "brief",
+            "measurements"
+          ]
+        }
+      ],
+      "paragraphs": [
+        {
+          "id": "S01-P01",
+          "text": "バッチ処理はデータをまとめて処理することです。今日は現行と改善案を同じPCで各3回測った設定で比べます。値は演習用の仮想値で、実際の測定結果ではありません。比較の前提を共有してから、平均時間の差を見ます。",
+          "sourceIds": [
+            "brief",
+            "measurements"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S02",
+      "chapter": "result",
+      "role": "平均の比較結果を示す",
+      "title": "演習の平均時間は15秒短縮",
+      "message": "演習の平均時間は15秒短縮",
+      "talkingPoints": [
+        "現行の平均は40秒",
+        "改善案の平均は25秒",
+        "現行比37.5%短い"
+      ],
+      "notes": "平均のグラフを主役にする。元表と重複説明を外し、元値・範囲・計算式はレビューと原稿へ。",
+      "transition": "この演習の差が示せる範囲を確認します。",
+      "seconds": 50,
+      "sourceIds": [
+        "measurements",
+        "summary"
+      ],
+      "elements": [
+        {
+          "id": "comparison-chart",
+          "kind": "diagram",
+          "assetId": "comparison-svg",
+          "alt": "現行40秒と改善案25秒の平均時間の横棒比較",
+          "caption": "同じPC・各3回",
+          "sourceIds": [
+            "summary"
+          ],
+          "regionSelectable": true
+        }
+      ],
+      "paragraphs": [
+        {
+          "id": "S02-P01",
+          "text": "現行は40、42、38秒で、3回の算術平均が40秒です。改善案は25、24、26秒で、平均25秒です。平均の差は15秒。現行の40秒を分母にすると37.5パーセント短縮です。横棒はどちらも0秒を起点とする同じ尺度です。各回の範囲は現行38から42秒、改善案24から26秒で、元データはレビューの出典から確認できます。ここでは演習値の差だけを読みます。",
+          "sourceIds": [
+            "measurements",
+            "summary"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S04",
+      "chapter": "limits",
+      "role": "演習値から言える範囲を限定する",
+      "title": "実運用の短縮効果は未検証",
+      "message": "実運用の短縮効果は未検証",
+      "talkingPoints": [
+        "仮想値と実測を区別する",
+        "入力量と測定範囲が未指定"
+      ],
+      "notes": "結果や次の手順を混ぜず、推論の限界だけを示す。",
+      "transition": "効果を確かめるため、実測条件をそろえます。",
+      "seconds": 35,
+      "sourceIds": [
+        "brief",
+        "next-proposal"
+      ],
+      "elements": [
+        {
+          "id": "limit",
+          "kind": "text",
+          "text": "入力量・測定範囲が未指定",
+          "sourceIds": [
+            "next-proposal"
+          ]
+        }
+      ],
+      "paragraphs": [
+        {
+          "id": "S04-P01",
+          "text": "今回の値は演習用です。実運用の入力データ量と、どこからどこまでの時間を測るかは指定されていません。そのため本番でも15秒短くなる、あるいは37.5パーセント短縮するとは判断できません。演習値の差と実運用の効果を区別します。",
+          "sourceIds": [
+            "brief",
+            "next-proposal"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S03",
+      "chapter": "next",
+      "role": "次にそろえる実測条件を提案する",
+      "title": "入力量・測定範囲をそろえて実測する",
+      "message": "入力量・測定範囲をそろえて実測する",
+      "talkingPoints": [
+        "同じ入力データ量",
+        "開始・終了をそろえる",
+        "各回の値と平均を残す"
+      ],
+      "notes": "提案だけを示す。結果の言い直しと限界説明は別ページへ分離済み。",
+      "transition": "この比較を共通の土台として、実測の条件を相談します。",
+      "seconds": 55,
+      "sourceIds": [
+        "next-proposal"
+      ],
+      "elements": [
+        {
+          "id": "next-conditions",
+          "kind": "list",
+          "items": [
+            "同じ入力データ量で比べる",
+            "開始・終了の測定範囲をそろえる",
+            "複数回の値と平均を残す"
+          ],
+          "sourceIds": [
+            "next-proposal"
+          ]
+        }
+      ],
+      "paragraphs": [
+        {
+          "id": "S03-P01",
+          "text": "次の提案は、同じ入力データ量を用意し、開始と終了の測定範囲をそろえて実測することです。複数回の値を記録し、平均だけでなくばらつきも確認します。担当者と期間はまだ決まっていません。今日は実測でそろえる条件を合意し、次の作業で担当者と期間を決めましょう。",
+          "sourceIds": [
+            "next-proposal"
+          ]
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "measurements",
+      "kind": "data",
+      "title": "演習用バッチ処理の仮想測定値",
+      "label": "仮想値（演習用）",
+      "path": "data/measurements.csv",
+      "position": "行2–7 / method,run,seconds",
+      "lineRange": [
+        2,
+        7
+      ],
+      "sha256": "255218396f846432b398f976294294a708ce8e08e034081548a59a385d809142",
+      "columns": "method,run,seconds",
+      "unit": "秒",
+      "period": "演習・日時未指定",
+      "filters": "同じPC・各3回",
+      "checkedAt": "2026-10-10",
+      "copy": true
+    },
+    {
+      "id": "brief",
+      "kind": "project",
+      "title": "合同会議の依頼と比較条件",
+      "path": "data/brief.md",
+      "position": "見出し: 比較条件",
+      "sha256": "ef045f6075dea388a73c9765394e12b896f4650bdd05e7d11d4bfd3db2786fba",
+      "checkedAt": "2026-10-10",
+      "copy": true,
+      "heading": "比較条件"
+    },
+    {
+      "id": "summary",
+      "kind": "derived",
+      "title": "方式別の算術平均と現行比短縮率",
+      "label": "仮想値（演習用）",
+      "inputIds": [
+        "measurements"
+      ],
+      "formula": "現行平均=(40+42+38)/3=40秒、改善案平均=(25+24+26)/3=25秒、差=40−25=15秒、短縮率=(40−25)/40×100=37.5%",
+      "code": "scripts/aggregate.mjs",
+      "output": "data/summary.json",
+      "unit": "秒／%",
+      "population": "同じPCの仮想測定、各方式3回、全6行",
+      "missing": "欠測なし、全行使用",
+      "checkedAt": "2026-10-10"
+    },
+    {
+      "id": "next-proposal",
+      "kind": "concept",
+      "title": "実測でそろえる条件の提案",
+      "label": "提案・実運用効果未検証",
+      "checkedAt": "2026-10-10"
+    }
+  ],
+  "assets": [
+    {
+      "id": "comparison-svg",
+      "file": "assets/comparison.svg",
+      "preview": true,
+      "originals": [
+        "assets/comparison.svg"
+      ],
+      "origin": "CSVの平均値から独自生成した編集可能SVG",
+      "license": "この演習用プロジェクト内で再利用可",
+      "regenerate": "node scripts/aggregate.mjs",
+      "slideIds": [
+        "S02"
+      ],
+      "sourceIds": [
+        "summary"
+      ]
+    }
+  ],
+  "files": [
+    "data/measurements.csv",
+    "data/summary.json",
+    "scripts/aggregate.mjs",
+    "data/brief.md",
+    "references/r2-deck.json",
+    "references/revision-notes.md"
+  ],
+  "design": {
+    "themes": [
+      {
+        "id": "calm",
+        "background": "#ffffff",
+        "ink": "#172a3a",
+        "accent": "#137e75",
+        "muted": "#586c7d",
+        "font": "Arial, sans-serif",
+        "ratio": [
+          16,
+          9
+        ],
+        "padding": 5
+      },
+      {
+        "id": "editorial",
+        "background": "#fffdf8",
+        "ink": "#172a3a",
+        "accent": "#137e75",
+        "muted": "#586c7d",
+        "font": "Arial, sans-serif",
+        "ratio": [
+          16,
+          9
+        ],
+        "padding": 7
+      }
+    ]
+  },
+  "master": {
+    "status": "未提供、持込マスターなし"
+  },
+  "variants": [
+    {
+      "id": "A",
+      "name": "標準の比較",
+      "themeId": "calm"
+    },
+    {
+      "id": "B",
+      "name": "余白と強調を比較",
+      "themeId": "editorial"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "A-visual-S01",
+      "kind": "visual",
+      "slideId": "S01",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "A",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "pending",
+      "reviewer": "Codex sample author",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "structure",
+      "environment": {
+        "surface": "actual HTML not rendered"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "実表示",
+          "result": "未検証",
+          "reason": "許可された実表示経路を利用できず、構造検査を目視審査の代用にしない"
+        }
+      ],
+      "findings": [],
+      "unchecked": [
+        "全幅・レビュー/単独/一覧/拡大の実HTML表示"
+      ]
+    },
+    {
+      "id": "A-visual-S02",
+      "kind": "visual",
+      "slideId": "S02",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "A",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "pending",
+      "reviewer": "Codex sample author",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "structure",
+      "environment": {
+        "surface": "actual HTML not rendered"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "実表示",
+          "result": "未検証",
+          "reason": "許可された実表示経路を利用できず、構造検査を目視審査の代用にしない"
+        }
+      ],
+      "findings": [],
+      "unchecked": [
+        "全幅・レビュー/単独/一覧/拡大の実HTML表示"
+      ]
+    },
+    {
+      "id": "A-visual-S04",
+      "kind": "visual",
+      "slideId": "S04",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "A",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "pending",
+      "reviewer": "Codex sample author",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "structure",
+      "environment": {
+        "surface": "actual HTML not rendered"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "実表示",
+          "result": "未検証",
+          "reason": "許可された実表示経路を利用できず、構造検査を目視審査の代用にしない"
+        }
+      ],
+      "findings": [],
+      "unchecked": [
+        "全幅・レビュー/単独/一覧/拡大の実HTML表示"
+      ]
+    },
+    {
+      "id": "A-visual-S03",
+      "kind": "visual",
+      "slideId": "S03",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "A",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "pending",
+      "reviewer": "Codex sample author",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "structure",
+      "environment": {
+        "surface": "actual HTML not rendered"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "実表示",
+          "result": "未検証",
+          "reason": "許可された実表示経路を利用できず、構造検査を目視審査の代用にしない"
+        }
+      ],
+      "findings": [],
+      "unchecked": [
+        "全幅・レビュー/単独/一覧/拡大の実HTML表示"
+      ]
+    },
+    {
+      "id": "A-page-S01",
+      "kind": "page",
+      "slideId": "S01",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "A",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "verified",
+      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "semantic",
+      "environment": {
+        "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
+        "operatingSystem": "macOS",
+        "runtime": "Node.js 26.10.0",
+        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "一要点と表現",
+          "result": "確認",
+          "reason": "同じPC・各3回・演習用仮想値の短い条件ラベルが比較前提の一要点を支える。バッチ処理の定義はS01-P01へ移し、結果や次の行動を混ぜていない。"
+        },
+        {
+          "item": "必要な条件",
+          "result": "確認",
+          "reason": "messageとconditionsに同じPC・各3回・仮想値を残した。入力・測定範囲が未指定という詳細はbriefと限界ページで確認できる。"
+        }
+      ],
+      "findings": [],
+      "unchecked": []
+    },
+    {
+      "id": "A-page-S02",
+      "kind": "page",
+      "slideId": "S02",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "A",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "verified",
+      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "semantic",
+      "environment": {
+        "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
+        "operatingSystem": "macOS",
+        "runtime": "Node.js 26.10.0",
+        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "一要点と視覚表現",
+          "result": "確認",
+          "reason": "比較グラフだけを主役にして、平均の差15秒という一要点を同一title/messageで示す。スライド上は同文messageを繰り返さず、comparison-table/differenceを除き、37.5%・範囲・解釈はS02-P01/出典へ移した。グラフの秒単位、同じPC・各3回、仮想値表示は維持。"
+        },
+        {
+          "item": "数値・尺度・根拠",
+          "result": "確認",
+          "reason": "CSVの現行40/42/38と改善案25/24/26を集計し平均40/25、差15、現行40を分母として37.5%に一致。SVGは0から50秒の同一線形尺度で幅512/320、比40:25、各3回と仮想値の表示も維持。"
+        }
+      ],
+      "findings": [],
+      "unchecked": []
+    },
+    {
+      "id": "A-page-S04",
+      "kind": "page",
+      "slideId": "S04",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "A",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "verified",
+      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "semantic",
+      "environment": {
+        "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
+        "operatingSystem": "macOS",
+        "runtime": "Node.js 26.10.0",
+        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "一要点と説明量",
+          "result": "確認",
+          "reason": "実運用効果未検証の一要点を同一title/messageで示し、同文messageはスライド上で繰り返さない。limitは理由となる入力量/測定範囲未指定だけを示す。適切な数値表現がない限界には短い言葉を選ぶ。"
+        },
+        {
+          "item": "推論の範囲",
+          "result": "確認",
+          "reason": "S04-P01は演習の15秒/37.5%から本番効果を確定できない理由を説明し、次の具体手順はS03に分離している。"
+        }
+      ],
+      "findings": [],
+      "unchecked": []
+    },
+    {
+      "id": "A-page-S03",
+      "kind": "page",
+      "slideId": "S03",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "A",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "verified",
+      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "semantic",
+      "environment": {
+        "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
+        "operatingSystem": "macOS",
+        "runtime": "Node.js 26.10.0",
+        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "一要点と行動",
+          "result": "確認",
+          "reason": "next-conditionsの3項目はいずれも同じ条件で実測するという一つの提案を支える。takeawayとlimitを外し、結果再掲や限界との二つの主張を混在させない。"
+        },
+        {
+          "item": "提案と根拠",
+          "result": "確認",
+          "reason": "next-proposalとして扱い、S03-P01は未決の担当者・期間も明示する。実測済み/実運用効果という新しい結果を追加していない。"
+        }
+      ],
+      "findings": [],
+      "unchecked": []
+    },
+    {
+      "id": "A-flow-deck",
+      "kind": "flow",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "A",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "verified",
+      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "semantic",
+      "environment": {
+        "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
+        "operatingSystem": "macOS",
+        "runtime": "Node.js 26.10.0",
+        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "前提と用語",
+          "result": "確認",
+          "reason": "S01-P01の冒頭でバッチ処理を平易に定義。演習用仮想値を最初に説明し、各3回と同じPCを示してから結果へ進む。"
+        },
+        {
+          "item": "流れと論理",
+          "result": "改訂後確認",
+          "reason": "重複削減後の生成story/scriptをS01→S02→S04→S03で再通読。前提、差、推論の限界、次の実測条件を一ページずつ示し、各transitionと次ページが対応。title/message同一でも読み上げ原稿は詳細を保つ。"
+        },
+        {
+          "item": "図表と原稿",
+          "result": "確認",
+          "reason": "CSV、集計JSON、SVG、S02-P01の平均40/25、差15秒、37.5%、各回の範囲が一致。結果の再掲をS03から外しても主旨はS02に保持。"
+        },
+        {
+          "item": "持ち時間",
+          "result": "計画上確認",
+          "reason": "ページ秒数40+50+35+55=180秒。300文字/分の想定で原稿を見直した。3分の実リハーサルは別確認であり未実施。"
+        }
+      ],
+      "findings": [
+        {
+          "id": "R3-separated-limit",
+          "target": {
+            "slideId": "S03",
+            "paragraphId": "S03-P01"
+          },
+          "severity": "major",
+          "problem": "旧r2のS03に結果再掲・限界・次の行動が混在していた",
+          "reason": "聞き手が次の行動の要点を見分けにくい",
+          "suggestion": "限界を独立ページにし、S03は実測条件の提案へ絞る",
+          "resolution": "resolved",
+          "resolutionReason": "r3の新S04へ限界を分離し、S03のtakeawayを廃止して行動3条件だけに修正。新版の生成原稿/ストーリーを再読した。"
+        }
+      ],
+      "unchecked": []
+    },
+    {
+      "id": "B-visual-S01",
+      "kind": "visual",
+      "slideId": "S01",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "pending",
+      "reviewer": "Codex sample author",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "structure",
+      "environment": {
+        "surface": "actual HTML not rendered"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "実表示",
+          "result": "未検証",
+          "reason": "許可された実表示経路を利用できず、構造検査を目視審査の代用にしない"
+        }
+      ],
+      "findings": [],
+      "unchecked": [
+        "全幅・レビュー/単独/一覧/拡大の実HTML表示"
+      ]
+    },
+    {
+      "id": "B-visual-S02",
+      "kind": "visual",
+      "slideId": "S02",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "pending",
+      "reviewer": "Codex sample author",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "structure",
+      "environment": {
+        "surface": "actual HTML not rendered"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "実表示",
+          "result": "未検証",
+          "reason": "許可された実表示経路を利用できず、構造検査を目視審査の代用にしない"
+        }
+      ],
+      "findings": [],
+      "unchecked": [
+        "全幅・レビュー/単独/一覧/拡大の実HTML表示"
+      ]
+    },
+    {
+      "id": "B-visual-S04",
+      "kind": "visual",
+      "slideId": "S04",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "pending",
+      "reviewer": "Codex sample author",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "structure",
+      "environment": {
+        "surface": "actual HTML not rendered"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "実表示",
+          "result": "未検証",
+          "reason": "許可された実表示経路を利用できず、構造検査を目視審査の代用にしない"
+        }
+      ],
+      "findings": [],
+      "unchecked": [
+        "全幅・レビュー/単独/一覧/拡大の実HTML表示"
+      ]
+    },
+    {
+      "id": "B-visual-S03",
+      "kind": "visual",
+      "slideId": "S03",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "pending",
+      "reviewer": "Codex sample author",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "structure",
+      "environment": {
+        "surface": "actual HTML not rendered"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "実表示",
+          "result": "未検証",
+          "reason": "許可された実表示経路を利用できず、構造検査を目視審査の代用にしない"
+        }
+      ],
+      "findings": [],
+      "unchecked": [
+        "全幅・レビュー/単独/一覧/拡大の実HTML表示"
+      ]
+    },
+    {
+      "id": "B-page-S01",
+      "kind": "page",
+      "slideId": "S01",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "verified",
+      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "semantic",
+      "environment": {
+        "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
+        "operatingSystem": "macOS",
+        "runtime": "Node.js 26.10.0",
+        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "一要点と表現",
+          "result": "確認",
+          "reason": "同じPC・各3回・演習用仮想値の短い条件ラベルが比較前提の一要点を支える。バッチ処理の定義はS01-P01へ移し、結果や次の行動を混ぜていない。"
+        },
+        {
+          "item": "必要な条件",
+          "result": "確認",
+          "reason": "messageとconditionsに同じPC・各3回・仮想値を残した。入力・測定範囲が未指定という詳細はbriefと限界ページで確認できる。"
+        }
+      ],
+      "findings": [],
+      "unchecked": []
+    },
+    {
+      "id": "B-page-S02",
+      "kind": "page",
+      "slideId": "S02",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "verified",
+      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "semantic",
+      "environment": {
+        "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
+        "operatingSystem": "macOS",
+        "runtime": "Node.js 26.10.0",
+        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "一要点と視覚表現",
+          "result": "確認",
+          "reason": "比較グラフだけを主役にして、平均の差15秒という一要点を同一title/messageで示す。スライド上は同文messageを繰り返さず、comparison-table/differenceを除き、37.5%・範囲・解釈はS02-P01/出典へ移した。グラフの秒単位、同じPC・各3回、仮想値表示は維持。"
+        },
+        {
+          "item": "数値・尺度・根拠",
+          "result": "確認",
+          "reason": "CSVの現行40/42/38と改善案25/24/26を集計し平均40/25、差15、現行40を分母として37.5%に一致。SVGは0から50秒の同一線形尺度で幅512/320、比40:25、各3回と仮想値の表示も維持。"
+        }
+      ],
+      "findings": [],
+      "unchecked": []
+    },
+    {
+      "id": "B-page-S04",
+      "kind": "page",
+      "slideId": "S04",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "verified",
+      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "semantic",
+      "environment": {
+        "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
+        "operatingSystem": "macOS",
+        "runtime": "Node.js 26.10.0",
+        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "一要点と説明量",
+          "result": "確認",
+          "reason": "実運用効果未検証の一要点を同一title/messageで示し、同文messageはスライド上で繰り返さない。limitは理由となる入力量/測定範囲未指定だけを示す。適切な数値表現がない限界には短い言葉を選ぶ。"
+        },
+        {
+          "item": "推論の範囲",
+          "result": "確認",
+          "reason": "S04-P01は演習の15秒/37.5%から本番効果を確定できない理由を説明し、次の具体手順はS03に分離している。"
+        }
+      ],
+      "findings": [],
+      "unchecked": []
+    },
+    {
+      "id": "B-page-S03",
+      "kind": "page",
+      "slideId": "S03",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "verified",
+      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "semantic",
+      "environment": {
+        "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
+        "operatingSystem": "macOS",
+        "runtime": "Node.js 26.10.0",
+        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "一要点と行動",
+          "result": "確認",
+          "reason": "next-conditionsの3項目はいずれも同じ条件で実測するという一つの提案を支える。takeawayとlimitを外し、結果再掲や限界との二つの主張を混在させない。"
+        },
+        {
+          "item": "提案と根拠",
+          "result": "確認",
+          "reason": "next-proposalとして扱い、S03-P01は未決の担当者・期間も明示する。実測済み/実運用効果という新しい結果を追加していない。"
+        }
+      ],
+      "findings": [],
+      "unchecked": []
+    },
+    {
+      "id": "B-flow-deck",
+      "kind": "flow",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "18431324c79269046ff2c99cb9cad42d91ed308b107257e4271a6aa14d17dfcc",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "verified",
+      "reviewer": "Codex authoring worker semantic self-review",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "semantic",
+      "environment": {
+        "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
+        "operatingSystem": "macOS",
+        "runtime": "Node.js 26.10.0",
+        "finalCheck": "renderer 2f36c83; generated script.md/story.md bytes matched the actually reread version; SVG source changed only the redundant axis explanation"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "前提と用語",
+          "result": "確認",
+          "reason": "S01-P01の冒頭でバッチ処理を平易に定義。演習用仮想値を最初に説明し、各3回と同じPCを示してから結果へ進む。"
+        },
+        {
+          "item": "流れと論理",
+          "result": "改訂後確認",
+          "reason": "重複削減後の生成story/scriptをS01→S02→S04→S03で再通読。前提、差、推論の限界、次の実測条件を一ページずつ示し、各transitionと次ページが対応。title/message同一でも読み上げ原稿は詳細を保つ。"
+        },
+        {
+          "item": "図表と原稿",
+          "result": "確認",
+          "reason": "CSV、集計JSON、SVG、S02-P01の平均40/25、差15秒、37.5%、各回の範囲が一致。結果の再掲をS03から外しても主旨はS02に保持。"
+        },
+        {
+          "item": "持ち時間",
+          "result": "計画上確認",
+          "reason": "ページ秒数40+50+35+55=180秒。300文字/分の想定で原稿を見直した。3分の実リハーサルは別確認であり未実施。"
+        }
+      ],
+      "findings": [
+        {
+          "id": "R3-separated-limit",
+          "target": {
+            "slideId": "S03",
+            "paragraphId": "S03-P01"
+          },
+          "severity": "major",
+          "problem": "旧r2のS03に結果再掲・限界・次の行動が混在していた",
+          "reason": "聞き手が次の行動の要点を見分けにくい",
+          "suggestion": "限界を独立ページにし、S03は実測条件の提案へ絞る",
+          "resolution": "resolved",
+          "resolutionReason": "r3の新S04へ限界を分離し、S03のtakeawayを廃止して行動3条件だけに修正。新版の生成原稿/ストーリーを再読した。"
+        }
+      ],
+      "unchecked": []
+    }
+  ]
+}

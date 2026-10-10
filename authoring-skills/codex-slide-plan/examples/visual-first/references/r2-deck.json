@@ -1,0 +1,446 @@
+{
+  "schemaVersion": 2,
+  "id": "batch-comparison",
+  "revision": "r2",
+  "title": "バッチ処理の改善案を、平均時間から考える",
+  "language": "ja",
+  "purpose": "現行と改善案の平均処理時間を共有し、実運用で確かめる条件を整理する",
+  "audience": "開発者と非技術部門の合同会議",
+  "message": "仮想測定では40秒から25秒へ。差の意味と確認条件を共有する",
+  "expectedOutcome": "平均時間の差を理解し、仮想値と実運用の効果を区別できる",
+  "durationSeconds": 180,
+  "timing": {
+    "charactersPerMinute": 300
+  },
+  "requestedSlides": 3,
+  "citations": "review",
+  "chapters": [
+    {
+      "id": "purpose",
+      "title": "目的と条件"
+    },
+    {
+      "id": "result",
+      "title": "平均時間の比較"
+    },
+    {
+      "id": "next",
+      "title": "実運用での確認"
+    }
+  ],
+  "unresolved": [
+    "実運用の入力データ量と測定範囲は未指定。今回の仮想値から本番効果を確定しない。"
+  ],
+  "slides": [
+    {
+      "id": "S01",
+      "chapter": "purpose",
+      "role": "比較する目的と前提を共有する",
+      "title": "まとめて処理する時間を短くする",
+      "message": "同じPC・各3回の仮想測定から、比較の見方をそろえる",
+      "talkingPoints": [
+        "バッチ処理はデータをまとめて処理すること",
+        "現行と改善案の時間を比較する",
+        "今回は演習用の仮想値"
+      ],
+      "notes": "非技術部門向けにバッチ処理を初出で説明する。",
+      "transition": "条件をそろえて、次に平均時間を見ます。",
+      "seconds": 50,
+      "sourceIds": [
+        "brief",
+        "measurements"
+      ],
+      "elements": [
+        {
+          "id": "goal",
+          "kind": "text",
+          "text": "確認したいこと：改善案は平均でどれだけ短いか",
+          "sourceIds": [
+            "brief"
+          ]
+        },
+        {
+          "id": "conditions",
+          "kind": "list",
+          "items": [
+            "同じPCで比較",
+            "現行・改善案を各3回",
+            "演習用の仮想値"
+          ],
+          "sourceIds": [
+            "brief",
+            "measurements"
+          ]
+        }
+      ],
+      "paragraphs": [
+        {
+          "id": "S01-P01",
+          "text": "今日は、バッチ処理の改善案を、処理にかかる時間から比べます。バッチ処理とは、データを一件ずつ操作する代わりに、まとめて処理することです。開発者と非技術部門の皆さんが同じ数字を読めるように、まず比較の前提をそろえます。資料の値は、同じPCで現行と改善案をそれぞれ3回測ったという設定の、演習用の仮想値です。実運用で測った結果ではありません。今日は平均時間の差と、その差をどこまで判断材料にできるかを共有します。",
+          "sourceIds": [
+            "brief",
+            "measurements"
+          ]
+        }
+      ],
+      "layout": {
+        "grid": {
+          "columns": 3,
+          "rows": 1,
+          "slots": [
+            {
+              "elementId": "goal",
+              "row": 1,
+              "column": 1,
+              "rowSpan": 1,
+              "columnSpan": 2
+            },
+            {
+              "elementId": "conditions",
+              "row": 1,
+              "column": 3,
+              "rowSpan": 1,
+              "columnSpan": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "S02",
+      "chapter": "result",
+      "role": "平均の比較結果を示す",
+      "title": "平均40秒から25秒へ、15秒短縮",
+      "message": "現行40秒、改善案25秒。平均の差は15秒",
+      "talkingPoints": [
+        "現行の平均は40秒",
+        "改善案の平均は25秒",
+        "現行比37.5%短い"
+      ],
+      "notes": "依頼に沿い平均時間と差が見出しで分かる表現に改訂。前ページの条件から比較、次ページの実測条件へつなぐ。",
+      "transition": "この差を踏まえて、実運用で何を確かめるか整理します。",
+      "seconds": 75,
+      "sourceIds": [
+        "measurements",
+        "summary"
+      ],
+      "elements": [
+        {
+          "id": "comparison-chart",
+          "kind": "diagram",
+          "assetId": "comparison-svg",
+          "alt": "現行40秒と改善案25秒の平均時間の横棒比較",
+          "caption": "平均処理時間（秒・演習用仮想値）",
+          "sourceIds": [
+            "summary"
+          ],
+          "regionSelectable": true
+        },
+        {
+          "id": "comparison-table",
+          "kind": "table",
+          "caption": "各3回の平均と範囲（秒・仮想値）",
+          "columns": [
+            "方式",
+            "平均（秒）",
+            "範囲（秒）"
+          ],
+          "rows": [
+            {
+              "id": "current",
+              "cells": [
+                "現行",
+                "40",
+                "38–42"
+              ]
+            },
+            {
+              "id": "proposal",
+              "cells": [
+                "改善案",
+                "25",
+                "24–26"
+              ]
+            }
+          ],
+          "sourceIds": [
+            "measurements",
+            "summary"
+          ],
+          "dataRef": {
+            "path": "data/measurements.csv",
+            "position": "行2–7 / method,seconds"
+          }
+        },
+        {
+          "id": "difference",
+          "kind": "text",
+          "text": "15秒短い／現行比37.5%短縮（仮想値）",
+          "sourceIds": [
+            "summary"
+          ]
+        }
+      ],
+      "paragraphs": [
+        {
+          "id": "S02-P01",
+          "text": "比較の条件が分かったので、平均時間の差を見てみましょう。現行は3回の平均が40秒、改善案は25秒でした。つまり、今回の仮想測定では、改善案が平均で15秒短くなっています。現行の40秒を基準に計算すると、37.5パーセントの短縮です。左の横棒と右の表は同じ平均値を示し、表には各回の範囲も添えています。現行の値は38秒から42秒、改善案は24秒から26秒でした。短縮という表現は、あくまでこの演習用の仮想値を比較した結果です。実運用でも15秒短くなるとは確定できません。この違いを押さえたうえで、次に実運用でそろえる条件を整理します。",
+          "sourceIds": [
+            "measurements",
+            "summary"
+          ]
+        }
+      ],
+      "layout": {
+        "grid": {
+          "columns": 3,
+          "rows": 2,
+          "slots": [
+            {
+              "elementId": "comparison-chart",
+              "row": 1,
+              "column": 1,
+              "rowSpan": 1,
+              "columnSpan": 2
+            },
+            {
+              "elementId": "comparison-table",
+              "row": 1,
+              "column": 3,
+              "rowSpan": 2,
+              "columnSpan": 1
+            },
+            {
+              "elementId": "difference",
+              "row": 2,
+              "column": 1,
+              "rowSpan": 1,
+              "columnSpan": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "S03",
+      "chapter": "next",
+      "role": "結果の意味と次の確認をまとめる",
+      "title": "次は実運用の条件で確かめる",
+      "message": "平均の差を手がかりに、同じ条件で実測する",
+      "talkingPoints": [
+        "今回の仮想値では15秒の差",
+        "入力と測定範囲を明示して確認する",
+        "実運用の効果は今回未検証"
+      ],
+      "notes": "新しい実測の提案であり、CSVにない測定結果を追加しない。",
+      "transition": "この比較を共通の土台として、実測の条件を相談します。",
+      "seconds": 55,
+      "sourceIds": [
+        "summary",
+        "next-proposal"
+      ],
+      "elements": [
+        {
+          "id": "takeaway",
+          "kind": "text",
+          "text": "今回の比較：40秒 → 25秒（演習用仮想値）",
+          "sourceIds": [
+            "summary"
+          ]
+        },
+        {
+          "id": "next-conditions",
+          "kind": "list",
+          "items": [
+            "同じ入力データ量で比べる",
+            "開始・終了の測定範囲をそろえる",
+            "複数回の値と平均を残す"
+          ],
+          "sourceIds": [
+            "next-proposal"
+          ]
+        },
+        {
+          "id": "limit",
+          "kind": "text",
+          "text": "実運用の短縮効果は未検証",
+          "sourceIds": [
+            "next-proposal"
+          ]
+        }
+      ],
+      "paragraphs": [
+        {
+          "id": "S03-P01",
+          "text": "まとめると、今回の仮想測定では、平均時間が40秒から25秒になり、15秒の差がありました。これは改善案を確かめるための比較例として使います。実運用の効果を判断するには、同じ入力データ量を使い、どこからどこまでの時間を測るかをそろえる必要があります。そのうえで複数回の値を残し、平均だけでなく値のばらつきも見ましょう。今回の資料には実運用の入力や測定範囲がないため、その効果は未検証です。この平均時間の読み方を共通の土台にして、次の実測でそろえる条件を相談できればと思います。",
+          "sourceIds": [
+            "summary",
+            "next-proposal"
+          ]
+        }
+      ],
+      "layout": {
+        "grid": {
+          "columns": 2,
+          "rows": 2,
+          "slots": [
+            {
+              "elementId": "takeaway",
+              "row": 1,
+              "column": 1,
+              "rowSpan": 1,
+              "columnSpan": 2
+            },
+            {
+              "elementId": "next-conditions",
+              "row": 2,
+              "column": 1,
+              "rowSpan": 1,
+              "columnSpan": 1
+            },
+            {
+              "elementId": "limit",
+              "row": 2,
+              "column": 2,
+              "rowSpan": 1,
+              "columnSpan": 1
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "sources": [
+    {
+      "id": "measurements",
+      "kind": "data",
+      "title": "演習用バッチ処理の仮想測定値",
+      "label": "仮想値（演習用）",
+      "path": "data/measurements.csv",
+      "position": "行2–7 / method,run,seconds",
+      "lineRange": [
+        2,
+        7
+      ],
+      "sha256": "255218396f846432b398f976294294a708ce8e08e034081548a59a385d809142",
+      "columns": "method,run,seconds",
+      "unit": "秒",
+      "period": "演習用の仮想測定、測定日時未指定",
+      "filters": "同じPC、現行・改善案を各3回、全6行、除外なし",
+      "checkedAt": "2026-10-10",
+      "copy": true
+    },
+    {
+      "id": "brief",
+      "kind": "project",
+      "title": "合同会議の依頼と比較条件",
+      "path": "input/brief.txt",
+      "position": "行1",
+      "lineRange": [
+        1,
+        1
+      ],
+      "sha256": "2ea6d63419411694e01c9efa874f5f5d41dc96f1280b08d4ca331f81db001e92",
+      "checkedAt": "2026-10-10",
+      "copy": true
+    },
+    {
+      "id": "summary",
+      "kind": "derived",
+      "title": "方式別の算術平均と現行比短縮率",
+      "label": "仮想値（演習用）",
+      "inputIds": [
+        "measurements"
+      ],
+      "formula": "現行平均=(40+42+38)/3=40秒、改善案平均=(25+24+26)/3=25秒、差=40−25=15秒、短縮率=(40−25)/40×100=37.5%",
+      "code": "scripts/aggregate.mjs",
+      "output": "data/summary.json",
+      "unit": "秒／%",
+      "population": "同じPCの仮想測定、各方式3回、全6行",
+      "missing": "欠測なし、全行使用",
+      "checkedAt": "2026-10-10"
+    },
+    {
+      "id": "next-proposal",
+      "kind": "concept",
+      "title": "実測でそろえる条件の提案",
+      "label": "提案・実運用効果未検証",
+      "checkedAt": "2026-10-10"
+    }
+  ],
+  "assets": [
+    {
+      "id": "comparison-svg",
+      "file": "assets/comparison.svg",
+      "preview": true,
+      "originals": [
+        "assets/comparison.svg"
+      ],
+      "origin": "CSVの平均値から独自生成した編集可能SVG",
+      "license": "この演習用プロジェクト内で再利用可",
+      "regenerate": "node scripts/aggregate.mjs",
+      "slideIds": [
+        "S02"
+      ],
+      "sourceIds": [
+        "summary"
+      ]
+    }
+  ],
+  "files": [
+    "data/measurements.csv",
+    "data/summary.json",
+    "scripts/aggregate.mjs"
+  ],
+  "design": {
+    "theme": {
+      "background": "#ffffff",
+      "ink": "#172a3a",
+      "accent": "#137e75",
+      "muted": "#586c7d",
+      "font": "Arial, sans-serif",
+      "ratio": [
+        16,
+        9
+      ],
+      "padding": 5
+    }
+  },
+  "master": {
+    "status": "未提供、持込マスターなし"
+  },
+  "coherence": {
+    "revision": "r2",
+    "contentHash": "3d1b807f9c4ebd369e8e3fcf249a960392369c5d6c1a88b069ad93867ca8836c",
+    "reviewer": "Codex independent reviewer first-use trial",
+    "checkedAt": "2026-10-10",
+    "checks": [
+      {
+        "item": "聞き手の前提・用語",
+        "result": "確認",
+        "evidence": "S01-P01でバッチ処理を平易に説明し、S02-P01で短縮率の基準を説明"
+      },
+      {
+        "item": "根拠と結論",
+        "result": "確認",
+        "evidence": "全ページで演習用仮想値として扱い、実運用の効果を確定しない"
+      },
+      {
+        "item": "ページ間の自然さ",
+        "result": "確認",
+        "evidence": "S01の条件共有→S02の平均40秒/25秒と15秒の差→S03の実測条件という順で改訂後通読"
+      },
+      {
+        "item": "図表と原稿の一致",
+        "result": "確認",
+        "evidence": "CSV、再生成SVG、表、改訂見出し/原稿は40秒/25秒/15秒/37.5%で一致"
+      }
+    ],
+    "findings": [],
+    "unchecked": [
+      "実ブラウザ表示・狭幅・操作",
+      "実際の聞き手評価",
+      "3分の実リハーサル"
+    ]
+  }
+}
