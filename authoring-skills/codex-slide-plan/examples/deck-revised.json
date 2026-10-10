@@ -1,0 +1,412 @@
+{
+  "schemaVersion": 1,
+  "id": "comparison-demo",
+  "revision": "r2",
+  "title": "比較の数字と条件を一緒に読む",
+  "language": "ja",
+  "purpose": "処理手順の比較を前提と条件付きで説明する",
+  "audience": "ETLを知らない企画担当。実測前に比較の見方を知りたい",
+  "message": "数字と条件をセットで読む",
+  "expectedOutcome": "仮値から実測の効果を決めず確認条件を選べる",
+  "durationSeconds": 180,
+  "timing": {
+    "charactersPerMinute": 300
+  },
+  "requestedSlides": 4,
+  "chapters": [
+    {
+      "id": "intro",
+      "title": "目的"
+    },
+    {
+      "id": "evidence",
+      "title": "条件と比較"
+    },
+    {
+      "id": "close",
+      "title": "次の確認"
+    }
+  ],
+  "unresolved": [
+    "実測の担当と期間は本資料の対象外"
+  ],
+  "slides": [
+    {
+      "id": "S01",
+      "chapter": "intro",
+      "role": "今日の判断を示す",
+      "title": "数字と条件を一緒に読む",
+      "message": "仮値を使って比較の見方を共有する",
+      "talkingPoints": [
+        "今日は比較の読み方を確認する",
+        "実測結果ではない"
+      ],
+      "notes": "説明用仮値を実績として読まない。",
+      "transition": "まず比較に必要な条件を整理します。",
+      "seconds": 30,
+      "layoutId": "cover",
+      "sourceIds": [
+        "brief"
+      ],
+      "elements": [
+        {
+          "id": "goal",
+          "kind": "text",
+          "sourceIds": [],
+          "text": "ゴール: 数字だけで判断せず、前提と条件を確かめる。"
+        }
+      ],
+      "paragraphs": [
+        {
+          "id": "S01-P01",
+          "text": "今日は処理手順を比べるときに何を一緒に確認するかを整理します。説明には仮の数字を使います。実測結果の報告ではありません。",
+          "sourceIds": [
+            "brief"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S02",
+      "chapter": "evidence",
+      "role": "比較の前提を渡す",
+      "title": "比較条件を揃えて読む",
+      "message": "同じ入力・対象範囲で手順を比べる",
+      "talkingPoints": [
+        "入力、手順、条件の順に読む",
+        "ETLの説明を補う"
+      ],
+      "notes": "略語の初出説明と、仮値へのつなぎを追加した改訂。",
+      "transition": "条件を共有できたので次に説明用の仮値を見てみます。",
+      "seconds": 45,
+      "layoutId": "background",
+      "sourceIds": [
+        "brief",
+        "concept-flow"
+      ],
+      "elements": [
+        {
+          "id": "scope-diagram",
+          "kind": "diagram",
+          "sourceIds": [
+            "concept-flow"
+          ],
+          "assetId": "flow-original",
+          "alt": "入力、手順、条件の3段階",
+          "regionSelectable": true
+        }
+      ],
+      "paragraphs": [
+        {
+          "id": "S02-P01",
+          "text": "ETLはデータを取り出し、使える形に整え、保存先へ読み込む処理です。この資料では同じ入力を揃える例として使います。比較は同じ入力で行い、待ち時間は含めません。",
+          "sourceIds": [
+            "brief"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S03",
+      "chapter": "evidence",
+      "role": "結果を条件付きで読む",
+      "title": "仮値では一括処理の時間が短い",
+      "message": "18分と9分の比較例。実測ではない",
+      "talkingPoints": [
+        "手動18分、一括9分という仮値",
+        "条件は出典から確認"
+      ],
+      "notes": "系列と表の行を同じ元データへ対応。",
+      "transition": "例の見方を次の確認手順にまとめます。",
+      "seconds": 60,
+      "layoutId": "result-chart",
+      "sourceIds": [
+        "illustrative-data",
+        "comparison-derived"
+      ],
+      "elements": [
+        {
+          "id": "runtime-chart",
+          "kind": "chart",
+          "sourceIds": [
+            "comparison-derived"
+          ],
+          "unit": "分",
+          "caption": "方法ごとの時間（仮値）",
+          "series": [
+            {
+              "id": "manual",
+              "label": "手動",
+              "value": 18
+            },
+            {
+              "id": "batch",
+              "label": "一括",
+              "value": 9
+            }
+          ],
+          "dataRef": {
+            "path": "data/illustrative.csv",
+            "position": "行2–3 / minutes"
+          }
+        },
+        {
+          "id": "runtime-table",
+          "kind": "table",
+          "sourceIds": [
+            "illustrative-data"
+          ],
+          "caption": "元データ（仮値）",
+          "columns": [
+            "方法",
+            "時間（分）"
+          ],
+          "rows": [
+            {
+              "id": "manual",
+              "cells": [
+                "手動",
+                "18"
+              ]
+            },
+            {
+              "id": "batch",
+              "cells": [
+                "一括",
+                "9"
+              ]
+            }
+          ],
+          "dataRef": {
+            "path": "data/illustrative.csv",
+            "position": "行2–3 / stage,minutes"
+          }
+        }
+      ],
+      "paragraphs": [
+        {
+          "id": "S03-P01",
+          "text": "こちらは説明用の仮値です。手動を18分、一括を9分としています。この差は実測の短縮効果ではありません。入力、測定範囲、待ち時間の扱いを確認するという見方を共有するための例です。",
+          "sourceIds": [
+            "illustrative-data"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S04",
+      "chapter": "close",
+      "role": "次の行動に結びつける",
+      "title": "実測の確認事項を決める",
+      "message": "入力・範囲・単位を揃えて実測を記録する",
+      "talkingPoints": [
+        "仮値は意思決定の根拠にしない",
+        "実測する条件を揃える"
+      ],
+      "notes": "具体的担当や期日は次の作業で決める。",
+      "transition": "以上です。どの条件を実測で確認するか相談します。",
+      "seconds": 35,
+      "layoutId": "closing",
+      "sourceIds": [
+        "concept-flow"
+      ],
+      "elements": [
+        {
+          "id": "actions",
+          "kind": "list",
+          "sourceIds": [
+            "concept-flow"
+          ],
+          "items": [
+            "同じ入力を用意する",
+            "測定範囲と単位を記録する",
+            "測定した値を出典付きで共有する"
+          ]
+        }
+      ],
+      "paragraphs": [
+        {
+          "id": "S04-P01",
+          "text": "要点は数字と条件をセットで読むことです。実測する場合は入力、測定範囲、単位を揃えて記録します。この仮値から本番導入の効果を決めることはできません。次は実測で確認する条件を決めましょう。",
+          "sourceIds": [
+            "concept-flow"
+          ]
+        }
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "id": "A",
+      "name": "標準の結果表示",
+      "storyId": "teaching",
+      "themeId": "calm"
+    },
+    {
+      "id": "B",
+      "name": "独自配置を比較",
+      "storyId": "teaching",
+      "themeId": "editorial",
+      "layouts": {
+        "S03": "custom-evidence-map"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "id": "illustrative-data",
+      "kind": "data",
+      "title": "説明用の比較データ",
+      "label": "仮値（実測ではない）",
+      "path": "data/illustrative.csv",
+      "position": "行2–3 / stage,minutes",
+      "lineRange": [
+        2,
+        3
+      ],
+      "sha256": "153d5ee9fe9b99ed64b1a76a9e467cbeb1e2bf14516f2f82a65374075e42e5a6",
+      "columns": "stage,minutes,sourceId",
+      "unit": "分",
+      "period": "説明用想定、特定期間なし",
+      "filters": "同じ入力を使う想定の2方法",
+      "checkedAt": "2026-10-10",
+      "copy": true
+    },
+    {
+      "id": "brief",
+      "kind": "project",
+      "title": "制作依頼と比較条件",
+      "path": "data/context.md",
+      "position": "見出し: 比較条件",
+      "heading": "比較条件",
+      "sha256": "2a06886a18902c287fb47b1f34900bd0013ce297ea29e3c6677c2490ef29c8cf",
+      "checkedAt": "2026-10-10",
+      "copy": true
+    },
+    {
+      "id": "concept-flow",
+      "kind": "concept",
+      "title": "比較の見取り図",
+      "label": "概念図・提案",
+      "checkedAt": "2026-10-10"
+    },
+    {
+      "id": "comparison-derived",
+      "kind": "derived",
+      "title": "比較グラフの集計",
+      "label": "仮値（実測ではない）",
+      "inputIds": [
+        "illustrative-data"
+      ],
+      "formula": "各stageのminutesを表示。短縮率=(18-9)/18=50%",
+      "code": "scripts/aggregate.mjs",
+      "output": "data/illustrative.csv",
+      "unit": "分",
+      "population": "説明用2処理、実験母数なし",
+      "missing": "欠測なしの仮定",
+      "checkedAt": "2026-10-10"
+    }
+  ],
+  "assets": [
+    {
+      "id": "flow-original",
+      "file": "assets/flow.svg",
+      "preview": true,
+      "originals": [
+        "assets/flow.svg"
+      ],
+      "origin": "独自作成の概念図。編集可能SVG原本",
+      "license": "プロジェクト内で自由に再利用可",
+      "regenerate": "flow.svgをテキスト編集。実測図ではない",
+      "slideIds": [
+        "S02"
+      ],
+      "sourceIds": [
+        "concept-flow"
+      ]
+    }
+  ],
+  "files": [
+    "data/illustrative.csv",
+    "scripts/aggregate.mjs"
+  ],
+  "catalog": {
+    "layouts": [
+      {
+        "id": "custom-evidence-map",
+        "version": "v1",
+        "name": "条件と結果の立体比較",
+        "purpose": "グラフと元データを非対称に配置する",
+        "fits": "結果と条件の往復が必要な資料",
+        "avoids": "文章だけの表紙",
+        "needs": "グラフと元表",
+        "quantity": "2要素、各3系列以下",
+        "structure": "左上グラフから右下原表へ視線を流す",
+        "adjust": "列幅、rowspan、読む順",
+        "prompt": "同じelement IDsと出典を保持し、余白を使った非対称配置を作る。",
+        "preview": [
+          "主要グラフ",
+          "余白",
+          "元データ"
+        ],
+        "grid": {
+          "columns": 3,
+          "rows": 3,
+          "slots": [
+            {
+              "elementId": "runtime-chart",
+              "row": 1,
+              "column": 1,
+              "rowSpan": 2,
+              "columnSpan": 2
+            },
+            {
+              "elementId": "runtime-table",
+              "row": 2,
+              "column": 3,
+              "rowSpan": 2,
+              "columnSpan": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "master": {
+    "status": "未提供・利用者固有マスターは未検証"
+  },
+  "coherence": {
+    "revision": "r2",
+    "contentHash": "605a132bae149e1f44a2cdccb3b7198fc72cef7b66197314c887a2b13591b434",
+    "reviewer": "Codex sample revised editorial review",
+    "checkedAt": "2026-10-10",
+    "checks": [
+      {
+        "item": "聞き手の前提・用語",
+        "result": "改訂後確認",
+        "evidence": "S02-P01でETLの意味を初出で説明"
+      },
+      {
+        "item": "根拠と結論",
+        "result": "確認",
+        "evidence": "S03/S04の仮値・実測の区別を維持"
+      },
+      {
+        "item": "ページ間の自然さ",
+        "result": "改訂後確認",
+        "evidence": "S02→S03は条件共有→仮値の説明の順になった"
+      },
+      {
+        "item": "図表と原稿の一致",
+        "result": "確認",
+        "evidence": "系列・表・原稿は同じCSVと一致"
+      }
+    ],
+    "findings": [],
+    "unchecked": [
+      "実際の聞き手による評価",
+      "リハーサル実測",
+      "利用者固有マスター"
+    ]
+  }
+}
