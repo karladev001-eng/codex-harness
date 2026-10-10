@@ -2,13 +2,13 @@
 
 既定の `create-rulebooks`、`create-subagent`、`create-harness`、`inspect-harness`、`codex-html-plan` を任意のプロジェクトへ導入します。`codex-slide-plan` は明示選択で追加するオプションです。最初の4スキルは独立したMarkdownで、2つのHTML計画スキルはpack runtimeを含み使用時にNode.js 22以上が必要です。ハーネス本体の有効化、個人用AGENTS.mdやモデル設定の変更は行いません。
 
-`codex-slide-plan` は新しいスキルです。現在配布中の0.4.2 tarballには含まれていないため、次の配布版まではこのcheckoutから導入してください。現行のnpm `@latest` や既存tarballでは選択できません。
+0.4.3では `codex-slide-plan` の導入元を同じnpmパッケージ/tgzに収録します。以下は0.4.3対応の手順です。registryからの取得には指定版の配布完了とpackageアクセス権が必要です。
 
 導入CLIにはNode.js 22以上とnpmが必要です。通常の導入・HTML制作には利用者のPython、TypeScriptコンパイラ、リポジトリのcloneやnpm ciは不要です。スキルの使用自体には、利用先のCodexがMarkdownスキルに対応している必要があります。
 
 ## GitHub Packagesから既定スキルを導入・更新する
 
-**2026-10-10に非公開npm版0.4.2を配布済みです（既定5スキル）。** 各PCで、本体と同じ[PCごとの初回npm認証](../docs/guides/installation.md#github-packagesの初回認証)（classic PATのread:packagesと対象packageアクセス権）を済ませます。tokenはnpm loginの対話入力で扱い、チャット・リポジトリ・引数へ貼りません。
+既定の導入対象は5スキルです。各PCで、本体と同じ[PCごとの初回npm認証](../docs/guides/installation.md#github-packagesの初回認証)（classic PATのread:packagesと対象packageアクセス権）を済ませます。tokenはnpm loginの対話入力で扱い、チャット・リポジトリ・引数へ貼りません。
 
 package.jsonのない場所から導入でき、更新も同じコマンドです。
 
@@ -18,41 +18,41 @@ npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@
 npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@latest -- codex-harness authoring uninstall --project "/path/to/project" --skill inspect-harness
 ```
 
-PowerShellでは対象パスを `"C:\Projects\example"` へ置換します。版固定は `@latest` を配布済みの `@0.4.2` 等へ置換します。`--skill`を省略した解除は5スキルすべてが対象です。同版再実行は変更なし、未編集の旧版を更新します。401/403/404/通信エラーの切り分けは[導入ガイド](../docs/guides/installation.md#取得導入の失敗)へ。取得失敗では導入CLIは実行されず、編集済みスキルは取得成功後も上書きしません。本体install、AGENTS入口、設定を変更しない独立導入です。
+PowerShellでは対象パスを `"C:\Projects\example"` へ置換します。版固定は `@latest` を `@0.4.3` 等の取得する版へ置換します。`--skill`を省略した解除は5スキルすべてが対象です。同版再実行は変更なし、未編集の旧版を更新します。401/403/404/通信エラーの切り分けは[導入ガイド](../docs/guides/installation.md#取得導入の失敗)へ。取得失敗では導入CLIは実行されず、編集済みスキルは取得成功後も上書きしません。本体install、AGENTS入口、設定を変更しない独立導入です。
 
 ## 配布物をコピーして導入する
 
-配布元で作成した `karladev001-eng-codex-harness-0.4.2.tgz` を対象PCへコピーします。0.4.2のGitHub Release公開は前提にしません。macOS/LinuxとWindows PowerShellで同じコマンドを使えます。
+配布元で作成した `karladev001-eng-codex-harness-0.4.3.tgz` を対象PCへコピーします。GitHub Release公開は前提にしません。macOS/LinuxとWindows PowerShellで同じコマンドを使えます。
 
 ```sh
-npx --yes --package ./karladev001-eng-codex-harness-0.4.2.tgz codex-harness authoring install --project "/absolute/path/to/your project"
+npx --yes --package ./karladev001-eng-codex-harness-0.4.3.tgz codex-harness authoring install --project "/absolute/path/to/your project"
 ```
 
 PowerShellではプロジェクトパスを `"C:\absolute\path\to\your project"` のように指定します。空白・日本語を含むパスは引用符で囲んでください。tarballはコピーしたディレクトリから指定するか、絶対パスに置き換えます。隔離テストでは `npx --offline` 起動を確認していますが、利用環境のnpmキャッシュ等に依存します。Node/npmの導入だけで全環境のoffline起動を保証するものではありません。
 
 Codexへは次のように依頼できます。
 
-> コピー済みの `karladev001-eng-codex-harness-0.4.2.tgz` を使い、codex-harness authoring installで `/絶対パス/対象プロジェクト` に5つのauthoringスキルを導入してください。既存の同名スキルが未所有または編集済みなら上書きせず報告してください。
+> コピー済みの `karladev001-eng-codex-harness-0.4.3.tgz` を使い、codex-harness authoring installで `/絶対パス/対象プロジェクト` に5つのauthoringスキルを導入してください。既存の同名スキルが未所有または編集済みなら上書きせず報告してください。
 
-## codex-slide-planを任意追加する（対応版の配布後）
+## codex-slide-planを任意追加する
 
-同じ非公開npmパッケージに導入元を収録します。別パッケージ、本体の有効化、cloneやnpm ciは不要です。**現行0.4.2には含まれません。以下の `<対応版>` は、この機能を収録して実際に配布した版へ置き換えます。現行の `@latest` に置き換えないでください。** Node.js 22以上・npmと、上記のGitHub Packages認証・packageアクセス権が必要です。
+0.4.3では同じ非公開npmパッケージに導入元を収録します。別パッケージ、本体の有効化、cloneやnpm ciは不要です。以下は0.4.3に固定した導入・更新・削除の例です。Node.js 22以上・npmと、上記のGitHub Packages認証・packageアクセス権が必要です。
 
 導入・更新は同じ明示選択です。削除も明示選択で行います。
 
 ```sh
-npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@<対応版> -- codex-harness authoring install --project "/path/to/project" --skill codex-slide-plan
-npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@<対応版> -- codex-harness authoring uninstall --project "/path/to/project" --skill codex-slide-plan
+npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@0.4.3 -- codex-harness authoring install --project "/path/to/project" --skill codex-slide-plan
+npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@0.4.3 -- codex-harness authoring uninstall --project "/path/to/project" --skill codex-slide-plan
 ```
 
-ネット接続を使わない導入先へは対応版のtgzをコピーします。ファイル名を受け取った実物へ置き換えて実行してください。
+ネット接続を使わない導入先へは0.4.3のtgzをコピーし、そのファイルを置いたディレクトリから実行します。
 
 ```sh
-npx --yes --package ./karladev001-eng-codex-harness-<対応版>.tgz codex-harness authoring install --project "/path/to/project" --skill codex-slide-plan
-npx --yes --package ./karladev001-eng-codex-harness-<対応版>.tgz codex-harness authoring uninstall --project "/path/to/project" --skill codex-slide-plan
+npx --yes --package ./karladev001-eng-codex-harness-0.4.3.tgz codex-harness authoring install --project "/path/to/project" --skill codex-slide-plan
+npx --yes --package ./karladev001-eng-codex-harness-0.4.3.tgz codex-harness authoring uninstall --project "/path/to/project" --skill codex-slide-plan
 ```
 
-シェルで `<対応版>` を含む例をそのまま実行しないでください。PowerShellでは対象パスを `"C:\Projects\example"` へ置換します。npmキャッシュなどの前提は上記のローカルtarball経路と同じで、全環境の完全offline起動を保証しません。
+PowerShellでは対象パスを `"C:\Projects\example"` へ置換します。npmキャッシュなどの前提は上記のローカルtarball経路と同じで、全環境の完全offline起動を保証しません。
 
 既定配置は `<project>/.agents/skills/codex-slide-plan`。個人用は同じコマンドへ `--skills-dir "/absolute/user/home/.agents/skills"` を加えます。ハーネスの設定やAGENTS入口は変更しません。導入後、新しいCodexチャットで `$codex-slide-plan` と資料・目的を渡してください。
 
@@ -74,7 +74,7 @@ npm run build
 node dist/skill/runtime.js authoring install --project "/path/to/project"
 ```
 
-PowerShellでは `--project "C:\Projects\example"`。現在のcheckoutから新スキルだけを入れる場合は `--skill codex-slide-plan` を加えます。既存配布物は従来の5スキルのままです。
+PowerShellでは `--project "C:\Projects\example"`。現在のcheckoutから任意スキルだけを入れる場合は `--skill codex-slide-plan` を加えます。指定なしの導入対象は5スキルです。
 
 ## 導入確認と最初の利用
 
@@ -91,8 +91,8 @@ PowerShellでは `--project "C:\Projects\example"`。現在のcheckoutから新�
 1スキルだけ導入・追加・更新するには `--skill` を指定します。複数回指定できます。
 
 ```sh
-npx --yes --package ./karladev001-eng-codex-harness-0.4.2.tgz codex-harness authoring install --project "/path/to/project" --skill inspect-harness
-npx --yes --package ./karladev001-eng-codex-harness-0.4.2.tgz codex-harness authoring uninstall --project "/path/to/project" --skill inspect-harness
+npx --yes --package ./karladev001-eng-codex-harness-0.4.3.tgz codex-harness authoring install --project "/path/to/project" --skill inspect-harness
+npx --yes --package ./karladev001-eng-codex-harness-0.4.3.tgz codex-harness authoring uninstall --project "/path/to/project" --skill inspect-harness
 ```
 
 `--skill` を省略したinstall/更新/uninstallは既定5スキルだけを対象にし、独立導入済みの `codex-slide-plan` を変更しません。従来の4スキルだけを指定する従来コマンドも引き続き使えます。全対象の確認後に一括変更するため、1つでも競合があれば他の対象も変更しません。所有するスキルに追記・編集・削除があると、更新・解除を拒否してその内容を保持します。無関係なスキルやプロジェクトファイルは残します。
@@ -100,7 +100,7 @@ npx --yes --package ./karladev001-eng-codex-harness-0.4.2.tgz codex-harness auth
 個人用に使う場合は `--skills-dir` にスキル親ディレクトリを明示できます。
 
 ```sh
-npx --yes --package ./karladev001-eng-codex-harness-0.4.2.tgz codex-harness authoring install --skills-dir "/absolute/user/home/.codex/skills" --skill inspect-harness
+npx --yes --package ./karladev001-eng-codex-harness-0.4.3.tgz codex-harness authoring install --skills-dir "/absolute/user/home/.codex/skills" --skill inspect-harness
 ```
 
 同名スキルをプロジェクト用と個人用の両方へ置くと、Codexで重複して表示される場合があります。通常はプロジェクト用を選びます。導入CLIは既存スキルを自動マージしません。

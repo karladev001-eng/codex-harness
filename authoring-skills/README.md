@@ -1,6 +1,6 @@
 # 既定5スキルと任意追加スキル
 
-必要な文書を作成・確認するためのスキルです。本体のオーケストレーションやモデル設定を有効化せず、それぞれ単独で使えます。[導入手順](INSTALL.md)で既定5スキルまたは必要なものだけ選べます。`codex-slide-plan` は `--skill codex-slide-plan` を明示して追加します。本体install/updateと指定なしのauthoring操作では導入・更新・削除しません。`codex-slide-plan` は現在のcheckoutに追加済みで、配布中の0.4.2 tarballには含まれていません。対応版を配布するまでは現行のnpm `@latest` から導入できません。
+必要な文書を作成・確認するためのスキルです。本体のオーケストレーションやモデル設定を有効化せず、それぞれ単独で使えます。[導入手順](INSTALL.md)で既定5スキルまたは必要なものだけ選べます。`codex-slide-plan` は `--skill codex-slide-plan` を明示して追加します。本体install/updateと指定なしのauthoring操作では導入・更新・削除しません。0.4.3では同じnpmパッケージ/tgzに `codex-slide-plan` の導入元を収録します。[任意追加の手順](INSTALL.md#codex-slide-planを任意追加する)では0.4.3を明示して選択します。
 
 | スキル | 依頼例 | 成果物 |
 | --- | --- | --- |

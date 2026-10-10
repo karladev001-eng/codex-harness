@@ -1,6 +1,6 @@
 # 非公開npm配布を準備・検証する
 
-GitHub Packagesの非公開配布を準備中です。現在のpackageは0.4.2。ソースの `private: true` はnpm publishを禁止する設定で、非公開registry設定そのものではありません。`UNLICENSED`も維持します。この手順はbuild、配布用staging、dry-run、ローカルtarballと隔離検証までです。実registry送信、公開、push、認証操作、ライセンス変更は別途指示まで行いません。
+0.4.3のGitHub Packages向け非公開配布を準備・検証します。ソースの `private: true` はnpm publishを禁止する設定で、非公開registry設定そのものではありません。`UNLICENSED`も維持します。この手順はbuild、配布用staging、dry-run、ローカルtarballと隔離検証までです。実registry送信、公開、push、認証操作、ライセンス変更は別途指示まで行いません。
 
 ## ビルドと配布内容
 
@@ -20,7 +20,7 @@ macOS/Linux：
 ```sh
 mkdir -p "/tmp/codex-harness-release"
 npm pack --pack-destination "/tmp/codex-harness-release"
-tar -tzf "/tmp/codex-harness-release/karladev001-eng-codex-harness-0.4.2.tgz"
+tar -tzf "/tmp/codex-harness-release/karladev001-eng-codex-harness-0.4.3.tgz"
 ```
 
 Windows PowerShell：
@@ -28,10 +28,10 @@ Windows PowerShell：
 ```powershell
 New-Item -ItemType Directory -Force -Path "$env:TEMP\codex-harness-release"
 npm pack --pack-destination "$env:TEMP\codex-harness-release"
-tar -tzf "$env:TEMP\codex-harness-release\karladev001-eng-codex-harness-0.4.2.tgz"
+tar -tzf "$env:TEMP\codex-harness-release\karladev001-eng-codex-harness-0.4.3.tgz"
 ```
 
-版はpackage.jsonの値と生成ファイル名で確認します。独立したstandalone/plugin、5スキル、Knowledge CLIと独立拡張、文書・出典・個別LICENSEを含むこと、参照先が展開後にも存在することを確認します。TypeScriptソース・node_modules・個人設定を実行配布物へ入れません。Raycastの実行ソース/依存は別導入です。
+版はpackage.jsonの値と生成ファイル名で確認します。独立したstandalone/plugin、既定5スキルと任意追加codex-slide-planの導入元、Knowledge CLIと独立拡張、文書・出典・個別LICENSEを含むこと、参照先が展開後にも存在することを確認します。TypeScriptソース・node_modules・個人設定を実行配布物へ入れません。Raycastの実行ソース/依存は別導入です。
 
 ## GitHub Packages用stagingを生成する
 
@@ -41,27 +41,27 @@ macOS/Linux：
 
 ```sh
 mkdir -p "/tmp/codex-harness-release"
-npm run stage:registry -- "/tmp/codex-harness-release/stage-0.4.2"
+npm run stage:registry -- "/tmp/codex-harness-release/stage-0.4.3"
 ```
 
 Windows PowerShell：
 
 ```powershell
 New-Item -ItemType Directory -Force -Path "$env:TEMP\codex-harness-release"
-npm run stage:registry -- "$env:TEMP\codex-harness-release\stage-0.4.2"
+npm run stage:registry -- "$env:TEMP\codex-harness-release\stage-0.4.3"
 ```
 
-生成manifestは `@karladev001-eng/codex-harness` / 0.4.2、repositoryは `karladev001-eng/harness`、publishConfig.registryは `https://npm.pkg.github.com` です。ソースのprivate:trueは変えず、stagingにだけpublish禁止フラグを収録しません。配布manifestにdevDependenciesやprepare/prepack/postinstall等のscriptsはなく、利用PCではbuildやAGENTSへの自動書込みを行いません。stage生成のpack一覧取得も専用一時home/config/cacheとofflineを使い、認証設定へ触れません。
+生成manifestは `@karladev001-eng/codex-harness` / 0.4.3、repositoryは `karladev001-eng/harness`、publishConfig.registryは `https://npm.pkg.github.com` です。ソースのprivate:trueは変えず、stagingにだけpublish禁止フラグを収録しません。配布manifestにdevDependenciesやprepare/prepack/postinstall等のscriptsはなく、利用PCではbuildやAGENTSへの自動書込みを行いません。stage生成のpack一覧取得も専用一時home/config/cacheとofflineを使い、認証設定へ触れません。
 
-stagingに移動してdry-runとローカルpackを行います。以下の `publish --dry-run` は送信しません。実publishコマンドは今回の手順に含めません。npmのログ/cacheも一時ディレクトリへ向けます。
+stagingに移動してdry-runとローカルpackを行います。レビュー・隔離検証したtgzのSHA-256を記録し、実配布には同じtgzを使います。検証後に再build/再packしたものは別の配布候補として扱います。以下の `publish --dry-run` は送信しません。実publishコマンドは今回の手順に含めません。npmのログ/cacheも一時ディレクトリへ向けます。
 
 ```sh
-cd "/tmp/codex-harness-release/stage-0.4.2"
+cd "/tmp/codex-harness-release/stage-0.4.3"
 npm publish --dry-run --ignore-scripts --offline --cache "/tmp/codex-harness-release/npm-cache" --registry=https://npm.pkg.github.com
 npm pack --ignore-scripts --offline --cache "/tmp/codex-harness-release/npm-cache" --pack-destination "/tmp/codex-harness-release"
 ```
 
-PowerShellでも作成したstageへ `Set-Location` し、上の絶対パスを `$env:TEMP` 以下へ置換します。npm publishのdry-run成功は、GitHub Packagesの受入、packageのvisibility/アクセス、版未使用の確認ではありません。配布直前に0.4.2が未使用であること、関連repositoryが非公開で対象packageも非公開であること、利用者/送信者のpackage権限、送信者認証を別工程で確認します。ソースのpublish禁止とstagingのregistry固定を、実配布や一般公開の許可と読み替えません。
+PowerShellでも作成したstageへ `Set-Location` し、上の絶対パスを `$env:TEMP` 以下へ置換します。npm publishのdry-run成功は、GitHub Packagesの受入、packageのvisibility/アクセス、版未使用の確認ではありません。配布直前に0.4.3が未使用であること、関連repositoryが非公開で対象packageも非公開であること、利用者/送信者のpackage権限、送信者認証を別工程で確認します。ソースのpublish禁止とstagingのregistry固定を、実配布や一般公開の許可と読み替えません。
 
 ## 一時registryでnpm経路を検証する
 
@@ -76,16 +76,16 @@ macOS/Linuxの例です。受け取ったtarballの絶対パスを使います�
 ```sh
 task_home="$(mktemp -d)"
 task_project="$(mktemp -d)"
-npx --yes --package /tmp/codex-harness-release/karladev001-eng-codex-harness-0.4.2.tgz codex-harness doctor --home "$task_home" --project "$task_project"
-npx --yes --package /tmp/codex-harness-release/karladev001-eng-codex-harness-0.4.2.tgz codex-harness install --home "$task_home"
+npx --yes --package /tmp/codex-harness-release/karladev001-eng-codex-harness-0.4.3.tgz codex-harness doctor --home "$task_home" --project "$task_project"
+npx --yes --package /tmp/codex-harness-release/karladev001-eng-codex-harness-0.4.3.tgz codex-harness install --home "$task_home"
 node "$task_home/.agents/skills/codex-harness/runtime.js" status --home "$task_home" --project "$task_project"
-npx --yes --package /tmp/codex-harness-release/karladev001-eng-codex-harness-0.4.2.tgz codex-harness install --home "$task_home"
-npx --yes --package /tmp/codex-harness-release/karladev001-eng-codex-harness-0.4.2.tgz codex-harness uninstall --home "$task_home"
+npx --yes --package /tmp/codex-harness-release/karladev001-eng-codex-harness-0.4.3.tgz codex-harness install --home "$task_home"
+npx --yes --package /tmp/codex-harness-release/karladev001-eng-codex-harness-0.4.3.tgz codex-harness uninstall --home "$task_home"
 ```
 
 再installで `unchanged`、無関係なAGENTS/設定/制作記憶の保持を確認します。別版からの更新・編集済み拒否・失敗時の復元は既存テストで確認し、新版で回帰があれば修正します。Windowsで一時ホームを指定する場合は、存在する絶対ディレクトリを `--home` と `--project` に渡します。実機未検証ならその旨を記録します。
 
-authoringは `authoring install --project "$task_project" --skill inspect-harness` と対応するuninstallで単体選択を確認します。本体installと所有記録が別で、本体の有効化を行わないことを確認します。Knowledge stateも一時絶対パスにし、登録・外部送信は実行しません。
+authoringは `authoring install --project "$task_project" --skill inspect-harness` と対応するuninstallで単体選択を確認します。0.4.3では `--skill codex-slide-plan` の明示導入・再実行・解除も確認し、runtime/CSS/JS、quality-review.md、revision-notes.md、サンプルが導入先に揃うこととHTML生成を検査します。指定なしのauthoring操作と本体install/updateでは任意スキルを変更しないことも確認します。本体installと所有記録が別で、本体の有効化を行わないことを確認します。Knowledge stateも一時絶対パスにし、登録・外部送信は実行しません。
 
 ## 文書と記録
 
