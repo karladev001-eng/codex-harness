@@ -6,16 +6,17 @@
 
 Knowledgeの隔離試験は[運用ガイドの検証範囲](docs/guides/knowledge-operations.md#検証範囲)、検索の契約は[ADR 0006](docs/adr/0006-knowledge-retrieval.md)、個別の現機確認はsource checkoutの `docs/harness/tasks/activate-knowledge-memory.md` と `docs/harness/tasks/raycast-knowledge.md` に記録されています。ここからWindows/Linux・別PC・全サービスの網羅取得・長期効果を確認済みとは扱いません。最新の公開準備の検証は実行後に追記し、過去の結果を現在版の再実行として扱わないでください。
 
-## 2026-10-10: codex-slide-plan v4の導入分離（担当検証）
+## 2026-10-10: codex-slide-plan v4の導入分離・tarball統合検証
 
-実施環境: macOS、Node.js 26.10.0、npm 11.19.1。一時home/projectで導入所有管理を確認し、実ホームへの導入・npm publish・pushは行っていません。
+実施環境: macOS、Node.js 26.10.0、npm 11.19.1。依存関係はlockfileからofflineで導入。一時home/projectと実pack tarballを使い、実ホームへの導入、npm publish、pushは行っていません。ソースpackage/package-lock/pluginの版は既存の0.4.2のままです。
 
-- `npm run build`: PASS。本体skill/pluginのpayloadは既定5スキルだけを持ち、任意追加の導入元は同じnpmアーカイブのルートに収録する契約です。
-- `node --test tests/install.test.cjs`: 27件PASS。旧本体内の所有コピーのバックアップと除去、編集済みコピーによる中断、独立導入済みコピーの保持、旧同梱sourceからの新規本体導入でもオプションを除外することを確認しました。
-- authoringの既定導入・再実行・更新・解除と所有管理を対象にした10件PASS。恒久runtimeが意図しない近隣ディレクトリのオプションsourceを使わず、対応版npm/tgzからの実行を案内することも確認しました。
-- `npm run check:docs`: 173文書・823リンク、エラー0（この担当worktreeのスキル本体は旧版のまま）。
+- `npm test`: **168/168 PASS**。本体更新・所有管理と、実pack tarballからのoffline npx起動を含みます。tarballで既定本体導入後もslide-planが本体skill/plugin内にないこと、authoring既定が5件であること、codex-slide-planの明示導入・同版再実行・解除、既定操作による独立した任意skillの保持、自由配置exampleからのreview HTML生成を確認しました。
+- 追加した `actual npx tarball update refreshes an explicit optional skill and refuses edited content` は、統合済みtarballを一時ディレクトリへ展開し、ローカル専用の `0.4.2-integration.1` / `.2` tarballを作成して比較します。前版から任意skillを導入し、指定なしの導入・解除がそのファイルを保持すること、新版tarballからの明示更新、編集後の更新拒否を確認しました。package test内で編集前後のskill SHA-256を比較し、元のAGENTS.md・settings.json・preferences.mdとプロジェクトAGENTS.mdはbyte単位で保持されることを検査します。tarballと試験home/projectは一時領域に作成し、テスト後に削除します。ソースの版は変えず、実npm registryへアクセスしていません。
+- `node --test authoring-skills/codex-slide-plan/tests/*.test.mjs`: **27/27 PASS**。生成HTML DOM上の対象選択/コメント/修正応答、テンプレートなし新規作成、PPTX fixtureの構造写像、安全なlegacy working-copy移行、出典・編集内容の境界を検証しました。
+- `npm run check:docs`: **173文書・824リンク、エラー0**。
+- ブラウザでの描画・狭幅表示・実操作、実際のCodex UIでのスキル検出、利用者提供マスターでの比較は未検証です。DOMテストとHTMLファイル生成をブラウザ確認済みとは扱いません。
 
-新しいスキル本体が必要とする `scripts/legacy-v1.json` と自由配置サンプルの統合後に、実packアーカイブを使うオプション単独導入・再実行・更新・解除・HTML生成の結合試験を行います。担当worktreeには必要ファイルを偽造して追加していません。この項目はその結合試験やブラウザ表示の成功を示しません。
+これらは一時領域での検証です。実ホームへの導入、npm配布、pushは行っていません。既存のregistry lifecycleテストは認証なしのloopback fixtureを使います。新規v4のpackage更新/競合試験はローカルtarballのみを使い、公開registryへ接続していません。
 
 ## 2026-10-10: codex-slide-planの統合・配布検証
 

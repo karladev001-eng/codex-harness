@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const { spawnSync } = require('node:child_process');
 const { fixture, root, run, tree, write } = require('./helpers.cjs');
 
@@ -117,4 +118,84 @@ test('packed release runs through actual npx outside repo without compiler/netwo
   assert.equal(fs.statSync(path.join(installed.target, 'references/creative-loop.md')).isFile(), true);
   assert.deepEqual(fs.readFileSync(path.join(installed.target, 'references/roles/record-keeper.md')), fs.readFileSync(path.join(root, 'dist/skill/references/roles/record-keeper.md')));
   assert.equal(packaged('install', '--home', f.home).status, 'unchanged');
+});
+
+test('actual npx tarball update refreshes an explicit optional skill and refuses edited content', { timeout: 120000 }, t => {
+  const f = fixture(t), npm = process.env.npm_execpath;
+  assert.ok(npm && fs.existsSync(npm), 'Run packaging tests using npm test');
+  const env = { ...require('./npm-fixture.cjs').npmEnvironment(f), npm_config_offline: 'true' };
+  const npx = path.join(path.dirname(npm), 'npx-cli.js'); assert.ok(fs.existsSync(npx));
+  const unpacked = path.join(f.base, 'npx package source'); fs.mkdirSync(unpacked);
+  const packed = spawnSync(npm, ['pack', '--ignore-scripts', '--offline', '--json', '--pack-destination', f.base], { encoding: 'utf8', cwd: root, env, timeout: 90000 });
+  assert.ifError(packed.error); assert.equal(packed.status, 0, packed.stderr);
+  const filename = JSON.parse(packed.stdout)[0].filename;
+  const extraction = spawnSync('tar', ['-xzf', path.join(f.base, filename), '-C', unpacked], { encoding: 'utf8' });
+  assert.ifError(extraction.error); assert.equal(extraction.status, 0, extraction.stderr);
+  const originalPackage = path.join(unpacked, 'package');
+  const sourceSkill = path.join(originalPackage, 'authoring-skills/codex-slide-plan/SKILL.md');
+  assert.equal(fs.existsSync(sourceSkill), true, 'the packed source contains the optional skill');
+
+  function makeRelease(version, marker) {
+    const stage = path.join(f.base, 'release ' + marker); fs.cpSync(originalPackage, stage, { recursive: true });
+    const manifest = path.join(stage, 'package.json'), metadata = JSON.parse(fs.readFileSync(manifest, 'utf8'));
+    metadata.version = version; fs.writeFileSync(manifest, JSON.stringify(metadata, null, 2) + '\n');
+    const skill = path.join(stage, 'authoring-skills/codex-slide-plan/SKILL.md');
+    fs.appendFileSync(skill, `\n<!-- integration fixture ${marker} -->\n`);
+    const result = spawnSync(npm, ['pack', '--ignore-scripts', '--offline', '--json', '--pack-destination', f.base], { encoding: 'utf8', cwd: stage, env, timeout: 90000 });
+    assert.ifError(result.error); assert.equal(result.status, 0, result.stderr);
+    return path.join(f.base, JSON.parse(result.stdout)[0].filename);
+  }
+  const oldArchive = makeRelease('0.4.2-integration.1', 'release-one');
+  const newArchive = makeRelease('0.4.2-integration.2', 'release-two');
+  function run(archivePath, ...args) {
+    return spawnSync(process.execPath, [npx, '--yes', '--offline', '--package', archivePath, 'codex-harness', ...args], {
+      encoding: 'utf8', cwd: f.project, env, timeout: 90000,
+    });
+  }
+  function success(result) { assert.ifError(result.error); assert.equal(result.status, 0, result.stderr + result.stdout); return JSON.parse(result.stdout); }
+
+  const homeAgents = path.join(f.home, '.codex/AGENTS.md'); write(homeAgents, '\uFEFF# Personal instructions\r\n');
+  const homeSettings = path.join(f.home, '.codex/harness/settings.json'); write(homeSettings, '{"measurement":false}\r\n');
+  const agentsBefore = fs.readFileSync(homeAgents), settingsBefore = fs.readFileSync(homeSettings);
+  const installedHome = success(run(oldArchive, 'install', '--home', f.home)); assert.equal(installedHome.status, 'installed');
+  const managedAgentsBefore = fs.readFileSync(homeAgents);
+  assert.ok(managedAgentsBefore.subarray(0, agentsBefore.length).equals(agentsBefore), 'the original AGENTS bytes stay before the managed block');
+  const preservedPreferences = path.join(require('../dist/skill/lib.js').localRoot(f.project, f.home), 'creative/preferences.md');
+  write(preservedPreferences, '# Existing preferences\r\n');
+  const preferencesBefore = fs.readFileSync(preservedPreferences);
+
+  const projectAgents = path.join(f.project, 'AGENTS.md'); write(projectAgents, '# Project instructions\r\n');
+  const oldInstall = success(run(oldArchive, 'authoring', 'install', '--project', f.project, '--skill', 'codex-slide-plan'));
+  assert.deepEqual(oldInstall.skills, ['codex-slide-plan']);
+  const skillRoot = path.join(f.project, '.agents/skills/codex-slide-plan');
+  const skillFile = path.join(skillRoot, 'SKILL.md'); assert.match(fs.readFileSync(skillFile, 'utf8'), /fixture release-one/);
+  const originalSkillHash = crypto.createHash('sha256').update(fs.readFileSync(skillFile)).digest('hex');
+
+  const afterOldInstall = tree(skillRoot);
+  assert.equal(success(run(oldArchive, 'authoring', 'install', '--project', f.project)).skills.length, 5);
+  assert.equal(success(run(oldArchive, 'authoring', 'uninstall', '--project', f.project)).status, 'uninstalled');
+  assert.deepEqual(tree(skillRoot), afterOldInstall, 'default install and uninstall leave the optional skill untouched');
+  assert.equal(success(run(oldArchive, 'install', '--home', f.home)).status, 'unchanged');
+  assert.deepEqual(fs.readFileSync(homeAgents), managedAgentsBefore);
+  assert.deepEqual(fs.readFileSync(homeSettings), settingsBefore);
+  assert.deepEqual(fs.readFileSync(preservedPreferences), preferencesBefore);
+
+  const updated = success(run(newArchive, 'authoring', 'install', '--project', f.project, '--skill', 'codex-slide-plan'));
+  assert.equal(updated.status, 'installed');
+  assert.match(fs.readFileSync(skillFile, 'utf8'), /fixture release-two/);
+  assert.notEqual(crypto.createHash('sha256').update(fs.readFileSync(skillFile)).digest('hex'), originalSkillHash);
+  assert.equal(fs.readFileSync(projectAgents, 'utf8'), '# Project instructions\r\n');
+  assert.deepEqual(fs.readFileSync(homeAgents), managedAgentsBefore);
+  assert.deepEqual(fs.readFileSync(homeSettings), settingsBefore);
+  assert.deepEqual(fs.readFileSync(preservedPreferences), preferencesBefore);
+
+  fs.appendFileSync(skillFile, '\nUser customization\n');
+  const editedTree = tree(skillRoot), editedHash = crypto.createHash('sha256').update(fs.readFileSync(skillFile)).digest('hex');
+  const refused = run(newArchive, 'authoring', 'install', '--project', f.project, '--skill', 'codex-slide-plan');
+  assert.ifError(refused.error); assert.notEqual(refused.status, 0); assert.match(refused.stderr, /user changes/);
+  assert.deepEqual(tree(skillRoot), editedTree);
+  assert.equal(crypto.createHash('sha256').update(fs.readFileSync(skillFile)).digest('hex'), editedHash);
+  assert.deepEqual(fs.readFileSync(homeAgents), managedAgentsBefore);
+  assert.deepEqual(fs.readFileSync(homeSettings), settingsBefore);
+  assert.deepEqual(fs.readFileSync(preservedPreferences), preferencesBefore);
 });
