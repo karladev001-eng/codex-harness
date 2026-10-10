@@ -2,9 +2,9 @@
 
 Node.js 22以上・npmとスキル対応のCodexを用意します。Gitはworktreeでの隔離に使います。導入CLIはモデルやサブエージェントの利用権を付与しません。
 
-## GitHub Packagesの非公開npm配布（準備中）
+## GitHub Packagesの非公開npm配布
 
-**0.4.2の配布準備中です。実registryへの登録・入手可能性は未確認です。** 配布開始後は、Node.js 22以上とnpmを用意し、ホームなどpackage.jsonのないディレクトリから実行できます。利用PCでclone、npm ci、TypeScriptビルドは不要です。
+**2026-10-10に非公開npm版0.4.2を配布済みです。** [package](https://github.com/users/karladev001-eng/packages/npm/package/codex-harness)へのアクセス権が必要です。0.4.2は既定5スキルを含み、任意追加のcodex-slide-planは未収録です。Node.js 22以上とnpmを用意し、ホームなどpackage.jsonのないディレクトリから実行できます。利用PCでclone、npm ci、TypeScriptビルドは不要です。
 
 ### GitHub Packagesの初回認証
 
@@ -14,11 +14,11 @@ Node.js 22以上・npmとスキル対応のCodexを用意します。Gitはworkt
 npm login --scope=@karladev001-eng --auth-type=legacy --registry=https://npm.pkg.github.com
 ```
 
-ユーザー名とclassic PATはnpmの対話プロンプトで入力します。tokenをチャット、リポジトリ、コマンド引数へ貼らないでください。npmがPCの認証設定を保存します。この準備実装では実認証・token発行/入力を行っていません。詳しい要件は[GitHub公式のnpm registry案内](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry)を参照します。
+ユーザー名とclassic PATはnpmの対話プロンプトで入力します。tokenをチャット、リポジトリ、コマンド引数へ貼らないでください。npmがPCの認証設定を保存します。認証は利用PCで行います。詳しい要件は[GitHub公式のnpm registry案内](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry)を参照します。
 
 ### 初回導入・更新
 
-macOS/Linux・Windows PowerShell共通（配布開始後）：
+macOS/Linux・Windows PowerShell共通：
 
 ```sh
 npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@latest -- codex-harness install
@@ -83,6 +83,8 @@ node dist/skill/runtime.js install
 
 `--skills-dir PARENT` でスキルの親ディレクトリを明示できます。導入済みの場所を変える際は、先に所有記録に従って解除します。`--home PATH` は一時ホームでの検証用です。実ホームへ試験導入せず、保守者は[一時環境の手順](../maintainers/releasing.md)を使ってください。
 
+本体install/updateは既定5スキルの導入元を保持し、任意追加のcodex-slide-planを本体配下へ配置しません。[任意追加の導入手順](../../authoring-skills/INSTALL.md#codex-slide-planを任意追加する対応版の配布後)では対応版のパッケージから明示選択します。既に独立導入したコピーを本体操作で変更しません。
+
 この経路は単体スキルの導入です。コンパイル済みプラグインもtarballの `dist/plugins/codex-harness/` に含まれますが、プラグイン一覧への登録をinstallが行うわけではありません。開発元の `plugins/` だけでは実行物が不足します。本体のプラグイン版と単体スキル版を重複して有効化しないでください。
 
 ## 確認
@@ -115,7 +117,7 @@ node "$env:USERPROFILE\.agents\skills\codex-harness\runtime.js" doctor --project
 
 ## 更新・解除
 
-registry配布開始後は上のnpm execを再実行します。checkout経路は新しいcheckoutをビルドし、tarball経路は更新版をコピーして同じ `install` を再実行します。未編集の所有ファイルと入口を更新し、同じ配布物なら `unchanged` を返します。個人/プロジェクトの設定と制作記憶は保持します。明示したモデル設定やOFF設定は更新後も優先されます。
+registry経路は上のnpm execを再実行します。checkout経路は新しいcheckoutをビルドし、tarball経路は更新版をコピーして同じ `install` を再実行します。未編集の所有ファイルと入口を更新し、同じ配布物なら `unchanged` を返します。個人/プロジェクトの設定と制作記憶は保持します。明示したモデル設定やOFF設定は更新後も優先されます。
 
 ```sh
 npx --yes --package ./karladev001-eng-codex-harness-0.4.2.tgz codex-harness uninstall

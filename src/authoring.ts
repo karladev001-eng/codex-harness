@@ -2,7 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { canonical, copySkill, equalFiles, exists, inventory, isObject, Json, readJson, rejectSymlink, safePath, sourceRoot, within } from './lib';
 
-export const SKILLS = ['create-rulebooks', 'create-subagent', 'create-harness', 'inspect-harness', 'codex-html-plan', 'codex-slide-plan'];
+export const DEFAULT_SKILLS = ['create-rulebooks', 'create-subagent', 'create-harness', 'inspect-harness', 'codex-html-plan'];
+export const OPTIONAL_SKILLS = ['codex-slide-plan'];
+export const SKILLS = [...DEFAULT_SKILLS, ...OPTIONAL_SKILLS];
 const REQUIRED: Record<string, string[]> = {
   'create-rulebooks': ['SKILL.md', 'assets/rulebook.md'], 'create-subagent': ['SKILL.md', 'assets/subagent.md'],
   'create-harness': ['SKILL.md', 'assets/harness-index.md', 'assets/workflow.md'], 'inspect-harness': ['SKILL.md'],
@@ -13,11 +15,20 @@ const REQUIRED: Record<string, string[]> = {
   ],
   'codex-slide-plan': [
     'SKILL.md', 'agents/openai.yaml', 'references/schema.md', 'references/workflow.md', 'references/masters.md',
-    'templates/catalog.json', 'scripts/pack.mjs', 'scripts/review.js', 'scripts/style.css', 'scripts/inspect-master.py',
+    'scripts/legacy-v1.json', 'scripts/pack.mjs', 'scripts/review.js', 'scripts/style.css', 'scripts/inspect-master.py',
     'scripts/make-fixtures.py', 'examples/deck.json',
   ],
 };
-export function authoring(args: Json, source = path.join(sourceRoot, 'authoring-skills')): Json {
+function releaseAuthoringSource(): string | null {
+  const release = path.resolve(sourceRoot, '../..'), manifest = path.join(release, 'package.json');
+  // Do not use a similarly named sibling directory near a permanent installation.
+  if (!exists(manifest) || sourceRoot !== path.join(release, 'dist', 'skill')) return null;
+  const metadata = readJson(manifest);
+  if (metadata.name !== '@karladev001-eng/codex-harness' || metadata.bin?.['codex-harness'] !== 'dist/skill/runtime.js') return null;
+  return path.join(release, 'authoring-skills');
+}
+export function authoring(args: Json, source?: string): Json {
+  const defaultSource = path.join(sourceRoot, 'authoring-skills');
   const project = canonical(args.project || '.');
   if (!fs.existsSync(project) || !fs.statSync(project).isDirectory()) throw new Error('Project directory does not exist');
   const root = args.skills_dir ? canonical(args.skills_dir) : safePath(project, '.agents', 'skills');
@@ -27,15 +38,18 @@ export function authoring(args: Json, source = path.join(sourceRoot, 'authoring-
   const oldBytes = exists(manifest) ? fs.readFileSync(manifest) : null;
   const state = oldBytes ? readJson(manifest) : { schema_version: 1, root, skills: {} };
   if (!isObject(state) || state.schema_version !== 1 || state.root !== root || !isObject(state.skills) || Object.keys(state.skills).some(key => !SKILLS.includes(key))) throw new Error('Invalid authoring ownership manifest');
-  const selected: string[] = args.skill.length ? [...new Set<string>(args.skill)] : SKILLS;
+  const selected: string[] = args.skill.length ? [...new Set<string>(args.skill)] : DEFAULT_SKILLS;
   if (selected.some(name => !SKILLS.includes(name))) throw new Error('Unknown authoring skill; choose: ' + SKILLS.join(', '));
   const planned: { name: string; target: string; source: string; files: Record<string, string> | null }[] = [];
   for (const name of selected) {
-    const target = safePath(root, name), skillSource = path.join(source, name), owned = state.skills[name];
+    const target = safePath(root, name), owned = state.skills[name];
     if (owned) {
       if (!equalFiles(inventory(target), owned)) throw new Error('Installed authoring skill has user changes: ' + name);
     } else if (exists(target)) throw new Error('Unowned authoring skill target already exists: ' + name);
-    if (args.action === 'uninstall') { if (owned) planned.push({ name, target, source: skillSource, files: null }); continue; }
+    if (args.action === 'uninstall') { if (owned) planned.push({ name, target, source: '', files: null }); continue; }
+    const selectedSource = source ?? (OPTIONAL_SKILLS.includes(name) ? releaseAuthoringSource() : defaultSource);
+    const skillSource = selectedSource ? path.join(selectedSource, name) : '';
+    if (!skillSource || !exists(skillSource)) throw new Error('Authoring source unavailable: ' + name + '; run authoring install from a supporting release npm package or tarball');
     const files = inventory(skillSource);
     const missing = REQUIRED[name].filter(file => !Object.hasOwn(files, file));
     if (missing.length) throw new Error('Source authoring skill is incomplete: ' + name + ': ' + missing.join(', '));

@@ -1,14 +1,14 @@
 # Authoring Skills を既存プロジェクトへ導入する
 
-`create-rulebooks`、`create-subagent`、`create-harness`、`inspect-harness`、`codex-html-plan`、`codex-slide-plan` を任意のプロジェクトへ導入します。最初の4スキルは独立したMarkdownで、2つのHTML計画スキルはpack runtimeを含み使用時にNode.js 22以上が必要です。ハーネス本体の有効化、個人用AGENTS.mdやモデル設定の変更は行いません。
+既定の `create-rulebooks`、`create-subagent`、`create-harness`、`inspect-harness`、`codex-html-plan` を任意のプロジェクトへ導入します。`codex-slide-plan` は明示選択で追加するオプションです。最初の4スキルは独立したMarkdownで、2つのHTML計画スキルはpack runtimeを含み使用時にNode.js 22以上が必要です。ハーネス本体の有効化、個人用AGENTS.mdやモデル設定の変更は行いません。
 
 `codex-slide-plan` は新しいスキルです。現在配布中の0.4.2 tarballには含まれていないため、次の配布版まではこのcheckoutから導入してください。現行のnpm `@latest` や既存tarballでは選択できません。
 
-導入CLIにはNode.js 22以上とnpmが必要です。利用者のPython、TypeScriptコンパイラ、リポジトリのcloneは不要です。スキルの使用自体には、利用先のCodexがMarkdownスキルに対応している必要があります。
+導入CLIにはNode.js 22以上とnpmが必要です。通常の導入・HTML制作には利用者のPython、TypeScriptコンパイラ、リポジトリのcloneやnpm ciは不要です。スキルの使用自体には、利用先のCodexがMarkdownスキルに対応している必要があります。
 
-## GitHub Packagesから導入・更新する（準備中）
+## GitHub Packagesから既定スキルを導入・更新する
 
-**非公開npm配布は準備中で、まだ入手可能とは案内していません。** 配布開始後は、本体と同じ[PCごとの初回npm認証](../docs/guides/installation.md#github-packagesの初回認証)（classic PATのread:packagesと対象packageアクセス権）を済ませます。tokenはnpm loginの対話入力で扱い、チャット・リポジトリ・引数へ貼りません。
+**2026-10-10に非公開npm版0.4.2を配布済みです（既定5スキル）。** 各PCで、本体と同じ[PCごとの初回npm認証](../docs/guides/installation.md#github-packagesの初回認証)（classic PATのread:packagesと対象packageアクセス権）を済ませます。tokenはnpm loginの対話入力で扱い、チャット・リポジトリ・引数へ貼りません。
 
 package.jsonのない場所から導入でき、更新も同じコマンドです。
 
@@ -34,6 +34,34 @@ Codexへは次のように依頼できます。
 
 > コピー済みの `karladev001-eng-codex-harness-0.4.2.tgz` を使い、codex-harness authoring installで `/絶対パス/対象プロジェクト` に5つのauthoringスキルを導入してください。既存の同名スキルが未所有または編集済みなら上書きせず報告してください。
 
+## codex-slide-planを任意追加する（対応版の配布後）
+
+同じ非公開npmパッケージに導入元を収録します。別パッケージ、本体の有効化、cloneやnpm ciは不要です。**現行0.4.2には含まれません。以下の `<対応版>` は、この機能を収録して実際に配布した版へ置き換えます。現行の `@latest` に置き換えないでください。** Node.js 22以上・npmと、上記のGitHub Packages認証・packageアクセス権が必要です。
+
+導入・更新は同じ明示選択です。削除も明示選択で行います。
+
+```sh
+npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@<対応版> -- codex-harness authoring install --project "/path/to/project" --skill codex-slide-plan
+npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@<対応版> -- codex-harness authoring uninstall --project "/path/to/project" --skill codex-slide-plan
+```
+
+ネット接続を使わない導入先へは対応版のtgzをコピーします。ファイル名を受け取った実物へ置き換えて実行してください。
+
+```sh
+npx --yes --package ./karladev001-eng-codex-harness-<対応版>.tgz codex-harness authoring install --project "/path/to/project" --skill codex-slide-plan
+npx --yes --package ./karladev001-eng-codex-harness-<対応版>.tgz codex-harness authoring uninstall --project "/path/to/project" --skill codex-slide-plan
+```
+
+シェルで `<対応版>` を含む例をそのまま実行しないでください。PowerShellでは対象パスを `"C:\Projects\example"` へ置換します。npmキャッシュなどの前提は上記のローカルtarball経路と同じで、全環境の完全offline起動を保証しません。
+
+既定配置は `<project>/.agents/skills/codex-slide-plan`。個人用は同じコマンドへ `--skills-dir "/absolute/user/home/.agents/skills"` を加えます。ハーネスの設定やAGENTS入口は変更しません。導入後、新しいCodexチャットで `$codex-slide-plan` と資料・目的を渡してください。
+
+PPTX/POTXマスターの構造読取りだけはPython 3が必要です。元資料の表示確認は利用可能なレンダラーで行い、構造読取りと表示確認を分けます。Pythonやマスターがなくても通常のHTML制作はできます。
+
+本体の恒久runtimeへオプションの導入元はコピーしません。そのruntimeでオプションのinstall/updateを指定すると、対応版npmパッケージまたはtgzから実行するよう案内します。所有記録のあるオプションの明示uninstallは導入元がなくても行えます。
+
+過去の本体内にあったコピーは、本体updateが所有記録と全ファイルの未編集を確認した場合だけバックアップして除去します。編集済み・追記・欠落があると更新を中断し、内容を保持します。独立した導入先や制作資料を削除しません。新しい独立導入は必要なときに上記コマンドで選びます。
+
 ## checkoutから導入する
 
 開発者向けに、アクセス可能なリポジトリをcloneして移動します。対象は本体のcheckoutと別の、既存のプロジェクトの絶対パスです。
@@ -54,7 +82,7 @@ PowerShellでは `--project "C:\Projects\example"`。現在のcheckoutから新�
 
 > $inspect-harness 今の構成、規則、担当、作業手順を変更せずに確認してください。
 
-既存の索引がなければその旨を説明します。作成には `$create-harness` で必要な規則・担当・ワークフローを依頼します。5スキルの用途と成果物は[一覧](README.md)へ。
+既存の索引がなければその旨を説明します。作成には `$create-harness` で必要な規則・担当・ワークフローを依頼します。既定5スキルと任意追加の用途と成果物は[一覧](README.md)へ。
 
 ## 更新・削除と個別選択
 
@@ -67,7 +95,7 @@ npx --yes --package ./karladev001-eng-codex-harness-0.4.2.tgz codex-harness auth
 npx --yes --package ./karladev001-eng-codex-harness-0.4.2.tgz codex-harness authoring uninstall --project "/path/to/project" --skill inspect-harness
 ```
 
-`--skill` を省略すると5スキルすべてを対象にします。従来の4スキルだけを指定する従来コマンドも引き続き使えます。全対象の確認後に一括変更するため、1つでも競合があれば他の対象も変更しません。所有するスキルに追記・編集・削除があると、更新・解除を拒否してその内容を保持します。無関係なスキルやプロジェクトファイルは残します。
+`--skill` を省略したinstall/更新/uninstallは既定5スキルだけを対象にし、独立導入済みの `codex-slide-plan` を変更しません。従来の4スキルだけを指定する従来コマンドも引き続き使えます。全対象の確認後に一括変更するため、1つでも競合があれば他の対象も変更しません。所有するスキルに追記・編集・削除があると、更新・解除を拒否してその内容を保持します。無関係なスキルやプロジェクトファイルは残します。
 
 個人用に使う場合は `--skills-dir` にスキル親ディレクトリを明示できます。
 
@@ -79,6 +107,6 @@ npx --yes --package ./karladev001-eng-codex-harness-0.4.2.tgz codex-harness auth
 
 ## 確認範囲
 
-自動テストで、checkoutの6スキルと現行配布物の5スキル、従来4/5スキルからの更新、単独導入、再実行、部分更新・削除、不完全なHTML計画スキルの拒否、既存指示の保持、未所有・編集済みフォルダの拒否、失敗時の復元を確認します。実際のtarballをnpxで起動する検証も含みます。実行済みOS・制約は [VALIDATION.md](../VALIDATION.md) を参照してください。
+自動テストで、既定5スキルと明示選択の任意追加、従来4/5スキルからの更新、旧本体内コピーの所有記録に従う移行、単独導入、再実行、部分更新・削除、不完全なHTML計画スキルの拒否、既存指示の保持、未所有・編集済みフォルダの拒否、失敗時の復元を確認します。実際のtarballをnpxで起動する検証も含みます。実行済みOS・制約は [VALIDATION.md](../VALIDATION.md) を参照してください。
 
 以前のdownload方式では、macOS上でコミット `3a861ce9cacbb954601dc373a3e89dbe6cdd516e` の4スキル8ファイルの一致を確認しました。この歴史的確認は、現在のCLIによる全OS検証を代替するものではありません。

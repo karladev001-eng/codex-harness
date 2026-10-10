@@ -2,9 +2,20 @@
 
 ## 現行の読み方
 
-この文書は日付・版ごとの検証証拠です。古い件数、4スキル表記、非公開GitHub Releaseの提案、当時の未実装範囲はその時点の記録として保持します。現在の使い方は[文書索引](docs/README.md)、ローカル配布は[保守ガイド](docs/maintainers/releasing.md)へ。配布対象のnpm package 0.4.2には5スキルとKnowledge/Chrome/Raycastの実装があります。このcheckoutでは6つ目のcodex-slide-planを追加していますが、まだ配布していません。実装の存在、隔離試験、実機での登録、長期効果をそれぞれ区別してください。
+この文書は日付・版ごとの検証証拠です。古い件数、4スキル表記、非公開GitHub Releaseの提案、当時の未実装範囲はその時点の記録として保持します。現在の使い方は[文書索引](docs/README.md)、ローカル配布は[保守ガイド](docs/maintainers/releasing.md)へ。配布対象のnpm package 0.4.2には5スキルとKnowledge/Chrome/Raycastの実装があります。このcheckoutには任意追加のcodex-slide-planがあり、対応版はまだ配布していません。本体導入と指定なしのauthoring操作は既定5スキルだけを対象にします。実装の存在、隔離試験、実機での登録、長期効果をそれぞれ区別してください。
 
 Knowledgeの隔離試験は[運用ガイドの検証範囲](docs/guides/knowledge-operations.md#検証範囲)、検索の契約は[ADR 0006](docs/adr/0006-knowledge-retrieval.md)、個別の現機確認はsource checkoutの `docs/harness/tasks/activate-knowledge-memory.md` と `docs/harness/tasks/raycast-knowledge.md` に記録されています。ここからWindows/Linux・別PC・全サービスの網羅取得・長期効果を確認済みとは扱いません。最新の公開準備の検証は実行後に追記し、過去の結果を現在版の再実行として扱わないでください。
+
+## 2026-10-10: codex-slide-plan v4の導入分離（担当検証）
+
+実施環境: macOS、Node.js 26.10.0、npm 11.19.1。一時home/projectで導入所有管理を確認し、実ホームへの導入・npm publish・pushは行っていません。
+
+- `npm run build`: PASS。本体skill/pluginのpayloadは既定5スキルだけを持ち、任意追加の導入元は同じnpmアーカイブのルートに収録する契約です。
+- `node --test tests/install.test.cjs`: 27件PASS。旧本体内の所有コピーのバックアップと除去、編集済みコピーによる中断、独立導入済みコピーの保持、旧同梱sourceからの新規本体導入でもオプションを除外することを確認しました。
+- authoringの既定導入・再実行・更新・解除と所有管理を対象にした10件PASS。恒久runtimeが意図しない近隣ディレクトリのオプションsourceを使わず、対応版npm/tgzからの実行を案内することも確認しました。
+- `npm run check:docs`: 173文書・823リンク、エラー0（この担当worktreeのスキル本体は旧版のまま）。
+
+新しいスキル本体が必要とする `scripts/legacy-v1.json` と自由配置サンプルの統合後に、実packアーカイブを使うオプション単独導入・再実行・更新・解除・HTML生成の結合試験を行います。担当worktreeには必要ファイルを偽造して追加していません。この項目はその結合試験やブラウザ表示の成功を示しません。
 
 ## 2026-10-10: codex-slide-planの統合・配布検証
 

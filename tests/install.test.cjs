@@ -122,7 +122,7 @@ test('source target overlap refused before mutation', t => {
 test('every required source asset is checked before backup/mutation', t => {
   assert.ok(installer.REQUIRED_SOURCE_FILES.includes('references/roles/record-keeper.md'));
   for (const file of ['authoring-skills/codex-html-plan/SKILL.md', 'authoring-skills/codex-html-plan/UPSTREAM.md', 'authoring-skills/codex-html-plan/LICENSE', 'authoring-skills/codex-html-plan/runtime/pack.mjs', 'authoring-skills/codex-html-plan/examples/task-board.plan.html']) assert.ok(installer.REQUIRED_SOURCE_FILES.includes(file), file);
-  for (const file of ['authoring-skills/codex-slide-plan/SKILL.md', 'authoring-skills/codex-slide-plan/references/schema.md', 'authoring-skills/codex-slide-plan/references/workflow.md', 'authoring-skills/codex-slide-plan/references/masters.md', 'authoring-skills/codex-slide-plan/templates/catalog.json', 'authoring-skills/codex-slide-plan/scripts/pack.mjs', 'authoring-skills/codex-slide-plan/scripts/review.js', 'authoring-skills/codex-slide-plan/scripts/style.css', 'authoring-skills/codex-slide-plan/scripts/inspect-master.py', 'authoring-skills/codex-slide-plan/scripts/make-fixtures.py', 'authoring-skills/codex-slide-plan/examples/deck.json']) assert.ok(installer.REQUIRED_SOURCE_FILES.includes(file), file);
+  assert.equal(installer.REQUIRED_SOURCE_FILES.some(file => file.startsWith('authoring-skills/codex-slide-plan/')), false);
   const f = fixture(t), l = locations(f), source = path.join(f.base, 'release/skill'); lib.copySkill(path.join(root, 'dist/skill'), source); write(l.agents, 'Original');
   for (const file of installer.REQUIRED_SOURCE_FILES) {
     const missing = path.join(source, file), bytes = fs.readFileSync(missing); fs.unlinkSync(missing); const before = tree(f.base);
@@ -235,4 +235,32 @@ for (const mode of ['legacy-off', 'loop-off', 'pinned']) test(`actual 0.3.0 upgr
   if (mode === 'pinned') assert.deepEqual(status.model_selection.pins.standard, { source: 'personal', path: personal });
   for (const [i, file] of [personal, project, memoryFile].entries()) assert.deepEqual(fs.readFileSync(file), before[i]);
   assert.equal(installer.install(l.args).status, 'unchanged');
+});
+
+test('owned legacy nested optional copy is backed up and removed on core update', t => {
+  const f = fixture(t), l = locations(f), initial = installer.install(l.args);
+  const nested = path.join(initial.target, 'authoring-skills/codex-slide-plan');
+  lib.copySkill(path.join(root, 'authoring-skills/codex-slide-plan'), nested);
+  const state = lib.readJson(l.manifest); state.files = lib.inventory(initial.target); write(l.manifest, state);
+  const independent = path.join(f.home, '.agents/skills/codex-slide-plan'); write(path.join(independent, 'SKILL.md'), 'independent user content');
+  const independentSaved = tree(independent);
+  const result = installer.install(l.args); assert.equal(result.status, 'installed'); assert.equal(fs.existsSync(nested), false);
+  assert.deepEqual(tree(path.join(result.backup, 'skill/authoring-skills/codex-slide-plan')), tree(path.join(root, 'authoring-skills/codex-slide-plan')));
+  assert.deepEqual(tree(independent), independentSaved); installer.uninstall(l.args); assert.deepEqual(tree(independent), independentSaved);
+});
+test('edited legacy nested optional copy blocks core migration without losing bytes', t => {
+  const f = fixture(t), l = locations(f), initial = installer.install(l.args), nested = path.join(initial.target, 'authoring-skills/codex-slide-plan');
+  lib.copySkill(path.join(root, 'authoring-skills/codex-slide-plan'), nested);
+  const state = lib.readJson(l.manifest); state.files = lib.inventory(initial.target); write(l.manifest, state);
+  fs.appendFileSync(path.join(nested, 'SKILL.md'), '\nUser edit'); const saved = tree(f.base);
+  for (const operation of [installer.install, installer.uninstall]) assert.throws(() => operation(l.args), /user changes/);
+  assert.deepEqual(tree(f.base), saved);
+});
+test('core install excludes nested optional even when offered by an old bundled source', t => {
+  const f = fixture(t), source = path.join(f.base, 'old release'); lib.copySkill(path.join(root, 'dist/skill'), source);
+  lib.copySkill(path.join(root, 'authoring-skills/codex-slide-plan'), path.join(source, 'authoring-skills/codex-slide-plan'));
+  const result = installer.install({ home: f.home }, source);
+  assert.equal(fs.existsSync(path.join(result.target, 'authoring-skills/codex-slide-plan')), false);
+  assert.equal(Object.keys(lib.readJson(locations(f).manifest).files).some(file => file.startsWith('authoring-skills/codex-slide-plan/')), false);
+  assert.equal(installer.install({ home: f.home }, source).status, 'unchanged');
 });

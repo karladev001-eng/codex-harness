@@ -24,7 +24,7 @@ node "<runtime>" measure record --project <project> --input <measurement.json>
 
 ## 配布と導入
 
-Node.js 22以上。GitHub Packages非公開npm配布は準備中。配布開始後はPCごとにnpm login（classic PATのread:packagesとpackageアクセス権）を済ませ、次を実行する。tokenは対話入力のみとし、チャット/リポジトリ/引数へ貼らない。
+Node.js 22以上。2026-10-10にGitHub Packagesへ非公開npm版0.4.2を配布済み（既定5スキル、codex-slide-plan未収録）。PCごとにnpm login（classic PATのread:packagesとpackageアクセス権）を済ませ、次を実行する。tokenは対話入力のみとし、チャット/リポジトリ/引数へ貼らない。
 
 ```sh
 npm login --scope=@karladev001-eng --auth-type=legacy --registry=https://npm.pkg.github.com
@@ -45,7 +45,9 @@ npx --yes --package ./karladev001-eng-codex-harness-0.4.2.tgz codex-harness auth
 
 `install` は個人用AGENTS.mdに恒久的な導入先のruntime.jsを参照する入口を登録する。`uninstall` は所有する入口とスキルのみ解除する。旧Python版schema-1 manifestも、ファイルと入口が未編集ならPythonを実行せず移行できる。
 
-`authoring install|uninstall --project PATH` は独立した6スキル（4つのMarkdownスキルとHTML pack runtimeを持つcodex-html-plan、codex-slide-plan）を `.agents/skills` に導入・更新・削除する。現在配布中の0.4.2 tarballにはcodex-slide-planがないため、checkoutから導入する。`--skill NAME` を繰り返すと対象を選べる。`--skills-dir PARENT` で個人用など別のスキル親ディレクトリを明示できる。所有manifestで確認できない既存フォルダや編集済みファイルは上書きしない。オーケストレーションの有効化やAGENTS.md変更は行わない。
+`authoring install|uninstall --project PATH` は既定5スキル（4つのMarkdownスキルとcodex-html-plan）を `.agents/skills` に導入・更新・削除する。`--skill NAME` を繰り返すと対象を選べる。任意追加の `codex-slide-plan` は対応版パッケージのCLIから `--skill codex-slide-plan` を明示する。現行0.4.2には含まれず、現行 `@latest` では追加できない。対応版の版固定npm/tgz手順は[単独導入](../../../../../authoring-skills/INSTALL.md#codex-slide-planを任意追加する対応版の配布後)へ。指定なしのinstall/update/uninstallは独立導入済みオプションを変更しない。本体の通常install/updateもオプションを配置しない。
+
+`--skills-dir PARENT` で個人用など別のスキル親ディレクトリを明示できる。所有manifestで確認できない既存フォルダや編集済みファイルは上書きしない。オーケストレーションの有効化やAGENTS.md変更は行わない。オプションの導入元は恒久本体runtimeにないため、install/updateは対応版のnpm/tgzから実行する。明示uninstallは所有記録だけで行える。旧本体内のオプションコピーの移行では所有記録に沿う未編集チェック・バックアップを適用し、独立導入や制作資料には触れない。PPTX/POTX構造読取りだけはPython 3を追加で使う。
 
 設定は既定 < 個人 < プロジェクト。`improvement_loop` はboolean（既定true）で好みの自動読取・記録・適用・候補試用を制御する。OFFは保存済み記憶を消さず通常の修正を続け、明示的な記憶管理は別操作（persistence OFFなら永続記憶読書きなし）。`model_selection` はauto/fixed（既定auto）。明示modelのある役割だけpinになり、effortだけの上書きはpinにしない。旧4機能全OFFかつ新キー未指定はimprovement_loop=falseを補完する。enabled=falseまたは5機能全OFFはinactive。
 
