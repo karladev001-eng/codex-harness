@@ -29,7 +29,7 @@ source kind:
 
 sha256はファイルbytesのSHA-256。packはWebをfetchしない。閲覧記録をverifiedにするのはCodexが原本を確認したときのみ。ローカル未同梱出典は相対pathと位置をコピーできるが、「元プロジェクトが必要」と表示する。commit固定URLはverifiedなGit remoteからCodexが作成した場合だけWeb registryへ記録する。任意のabsolute pathを共有リンクにしない。
 
-assetは`id,file,originals,origin,license,regenerate,slideIds,sourceIds`。fileはassets/配下。原本一覧は実在ファイルのみ。filesでdata/scripts/references/layouts等の必要最小限を明示収録する。読み込めない、symlink、許可外形式、active/external SVG、path逸脱はpack失敗。原本は変更しない。
+assetは`id,file,originals,origin,license,regenerate,slideIds,sourceIds`。`preview:true`なら256KB以下の表示画像だけをHTMLへ埋込み、単体HTMLの選択プレビューにする。大きな原本はbundleに保持する。fileはassets/配下。原本一覧は実在ファイルのみ。filesでdata/scripts/references/layouts等の必要最小限を明示収録する。読み込めない、symlink、許可外形式、active/external SVG、path逸脱はpack失敗。原本は変更しない。
 
 独自layout: `{id,version,name,purpose,fits,avoids,needs,quantity,structure,adjust,prompt,preview,grid:{columns,rows,slots:[{elementId,row,column,rowSpan,columnSpan}]}}`。gridは1–12で安全な数値だけ。master参照等で自由配置が必要なら`canvas:{slots:[{elementId,x,y,width,height}]}`、`titleBox`/`messageBox`同形式、`hideKicker:true`。canvasは百分率0–100、page内だけで原本座標との対応を記録。CSS/HTML任意注入は受け付けない。テーマは`id,name,background,ink,accent,muted,font,ratio:[16,9],padding,footer`。配色は6桁hex、fontはローカル書体名・fallbackのみ。
 
