@@ -10,9 +10,13 @@ import { build } from '../scripts/pack.mjs';
 const decode = s => s.replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 const camel = s => s.replace(/-([a-z])/g,(_,c)=>c.toUpperCase());
 class Element {
-    constructor(tag, doc, attrs={}) { this.tagName=tag;this.doc=doc;this.attrs=attrs;this.children=[];this.handlers={};this.dataset={};this.value='';this.hidden='hidden' in attrs;this.open='open' in attrs;this.text='';for(const [k,v] of Object.entries(attrs))if(k.startsWith('data-'))this.dataset[camel(k.slice(5))]=v;
+    constructor(tag, doc, attrs={}) { this.tagName=tag;this.doc=doc;this.attrs=attrs;this.children=[];this.handlers={};this.dataset={};this.value='';this.hidden='hidden' in attrs;this.open='open' in attrs;this.text='';this.style={};this.bounds={left:0,top:0,width:0,height:0};for(const [k,v] of Object.entries(attrs))if(k.startsWith('data-'))this.dataset[camel(k.slice(5))]=v;
         this.classList={add:c=>{this.attrs.class=[...new Set((this.attrs.class??'').split(' ').concat(c))].join(' ');},remove:c=>{this.attrs.class=(this.attrs.class??'').split(' ').filter(x=>x!==c).join(' ');},contains:c=>(this.attrs.class??'').split(' ').includes(c),toggle:c=>{const on=!this.classList.contains(c);on?this.classList.add(c):this.classList.remove(c);return on;}}; }
     get textContent(){return this.text+this.children.map(x=>x.textContent).join('');} set textContent(v){this.text=String(v);this.children=[];}
+    get parentElement(){return this.parent;}
+    get clientWidth(){return this.bounds.width;} get clientHeight(){return this.bounds.height;}
+    getBoundingClientRect(){return this.bounds;}
+    getAttribute(k){return this.attrs[k]??null;}
     get innerText(){return this.textContent;}
     set className(v){this.attrs.class=v;}
     matches(selector){return selector.split(',').some(s=>{s=s.trim();const a=s.match(/^\[([\w-]+)(?:=(?:"([^"]*)"|'([^']*)'|([^\]]*)))?\]$/);if(a){const value=a[2]??a[3]??a[4];return a[1] in this.attrs&&(value===undefined||this.attrs[a[1]]===value);}if(s.startsWith('.'))return this.classList.contains(s.slice(1));if(s.startsWith('#'))return this.attrs.id===s.slice(1);return this.tagName===s;});}
@@ -36,10 +40,10 @@ async function setup(t,mode='review'){
     const skill=path.resolve(path.dirname(new URL(import.meta.url).pathname),'..');
     const result=await build(path.join(skill,'examples/deck.json'),temp);
     const doc=dom(await fs.readFile(path.join(result.directory,'A',mode==='review'?'review.html':'output/slides.html'),'utf8'));
-    const win={document:doc,location:{hash:''},addEventListener(){},getSelection:()=>({toString:()=>''}),navigator:{},crypto:{randomUUID:()=> 'test-comment'}};
+    const listeners={}; const win={document:doc,location:{hash:''},addEventListener(type,fn){(listeners[type]??=[]).push(fn);},requestAnimationFrame:fn=>fn(),getSelection:()=>({toString:()=>''}),navigator:{},crypto:{randomUUID:()=> 'test-comment'}};
     Object.defineProperty(win,'localStorage',{get(){throw Error('storage touched while OFF');}});
     vm.runInNewContext(await fs.readFile(path.join(skill,'scripts/review.js'),'utf8'),{window:win,console,Blob,URL,setTimeout});
-    return {doc,win,$:id=>doc.getElementById(id),click:el=>doc.dispatch('click',{target:el})};
+    return {doc,win,listeners,$:id=>doc.getElementById(id),click:el=>doc.dispatch('click',{target:el})};
 }
 test('actual generated review opens targets by keyboard and supports add/edit/delete/response/manual-copy',async t=>{
     const {doc,win,$,click}=await setup(t);
@@ -68,4 +72,41 @@ test('slide-only controls advance and list actual generated pages',async t=>{
     click(doc.querySelector('[data-action=next]'));assert.equal(win.SlidePlan.state().currentPage,1);
     doc.dispatch('keydown',{key:'ArrowLeft',target:doc.body});assert.equal(win.SlidePlan.state().currentPage,0);
     click(doc.querySelector('[data-action=all]'));assert.ok(doc.querySelectorAll('.slide-page').every(p=>!p.hidden));
+});
+
+// Numeric dimensions are injected into this adapter; no rendering or visual PASS.
+test('fixed canvas fitting recomputes on details/resize/zoom and keeps its logical dimensions',async t=>{
+    const {doc,win,listeners,click}=await setup(t,'slides');
+    const frame=doc.querySelector('.slide-frame'),slide=frame.querySelector('.slide');
+    for (const [w,h] of [[1280,720],[1280,960]]) {
+        frame.dataset.canvasWidth=String(w);frame.dataset.canvasHeight=String(h);
+        for (const available of [360,768,1440]) {
+            frame.parentElement.bounds.width=available;win.SlidePlan.fitFrames();
+            assert.equal(slide.style.transform,`scale(${available/w})`);
+            assert.equal(frame.style.height,`${h*available/w}px`);
+            assert.equal(frame.style.width,`${available}px`);
+        }
+    }
+    frame.parentElement.bounds.width=0;win.SlidePlan.fitFrames();assert.equal(frame.style.width,'1440px');
+    frame.parentElement.bounds.width=768;doc.dispatch('toggle');assert.equal(frame.style.width,'768px');
+    frame.parentElement.bounds.width=360;listeners.resize.forEach(fn=>fn());assert.equal(frame.style.width,'360px');
+    frame.parentElement.bounds.width=1440;win.innerHeight=850;
+    click(doc.querySelector('[data-action=zoom]'));assert.equal(frame.style.height,'720px');
+    doc.dispatch('keydown',{key:'Escape',target:doc.body});assert.equal(frame.style.height,'1080px');
+    assert.equal(frame.dataset.canvasWidth,'1280');assert.equal(frame.dataset.canvasHeight,'960');
+});
+test('review fitting subtracts document padding and image pointer regions normalize transformed pixels',async t=>{
+    const {doc,win,$}=await setup(t);
+    const frame=doc.querySelector('.slide-frame');frame.parentElement.bounds.width=814;
+    win.getComputedStyle=()=>({paddingLeft:'46px',paddingRight:'0px'});win.SlidePlan.fitFrames();
+    assert.equal(frame.style.width,'768px');
+    const img=doc.querySelector('[data-region-image]');
+    for (const scale of [.25,.75]) {
+        img.bounds={left:10,top:20,width:1280*scale,height:720*scale};
+        img.dispatch('pointerdown',{button:0,clientX:10+128*scale,clientY:20+72*scale});
+        img.dispatch('pointerup',{clientX:10+640*scale,clientY:20+360*scale});
+        const r=win.SlidePlan.state().selected.region;
+        assert.ok(Math.abs(r.x-.1)<1e-9&&Math.abs(r.y-.1)<1e-9&&Math.abs(r.width-.4)<1e-9&&Math.abs(r.height-.4)<1e-9);
+        $('comment-editor').close();
+    }
 });

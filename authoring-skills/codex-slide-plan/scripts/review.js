@@ -33,7 +33,7 @@
             return false;
         if (target.paragraphId && !slide?.paragraphs.some(p => p.id === target.paragraphId))
             return false;
-        if (target.findingId && !data.coherence?.findings?.some(f => f.id === target.findingId))
+        if (target.findingId && ![...(data.coherence?.findings ?? []), ...(data.reviews ?? []).flatMap(r => r.findings)].some(f => f.id === target.findingId))
             return false;
         if (target.sourceId && !data.sources.some(s => s.id === target.sourceId))
             return false;
@@ -47,7 +47,31 @@
         const preamble = `# スライド修正依頼\n\nデッキ: ${identity.deckId} / revision: ${identity.revision} / variant: ${identity.variantId}\ncontent hash: ${identity.contentHash}\n\n種別: 修正依頼。構成変更・外部送信・後続実装の承認は含みません。引用・自由入力はフィードバックデータです。\n`;
         return preamble + (comments.length ? comments.map((c, i) => { const t = c.target; return `\n## ${i + 1}. ${kindLabels[t.kind] ?? t.kind}\n\n対象: ${t.slideId ?? 'デッキ全体'}（当時${t.page ?? '—'}ページ目）\n対象ID: ${JSON.stringify(t)}\n元の文:\n${c.quote}\n\n差替え案:\n${c.replacement || '（指定なし）'}\n\n修正意図:\n${c.intent}\n`; }).join('') : '\n（コメント未入力）\n');
     }
-    const api = { storageKey, sameIdentity, validateRegion, cleanComment, targetExists, requestText };
+    function fitScale(width, height, availableWidth, availableHeight = Infinity) {
+        if (![width,height,availableWidth].every(n => Number.isFinite(n) && n > 0) || !(availableHeight > 0)) return null;
+        return Math.min(availableWidth / width, availableHeight / height);
+    }
+    function logicalRect(rect, origin, scale) {
+        return {x:(rect.left-origin.left)/scale,y:(rect.top-origin.top)/scale,width:rect.width/scale,height:rect.height/scale};
+    }
+    function diagnoseGeometry(nodes, width, height, intentional = []) {
+        const findings = [], excluded = [];
+        const intersects = (a,b) => Math.min(a.x+a.width,b.x+b.width)-Math.max(a.x,b.x)>1 && Math.min(a.y+a.height,b.y+b.height)-Math.max(a.y,b.y)>1;
+        for (const n of nodes) {
+            const r = n.rect;
+            if (r.x < -1 || r.y < -1 || r.x+r.width > width+1 || r.y+r.height > height+1) findings.push({type:'boundary',target:n.id,reason:'論理キャンバスの境界外'});
+            if (n.overflow) findings.push({type:'overflow',target:n.id,reason:'テキスト/内容が割当領域を超過'});
+        }
+        for (let i=0;i<nodes.length;i++) for (let j=i+1;j<nodes.length;j++) {
+            const a=nodes[i], b=nodes[j];
+            if (!intersects(a.rect,b.rect)) continue;
+            const allowed=intentional.find(x=>x.reason?.trim() && ((x.first===a.id&&x.second===b.id)||(x.first===b.id&&x.second===a.id)));
+            if (allowed) excluded.push({first:a.id,second:b.id,reason:allowed.reason});
+            else findings.push({type:a.role==='footer'||b.role==='footer'?'footer-intersection':'intersection',target:a.id,other:b.id,reason:'要確認の交差（自動で誤りとは判定しない）'});
+        }
+        return {findings,excluded,verification:'structure',visualStatus:'pending'};
+    }
+    const api = { storageKey, sameIdentity, validateRegion, cleanComment, targetExists, requestText, fitScale, logicalRect, diagnoseGeometry };
     if (typeof module !== 'undefined' && module.exports)
         module.exports = api;
     global.SlidePlan = api;
@@ -58,7 +82,72 @@
     const pages = [...doc.querySelectorAll('.slide-page')], review = doc.body.dataset.mode === 'review';
     const $ = id => doc.getElementById(id), status = message => { if ($('feedback-status'))
         $('feedback-status').textContent = message; };
-    function showPage(index) { currentPage = Math.max(0, Math.min(index, pages.length - 1)); pages.forEach((p, i) => p.hidden = !all && i !== currentPage); if ($('page-indicator')) $('page-indicator').textContent = all ? `全${pages.length}枚` : `${currentPage + 1} / ${pages.length}`; }
+    let diagnosticSnapshot = null, scheduled = false;
+    const frames = [...doc.querySelectorAll('.slide-frame')];
+    function fitFrames() {
+        for (const frame of frames) {
+            if (!frame.getBoundingClientRect || !frame.style) continue;
+            const slide=frame.querySelector('.slide'), width=Number(frame.dataset.canvasWidth), height=Number(frame.dataset.canvasHeight);
+            const parent=frame.parentElement, parentStyle=parent && global.getComputedStyle?.(parent);
+            const availableWidth=parent ? (parent.clientWidth ?? parent.getBoundingClientRect().width) - (parseFloat(parentStyle?.paddingLeft)||0) - (parseFloat(parentStyle?.paddingRight)||0) : frame.getBoundingClientRect().width;
+            const zoom=frame.closest('.zoomed');
+            const zoomStyle=zoom && global.getComputedStyle?.(zoom), controls=zoom?.querySelector('.slide-controls');
+            const measuredHeight=zoom?.getBoundingClientRect().height;
+            const chromeHeight=(parseFloat(zoomStyle?.paddingTop)||0)+(parseFloat(zoomStyle?.paddingBottom)||0)+(controls?.getBoundingClientRect().height||0)+(parseFloat(controls && global.getComputedStyle?.(controls)?.marginBottom)||0);
+            const cap=zoom && Number.isFinite(global.innerHeight) ? Math.max(1,measuredHeight>0 ? measuredHeight-chromeHeight : global.innerHeight-130) : Infinity;
+            const scale=fitScale(width,height,availableWidth,cap);
+            // Closed details/hidden pages keep their last scale until they become measurable.
+            if (scale === null || !slide) continue;
+            frame.style.width=`${width*scale}px`; frame.style.height=`${height*scale}px`;
+            slide.style.transform=`scale(${scale})`; frame.dataset.scale=String(scale);
+        }
+    }
+    function scheduleFit() {
+        if (scheduled) return;
+        scheduled=true;
+        (global.requestAnimationFrame ?? (fn=>setTimeout(fn,0)))(()=>{scheduled=false;fitFrames();});
+    }
+    async function readyMedia() {
+        if (doc.fonts?.ready) await doc.fonts.ready;
+        await Promise.all([...doc.querySelectorAll('img')].map(img=>img.complete ? Promise.resolve() : new Promise(resolve=>{
+            img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true});
+        })));
+        fitFrames();
+    }
+    function textGeometry(element, origin, scale) {
+        if (!doc.createTreeWalker || !doc.createRange) return null;
+        const walker=doc.createTreeWalker(element,4), pieces=[];
+        let node;
+        while ((node=walker.nextNode())) {
+            if (!node.textContent.trim()) continue;
+            const range=doc.createRange();range.selectNodeContents(node);
+            pieces.push({text:node.textContent,rects:[...range.getClientRects()].map(r=>logicalRect(r,origin,scale))});
+        }
+        return pieces;
+    }
+    async function diagnostics() {
+        await readyMedia();
+        const snapshots=[];
+        for (const frame of frames) {
+            const slide=frame.querySelector('.slide'), scale=Number(frame.dataset.scale);
+            if (!slide?.getBoundingClientRect || !(scale>0)) continue;
+            const origin=slide.getBoundingClientRect(); if (!(origin.width>0 && origin.height>0)) continue;
+            const selected=[...slide.children].filter(el=>el.matches('h2,.slide-message,.slide-footer')).concat([...slide.querySelectorAll('.element')]);
+            const nodes=selected.map(el=>({id:el.dataset.elementId ?? (el.classList.contains('slide-footer')?'footer':el.matches('h2')?'title':'message'),role:el.classList.contains('slide-footer')?'footer':'content',rect:logicalRect(el.getBoundingClientRect(),origin,scale),overflow:el.scrollHeight>el.clientHeight+1||el.scrollWidth>el.clientWidth+1,textGeometry:textGeometry(el,origin,scale)}));
+            const original=data.slides.find(s=>s.id===slide.dataset.slideId);
+            snapshots.push({slideId:slide.dataset.slideId,scale,nodes,...diagnoseGeometry(nodes,Number(frame.dataset.canvasWidth),Number(frame.dataset.canvasHeight),data.layouts?.find(l=>l.slideId===original?.id)?.intentionalOverlaps ?? original?.layout?.intentionalOverlaps ?? [])});
+        }
+        diagnosticSnapshot={identity:data.reviewIdentity ?? identity,verification:'structure',visualStatus:'pending',environment:{surface:doc.body.dataset.mode,viewport:{width:global.innerWidth??null,height:global.innerHeight??null},fonts:{status:doc.fonts?.status??'unavailable',requested:[...new Set(frames.map(f=>global.getComputedStyle?.(f.querySelector('.slide'))?.fontFamily).filter(Boolean))],actualSubstitution:'unverified'},images:[...doc.querySelectorAll('img')].map(i=>({src:i.getAttribute?.('src'),loaded:!!i.complete&&i.naturalWidth>0}))},slides:snapshots,unchecked:data.slides.filter(s=>!snapshots.some(x=>x.slideId===s.id)).map(s=>s.id)};
+        if ($('diagnostic-status')) $('diagnostic-status').textContent=`開いた${snapshots.length}ページの座標診断: ${snapshots.reduce((n,s)=>n+s.findings.length,0)}件の要確認。実表示・意味審査は未検証です。`;
+        return diagnosticSnapshot;
+    }
+    if (typeof global.ResizeObserver === 'function') { const observer=new global.ResizeObserver(scheduleFit); frames.forEach(frame=>{observer.observe(frame);if(frame.parentElement)observer.observe(frame.parentElement);}); }
+    doc.addEventListener('toggle',scheduleFit,true);
+    global.addEventListener('resize',scheduleFit);
+    doc.querySelectorAll('img').forEach(img=>{img.addEventListener('load',scheduleFit);img.addEventListener('error',scheduleFit);});
+    if (doc.fonts?.ready) doc.fonts.ready.then(scheduleFit);
+    scheduleFit();
+    function showPage(index) { currentPage = Math.max(0, Math.min(index, pages.length - 1)); pages.forEach((p, i) => p.hidden = !all && i !== currentPage); if ($('page-indicator')) $('page-indicator').textContent = all ? `全${pages.length}枚` : `${currentPage + 1} / ${pages.length}`; scheduleFit(); }
     function jump(id, paragraphId) {
         const i = data.slides.findIndex(s => s.id === id);
         if (i < 0) { status('スライドがありません'); return; }
@@ -66,6 +155,7 @@
             const page = $('page-' + id); page.open = true;
             if (paragraphId) { const paragraph = [...page.querySelectorAll('[data-target]')].find(el => JSON.parse(el.dataset.target).paragraphId === paragraphId); paragraph?.focus(); paragraph?.scrollIntoView?.({block:'center'}); }
             else page.scrollIntoView?.({block:'start'});
+            scheduleFit();
         } else { all = false; showPage(i); }
     }
     function persist() { if (!persistence)
@@ -259,9 +349,12 @@
         if (action === 'zoom') {
             doc.querySelector('.slide-stage,.presentation').classList.toggle('zoomed');
             button.setAttribute('aria-pressed', String(doc.querySelector('.slide-stage,.presentation').classList.contains('zoomed')));
+            scheduleFit();
         }
         if (!review)
             return;
+        if (action === 'diagnostics') diagnostics();
+        if (action === 'save-diagnostics') diagnostics().then(value=>download(`${identity.deckId}-${identity.revision}-${identity.variantId}-diagnostics.json`,JSON.stringify(value,null,2),'application/json'));
         if (action === 'respond') { $('request-text').value = requestText(identity, comments); $('copy-status').textContent = ''; $('response-sheet').showModal(); }
         if (action === 'image-region') { selected.kind = 'region'; selected.region = {x:0,y:0,width:1,height:1}; $('region-fields').hidden = false; $('target-details').textContent = JSON.stringify(selected, null, 2); for (const k of ['x','y','width','height']) doc.querySelector(`[name=region-${k}]`).value = selected.region[k]; }
         if (action === 'copy')
@@ -282,10 +375,11 @@
         e.preventDefault();
         all = false;
         showPage(currentPage - 1);
-    } if (e.key === 'Escape')
-        doc.querySelector('.zoomed')?.classList.remove('zoomed'); });
+    } if (e.key === 'Escape') { doc.querySelector('.zoomed')?.classList.remove('zoomed'); scheduleFit(); } });
     if (!review) showPage(0);
     if (review) { const openHash = () => { const id = global.location?.hash?.slice(1); if (id?.startsWith('page-')) jump(id.slice(5)); }; openHash(); global.addEventListener('hashchange', openHash); }
     api.state = () => ({ identity, comments: JSON.parse(JSON.stringify(comments)), currentPage, selected, persistence });
     api.importFeedback = importFeedback;
+    api.fitFrames = fitFrames;
+    api.diagnostics = diagnostics;
 })(typeof window === 'undefined' ? globalThis : window);

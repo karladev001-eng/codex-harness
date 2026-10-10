@@ -48,7 +48,89 @@ catch {
 } }
 function safeSVG(buffer, name) { const s = buffer.toString('utf8'); require(!/<\s*(script|foreignObject|iframe|object|embed)\b|\bon[a-z]+\s*=|(?:href|src)\s*=|<!DOCTYPE|<!ENTITY|@import|url\(\s*["']?(?!#)/i.test(s), `Active/external SVG refused: ${name}`); }
 function jsonScript(value) { return JSON.stringify(value).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029'); }
-export function contentHash(deck) { const { coherence, ...content } = deck; return hash(JSON.stringify(content)); }
+function evidenceFiles(deck) {
+    const {coherence, reviews, files, ...body} = deck;
+    const references = new Set();
+    const strings = value => { if (typeof value === 'string') references.add(value); else if (Array.isArray(value)) value.forEach(strings); else if (value && typeof value === 'object') Object.values(value).forEach(strings); };
+    strings(body);
+    return new Set((reviews ?? []).flatMap(r => r.evidence ?? []).map(e=>e.path).filter(p=>typeof p === 'string' && p.startsWith('evidence/') && !references.has(p)));
+}
+export function contentHash(deck) {
+    const { coherence, reviews, ...content } = deck;
+    const evidence = evidenceFiles(deck);
+    if (content.files) content.files = content.files.filter(f => !evidence.has(f));
+    return hash(JSON.stringify(content));
+}
+// Renderer identity excludes generated HTML and review records to avoid a hash cycle.
+export async function rendererHash() {
+    const bytes = await Promise.all(['pack.mjs', 'style.css', 'review.js'].map(name => fs.readFile(path.join(HERE, name))));
+    return hash(Buffer.concat(bytes));
+}
+export const reviewIdentity = (deck, variantId, renderer, artifact) => ({ deckId: deck.id, revision: deck.revision, variantId, contentHash: contentHash(deck), rendererHash: renderer, ...(artifact ? {artifactHash:artifact} : {}) });
+function validateReviews(deck) {
+    require(deck.reviews === undefined || Array.isArray(deck.reviews), 'reviews must be an array');
+    unique(deck.reviews ?? [], 'review');
+    for (const r of deck.reviews ?? []) {
+        require(['visual','page','flow'].includes(r.kind), 'Invalid review kind');
+        require(['pending','changes','verified'].includes(r.status), 'Invalid review status');
+        require(['self','independent'].includes(r.reviewMode), 'Review mode required');
+        require(['rendered','semantic','structure'].includes(r.verification), 'Review verification required');
+        for (const k of ['reviewer','checkedAt']) text(r[k], `review ${k}`);
+        require(r.identity && typeof r.identity === 'object', 'Review identity required');
+        for (const k of ['deckId','revision','variantId']) id(r.identity[k], `review ${k}`);
+        for (const k of ['contentHash','rendererHash']) require(/^[a-f0-9]{64}$/.test(r.identity[k]), `Review ${k} required`);
+        const currentContent=r.identity.deckId === deck.id && r.identity.revision === deck.revision && r.identity.contentHash === contentHash(deck);
+        if (r.kind === 'flow') require(r.slideId === undefined, 'Flow review belongs to the whole deck');
+        if (r.kind !== 'flow') { id(r.slideId, 'review slide'); if (currentContent) require(deck.slides.some(s => s.id === r.slideId), 'Review slide missing'); }
+        require(r.environment && typeof r.environment === 'object', 'Review environment required');
+        text(r.environment.surface, 'Review environment surface');
+        require(Array.isArray(r.evidence) && Array.isArray(r.checks) && Array.isArray(r.findings) && Array.isArray(r.unchecked), 'Review evidence/checks/findings/unchecked required');
+        if (r.identity.artifactHash !== undefined) require(/^[a-f0-9]{64}$/.test(r.identity.artifactHash), 'Invalid review artifactHash');
+        for (const e of r.evidence) { relative(e.path); require(evidenceFiles(deck).has(e.path), 'Review evidence must be in evidence/ and not reused as deck content'); require((deck.files ?? []).includes(e.path), 'Review evidence must be explicitly listed in files'); require(/^[a-f0-9]{64}$/.test(e.sha256), 'Review evidence sha256 required'); }
+        for (const c of r.checks) for (const k of ['item','result','reason']) text(c[k], `review check ${k}`);
+        unique(r.findings, 'review finding');
+        for (const f of r.findings) {
+            require(['major','minor'].includes(f.severity) && ['open','resolved','intentional'].includes(f.resolution), 'Invalid review finding severity/resolution');
+            const slide = deck.slides.find(s => s.id === f.target?.slideId);
+            id(f.target?.slideId,'review finding slide');
+            if (currentContent) require(slide, 'Review finding slide missing');
+            if (f.target.elementId) { id(f.target.elementId,'review finding element'); if (currentContent) require(slide?.elements.some(e => e.id === f.target.elementId), 'Review finding element missing'); }
+            if (f.target.paragraphId) { id(f.target.paragraphId,'review finding paragraph'); if (currentContent) require(slide?.paragraphs.some(p => p.id === f.target.paragraphId), 'Review finding paragraph missing'); }
+            for (const k of ['problem','reason','suggestion']) text(f[k], `review finding ${k}`);
+            if (f.resolution !== 'open') text(f.resolutionReason, 'Review finding resolution reason');
+        }
+        if (r.status === 'verified') {
+            require(/^[a-f0-9]{64}$/.test(r.identity.artifactHash), 'Verified review artifactHash required');
+            require(r.unchecked.length === 0 && r.checks.length > 0, 'Verified review requires checks and no unchecked items');
+            require(!r.findings.some(f => f.resolution === 'open'), 'Verified review has unresolved findings');
+            require(r.kind === 'visual' ? r.verification === 'rendered' && r.evidence.some(e=>/\.(png|jpg|jpeg|webp|gif)$/i.test(e.path)) : r.verification === 'semantic', 'Verified visual requires rendered evidence; meaning requires semantic review');
+        }
+    }
+}
+export function reviewReport(deck, variantId, renderer, evidenceIssues = {}, artifact) {
+    const identity = reviewIdentity(deck, variantId, renderer, artifact);
+    const records = (deck.reviews ?? []).filter(r => r.identity.variantId === variantId).map(r => {
+        const stale = Object.entries(identity).some(([k,v]) => r.identity[k] !== v);
+        const issues = evidenceIssues[r.id] ?? [];
+        const major = r.findings.some(f => f.severity === 'major' && f.resolution === 'open');
+        return { ...r, stale, evidenceIssues: issues, effectiveStatus: stale || issues.length ? 'pending' : major ? 'changes' : r.status };
+    });
+    const scopes = [...deck.slides.flatMap(s => ['visual','page'].map(kind => ({kind, slideId:s.id}))), {kind:'flow'}].map(scope => {
+        const matching = records.filter(r => r.kind === scope.kind && r.slideId === scope.slideId);
+        const current = matching.filter(r => !r.stale && !r.evidenceIssues.length);
+        const effectiveStatus = current.some(r => r.effectiveStatus === 'changes') ? 'changes' : current.length && current.every(r => r.effectiveStatus === 'verified') ? 'verified' : 'pending';
+        return {...scope, status:effectiveStatus};
+    });
+    return { schemaVersion:1, identity, records, scopes, status:scopes.some(s => s.status === 'changes') ? 'changes' : scopes.every(s => s.status === 'verified') ? 'verified' : 'pending' };
+}
+async function checkReviewEvidence(deck, root) {
+    const issues = {};
+    for (const r of deck.reviews ?? []) for (const e of r.evidence) {
+        try { require(hash(await safeRead(root, e.path)) === e.sha256, 'hash mismatch'); }
+        catch (error) { (issues[r.id] ??= []).push(`${e.path}: ${error.message}`); }
+    }
+    return issues;
+}
 const DEFAULT_THEME = { id: 'default', background: '#ffffff', ink: '#243246', accent: '#176b70', muted: '#566777', font: 'Arial, sans-serif', ratio: [16, 9], padding: 6 };
 export const variantsFor = deck => deck.variants ?? [{ id: 'A', name: 'デザイン案' }];
 export async function loadCatalog(deck) {
@@ -69,6 +151,10 @@ export async function loadCatalog(deck) {
             unique(layout.canvas.slots.map(s => ({ id: s.elementId })), 'canvas element');
             for (const slot of layout.canvas.slots)
                 rectangle(slot);
+        }
+        if (layout.intentionalOverlaps) {
+            require(Array.isArray(layout.intentionalOverlaps), 'intentionalOverlaps must be an array');
+            for (const pair of layout.intentionalOverlaps) { id(pair.first,'overlap target'); id(pair.second,'overlap target'); text(pair.reason,'intentional overlap reason'); }
         }
         if (layout.grid) {
             require(Number.isInteger(layout.grid.columns) && layout.grid.columns >= 1 && layout.grid.columns <= 12, 'Grid columns must be 1–12');
@@ -234,6 +320,7 @@ export async function validateDeck(deck) {
             const lid = variant.layouts?.[slide.id] ?? (slide.layout ? `slide-${slide.id}` : slide.layoutId ?? 'default');
             const layout = catalog.layouts.find(l => l.id === lid);
             require(layout, `Unknown layout ${lid}`);
+            for (const pair of layout.intentionalOverlaps ?? []) for (const name of [pair.first,pair.second]) require(['title','message','footer',...slide.elements.map(e=>e.id)].includes(name), 'Unknown intentional overlap target');
             if (layout.grid || layout.canvas)
                 for (const slot of (layout.grid ?? layout.canvas).slots)
                     require(slide.elements.some(el => el.id === slot.elementId), `Custom layout slot missing element: ${slot.elementId}`);
@@ -258,6 +345,7 @@ export async function validateDeck(deck) {
                 text(f[key], `finding ${key}`);
         }
     }
+    validateReviews(deck);
     return { catalog, targets };
 }
 export async function provenance(deck, root, projectRoot = root) {
@@ -347,7 +435,8 @@ function slideHTML(slide, index, deck, variant, catalog, prefix = '') {
     slide = { ...slide, page: index + 1 };
     const theme = catalog.themes.find(t => t.id === (variant.themeId ?? catalog.themes[0].id));
     const layout = catalog.layouts.find(l => l.id === (variant.layouts?.[slide.id] ?? (slide.layout ? `slide-${slide.id}` : slide.layoutId ?? 'default')));
-    const colors = `--slide-bg:${theme.background};--slide-ink:${theme.ink};--accent:${theme.accent};--slide-muted:${theme.muted};--ratio:${theme.ratio[0]}/${theme.ratio[1]};--slide-font:${theme.font};--slide-padding:${theme.padding ?? 6}%`;
+    const width = 1280, height = width * theme.ratio[1] / theme.ratio[0];
+    const colors = `--canvas-width:${width}px;--canvas-height:${height}px;--slide-bg:${theme.background};--slide-ink:${theme.ink};--accent:${theme.accent};--slide-muted:${theme.muted};--ratio:${theme.ratio[0]}/${theme.ratio[1]};--slide-font:${theme.font};--slide-padding:${width * (theme.padding ?? 6) / 100}px`;
     const boxStyle = box => box ? ` style="position:absolute;left:${box.x}%;top:${box.y}%;width:${box.width}%;height:${box.height}%;margin:0"` : '';
     const gridStyle = layout.canvas ? ' style="position:absolute;inset:0;display:block"' : layout.grid ? ` style="display:grid;grid-template-columns:repeat(${layout.grid.columns},minmax(0,1fr));grid-template-rows:repeat(${layout.grid.rows},minmax(0,1fr))"` : '';
     const els = slide.elements.map(el => { let html = elementHTML(el, slide, deck, prefix); const slot = layout.grid?.slots.find(s => s.elementId === el.id); const rect = layout.canvas?.slots.find(s => s.elementId === el.id); if (rect)
@@ -356,14 +445,14 @@ function slideHTML(slide, index, deck, variant, catalog, prefix = '') {
     const pageLabels = [...new Set(slide.sourceIds.map(id => deck.sources.find(s => s.id === id)?.label).filter(Boolean))];
     const elementLabels = new Set(slide.elements.flatMap(el => [...el.sourceIds, ...(deck.assets.find(a => a.id === el.assetId)?.sourceIds ?? [])]).map(id => deck.sources.find(s => s.id === id)?.label).filter(Boolean));
     const pageContext = pageLabels.filter(label => !elementLabels.has(label));
-    return `<section class="slide layout-${escape(layout.id)}${layout.canvas ? ' canvas-slide' : ''}" style="${escape(colors)}" data-slide-id="${slide.id}"${attrTarget(target('slide', slide))} aria-label="${index + 1}: ${escape(slide.title)}"><div class="slide-kicker"${layout.hideKicker ? ' hidden' : ''}${attrTarget(target('chapter', slide, { chapterId: slide.chapter }))}>${escape(deck.chapters.find(c => c.id === slide.chapter).title)} · ${index + 1}/${deck.slides.length}</div><h2${boxStyle(layout.titleBox)}${attrTarget(target('title', slide))}>${escape(slide.title)}</h2><p class="slide-message"${boxStyle(layout.messageBox)}${attrTarget(target('message', slide))}>${escape(slide.message)}</p><div class="slide-content"${gridStyle}>${els}</div>${pageContext.length ? `<p class="data-context">${escape(pageContext.join(' · '))}</p>` : ''}${(slide.citations ?? deck.citations) === 'slide' ? sourceStrip(slide.sourceIds, deck.sources, prefix, slide) : ''}<span class="slide-id-label">${index + 1} · ${escape(theme.footer ?? deck.title)}</span></section>`;
+    return `<div class="slide-frame" data-canvas-width="${width}" data-canvas-height="${height}" style="aspect-ratio:${theme.ratio[0]}/${theme.ratio[1]}"><section class="slide layout-${escape(layout.id)}${layout.canvas ? ' canvas-slide' : ''}" style="${escape(colors)}" data-slide-id="${slide.id}"${attrTarget(target('slide', slide))} aria-label="${index + 1}: ${escape(slide.title)}"><div class="slide-kicker"${layout.hideKicker ? ' hidden' : ''}${attrTarget(target('chapter', slide, { chapterId: slide.chapter }))}>${escape(deck.chapters.find(c => c.id === slide.chapter).title)} · ${index + 1}/${deck.slides.length}</div><h2${boxStyle(layout.titleBox)}${attrTarget(target('title', slide))}>${escape(slide.title)}</h2>${slide.title.trim() === slide.message.trim() ? '' : `<p class="slide-message"${boxStyle(layout.messageBox)}${attrTarget(target('message', slide))}>${escape(slide.message)}</p>`}<div class="slide-content"${gridStyle}>${els}</div><div class="slide-footer">${pageContext.length ? `<p class="data-context">${escape(pageContext.join(' · '))}</p>` : ''}${(slide.citations ?? deck.citations) === 'slide' ? sourceStrip(slide.sourceIds, deck.sources, prefix, slide) : ''}<span class="slide-id-label">${index + 1} · ${escape(theme.footer ?? deck.title)}</span></div></section></div>`;
 }
 function paragraphHTML(p, slide) { return `<p class="paragraph"${attrTarget(target('paragraph', slide, { paragraphId: p.id }))}>${escape(p.text)}</p>`; }
-export function render(deck, variant, catalog, sources, css, js, mode, displayAssets = deck.assets) {
+export function render(deck, variant, catalog, sources, css, js, mode, displayAssets = deck.assets, report = reviewReport(deck, variant.id, hash(css + js))) {
     const prefix = mode === 'slides' ? '../' : '';
     const model = { ...deck, sources, assets: displayAssets };
     const slides = deck.slides.map((s, i) => slideHTML(s, i, model, variant, catalog, prefix));
-    const identity = { deckId: deck.id, revision: deck.revision, variantId: variant.id, contentHash: contentHash(deck) };
+    const identity = report.identity;
     const nav = `<div class="slide-controls"><button data-action="previous" aria-label="前のスライド">← 前</button><span id="page-indicator"></span><button data-action="next" aria-label="次のスライド">次 →</button><button data-action="all">一覧</button><button data-action="zoom">拡大</button></div>`;
     let body;
     if (mode === 'slides')
@@ -374,6 +463,9 @@ export function render(deck, variant, catalog, sources, css, js, mode, displayAs
         const rate = deck.timing?.charactersPerMinute ?? 300;
         const flow = deck.slides.map((s, i) => `<article class="flow"><button data-jump-slide="${s.id}">${s.id} / ${i + 1}</button><div><strong>${escape(s.role)}</strong><p>${escape(s.message)}</p></div><div${attrTarget(target('notes', { ...s, page: i + 1 }))}>${s.talkingPoints.map(t => `<p>${escape(t)}</p>`).join('')}<small>${escape(s.notes)}</small></div><p class="bridge">${escape(s.transition)}<br>目安 ${s.seconds}秒</p></article>`).join('');
         const check = deck.coherence ? `<p>確認者: ${escape(deck.coherence.reviewer)} · ${escape(deck.coherence.checkedAt)}</p><ul>${deck.coherence.checks.map(c => `<li>${escape(c.item)}: ${escape(c.result)} / ${escape(c.evidence)}</li>`).join('')}</ul><p>未確認: ${escape(deck.coherence.unchecked.join(' / '))}</p>${(deck.coherence.findings ?? []).map(f => `<article class="panel finding"${attrTarget(target('finding', deck.slides.find(s => s.id === f.slideId), { findingId: f.id, paragraphId: f.paragraphId ?? null }))}><button data-jump-slide="${f.slideId}"${f.paragraphId ? ` data-jump-paragraph="${f.paragraphId}"` : ''}>${escape(f.slideId)} / ${escape(f.paragraphId ?? 'スライド')}</button><blockquote>${escape(f.quote)}</blockquote><p>聞き手への影響: ${escape(f.impact)}</p><p>理由: ${escape(f.reason)}</p><p>修正案: ${escape(f.suggestion)}</p></article>`).join('')}` : '<p class="warning">Codexによる通読チェック未記録。ブラウザ内では判定しません。</p>';
+        const labels = {pending:'審査待ち / 未検証',changes:'要修正',verified:'確認済み'};
+        const kindNames = {visual:'見た目',page:'ページの要点',flow:'全体の流れ'};
+        const reviewHTML = `<details class="sub"><summary>見た目・要点・流れの審査 · ${labels[report.status]}</summary><p>DOM座標は診断補助です。実表示・意味内容を自動判定しません。</p><p>${report.scopes.map(s => `${escape(s.slideId ?? '全体')} ${kindNames[s.kind]}: ${labels[s.status]}`).join('<br>')}</p>${report.records.map(r => `<article class="finding"><p><strong>${kindNames[r.kind]} / ${escape(r.slideId ?? '全体')}</strong> · ${labels[r.effectiveStatus]}${r.stale ? '（内容・描画版が変わり失効）' : ''}</p><p>${escape(r.reviewer)} · ${r.reviewMode === 'independent' ? '独立審査' : '自己審査'} · ${escape(r.checkedAt)} · ${escape(r.verification)}</p><pre>${escape(JSON.stringify(r.environment, null, 2))}</pre>${r.checks.map(c => `<p>${escape(c.item)}: ${escape(c.result)} / ${escape(c.reason)}</p>`).join('')}${r.evidence.map(e => `<p><a href="${escape(fileHref(e.path))}">${escape(e.path)}</a> · ${escape(e.sha256)}</p>`).join('')}${r.evidenceIssues.map(e => `<p class="warning">証拠未検証: ${escape(e)}</p>`).join('')}${r.findings.map(f => `<article class="finding"${attrTarget(target('finding', deck.slides.find(s => s.id === f.target.slideId), { ...f.target, findingId:f.id }))}><button data-jump-slide="${escape(f.target.slideId)}"${f.target.paragraphId ? ` data-jump-paragraph="${escape(f.target.paragraphId)}"` : ''}>${escape(f.target.slideId)} · ${escape(f.target.elementId ?? f.target.paragraphId ?? 'ページ')}</button><p>${escape(f.severity)} / ${escape(f.resolution)}: ${escape(f.problem)}</p><p>理由: ${escape(f.reason)}</p><p>修正案: ${escape(f.suggestion)}</p><p>${escape(f.resolutionReason ?? '')}</p></article>`).join('')}<p>未確認: ${escape(r.unchecked.join(' / ') || 'なし')}</p></article>`).join('')}<p id="diagnostic-status">表示診断は開いたページで実行します。実表示の審査は未記録のままです。</p><button data-action="diagnostics">描画座標を診断</button><button data-action="save-diagnostics">座標診断JSONを保存</button><a href="reviews.json" download>審査記録を保存</a></details>`;
         const sourceHTML = (s, slide) => `<article class="source-detail" id="source-${s.id}-${slide.id}"${attrTarget(target('source', slide, { sourceId: s.id }))}><p><strong>${escape(s.title)}</strong> · ${escape(s.status)}</p><p>${sourceLink(s)} · ${escape(s.position ?? s.location ?? '')}</p><p class="muted">${escape(s.detail)}</p><dl>${['author','date','scope','columns','unit','period','filters','formula','population','missing'].filter(k => s[k]).map(k => `<dt>${escape(k)}</dt><dd>${escape(s[k])}</dd>`).join('')}</dl><details class="sub"><summary>参照記録</summary><pre>${escape(JSON.stringify(s, null, 2))}</pre><button data-copy-location="${escape([s.path ?? s.url ?? s.title, s.position ?? s.location ?? ''].join(' : '))}">参照位置をコピー</button></details></article>`;
         const pageReview = deck.slides.map((s, i) => {
             const page = { ...s, page: i + 1 };
@@ -382,12 +474,12 @@ export function render(deck, variant, catalog, sources, css, js, mode, displayAs
             // Include derived inputs so their provenance is reachable on the same page.
             const addInputs = id => { for (const input of sources.find(x => x.id === id)?.inputIds ?? []) if (!ids.has(input)) { ids.add(input); addInputs(input); } }; [...ids].forEach(addInputs);
             const related = sources.filter(x => ids.has(x.id) || (x.kind === 'missing' && x.id.startsWith(`missing-${s.id}-`)));
-            return `<details class="page" id="page-${s.id}"><summary><span class="number">${String(i + 1).padStart(2, '0')}</span><span>${escape(s.message)}</span></summary><div class="page-content">${slides[i]}<div class="tools"><small>箇所を選ぶとコメントできます。</small><button data-pick-slide="${s.id}">ページにコメント</button></div><article class="notes"><h3>このページで伝えること</h3><div${attrTarget(target('notes', page))}><p>${escape(s.notes)}</p><ul>${s.talkingPoints.map(t => `<li>${escape(t)}</li>`).join('')}</ul></div><h3>発表原稿</h3>${s.paragraphs.map(p => paragraphHTML(p, page)).join('')}<p class="bridge">次へのつなぎ: ${escape(s.transition)} · 目安 ${s.seconds}秒</p><details class="sub"><summary>出典・素材${related.some(x => x.status === '要再確認') ? ' · 要再確認あり' : ''}</summary>${related.map(x => sourceHTML(x, page)).join('') || '<p>追加の根拠なし。</p>'}${assets.map(a => `<article class="asset-detail"><p>${escape(a.origin)} · ${escape(a.license)}</p><a href="${escape(fileHref(a.file))}">素材を開く</a> · <a href="${escape(fileHref(a.file))}" download>素材を保存</a>${(a.originals ?? []).map(f => ` · <a href="${escape(fileHref(f))}" download>原本 ${escape(f)}</a>`).join('')}<p class="muted">再生成: ${escape(a.regenerate)}</p></article>`).join('')}</details></article></div></details>`;
+            return `<details class="page" id="page-${s.id}"><summary><span class="number">${String(i + 1).padStart(2, '0')}</span><span>${escape(s.message)}</span></summary><div class="page-content">${slides[i]}<div class="tools"><small>箇所を選ぶとコメントできます。</small><button data-pick-slide="${s.id}">ページにコメント</button></div><article class="notes"><h3>このページで伝えること</h3><p${attrTarget(target('message', page))}>${escape(s.message)}</p><div${attrTarget(target('notes', page))}><p>${escape(s.notes)}</p><ul>${s.talkingPoints.map(t => `<li>${escape(t)}</li>`).join('')}</ul></div><h3>発表原稿</h3>${s.paragraphs.map(p => paragraphHTML(p, page)).join('')}<p class="bridge">次へのつなぎ: ${escape(s.transition)} · 目安 ${s.seconds}秒</p><details class="sub"><summary>出典・素材${related.some(x => x.status === '要再確認') ? ' · 要再確認あり' : ''}</summary>${related.map(x => sourceHTML(x, page)).join('') || '<p>追加の根拠なし。</p>'}${assets.map(a => `<article class="asset-detail"><p>${escape(a.origin)} · ${escape(a.license)}</p><a href="${escape(fileHref(a.file))}">素材を開く</a> · <a href="${escape(fileHref(a.file))}" download>素材を保存</a>${(a.originals ?? []).map(f => ` · <a href="${escape(fileHref(f))}" download>原本 ${escape(f)}</a>`).join('')}<p class="muted">再生成: ${escape(a.regenerate)}</p></article>`).join('')}</details></article></div></details>`;
         }).join('');
-        body = `<header class="document-header"><h1>${escape(deck.title)}</h1><p class="meta">${deck.slides.length}ページ · ${escape(deck.revision)} · ${escape(variant.name ?? 'デザイン案')}</p><p${attrTarget({kind:'purpose'})}>目的: ${escape(deck.purpose)}</p><p${attrTarget({kind:'audience'})}>聞き手: ${escape(deck.audience)} · 持ち時間: ${deck.durationSeconds ?? '未指定'}秒</p><p class="lead"${attrTarget({kind:'message'})}>${escape(deck.message)}</p><details class="sub"><summary>発表原稿を通して読む</summary>${script}<p class="muted">推定 ${Math.ceil(duration / rate * 60)}秒 / ${duration}文字 / 毎分${rate}文字。リハーサル実測ではありません。</p><a href="script.md" download>発表原稿を保存</a></details><details class="sub"><summary>流れ・分かりやすさの確認</summary>${check}<p>期待する理解・判断: ${escape(deck.expectedOutcome)}</p><p>未解決事項: ${escape(deck.unresolved.join(' / ') || 'なし')}</p><a href="story.md" download>話の流れを保存</a></details></header><main class="shell"><h2>ページごとの要点</h2>${pageReview}<details class="sub"><summary>マスター・制作情報</summary><p>${escape(deck.master?.status ?? 'マスター未指定。内容に合わせて配置したデザイン案です。')}</p><pre>${escape(JSON.stringify(deck.master ?? {}, null, 2))}</pre>${deck.migration ? `<p class="warning">旧版からの作業用コピー。元ファイルとコメントは保持し、別版の修正を自動適用しません。</p>` : ''}${(deck.files ?? []).filter(f => /\.(pptx|potx)$/i.test(f)).map(f => `<p><a href="${escape(fileHref(f))}">マスター原本 ${escape(f)}</a></p>`).join('')}<details><summary>制作データ</summary><pre>${escape(JSON.stringify(identity, null, 2))}</pre></details>${variantsFor(deck).length > 1 ? `<p>${variantsFor(deck).map(v => `<a href="../${v.id}/review.html">${escape(v.name ?? v.id)}</a>`).join(' · ')}</p>` : ''}</details><section class="feedback"><div id="comment-list"></div><details class="sub"><summary>コメントの保存・読込</summary><label><input type="checkbox" id="persist"> この版のコメントをブラウザに保存</label><p id="storage-status" role="status">保存OFF（localStorageを使いません）</p><button data-action="save-md">修正回答を保存</button><button data-action="save-json">コメントJSONを保存</button><label for="import-comments">保存したJSONを読込（自動適用しない）</label><input id="import-comments" type="file" accept=".json"></details><p id="feedback-status" role="status"></p></section><p class="fine">箇所コメント → 修正回答をコピー → チャットに貼り戻して次の案へ。HTMLから自動送信しません。</p></main><footer class="response-bar"><small id="comment-count">コメント 0件</small><button data-action="respond" class="primary">修正回答を作成</button><a href="output/slides.html">スライドだけを開く</a></footer><dialog id="comment-editor" aria-labelledby="editor-title"><div class="dialog-header"><h2 id="editor-title">この箇所にコメント</h2><button data-close="comment-editor" aria-label="閉じる">×</button></div><p id="selected-target" class="muted"></p><form id="comment-form"><label for="quote">原文</label><textarea id="quote"></textarea><label for="intent">修正希望</label><textarea id="intent" required></textarea><details class="sub"><summary>差替え案・対象の詳細</summary><label for="replacement">差替え案（任意）</label><textarea id="replacement"></textarea><pre id="target-details"></pre><button type="button" data-action="image-region" hidden id="image-region">画像の領域を指定</button><div id="region-fields" hidden><p>画像内の領域（0–1）。元のPPTXオブジェクトとは対応しません。</p>${['x','y','width','height'].map(k => `<label>${k}<input name="region-${k}" type="number" min="0" max="1" step="0.001"></label>`).join('')}</div></details><div class="actions"><button type="button" data-action="cancel-edit">キャンセル</button><button type="submit" class="primary">コメントを保存</button></div></form></dialog><dialog id="response-sheet" aria-labelledby="response-title"><div class="dialog-header"><h2 id="response-title">修正回答</h2><button data-close="response-sheet" aria-label="閉じる">×</button></div><p>コピーしてチャットへ貼り戻してください。</p><label for="request-text">修正回答（手動コピーもできます）</label><textarea id="request-text" readonly rows="14"></textarea><p id="copy-status" role="status"></p><div class="actions"><button data-action="copy" class="primary">修正回答をコピー</button></div></dialog>`;
+        body = `<header class="document-header"><h1>${escape(deck.title)}</h1><p class="meta">${deck.slides.length}ページ · ${escape(deck.revision)} · ${escape(variant.name ?? 'デザイン案')}</p><p${attrTarget({kind:'purpose'})}>目的: ${escape(deck.purpose)}</p><p${attrTarget({kind:'audience'})}>聞き手: ${escape(deck.audience)} · 持ち時間: ${deck.durationSeconds ?? '未指定'}秒</p><p class="lead"${attrTarget({kind:'message'})}>${escape(deck.message)}</p><details class="sub"><summary>発表原稿を通して読む</summary>${script}<p class="muted">推定 ${Math.ceil(duration / rate * 60)}秒 / ${duration}文字 / 毎分${rate}文字。リハーサル実測ではありません。</p><a href="script.md" download>発表原稿を保存</a></details><details class="sub"><summary>流れ・分かりやすさの確認</summary>${check}<p>期待する理解・判断: ${escape(deck.expectedOutcome)}</p><p>未解決事項: ${escape(deck.unresolved.join(' / ') || 'なし')}</p><a href="story.md" download>話の流れを保存</a></details></header><main class="shell">${reviewHTML}<h2>ページごとの要点</h2>${pageReview}<details class="sub"><summary>マスター・制作情報</summary><p>${escape(deck.master?.status ?? 'マスター未指定。内容に合わせて配置したデザイン案です。')}</p><pre>${escape(JSON.stringify(deck.master ?? {}, null, 2))}</pre>${deck.migration ? `<p class="warning">旧版からの作業用コピー。元ファイルとコメントは保持し、別版の修正を自動適用しません。</p>` : ''}${(deck.files ?? []).filter(f => /\.(pptx|potx)$/i.test(f)).map(f => `<p><a href="${escape(fileHref(f))}">マスター原本 ${escape(f)}</a></p>`).join('')}<details><summary>制作データ</summary><pre>${escape(JSON.stringify(identity, null, 2))}</pre></details>${variantsFor(deck).length > 1 ? `<p>${variantsFor(deck).map(v => `<a href="../${v.id}/review.html">${escape(v.name ?? v.id)}</a>`).join(' · ')}</p>` : ''}</details><section class="feedback"><div id="comment-list"></div><details class="sub"><summary>コメントの保存・読込</summary><label><input type="checkbox" id="persist"> この版のコメントをブラウザに保存</label><p id="storage-status" role="status">保存OFF（localStorageを使いません）</p><button data-action="save-md">修正回答を保存</button><button data-action="save-json">コメントJSONを保存</button><label for="import-comments">保存したJSONを読込（自動適用しない）</label><input id="import-comments" type="file" accept=".json"></details><p id="feedback-status" role="status"></p></section><p class="fine">箇所コメント → 修正回答をコピー → チャットに貼り戻して次の案へ。HTMLから自動送信しません。</p></main><footer class="response-bar"><small id="comment-count">コメント 0件</small><button data-action="respond" class="primary">修正回答を作成</button><a href="output/slides.html">スライドだけを開く</a></footer><dialog id="comment-editor" aria-labelledby="editor-title"><div class="dialog-header"><h2 id="editor-title">この箇所にコメント</h2><button data-close="comment-editor" aria-label="閉じる">×</button></div><p id="selected-target" class="muted"></p><form id="comment-form"><label for="quote">原文</label><textarea id="quote"></textarea><label for="intent">修正希望</label><textarea id="intent" required></textarea><details class="sub"><summary>差替え案・対象の詳細</summary><label for="replacement">差替え案（任意）</label><textarea id="replacement"></textarea><pre id="target-details"></pre><button type="button" data-action="image-region" hidden id="image-region">画像の領域を指定</button><div id="region-fields" hidden><p>画像内の領域（0–1）。元のPPTXオブジェクトとは対応しません。</p>${['x','y','width','height'].map(k => `<label>${k}<input name="region-${k}" type="number" min="0" max="1" step="0.001"></label>`).join('')}</div></details><div class="actions"><button type="button" data-action="cancel-edit">キャンセル</button><button type="submit" class="primary">コメントを保存</button></div></form></dialog><dialog id="response-sheet" aria-labelledby="response-title"><div class="dialog-header"><h2 id="response-title">修正回答</h2><button data-close="response-sheet" aria-label="閉じる">×</button></div><p>コピーしてチャットへ貼り戻してください。</p><label for="request-text">修正回答（手動コピーもできます）</label><textarea id="request-text" readonly rows="14"></textarea><p id="copy-status" role="status"></p><div class="actions"><button data-action="copy" class="primary">修正回答をコピー</button></div></dialog>`;
 
     }
-    return `<!doctype html><html lang="${escape(deck.language ?? 'ja')}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; font-src 'none'; form-action 'none'; base-uri 'none'"><title>${escape(deck.title)} · ${escape(deck.revision)} · ${escape(variant.id)}</title><style>${css}</style></head><body data-mode="${mode}" data-deck-id="${deck.id}" data-revision="${deck.revision}" data-variant="${variant.id}" data-content-hash="${identity.contentHash}">${body}<script type="application/json" id="deck-data">${jsonScript({ identity, slides: deck.slides, sources: deck.sources, coherence: deck.coherence ?? null })}</script><script>${js.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
+    return `<!doctype html><html lang="${escape(deck.language ?? 'ja')}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; font-src 'none'; form-action 'none'; base-uri 'none'"><title>${escape(deck.title)} · ${escape(deck.revision)} · ${escape(variant.id)}</title><style>${css}</style></head><body data-mode="${mode}" data-deck-id="${deck.id}" data-revision="${deck.revision}" data-variant="${variant.id}" data-content-hash="${identity.contentHash}">${body}<script type="application/json" id="deck-data">${jsonScript({ identity, slides: deck.slides, sources: deck.sources, coherence: deck.coherence ?? null, reviews: report.records, reviewIdentity: report.identity, layouts: deck.slides.map(s => ({slideId:s.id, ...catalog.layouts.find(l=>l.id === (variant.layouts?.[s.id] ?? (s.layout ? `slide-${s.id}` : s.layoutId ?? 'default')))})) })}</script><script>${js.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
 }
 function markdown(deck, mode) {
     const heading = `# ${deck.title}\n\nDeck: ${deck.id} / revision: ${deck.revision}\n\n`;
@@ -396,12 +488,12 @@ function markdown(deck, mode) {
     return heading + deck.slides.map((s, i) => `## ${i + 1}. ${s.id} — ${s.title}\n\n` + s.paragraphs.map(p => `### ${p.id}\n\n${p.text}\n\n出典: ${p.sourceIds.join(', ') || '追加事実なし'}\n`).join('\n') + `\nつなぎ: ${s.transition}\n`).join('\n');
 }
 async function filesFor(deck, root, projectRoot) {
-    const files = new Map();
+    const files = new Map(), evidence = evidenceFiles(deck);
     const add = async (f, from = root, to = f) => { relative(f); relative(to); require(FILE_TYPES.has(path.extname(f).toLowerCase()), `Unsupported bundled file: ${f}`); const buffer = await safeRead(from, f); if (path.extname(f).toLowerCase() === '.svg')
         safeSVG(buffer, f); require(!files.has(to) || hash(files.get(to)) === hash(buffer), `File collision: ${to}`); files.set(to, buffer); };
     for (const f of deck.files ?? []) {
-        require(['assets/', 'data/', 'scripts/', 'references/', 'layouts/'].some(p => f.startsWith(p)), `File outside declared artifact folders: ${f}`);
-        await add(f);
+        require(['assets/', 'data/', 'scripts/', 'references/', 'layouts/', 'evidence/'].some(p => f.startsWith(p)), `File outside declared artifact folders: ${f}`);
+        try { await add(f); } catch (error) { if (!evidence.has(f) || error.code !== 'ENOENT') throw error; }
     }
     for (const a of deck.assets) {
         await add(a.file);
@@ -421,6 +513,17 @@ async function filesFor(deck, root, projectRoot) {
                 require(files.has(el.dataRef.path), `dataRef not explicitly included: ${el.dataRef.path}`);
             }
     return files;
+}
+// Bind local content bytes as well as the structural content hash. Evidence bytes have
+// their own checks and manifest SHA, and never alter this content fingerprint.
+export async function artifactHash(deck, root, projectRoot = root, selectedFiles) {
+    const files = selectedFiles ?? await filesFor(deck, root, projectRoot), evidence=evidenceFiles(deck);
+    const entries=[...files].filter(([name])=>!evidence.has(name)).map(([name,bytes])=>[name,hash(bytes)]);
+    for (const source of deck.sources.filter(s=>['project','data'].includes(s.kind))) {
+        try { entries.push([`source:${source.id}`,hash(await safeRead(source.kind==='project'?projectRoot:root,source.path))]); }
+        catch (error) { entries.push([`source:${source.id}`,`unavailable:${error.code ?? error.message}`]); }
+    }
+    return hash(JSON.stringify(entries.sort((a,b)=>a[0].localeCompare(b[0]))));
 }
 async function createFreshDirectory(destination, writer) {
     const parent = path.dirname(destination);
@@ -454,6 +557,7 @@ export async function build(input, out, { projectRoot } = {}) {
     const { catalog } = await validateDeck(deck);
     const project = projectRoot ?? root;
     const sources = await provenance(deck, root, project), files = await filesFor(deck, root, project);
+    const renderer = await rendererHash(), artifact = await artifactHash(deck, root, project, files), evidenceIssues = await checkReviewEvidence(deck, root);
     const [css, js] = await Promise.all([fs.readFile(path.join(HERE, 'style.css'), 'utf8'), fs.readFile(path.join(HERE, 'review.js'), 'utf8')]);
     const mime = { '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif' };
     const displayAssets = deck.assets.map(asset => { const buffer = files.get(asset.file); if (asset.preview === true && buffer.length <= 262144 && mime[path.extname(asset.file).toLowerCase()])
@@ -473,12 +577,14 @@ export async function build(input, out, { projectRoot } = {}) {
             await emit('sources.json', JSON.stringify(sources, null, 2) + '\n');
             await emit('assets/registry.json', JSON.stringify(deck.assets, null, 2) + '\n');
 
-            await emit('review.html', render(deck, variant, catalog, sources, css, js, 'review', displayAssets));
-            await emit('output/slides.html', render(deck, variant, catalog, sources, css, js, 'slides', displayAssets));
-            await writeFile(destination, 'bundle-manifest.json', JSON.stringify({ schemaVersion: 1, identity: { deckId: deck.id, revision: deck.revision, variantId: variant.id, contentHash: contentHash(deck) }, files: manifest }, null, 2) + '\n');
+            const report = reviewReport(deck, variant.id, renderer, evidenceIssues, artifact);
+            await emit('reviews.json', JSON.stringify(report, null, 2) + '\n');
+            await emit('review.html', render(deck, variant, catalog, sources, css, js, 'review', displayAssets, report));
+            await emit('output/slides.html', render(deck, variant, catalog, sources, css, js, 'slides', displayAssets, report));
+            await writeFile(destination, 'bundle-manifest.json', JSON.stringify({ schemaVersion: 1, identity: { deckId: deck.id, revision: deck.revision, variantId: variant.id, contentHash: contentHash(deck), rendererHash: renderer, artifactHash: artifact }, files: manifest }, null, 2) + '\n');
         }
     });
-    return { directory: revisionDir, variants: variantsFor(deck).map(v => v.id), warnings: sources.filter(s => s.status === '要再確認').map(s => `${s.id}: ${s.detail}`), contentHash: contentHash(deck) };
+    return { directory: revisionDir, variants: variantsFor(deck).map(v => v.id), warnings: sources.filter(s => s.status === '要再確認').map(s => `${s.id}: ${s.detail}`), contentHash: contentHash(deck), rendererHash: renderer, artifactHash:artifact, reviews: variantsFor(deck).map(v => reviewReport(deck, v.id, renderer, evidenceIssues, artifact)) };
 }
 export async function bundle(input, out) {
     const source = path.resolve(input);
@@ -517,7 +623,7 @@ export function feedbackCheck(deck, feedback) {
                 exists = false;
             if (t.paragraphId && !s?.paragraphs.some(p => p.id === t.paragraphId))
                 exists = false;
-            if (t.findingId && !deck.coherence?.findings.some(f => f.id === t.findingId))
+            if (t.findingId && ![...(deck.coherence?.findings ?? []), ...(deck.reviews ?? []).flatMap(r => r.findings)].some(f => f.id === t.findingId))
                 exists = false;
             if (t.sourceId && !deck.sources.some(x => x.id === t.sourceId))
                 exists = false;
@@ -571,8 +677,10 @@ async function cli(args) {
     require(Number(process.versions.node.split('.')[0]) >= 22, 'Node.js 22+ required');
     const [command, input, ...rest] = args;
     const option = key => { const i = rest.indexOf(key); return i < 0 ? undefined : rest[i + 1]; };
-    if (command === 'hash')
-        return { contentHash: contentHash(JSON.parse(await fs.readFile(input, 'utf8'))) };
+    if (command === 'hash') {
+        const deck=JSON.parse(await fs.readFile(input, 'utf8')), root=path.dirname(path.resolve(input));
+        return {contentHash:contentHash(deck),rendererHash:await rendererHash(),artifactHash:await artifactHash(deck,root,option('--project-root') ?? root)};
+    }
     if (command === 'validate') {
         const deck = JSON.parse(await fs.readFile(input, 'utf8'));
         await validateDeck(deck);
