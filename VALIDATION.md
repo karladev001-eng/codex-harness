@@ -6,6 +6,18 @@
 
 Knowledgeの隔離試験は[運用ガイドの検証範囲](docs/guides/knowledge-operations.md#検証範囲)、検索の契約は[ADR 0006](docs/adr/0006-knowledge-retrieval.md)、個別の現機確認はsource checkoutの `docs/harness/tasks/activate-knowledge-memory.md` と `docs/harness/tasks/raycast-knowledge.md` に記録されています。ここからWindows/Linux・別PC・全サービスの網羅取得・長期効果を確認済みとは扱いません。最新の公開準備の検証は実行後に追記し、過去の結果を現在版の再実行として扱わないでください。
 
+## 2026-10-10: codex-slide-planの統合・配布検証
+
+実施環境: macOS、Node.js 26.10.0、npm 11.19.1。codex-slide-planを独立スキルとして統合し、配布物・既存所有管理・PPTXマスター参照fixtureを検証しました。
+
+- `npm test`: 161件PASS、失敗・skipなし。実tarballを一時領域へ展開し、offline npxで導入・再導入・解除、6スキル一括およびcodex-slide-plan単独の導入・解除、従来4/5スキル所有manifestからの更新を確認しました。tarball内の文書リンクとPython許可ファイル6件（source/dist/pluginの各配置）も検査しています。
+- `node --test authoring-skills/codex-slide-plan/tests/*.test.mjs`: 20件PASS。独立fixtureの4:3/16:9 PPTX構造を正本へ写し、生成HTMLの比率・配色・配置・ロゴを照合しました。原本PPTXは別途LibreOfficeでPNGに描画し、目視確認しました。出典・改訂・レイアウト・安全性も確認しました。
+- `npm run check:docs`: 185文書、824リンク、欠落0。tarball試験内の展開後文書検査も成功。スキルUI metadataはYAMLとして解析し、必須項目を確認しました。
+- 初見の制作試行ではbriefとCSVから4ページの案A/Bを作成し、r1からr3まで改訂しました。最新正本のvalidate/buildが成功し、A/Bとも警告0。独立の試行記録には実在しない聴衆評価やブラウザ操作を成功扱いしていません。
+- 構造の照合と原本fixture PNGの目視確認は完了。HTMLのブラウザ表示・狭幅・操作・保存/読込は未検証です。実際の利用者用マスターは提供されていないため、独自fixtureのみを使いました。
+
+これらは隔離した一時ディレクトリ・homeでのテストです。実ホームへの導入、npm公開、pushは行っていません。ブラウザでの検証は、file URLの拒否後に別経路で迂回していません。
+
 ## 2026-10-08: 0.4.2 非公開npm配布の準備と隔離registry検証
 
 実施環境: macOS / Darwin 25.6.0 arm64、Node.js 26.10.0、npm 11.19.1、package 0.4.2。Node.js 22以上の要件を満たす環境で実行。GitHub Packagesの非公開配布を準備し、ソースの `private: true` / `UNLICENSED`は維持しています。
