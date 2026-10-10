@@ -22,6 +22,12 @@ export const REQUIRED_SOURCE_FILES = [
   'authoring-skills/codex-html-plan/examples/task-board.src.html', 'authoring-skills/codex-html-plan/examples/task-board.plan.html',
   'authoring-skills/codex-html-plan/examples/records/ADR-07.md', 'authoring-skills/codex-html-plan/examples/records/TASK-42.md',
   'authoring-skills/codex-html-plan/examples/records/EXP-03.md', 'authoring-skills/codex-html-plan/examples/records/index.md',
+  'authoring-skills/codex-slide-plan/SKILL.md', 'authoring-skills/codex-slide-plan/agents/openai.yaml',
+  'authoring-skills/codex-slide-plan/references/schema.md', 'authoring-skills/codex-slide-plan/references/workflow.md',
+  'authoring-skills/codex-slide-plan/references/masters.md', 'authoring-skills/codex-slide-plan/templates/catalog.json',
+  'authoring-skills/codex-slide-plan/scripts/pack.mjs', 'authoring-skills/codex-slide-plan/scripts/review.js',
+  'authoring-skills/codex-slide-plan/scripts/style.css', 'authoring-skills/codex-slide-plan/scripts/inspect-master.py',
+  'authoring-skills/codex-slide-plan/scripts/make-fixtures.py', 'authoring-skills/codex-slide-plan/examples/deck.json',
 ];
 export interface InstallArgs { home?: string; skills_dir?: string }
 export function bootstrap(target: string): string {

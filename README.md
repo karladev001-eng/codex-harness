@@ -8,7 +8,7 @@ Codexで仕様を共有し、実装・独立レビュー・制作の改善を進
 - **実装と独立レビュー** — 担当へ必要な情報だけを渡し、Git worktreeで独立したコード作業を隔離します。
 - **改善ループ** — UI・文書へのフィードバックを、用途を限った候補・制作指針として次回へ使います。
 - **ナレッジベースと検索** — 保存した本文・メモ・画像・説明から少数の候補を探し、必要な箇所だけ読みます。
-- **再利用可能な5スキル** — ルール・担当・調整手順の作成、構成の確認、HTML計画の提示を個別に使えます。
+- **再利用可能な6スキル** — ルール・担当・調整手順の作成、構成の確認、仕様計画とスライド制作を個別に使えます。
 
 ```text
 仕様・モック → 明示承認 → 実装 → 独立レビュー → 統合・検証
@@ -22,7 +22,7 @@ Codexが手順を読み、利用可能なツールで担当の起動やレビュ
 | 使い方 | 向いている用途 | 導入と次に読む資料 |
 | --- | --- | --- |
 | ハーネス本体 | 仕様・分業・レビュー・改善を通して使う | [導入ガイド](docs/guides/installation.md)。個人用スキルとAGENTSの入口を登録 |
-| スキルのみ | 必要なルール、担当、計画を作成・確認する | [5スキルの一覧](authoring-skills/README.md)と[単独導入](authoring-skills/INSTALL.md)。本体を有効化しない |
+| スキルのみ | 必要なルール、担当、計画を作成・確認する | [6スキルの一覧](authoring-skills/README.md)と[単独導入](authoring-skills/INSTALL.md)。本体を有効化しない |
 
 ### 関連ツール
 
@@ -44,6 +44,8 @@ Knowledgeの同期にはGit・GitHub CLIと設定済みの非公開リポジト�
 ## クイックスタート
 
 **GitHub Packagesの非公開npm配布を準備中です。まだregistryから入手できる状態とは案内していません。** 現行版は **0.4.2**。配布開始後は、各PCで[初回認証](docs/guides/installation.md#github-packagesの初回認証)を済ませ、ホームなどpackage.jsonのない場所から次の1コマンドを実行します。初回導入と更新は同じコマンドです。
+
+`codex-slide-plan` は現在のcheckoutに追加されています。既存の0.4.2 tarballには含まれず、次の配布版まではcheckoutから導入してください。
 
 ```sh
 npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@latest -- codex-harness install
@@ -72,6 +74,7 @@ npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@
 | `create-harness` | 規則・担当・ワークフローを最小の索引でつなぐ |
 | `inspect-harness` | 既存の構成を読み取り専用で確認する |
 | `codex-html-plan` | 仕様・モック・未解決事項を単一HTMLで提示する |
+| `codex-slide-plan` | 話の流れ、発表原稿、出典とデザイン案をHTMLスライド・レビューにまとめる |
 
 呼出し例と成果物は[スキル一覧](authoring-skills/README.md)を参照してください。
 
@@ -94,7 +97,7 @@ npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@
 
 ## 対応状況
 
-ローカルCLI、5スキル、改善記録、Knowledgeの同期・文字検索・本文/画像取得、Chrome拡張、Raycast検索の実装があります。検証は[VALIDATION.md](VALIDATION.md)に日付と対象を分けて記載します。利用枠削減、長期的な制作改善、すべてのOS・別PCでの動作は確認済みとは扱いません。ベクトル意味検索、自動compact、会話削除は実装対象外です。
+ローカルCLI、6スキル、改善記録、Knowledgeの同期・文字検索・本文/画像取得、Chrome拡張、Raycast検索の実装があります。検証は[VALIDATION.md](VALIDATION.md)に日付と対象を分けて記載します。利用枠削減、長期的な制作改善、すべてのOS・別PCでの動作は確認済みとは扱いません。ベクトル意味検索、自動compact、会話削除は実装対象外です。
 
 <a id="開発検証"></a>
 <a id="参考"></a>

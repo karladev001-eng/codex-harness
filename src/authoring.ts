@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { canonical, copySkill, equalFiles, exists, inventory, isObject, Json, readJson, rejectSymlink, safePath, sourceRoot, within } from './lib';
 
-export const SKILLS = ['create-rulebooks', 'create-subagent', 'create-harness', 'inspect-harness', 'codex-html-plan'];
+export const SKILLS = ['create-rulebooks', 'create-subagent', 'create-harness', 'inspect-harness', 'codex-html-plan', 'codex-slide-plan'];
 const REQUIRED: Record<string, string[]> = {
   'create-rulebooks': ['SKILL.md', 'assets/rulebook.md'], 'create-subagent': ['SKILL.md', 'assets/subagent.md'],
   'create-harness': ['SKILL.md', 'assets/harness-index.md', 'assets/workflow.md'], 'inspect-harness': ['SKILL.md'],
@@ -10,6 +10,11 @@ const REQUIRED: Record<string, string[]> = {
     'SKILL.md', 'UPSTREAM.md', 'LICENSE', 'agents/openai.yaml', 'runtime/htmlplan.js', 'runtime/htmlplan.css', 'runtime/pack.mjs',
     'references/blocks.md', 'references/workflow.md', 'examples/task-board.src.html', 'examples/task-board.plan.html',
     'examples/records/ADR-07.md', 'examples/records/TASK-42.md', 'examples/records/EXP-03.md', 'examples/records/index.md',
+  ],
+  'codex-slide-plan': [
+    'SKILL.md', 'agents/openai.yaml', 'references/schema.md', 'references/workflow.md', 'references/masters.md',
+    'templates/catalog.json', 'scripts/pack.mjs', 'scripts/review.js', 'scripts/style.css', 'scripts/inspect-master.py',
+    'scripts/make-fixtures.py', 'examples/deck.json',
   ],
 };
 export function authoring(args: Json, source = path.join(sourceRoot, 'authoring-skills')): Json {

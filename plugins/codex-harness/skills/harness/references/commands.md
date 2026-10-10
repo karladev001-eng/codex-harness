@@ -45,7 +45,7 @@ npx --yes --package ./karladev001-eng-codex-harness-0.4.2.tgz codex-harness auth
 
 `install` は個人用AGENTS.mdに恒久的な導入先のruntime.jsを参照する入口を登録する。`uninstall` は所有する入口とスキルのみ解除する。旧Python版schema-1 manifestも、ファイルと入口が未編集ならPythonを実行せず移行できる。
 
-`authoring install|uninstall --project PATH` は独立した5スキル（4つのMarkdownスキルとNode.js pack runtimeを持つcodex-html-plan）を `.agents/skills` に導入・更新・削除する。`--skill NAME` を繰り返すと対象を選べる。`--skills-dir PARENT` で個人用など別のスキル親ディレクトリを明示できる。所有manifestで確認できない既存フォルダや編集済みファイルは上書きしない。オーケストレーションの有効化やAGENTS.md変更は行わない。
+`authoring install|uninstall --project PATH` は独立した6スキル（4つのMarkdownスキルとHTML pack runtimeを持つcodex-html-plan、codex-slide-plan）を `.agents/skills` に導入・更新・削除する。現在配布中の0.4.2 tarballにはcodex-slide-planがないため、checkoutから導入する。`--skill NAME` を繰り返すと対象を選べる。`--skills-dir PARENT` で個人用など別のスキル親ディレクトリを明示できる。所有manifestで確認できない既存フォルダや編集済みファイルは上書きしない。オーケストレーションの有効化やAGENTS.md変更は行わない。
 
 設定は既定 < 個人 < プロジェクト。`improvement_loop` はboolean（既定true）で好みの自動読取・記録・適用・候補試用を制御する。OFFは保存済み記憶を消さず通常の修正を続け、明示的な記憶管理は別操作（persistence OFFなら永続記憶読書きなし）。`model_selection` はauto/fixed（既定auto）。明示modelのある役割だけpinになり、effortだけの上書きはpinにしない。旧4機能全OFFかつ新キー未指定はimprovement_loop=falseを補完する。enabled=falseまたは5機能全OFFはinactive。
 

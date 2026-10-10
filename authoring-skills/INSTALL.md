@@ -1,6 +1,8 @@
 # Authoring Skills を既存プロジェクトへ導入する
 
-`create-rulebooks`、`create-subagent`、`create-harness`、`inspect-harness`、`codex-html-plan` を任意のプロジェクトへ導入します。最初の4スキルは独立したMarkdownで、`codex-html-plan` はpack runtimeを含み使用時にNode.js 22以上が必要です。ハーネス本体の有効化、個人用AGENTS.mdやモデル設定の変更は行いません。
+`create-rulebooks`、`create-subagent`、`create-harness`、`inspect-harness`、`codex-html-plan`、`codex-slide-plan` を任意のプロジェクトへ導入します。最初の4スキルは独立したMarkdownで、2つのHTML計画スキルはpack runtimeを含み使用時にNode.js 22以上が必要です。ハーネス本体の有効化、個人用AGENTS.mdやモデル設定の変更は行いません。
+
+`codex-slide-plan` は新しいスキルです。現在配布中の0.4.2 tarballには含まれていないため、次の配布版まではこのcheckoutから導入してください。現行のnpm `@latest` や既存tarballでは選択できません。
 
 導入CLIにはNode.js 22以上とnpmが必要です。利用者のPython、TypeScriptコンパイラ、リポジトリのcloneは不要です。スキルの使用自体には、利用先のCodexがMarkdownスキルに対応している必要があります。
 
@@ -44,7 +46,7 @@ npm run build
 node dist/skill/runtime.js authoring install --project "/path/to/project"
 ```
 
-PowerShellでは `--project "C:\Projects\example"`。利用したい1スキルだけなら `--skill inspect-harness` を加えます。
+PowerShellでは `--project "C:\Projects\example"`。現在のcheckoutから新スキルだけを入れる場合は `--skill codex-slide-plan` を加えます。既存配布物は従来の5スキルのままです。
 
 ## 導入確認と最初の利用
 
@@ -77,6 +79,6 @@ npx --yes --package ./karladev001-eng-codex-harness-0.4.2.tgz codex-harness auth
 
 ## 確認範囲
 
-自動テストで、5スキルの一致、従来4スキルおよび単体スキルの独立導入、再実行、部分更新・削除、不完全なHTML計画スキルの拒否、既存指示の保持、未所有・編集済みフォルダの拒否、失敗時の復元を確認します。実際のtarballをnpxで起動する検証も含みます。実行済みOS・制約は [VALIDATION.md](../VALIDATION.md) を参照してください。
+自動テストで、checkoutの6スキルと現行配布物の5スキル、従来4/5スキルからの更新、単独導入、再実行、部分更新・削除、不完全なHTML計画スキルの拒否、既存指示の保持、未所有・編集済みフォルダの拒否、失敗時の復元を確認します。実際のtarballをnpxで起動する検証も含みます。実行済みOS・制約は [VALIDATION.md](../VALIDATION.md) を参照してください。
 
 以前のdownload方式では、macOS上でコミット `3a861ce9cacbb954601dc373a3e89dbe6cdd516e` の4スキル8ファイルの一致を確認しました。この歴史的確認は、現在のCLIによる全OS検証を代替するものではありません。

@@ -1,6 +1,6 @@
-# 5つの独立スキル
+# 6つの独立スキル
 
-必要な文書を作成・確認するためのスキルです。本体のオーケストレーションやモデル設定を有効化せず、それぞれ単独で使えます。[導入手順](INSTALL.md)で全5スキルまたは必要なものだけ選べます。
+必要な文書を作成・確認するためのスキルです。本体のオーケストレーションやモデル設定を有効化せず、それぞれ単独で使えます。[導入手順](INSTALL.md)で全6スキルまたは必要なものだけ選べます。`codex-slide-plan` は現在のcheckoutに追加済みで、配布中の0.4.2 tarballには含まれていません。配布物へ追加されるまではcheckoutから導入してください。
 
 | スキル | 依頼例 | 成果物 |
 | --- | --- | --- |
@@ -9,12 +9,13 @@
 | [`create-harness`](create-harness/SKILL.md) | 「規則と担当を必要な順でつなぐ最小の調整手順を作って」 | 索引・必要な規則/担当/ワークフロー |
 | [`inspect-harness`](inspect-harness/SKILL.md) | 「今のルール、担当、作業手順を変更せず見せて」 | 構成と確認できる状態の説明 |
 | [`codex-html-plan`](codex-html-plan/SKILL.md) | 「実装前の仕様とUIモックを単一HTMLで提示して」 | `.src.html` とpack済み `.plan.html`。仕様回答と実装承認を分ける |
+| [`codex-slide-plan`](codex-slide-plan/SKILL.md) | 「この調査結果を発表用のスライドと話す原稿にまとめて」 | HTMLスライドとHTMLレビュー。話の流れ、発表原稿、図表の出典、テンプレートとマスターを同じ正本で管理 |
 
 Codexでは `$inspect-harness` のように明示して依頼できます。作成用3スキルを併用するなら、`create-harness` で最小索引を作り、必要なときだけ規則や担当を追加します。単発の結果・会議メモを恒久ルールへ変換しません。
 
 ## 必要な環境と導入の影響
 
-全スキルにスキル対応のCodexが必要です。最初の4つは独立したMarkdown、`codex-html-plan`はNode.js 22以上のpack runtimeとApache-2.0由来部分を含みます。導入CLIにはNode.js 22以上とnpmが必要です。
+全スキルにスキル対応のCodexが必要です。最初の4つは独立したMarkdown、`codex-html-plan`はNode.js 22以上のpack runtimeとApache-2.0由来部分を含みます。`codex-slide-plan` はHTMLレビュー用pack runtimeを含み、PPTX/PDF書出しは行いません。導入CLIにはNode.js 22以上とnpmが必要です。
 
 既定のCLI導入先は `<project>/.agents/skills/`。本体runtimeへの依存、個人用AGENTS.mdやモデル設定の変更、Chrome/Raycastの登録は行いません。手動でフォルダをコピーする方法もありますが、CLIの所有記録がない既存フォルダをinstallで引き継ぐことはできません。[更新と競合](INSTALL.md#更新削除と個別選択)を確認してください。
 
