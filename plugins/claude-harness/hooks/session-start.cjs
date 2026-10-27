@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // Runs the same read-only status the Codex bootstrap asks for, so activation does not
 // depend on the model remembering to check. Output is SessionStart additionalContext.
+// It never migrates data: until the Codex runtime is updated (its install migrates), both
+// hosts must keep using the same legacy store.
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
@@ -24,7 +26,6 @@ function project() {
 }
 
 const cwd = project();
-const migrated = run('data', 'migrate');
 const status = run('status', '--project', cwd, '--host', 'claude');
 if (status.error) {
   emit(`Harness status failed (${status.error}). Report this configuration or compatibility error when coding, creative or research work begins; do not activate harness features silently.`);
@@ -37,7 +38,6 @@ if (status.error) {
     `For coding, UI/document creation or feedback, Web research, ideation, strategy consultation or proposal criticism: read ${path.join(skill, 'SKILL.md')} and then ${path.join(skill, 'references', 'hosts', 'claude-code.md')}, which overrides Codex-specific steps.`,
     `Collaboration (peer=${status.data.collaboration.peer}): ${tasks}. Peer work goes through the consult-codex skill and needs a recorded send approval per project.`,
     `Re-check with: node "${runtime}" status --project <absolute-project-path> --host claude.`,
-    migrated.data?.status === 'migrated' ? `Shared harness data was copied from ${migrated.data.from} to ${migrated.data.data_home}.` : '',
     'A delegated worker (prompt contains HARNESS_WORKER) performs only its assignment and never coordinates.',
   ].filter(Boolean).join('\n'));
 }
