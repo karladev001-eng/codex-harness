@@ -73,3 +73,22 @@ for (const file of ['knowledge/README.md', 'knowledge/extension/README.md']) {
   fs.writeFileSync(destination, relocate(fs.readFileSync(source, 'utf8'), source, destination, referenced =>
     referenced === path.join(root, 'knowledge/extension/README.md') ? path.join(root, 'dist/knowledge/extension/README.md') : referenced));
 }
+
+// Claude Code marketplace: the same self-contained skill plus Claude agents and hooks.
+const claudeSource = path.join(root, 'plugins/claude-harness');
+const marketplace = path.join(root, 'dist/claude-marketplace'), claudePlugin = path.join(marketplace, 'plugins/harness');
+const version = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).version;
+for (const name of ['.claude-plugin', 'agents', 'hooks']) fs.cpSync(path.join(claudeSource, name), path.join(claudePlugin, name), { recursive: true });
+const claudeManifest = path.join(claudePlugin, '.claude-plugin/plugin.json');
+fs.writeFileSync(claudeManifest, JSON.stringify({ ...JSON.parse(fs.readFileSync(claudeManifest, 'utf8')), version }, null, 2) + '\n');
+fs.chmodSync(path.join(claudePlugin, 'hooks/session-start.cjs'), 0o755);
+fs.cpSync(target, path.join(claudePlugin, 'skills/harness'), { recursive: true, filter: file => path.relative(target, file) !== 'consult-claude' });
+// Default authoring skills are also exposed directly; the harness copy stays self-contained.
+for (const name of fs.readdirSync(path.join(target, 'authoring-skills')))
+  fs.cpSync(path.join(target, 'authoring-skills', name), path.join(claudePlugin, 'skills', name), { recursive: true });
+fs.mkdirSync(path.join(marketplace, '.claude-plugin'), { recursive: true });
+fs.writeFileSync(path.join(marketplace, '.claude-plugin/marketplace.json'), JSON.stringify({
+  name: 'codex-harness', owner: { name: 'Local developer' },
+  metadata: { description: 'Harness for Claude Code built from the codex-harness package' },
+  plugins: [{ name: 'harness', source: './plugins/harness', description: 'Specification-first coordination, isolated implementation and independent review', version }],
+}, null, 2) + '\n');

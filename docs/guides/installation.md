@@ -70,6 +70,26 @@ node dist/skill/runtime.js doctor --project .
 node dist/skill/runtime.js install
 ```
 
+## Claude Codeに導入する
+
+同じパッケージから、Claude Codeプラグイン `harness` としても導入できます。上のnpm exec・tarball・checkoutのどの経路でも、`install` に `--host claude` を付けます。
+
+```sh
+npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@latest -- codex-harness install --host claude
+```
+
+CLIは配布物のmarketplaceを `~/.agents/claude-marketplaces/codex-harness` へコピーし、`claude plugin marketplace add` と `claude plugin install harness@codex-harness --scope user` を実行します。再実行が更新で、同じ配布物なら `unchanged` です。所有記録は `~/.claude/harness/install.json`（`CLAUDE_CONFIG_DIR` 指定時はその配下）です。`claude` CLIが見つからない・登録に失敗した場合は、ファイルを残したまま終了コード2で `run_manually` に実行すべきコマンドを返します。Codexの `AGENTS.md` には触れません。
+
+| 含まれるもの | 内容 |
+| --- | --- |
+| スキル | `harness`（本体）と既定5スキル。`/harness:harness` などで呼べます |
+| エージェント | `implementer` / `integrator` / `reviewer` / `researcher`（`harness:` 接頭辞） |
+| hook | SessionStartで `status --host claude` を実行し、activeなら設定とモデルを文脈へ入れます |
+
+Claude Code上でのモデルは設定の `hosts.claude.models`（既定：deterministic=haiku/low、standard=sonnet/medium、complex・review=opus/high）から選びます。プロジェクトの `.harness.json` に `{"hosts":{"claude":{"models":{"standard":{"model":"opus"}}}}}` のように書くと固定できます。Codex固有の手順の読み替えは[Claude Code向けの読み替え](../../plugins/codex-harness/skills/harness/references/hosts/claude-code.md)にあります。解除は `codex-harness uninstall --host claude` です。
+
+設定・制作記憶・技術的知見はCodexと共有します（[設定](configuration.md)）。CodexとClaude Codeの両方に導入して構いません。
+
 ## 導入先と変更
 
 | 対象 | 既定の場所・動作 |

@@ -114,7 +114,10 @@ export function projectSettings(project: string): string[] {
   return [...new Set(files.map(file => canonical(file)))];
 }
 // Resolve configuration and model origins together so provenance cannot diverge from values.
-export function resolveSettings(project: string, home?: string): { config: Json; model_selection: Json } {
+export const HOSTS = ['codex', 'claude'] as const;
+// `models` is the Codex table for compatibility; other hosts read hosts.<host>.models.
+export function resolveSettings(project: string, home?: string, host = 'codex'): { config: Json; model_selection: Json } {
+  if (!(HOSTS as readonly string[]).includes(host)) throw new Error('Unknown host: expected ' + HOSTS.join(' or '));
   const result = structuredClone(DEFAULTS);
   const pins: Json = {};
   let explicitLoop = false;
@@ -126,7 +129,8 @@ export function resolveSettings(project: string, home?: string): { config: Json;
     const override = readJson(file);
     mergeSettings(result, override);
     explicitLoop ||= Object.hasOwn(override, 'improvement_loop');
-    if (isObject(override.models)) for (const [role, mapping] of Object.entries(override.models))
+    const models = host === 'codex' ? override.models : override.hosts?.[host]?.models;
+    if (isObject(models)) for (const [role, mapping] of Object.entries(models))
       if (isObject(mapping) && Object.hasOwn(mapping, 'model')) pins[role] = { source, path: file };
   }
   // Before 0.4, the four disabled features meant inactive. Preserve that opt-out
@@ -134,7 +138,7 @@ export function resolveSettings(project: string, home?: string): { config: Json;
   if (!explicitLoop && LEGACY_FLAGS.every(key => result[key] === false)) result.improvement_loop = false;
   if (result.schema_version !== 1 || result.max_agents < 1) throw new Error('Unsupported schema_version or invalid max_agents');
   if (!['auto', 'fixed'].includes(result.model_selection)) throw new Error('Invalid model_selection: expected auto or fixed');
-  for (const role of Object.values(result.models) as Json[])
+  for (const role of [result.models, ...Object.values(result.hosts).map((entry: any) => entry.models)].flatMap(Object.values) as Json[])
     if (!role.model.trim() || !['none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max', 'ultra'].includes(role.reasoning_effort)) throw new Error('Invalid model mapping');
   const preferences = result.preferences;
   if ((preferences.repository || preferences.project_key) &&
@@ -142,7 +146,9 @@ export function resolveSettings(project: string, home?: string): { config: Json;
        (preferences.project_key && !/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(preferences.project_key)) ||
        !preferences.branch.trim() || /[\x00-\x20\x7f]/.test(preferences.branch)))
     throw new Error('preferences requires valid repository, branch and project_key');
-  return { config: result, model_selection: {
+  if (host !== 'codex') result.models = result.hosts[host].models;
+  delete result.hosts;
+  return { config: { ...result, host }, model_selection: {
     mode: result.model_selection,
     resolution: result.model_selection === 'auto' ? 'host-launch' : 'configured',
     catalog_checked: false,
@@ -151,8 +157,8 @@ export function resolveSettings(project: string, home?: string): { config: Json;
     pins,
   } };
 }
-export function settings(project: string, home?: string): Json {
-  return resolveSettings(project, home).config;
+export function settings(project: string, home?: string, host = 'codex'): Json {
+  return resolveSettings(project, home, host).config;
 }
 export const active = (config: Json): boolean => config.enabled && FLAGS.some(key => config[key]);
 export function taskId(value: unknown): string {

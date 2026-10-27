@@ -54,6 +54,8 @@ npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@
 
 `latest`は配布者が指定する安定版です。取得したCLIが本体を `~/.agents/skills/codex-harness` にコピーし、`$CODEX_HOME/AGENTS.md`（未設定なら `~/.codex/AGENTS.md`）へ恒久runtimeの入口を追加します。既存の指示・設定・制作記憶を保持します。同版は `unchanged`、未編集の旧版は更新します。npm cacheを消した後も導入先runtimeを使えます。
 
+Claude Codeでは同じコマンドに `--host claude` を付けると、プラグイン `harness` として導入します（[Claude Codeに導入する](docs/guides/installation.md#claude-codeに導入する)）。設定と制作記憶はCodexと共有します。
+
 現在使える[ローカルtarball経路](docs/guides/installation.md#受け取ったローカルtarballから導入)も維持しています。認証・確認・版固定・解除・PowerShell・競合対応は[導入ガイド](docs/guides/installation.md)、clone/cdからの開発手順は[CONTRIBUTING](CONTRIBUTING.md)へ。ソースcheckoutの `private: true`・`UNLICENSED` を維持し、配布用stagingだけにGitHub Packages向けmanifestを生成します。非公開npm配布を行い、一般公開・ライセンス変更は行っていません。
 
 ## 最初の依頼
