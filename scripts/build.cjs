@@ -6,7 +6,7 @@ fs.rmSync(path.join(root, 'dist'), { recursive: true, force: true });
 const compiled = require('node:child_process').spawnSync(process.execPath, [require.resolve('typescript/bin/tsc'), '--project', path.join(root, 'tsconfig.json')], { stdio: 'inherit', cwd: root });
 if (compiled.error) throw compiled.error;
 if (compiled.status !== 0) process.exit(compiled.status || 1);
-for (const name of ['SKILL.md', 'read-sections.cjs', 'assets', 'references', 'consult-claude']) {
+for (const name of ['SKILL.md', 'read-sections.cjs', 'assets', 'references', 'consult-claude', 'consult-codex']) {
   fs.cpSync(path.join(root, 'plugins/codex-harness/skills/harness', name), path.join(target, name), { recursive: true });
 }
 for (const name of ['create-rulebooks', 'create-subagent', 'create-harness', 'inspect-harness', 'codex-html-plan']) {
@@ -83,6 +83,7 @@ const claudeManifest = path.join(claudePlugin, '.claude-plugin/plugin.json');
 fs.writeFileSync(claudeManifest, JSON.stringify({ ...JSON.parse(fs.readFileSync(claudeManifest, 'utf8')), version }, null, 2) + '\n');
 fs.chmodSync(path.join(claudePlugin, 'hooks/session-start.cjs'), 0o755);
 fs.cpSync(target, path.join(claudePlugin, 'skills/harness'), { recursive: true, filter: file => path.relative(target, file) !== 'consult-claude' });
+fs.cpSync(path.join(target, 'consult-codex'), path.join(claudePlugin, 'skills/consult-codex'), { recursive: true });
 // Default authoring skills are also exposed directly; the harness copy stays self-contained.
 for (const name of fs.readdirSync(path.join(target, 'authoring-skills')))
   fs.cpSync(path.join(target, 'authoring-skills', name), path.join(claudePlugin, 'skills', name), { recursive: true });

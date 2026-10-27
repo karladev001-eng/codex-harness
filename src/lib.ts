@@ -115,8 +115,13 @@ export function projectSettings(project: string): string[] {
 }
 // Resolve configuration and model origins together so provenance cannot diverge from values.
 export const HOSTS = ['codex', 'claude'] as const;
+// Named hosts resolve relative to the running host: itself is `host`, the other is `peer`.
+export function collaboration(tasks: Json, host: string): Json {
+  const peer = HOSTS.find(name => name !== host)!;
+  return { host, peer, tasks: Object.fromEntries(Object.entries(tasks).map(([task, mode]) => [task, mode === host ? 'host' : mode === peer ? 'peer' : mode])) };
+}
 // `models` is the Codex table for compatibility; other hosts read hosts.<host>.models.
-export function resolveSettings(project: string, home?: string, host = 'codex'): { config: Json; model_selection: Json } {
+export function resolveSettings(project: string, home?: string, host = 'codex'): { config: Json; collaboration: Json; model_selection: Json } {
   if (!(HOSTS as readonly string[]).includes(host)) throw new Error('Unknown host: expected ' + HOSTS.join(' or '));
   const result = structuredClone(DEFAULTS);
   const pins: Json = {};
@@ -146,9 +151,12 @@ export function resolveSettings(project: string, home?: string, host = 'codex'):
        (preferences.project_key && !/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(preferences.project_key)) ||
        !preferences.branch.trim() || /[\x00-\x20\x7f]/.test(preferences.branch)))
     throw new Error('preferences requires valid repository, branch and project_key');
+  const modes = ['codex', 'claude', 'both', 'host', 'peer', 'off'];
+  for (const [task, mode] of Object.entries(result.collaboration))
+    if (!modes.includes(mode as string)) throw new Error(`Invalid collaboration.${task}: expected ${modes.join(', ')}`);
   if (host !== 'codex') result.models = result.hosts[host].models;
   delete result.hosts;
-  return { config: { ...result, host }, model_selection: {
+  return { config: { ...result, host }, collaboration: collaboration(result.collaboration, host), model_selection: {
     mode: result.model_selection,
     resolution: result.model_selection === 'auto' ? 'host-launch' : 'configured',
     catalog_checked: false,

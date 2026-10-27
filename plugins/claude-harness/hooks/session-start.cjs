@@ -31,9 +31,11 @@ if (status.error) {
 } else if (status.data.active) {
   const c = status.data.config, flags = ['delegation', 'review', 'persistence', 'measurement', 'improvement_loop'].map(k => `${k}=${c[k] ? 'on' : 'off'}`).join(', ');
   const models = Object.entries(c.models).map(([role, m]) => `${role}=${m.model}/${m.reasoning_effort}`).join(', ');
+  const tasks = Object.entries(status.data.collaboration.tasks).map(([task, mode]) => `${task}=${mode}`).join(', ');
   emit([
     `Harness is active for ${status.data.project} (${flags}; max_agents=${c.max_agents}; models ${models}).`,
     `For coding, UI/document creation or feedback, Web research, ideation, strategy consultation or proposal criticism: read ${path.join(skill, 'SKILL.md')} and then ${path.join(skill, 'references', 'hosts', 'claude-code.md')}, which overrides Codex-specific steps.`,
+    `Collaboration (peer=${status.data.collaboration.peer}): ${tasks}. Peer work goes through the consult-codex skill and needs a recorded send approval per project.`,
     `Re-check with: node "${runtime}" status --project <absolute-project-path> --host claude.`,
     migrated.data?.status === 'migrated' ? `Shared harness data was copied from ${migrated.data.from} to ${migrated.data.data_home}.` : '',
     'A delegated worker (prompt contains HARNESS_WORKER) performs only its assignment and never coordinates.',

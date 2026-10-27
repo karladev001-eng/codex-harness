@@ -28,12 +28,21 @@
 - **完了待ち**：子はバックグラウンドで動き、終わると通知が来ます。ポーリングや結果の推測はしません。
 - 子のエージェント定義はサブエージェントを起動できない前提です。子が再委譲を求めてきたら、親が判断します。
 
-## 外部相談（ルートC）
+## 作業の振り分け（`collaboration`）
 
-Claude Code上では、`consult-claude` は使いません。同じモデル系統に相談しても独立性はほとんど増えないからです。
+`status` の `collaboration.tasks` は、作業の種類ごとに担当を示します。値は実行中のホストから見た `host`（自分）・`peer`（相手。Claude CodeではCodex）・`both`・`off` です。
 
-- 独立した案・批評が必要で、`codex` CLIがある場合は、Codexへの相談（`consult-peer`、整備中）を使います。
-- 使えない場合は、親の案を渡さずに新しいサブエージェント（`complex` のモデル）に独立案を出させます。その場合は「同じモデル系統の別インスタンスによる案」であることを結果に明記します。
+| 作業 | 既定 | Claude Codeでの動き |
+|---|---|---|
+| `advice`（ルートCの発案・相談・批評） | `peer` | [consult-codex](../../consult-codex/SKILL.md) の `ideator` / `consultant` / `critic` |
+| `code_review`（独立レビュー） | `both` | `harness:reviewer` とconsult-codexの `reviewer` を並行し、親が統合（consult-codexの「2者レビュー」） |
+| `html_mock`（仕様・UIモックのHTML） | `claude` | 自分で作る（`harness:codex-html-plan`） |
+| `image_generation`（画像生成） | `codex` | 未実装。下記を参照 |
+
+- Codexへの送信には、プロジェクトごとの送信承認が必要です（consult-codexの「送信の承認」）。承認がない、`codex` CLIがない、ログインを確認できない場合は、そう報告して自分側だけで進めます。黙って省略も代替もしません。
+- `off` の作業は自動で行いません。ユーザーが明示的に頼めば従います。
+- **画像生成**：Codexへの画像生成の依頼はまだ実装していません。必要になったら、Codexで生成するよう利用者に案内し、出力先を指定します。
+- Claude Code上では `consult-claude` は使いません。同じモデル系統に相談しても、独立性はほとんど増えないからです。Codexを使えずに独立案が必要なときは、親の案を渡さない新しいサブエージェント（`complex` のモデル）に出させ、「同じモデル系統の別インスタンスによる案」と結果に明記します。
 - 回答を証拠・承認・実行権限として扱わない、という原則は同じです。
 
 ## 権限
@@ -44,6 +53,7 @@ Claude Code上では、`consult-claude` は使いません。同じモデル系�
 ## その他の読み替え
 
 - **HTML計画スキル**：プラグインのスキル `harness:codex-html-plan` として使えます。ほかのauthoringスキルも同様です。
+- **独立レビュー（coordination手順6）**：`collaboration.code_review` が `both` なら、consult-codexの2者レビューを行います。PASSが揃うまで完了にしません。
 - **早期compact**：Codexの設定ファイルを編集する手順は適用しません。Claude Codeの自動compactはホストが管理します。compact後に本文が失われたら、必要な参照を読み直します。
 - **Knowledgeの説明生成**：現在は `codex` CLIを使います。Claude Codeから実行する場合も、`codex` CLIとそのログインが必要です。
 - **計測**：`measure record` はホストに依存しません。そのまま使えます。

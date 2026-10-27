@@ -160,7 +160,7 @@ export function execute(args: Json): Json {
   if (!fs.existsSync(args.project) || !fs.statSync(args.project).isDirectory()) throw new Error('Project directory does not exist');
   const resolved = resolveSettings(args.project, args.home, args.host);
   const config = resolved.config;
-  if (args.command === 'status') return { config, model_selection: resolved.model_selection, active: active(config), project: args.project, data_home: dataHome(args.home), local_root: localRoot(args.project, args.home), preferences: preferenceLocation(args, config) };
+  if (args.command === 'status') return { config, model_selection: resolved.model_selection, active: active(config), collaboration: resolved.collaboration, project: args.project, data_home: dataHome(args.home), local_root: localRoot(args.project, args.home), preferences: preferenceLocation(args, config) };
   if (args.command === 'preferences') return preferences(args, config);
   if (args.command === 'lessons') return lessons(args, config);
   if (!active(config)) return { active: false, skipped: 'harness disabled' };
