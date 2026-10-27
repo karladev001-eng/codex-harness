@@ -1,0 +1,77 @@
+{
+  "repository": "karladev001-eng/harness-knowledge-base",
+  "branch": "main",
+  "records": [
+    {
+      "path": "improvement/projects/harness/lessons/isolated-knowledge-fetch.json",
+      "lesson": {
+        "schema_version": 1,
+        "id": "isolated-knowledge-fetch",
+        "cause": "永続bare cacheの浅いfetch中断後にshallow.lockが残り、後続の知識取得が繰り返し失敗した。2026-10-24調査でOct18由来lockを確認しarchive後復旧",
+        "remedy": "fetchごとに新規の隔離bare repositoryを作り、検証済snapshotだけatomic置換。失敗は旧snapshotを保持し、自分のtempだけをcleanup。既存未知lockは削除しない",
+        "verification": [
+          "実SIGKILLで残したshallow.lockが次回pullを妨げず旧snapshotが保たれる隔離試験PASS",
+          "独立review・最終npm test252/252PASS"
+        ],
+        "scope": [
+          "Codex Harness knowledge/reader.cjsの浅いGit取得",
+          "GitHub private KB同期、従来300秒throttle/期限/検証を維持"
+        ],
+        "sources": [
+          "docs/harness/tasks/knowledge-health-20261024.md",
+          "docs/harness/tasks/knowledge-autosave.md / AC9–10"
+        ],
+        "recorded_at": "2026-10-24T16:12:14.206Z",
+        "evaluation": "unknown"
+      }
+    },
+    {
+      "path": "improvement/projects/harness/lessons/failure-notification-episodes.json",
+      "lesson": {
+        "schema_version": 1,
+        "id": "failure-notification-episodes",
+        "cause": "既存hourly jobは同じ説明生成失敗が続く間も毎回Mac通知を試みた",
+        "remedy": "stage・allowlist reason・opaque target IDでepisodeを識別し、排他下で通知予約を耐久保存。初回通知、継続抑制、実成功stageだけ復旧。通知失敗/未完予約は24h後再試行。主処理失敗を成功へ変えない",
+        "verification": [
+          "独立Node8process同時jobで通知1回/suppressed7/全exit1を確認",
+          "予約直後crash→24h未満抑制/24h再試行、busy/partial/復旧再発試験PASS",
+          "最終npm test252/252PASS"
+        ],
+        "scope": [
+          "knowledge/background.cjsの定期記録同期・説明生成通知",
+          "Mac通知の実画面表示や長期改善効果は未検証"
+        ],
+        "sources": [
+          "docs/harness/tasks/knowledge-autosave.md / S5 AC11",
+          "tests/knowledge-background.test.cjs"
+        ],
+        "recorded_at": "2026-10-24T16:12:14.206Z",
+        "evaluation": "unknown"
+      }
+    },
+    {
+      "path": "improvement/projects/harness/lessons/library-lock-release-race.json",
+      "lesson": {
+        "schema_version": 1,
+        "id": "library-lock-release-race",
+        "cause": "stale owner回収中lstat後read前に正常ownerがlockをunlinkすると、ENOENTのnullをUNSAFE_READ_LOCKと誤判定した",
+        "remedy": "消失によるnullだけを再試行し、破損JSON・不正PID・読取不能・symlinkは拒否を維持。競合試験の重なりは時間待ちではなく明示barrierで保証",
+        "verification": [
+          "決定的消失注入で修正前FAIL→修正後取得成功を独立確認",
+          "競合/消失/安全拒否3件×20反復PASS",
+          "独立reviewと最終252/252PASS"
+        ],
+        "scope": [
+          "knowledge/reader.cjs libraryLockの通常解放とstale回収の競合",
+          "未知lockの自動削除を許可しない"
+        ],
+        "sources": [
+          "docs/harness/tasks/knowledge-autosave.md / 最終統合レビューP2",
+          "tests/knowledge-analysis.test.cjs"
+        ],
+        "recorded_at": "2026-10-24T16:12:14.206Z",
+        "evaluation": "unknown"
+      }
+    }
+  ]
+}

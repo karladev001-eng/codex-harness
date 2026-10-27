@@ -1,0 +1,19 @@
+[
+  {
+    "id": "flow-original",
+    "file": "assets/flow.svg",
+    "preview": true,
+    "originals": [
+      "assets/flow.svg"
+    ],
+    "origin": "独自作成の概念図。編集可能SVG原本",
+    "license": "プロジェクト内で自由に再利用可",
+    "regenerate": "flow.svgをテキスト編集。実測図ではない",
+    "slideIds": [
+      "S02"
+    ],
+    "sourceIds": [
+      "concept-flow"
+    ]
+  }
+]

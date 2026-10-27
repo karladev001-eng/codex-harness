@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>修正記録の自動保存と再利用 · 仕様v1</title>
+<link rel="stylesheet" href="../../../authoring-skills/codex-html-plan/runtime/htmlplan.css">
+<script src="../../../authoring-skills/codex-html-plan/runtime/htmlplan.js" defer></script>
+<style>.overview{padding:22px;border:1px solid #d6dfd9;border-radius:14px;background:var(--green-soft);color:var(--ink);margin:24px 0}.overview strong{color:var(--green)}.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.card{padding:16px;border:1px solid #dce2de;border-radius:10px;background:var(--card);color:var(--ink)}.card h3{margin-top:0}table{width:100%;border-collapse:collapse}td,th{padding:10px;text-align:left;border-bottom:1px solid #ddd}code{overflow-wrap:anywhere}.tag{display:inline-block;font-size:12px;padding:3px 9px;border-radius:99px;background:var(--green-soft);color:var(--green)}</style>
+</head>
+<body data-plan-id="knowledge-autosave" data-version="1" data-scope="S1–S5 / AC1–AC12: 自動保存・既存3プロジェクト移行・再利用・同期復旧・通知抑制・履歴基盤・現機導入" data-approval="pending">
+<header>
+<span class="tag">実装前の提案 · 仕様v1</span>
+<h1>修正記録を、PCやworktreeを越えて使う</h1>
+<p>保存時にGitHubへ送信。失敗時は保留して再送。成長を振り返る履歴も残す。</p>
+<details class="thread"><summary>目的と依頼原文</summary><doc-quote via="prompt" from="ユーザー">各プロジェクトの修正記録もGitHubに保存して、別PCや別worktreeでも再利用できるようにしてください。ロックの再発対策と同じ失敗通知の抑制もお願いします。GitHubの保存は自動ではできませんか？できれば後々GitHubのデータを利用して、ナレッジベースの成長過程なども見れるようにしたいのですが。</doc-quote></details>
+</header>
+<main>
+<section class="overview">
+<h2>自動保存できます</h2>
+<p><strong>一度設定したら、毎回の送信承認は不要です。</strong> 修正から何を知見として残すかはハーネスが根拠を確認し、送信と再送はCLIで行います。会話全文を送る仕組みにはしません。</p>
+<div class="cols"><div class="card"><h3>1. 記録・再利用</h3><p>安定したproject IDで保存。既存の3プロジェクトを移行し、別PC・worktreeから同じ記録を取得。</p></div><div class="card"><h3>2. 同期・通知</h3><p>中断時のGitロックが次回を止めない取得方式へ。同じ継続障害の通知は初回にまとめる。</p></div><div class="card"><h3>3. 成長の履歴</h3><p>Git履歴に記録種別・時刻・操作IDを残す。将来のグラフや履歴表示の材料を整える。</p></div></div>
+<p>流れ: 修正 → 根拠と適用範囲を記録 → GitHubへ送信 → 次の作業で必要分を取得。通信失敗時は毎時の既存ジョブで再送します。</p>
+<p>保存先は既存の<strong>非公開harness-knowledge-base</strong>。新規画面は作らず、履歴ダッシュボードは次の段階です。他PCの認証・導入はそのPCで必要です。</p>
+<p>正本: <a href="knowledge-autosave.md">knowledge-autosave / 仕様v1</a>。実装・現機導入・GitHub移行の承認はpending。現在は計画と状態の展示です。</p>
+</section>
+<h2>提案する仕様</h2>
+<p>見出しを開くと、仕組み・状態・変更する実在コードを確認できます。</p>
+<doc-plan open="0">
+<doc-claim id="s1"><p>S1 · 同じプロジェクトなら、別PC・別worktreeでも同じ記録に届く。</p>
+<doc-flow caption="提案: フォルダ位置を保存先IDにしない。"><script type="text/plain">
+pc = PC A
+wt = worktree
+other = PC B
+id = project ID
+kb = GitHub [db]
+| pc | id |
+| wt | kb |
+| other | . |
+pc -> id : origin / 明示ID
+wt -> id : 同じrepository
+other -> id : 同じorigin
+id -> kb : 同じ保存先
+</script></doc-flow>
+<doc-claim id="s1-rules"><p>明示IDを優先し、Gitはorigin、non-Gitは持ち運べるIDで識別する。</p>
+<doc-schema lang="ts" title="提案: project登録簿の要点"><script type="text/plain">
+type ProjectIdentity = {
+  schema_version: 1;
+  project_key: string;       // path・ブランチを含めない
+  identity: string;          // originの正規化識別子 / 明示ID
+  created_at: string;        // 登録時刻。過去の獲得日ではない
+};
+// 明示設定 > 登録簿 > origin由来ID。
+// fork・衝突・改名を推測で統合しない。
+</script></doc-schema>
+<doc-note tone="info">non-Gitの安定ID設定はプロジェクトと一緒に別PCへ移します。新PCは同じ保存設定とGitHub CLI認証が必要です。</doc-note>
+<doc-claim><p>現在は絶対project pathのhashがlocal記録の場所になっている。</p><doc-code src="src/lib.ts" lines="99-105" hl="105" caption="現行コード。GitHub向けcache/pendingを安定target単位へ変更する。"></doc-code></doc-claim>
+</doc-claim>
+</doc-claim>
+<doc-claim id="s2"><p>S2 · 記録したら自動送信し、失敗した分は毎時再送する。</p>
+<doc-machine name="save" caption="提案: 状態を選ぶとCLIの返す結果例を確認できる。"><script type="text/plain">
+machine save initial local
+state local # 根拠を確認して記録した。
+state sending # GitHubへ送信中。
+state pending # 通信に失敗。PCに保留。
+state conflict # 他の変更と競合。上書きせず停止。
+state sent final # GitHubで保存確認済み。
+
+| local | sending | sent |
+| . | pending | conflict |
+
+local -write-> sending : 保存
+sending -ok-> sent : 確認
+sending -offline-> pending : 保留
+sending -changed-> conflict : SHA競合
+pending -hourly-> sending : 毎時再送
+conflict -resolve-> sending : 根拠を確認
+</script>
+<div data-state="local"><doc-mock w="460" frame="terminal" title="出力例 · 提案"><template>記録: 原因・対処・検証・適用範囲
+保存先: project IDで解決済み</template></doc-mock></div>
+<div data-state="sending"><doc-mock w="460" frame="terminal" title="出力例 · 提案"><template>ローカルの保留データを確保済み
+GitHubの版を確認して送信中…</template></doc-mock></div>
+<div data-state="pending"><doc-mock w="460" frame="terminal" title="出力例 · 提案"><template><span class="y">pending: true</span>
+通信失敗 / PC保存済み / 次の毎時処理で再送</template></doc-mock></div>
+<div data-state="conflict"><doc-mock w="460" frame="terminal" title="出力例 · 提案"><template><span class="r">conflict / pending: true</span>
+別PCの変更を検出。自動上書きせず確認が必要。</template></doc-mock></div>
+<div data-state="sent"><doc-mock w="460" frame="terminal" title="出力例 · 提案"><template><span class="g">ok: true / pending: false / freshness: fresh</span>
+GitHubの保存を確認済み</template></doc-mock></div>
+</doc-machine>
+<doc-claim id="s2-migration"><p>別プロジェクトA、ゲーム、別プロジェクトBの既存記録を、元のID・日付・評価を保って移行する。</p>
+<doc-schema lang="ts" title="提案: 既存記録の移行対象"><script type="text/plain">
+const migration = [
+  ['別プロジェクトA', '観察22件を含む既存記録'],
+  ['ゲーム', '観察19件を含む既存記録'],
+  ['別プロジェクトB', '形式の異なる既存記録も保全'],
+];
+// harnessの共有記録・project_keyは維持する。
+</script></doc-schema>
+<doc-note tone="warn">異なるremote記録や複数の異なるpendingがあれば停止します。原文を推測でmergeしません。既存の評価unknownも維持します。</doc-note>
+</doc-claim>
+<doc-claim><p>説明生成と修正記録の再送を独立させ、片方の失敗でももう片方を試す。</p><doc-flow caption="提案: 既存sessionless runnerを拡張。追加チャットなし。"><script type="text/plain">
+job = 毎時ジョブ
+prefs = 記録の再送
+analysis = 説明生成
+result = 処理別の結果
+| job | prefs |
+| analysis | result |
+job -> prefs : 登録targetのみ
+job -> analysis : 差分のみ
+prefs -> result : 独立した成否
+analysis -> result : 独立した成否
+</script></doc-flow><doc-note tone="info">OFF指定のprojectは自動送信しません。元projectの方針を確認できない場合も保留します。</doc-note></doc-claim>
+</doc-claim>
+<doc-claim id="s3"><p>S3 · 今の記録と変更履歴を残し、将来「どう育ったか」を振り返れるようにする。</p>
+<doc-schema lang="ts" title="提案: Gitの変更履歴に残す情報"><script type="text/plain">
+type ChangeMetadata = {
+  schema_version: 1;
+  operation_id: string;      // 再試行でも同じID
+  project_key: string;
+  kind: 'record' | 'correct' | 'forget' | 'migrate';
+  recorded_at: string;       // GitHubへ記録した時刻
+};
+// 元の観察日と移行日を分ける。本文journalは複製しない。
+</script></doc-schema>
+<doc-claim><p>技術的な修正は原因・対処・検証・適用条件をlessonとして残す。</p>
+<doc-schema lang="ts" title="提案: 技術的な知見の最小要素"><script type="text/plain">
+type Lesson = {
+  id: string; schema_version: 1;
+  cause: string; resolution: string;
+  verification: string[];
+  scope: string; source_refs: string[];
+  recorded_at: string;
+};
+// UIの好みとは別に保存。次回の用途に合う少数だけ取得。
+</script></doc-schema></doc-claim>
+<doc-claim><p>将来の集計では、移行・増減・指針への変化・未評価を区別する。</p>
+<doc-code lang="text" title="提案: 将来の集計で守る区別"><script type="text/plain">
+移行分: 以前の知見をGitHubへ移した記録。
+        その日に獲得した知見の数にはしない。
+増減:   安定IDから新規・訂正・取消を辿る。
+変化:   候補から指針になった時点を区別する。
+評価:   unknownを成功にせず、件数を効果と見なさない。
+</script></doc-code>
+<doc-note tone="info">今回の範囲は履歴を残す基盤です。成長のグラフ・閲覧画面は次の段階です。Git履歴の完全消去は別操作となります。</doc-note></doc-claim>
+</doc-claim>
+<doc-claim id="s4"><p>S4 · fetchが中断してロックを残しても、次回の同期を止めない。</p>
+<doc-flow caption="提案: 途中のGit repositoryを次回へ持ち越さず、有効snapshotだけを切り替える。"><script type="text/plain">
+old = 以前の有効snapshot [db]
+fetch = 新しい隔離bare repo
+check = schema / 期限 / private確認
+next = 検証済みsnapshot [db]
+| old | fetch |
+| . | check |
+| . | next |
+fetch -> check : 成功した取得だけ
+check -> next : atomic切替
+fetch -> old : 失敗時は保持
+</script></doc-flow>
+<doc-note tone="warn">毎回浅いfetchを行うため転送は増えます。既存の300秒間隔・hook期限を維持し、未知のlockは削除しません。</doc-note>
+<doc-claim><p>現在は同じGit cacheを繰り返しfetchしている。</p><doc-code src="knowledge/reader.cjs" lines="152-162" hl="154-155" caption="現行コード。fetch領域の使い回しをやめ、前回snapshotの保持と検証を維持する。"></doc-code></doc-claim>
+</doc-claim>
+<doc-claim id="s5"><p>S5 · 同じ障害が続いている間は、毎時通知しない。</p>
+<table><thead><tr><th>状態</th><th>提案する通知</th></tr></thead><tbody><tr><td>新しい障害</td><td>初回に1回通知</td></tr><tr><td>同じ原因が継続</td><td>通知を抑制し、状態・継続回数を更新</td></tr><tr><td>別の原因・別target</td><td>新規障害として通知</td></tr><tr><td>正常完了 → 同じ原因が再発</td><td>新しいepisodeとして通知</td></tr><tr><td>busy・未実行・部分成功</td><td>復旧扱いにせず、残る障害を保持</td></tr><tr><td>通知コマンド自体が失敗</td><td>同じepisodeでは24時間に最大1回再試行</td></tr></tbody></table>
+<doc-claim><p>通知抑制と処理の成否を分け、保留や失敗を隠さない。</p><doc-draft id="notice" label="通知文案 · 提案"><script type="text/plain">
+Knowledge: 修正記録をGitHubへ送信できませんでした。
+PCに保存済みです。再送状態を確認してください。
+
+Knowledge: 資料の同期を完了できませんでした。
+保存状態を確認してください。
+</script></doc-draft><doc-note tone="info">安全な状態保存ができない場合は永続抑制を保証できません。Macの通知許可による実表示も別条件です。</doc-note>
+<doc-claim><p>現行は失敗と判定するたびに通知を試みる。</p><doc-code src="knowledge/background.cjs" lines="98-103" hl="102" caption="現行コード。許可済みreasonと処理段階でepisodeを識別し、通知stateも排他する。"></doc-code></doc-claim></doc-claim>
+</doc-claim>
+<doc-claim aux="shared"><p>既存のCLI・GitHub認証・毎時ジョブを拡張する。</p><doc-code src="src/preferences.ts" lines="163-176" caption="現行のSHA条件付き送信。pendingの耐久保存・競合停止を保ち、操作IDと登録先の共通化を追加する。"></doc-code></doc-claim>
+<doc-claim aux="scope"><p>今回の範囲は保存・再利用・障害対策と履歴基盤。</p><ul><li>一般公開、アプリ本体の変更/配信、他PCへのログイン操作は含めない。</li><li>ダッシュボード・意味検索・過去の全会話の再抽出は含めない。</li><li>既存未commit差分と資料6件を保ち、独立レビュー後に正規導入する。</li></ul></doc-claim>
+</doc-plan>
+<section class="acceptance"><h2>受入条件</h2><ol>
+<li>AC1: 別path・worktree・別PC相当homeで同じGit projectへ到達。<a href="#s1">S1</a></li>
+<li>AC2: non-GitのIDを持ち運べる。statusは読取専用。<a href="#s1">S1</a></li>
+<li>AC3: target別共有state、競合保全、OFF指定を検証。<a href="#s1">S1</a> / <a href="#s2">S2</a></li>
+<li>AC4: 既存3プロジェクトの移行とfresh readを確認。<a href="#s2-migration">S2</a></li>
+<li>AC5: 自動保存、耐久pending、再送、応答紛失、競合、重複なし。<a href="#s2">S2</a></li>
+<li>AC6: 既存毎時jobで再送、生成失敗と独立、追加チャットなし。<a href="#s2">S2</a></li>
+<li>AC7: 技術的知見の記録・必要時取得・適用範囲を検証。<a href="#s3">S3</a></li>
+<li>AC8: 操作ID・種別・記録日を識別し、移行と新規を区別。<a href="#s3">S3</a></li>
+<li>AC9: 残存lock・fetch中断後も次回同期し、有効snapshotを保つ。<a href="#s4">S4</a></li>
+<li>AC10: 期限・排他・安全検証・実PCの処理時間を確認。<a href="#s4">S4</a></li>
+<li>AC11: 継続・原因変更・復旧・通知失敗・同時jobを検証。<a href="#s5">S5</a></li>
+<li>AC12: 関連tests/build/独立review後に導入し、現機の保存・再送を確認。他PC未検証は明示。<a href="#s2">S2</a></li>
+</ol></section>
+<section class="unresolved" id="unresolved"><h2>未解決事項</h2><p>仕様上の未解決事項はなし。数値や範囲は上記の承認対象に含めています。未解決0件でも実装承認は独立したpendingです。</p><p>他PCはその端末で認証と保存設定が必要です。既存記録にない過去の履歴、全修正の網羅、記録数による改善効果は推測しません。</p></section>
+<section class="related-docs"><h2>関連ドキュメント</h2><ul><li><a href="knowledge-autosave.md">knowledge-autosave · TASK</a> — 仕様v1・承認・制約の正本。</li><li><a href="knowledge-health-20261024.md">knowledge-health-20261024 · 調査記録</a> — 今回の実測と応急復旧。</li><li><a href="knowledge-background.md">knowledge-background · 既存導入記録</a> — 毎時ジョブの現状。</li><li><a href="../../guides/improvement-loop.md">改善ループガイド</a> — 既存の記憶保存契約。</li></ul><p>HTMLは単独で表示可能。関連Markdownは別ファイルです。このHTMLはCodexへ送信・承認記録を行いません。</p></section>
+</main></body></html>

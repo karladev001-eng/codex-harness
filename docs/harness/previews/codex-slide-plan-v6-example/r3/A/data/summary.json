@@ -1,0 +1,23 @@
+{
+  "label": "演習用仮想値・実測ではない",
+  "unit": "秒",
+  "conditions": "同じPC・各3回",
+  "methods": [
+    {
+      "method": "現行",
+      "count": 3,
+      "mean": 40,
+      "min": 38,
+      "max": 42
+    },
+    {
+      "method": "改善案",
+      "count": 3,
+      "mean": 25,
+      "min": 24,
+      "max": 26
+    }
+  ],
+  "difference": 15,
+  "reductionPercent": 37.5
+}
