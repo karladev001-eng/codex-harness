@@ -33,6 +33,7 @@
     "plugins/codex-harness/skills/harness/references",
     "plugins/codex-harness/skills/harness/assets",
     "plugins/codex-harness/skills/harness/consult-claude",
+    "plugins/codex-harness/skills/harness/consult-codex",
     "authoring-skills",
     "plugins/codex-harness/skills/harness/read-sections.cjs"
   ],

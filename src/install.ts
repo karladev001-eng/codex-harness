@@ -7,7 +7,7 @@ export const START = '<!-- codex-harness:begin -->';
 export const END = '<!-- codex-harness:end -->';
 export const REQUIRED_SOURCE_FILES = [
   'SKILL.md', 'read-sections.cjs', 'references/section-index.json', 'references/section-map.md', 'runtime.js', 'lib.js', 'install.js', 'authoring.js', 'preferences.js', 'records.js', 'identity.js', 'lessons.js', 'claude.js', 'package.json',
-  'consult-claude/SKILL.md', 'consult-claude/agents/openai.yaml', 'consult-claude/scripts/consult.mjs',
+  'consult-claude/SKILL.md', 'consult-claude/agents/openai.yaml', 'consult-claude/scripts/consult.mjs', 'consult-codex/SKILL.md', 'consult-codex/scripts/consult.mjs',
   'assets/adr.md', 'assets/completion.md', 'assets/creative-preferences.md', 'assets/defaults.json', 'assets/project-map.md', 'assets/task.md',
   'references/routing/settings.md', 'references/routing/preimplementation.md', 'references/routing/claude.md', 'references/routing/web.md', 'references/routing/creative.md', 'references/routing/coordination.md', 'references/routing/continuity.md',
   'references/routing/chart.md', 'references/routing/rule-map.md', 'references/early-compaction.md', 'references/hosts/claude-code.md',

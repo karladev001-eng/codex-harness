@@ -28,10 +28,10 @@ test('the built marketplace carries a self-contained harness skill, agents and t
   assert.deepEqual(fs.readdirSync(path.join(plugin, 'agents')).sort(), ['implementer.md', 'integrator.md', 'researcher.md', 'reviewer.md']);
   for (const agent of fs.readdirSync(path.join(plugin, 'agents'))) assert.match(fs.readFileSync(path.join(plugin, 'agents', agent), 'utf8'), /^---\nname: [a-z]+\ndescription: .+\nmodel: inherit\n/);
   assert.equal(lib.readJson(path.join(plugin, 'hooks/hooks.json')).hooks.SessionStart[0].hooks[0].command, 'node "${CLAUDE_PLUGIN_ROOT}/hooks/session-start.cjs"');
-  for (const file of ['runtime.js', 'claude.js', 'SKILL.md', 'references/hosts/claude-code.md', 'knowledge/cli.cjs']) assert.ok(fs.existsSync(path.join(plugin, 'skills/harness', file)), file);
+  for (const file of ['runtime.js', 'claude.js', 'SKILL.md', 'references/hosts/claude-code.md', 'knowledge/cli.cjs', 'consult-codex/scripts/consult.mjs']) assert.ok(fs.existsSync(path.join(plugin, 'skills/harness', file)), file);
   // Consulting Claude from Claude adds no independence, so the Codex-side skill is not shipped here.
   assert.equal(fs.existsSync(path.join(plugin, 'skills/harness/consult-claude')), false);
-  assert.deepEqual(fs.readdirSync(path.join(plugin, 'skills')).sort(), ['codex-html-plan', 'create-harness', 'create-rulebooks', 'create-subagent', 'harness', 'inspect-harness']);
+  assert.deepEqual(fs.readdirSync(path.join(plugin, 'skills')).sort(), ['codex-html-plan', 'consult-codex', 'create-harness', 'create-rulebooks', 'create-subagent', 'harness', 'inspect-harness']);
   // A file named claude.md would be auto-loaded as CLAUDE.md on case-insensitive file systems.
   assert.equal(Object.keys(tree(path.join(plugin, 'skills/harness/references/hosts'))).some(file => /^claude\.md$/i.test(path.basename(file))), false);
 });
