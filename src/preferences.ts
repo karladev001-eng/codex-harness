@@ -4,7 +4,7 @@ import { Json, digest, exists, isObject, localRoot, readJson, rejectSymlink, saf
 
 import { Transport, RemoteError, github, atomic, locked, textInput, remote, targetDirectory, targetIndex, registerTarget, targetId, metadata, commitMessage } from './records';
 import { identityStatus, resolveIdentity, projectIdentity } from './identity';
-import { canonical, codexHome, resolveSettings } from './lib';
+import { canonical, dataHome, resolveSettings } from './lib';
 export { Transport, RemoteError, github } from './records';
 export function preferenceTarget(config: Json): Json | null {
   const value = config.preferences;
@@ -204,7 +204,7 @@ export function preferences(args: Json, config: Json, transport: Transport = git
 
 // Only the old harness state layout is considered; unrelated files are never collected.
 function absorbLegacy(args: Json, location: Json, current: Json, validate: (value: any, target: Json) => Json, destination: string): Json {
-  const projects = safePath(codexHome(args.home), 'harness', 'projects');
+  const projects = safePath(dataHome(args.home), 'projects');
   if (!exists(projects)) return current;
   const candidates: string[] = [];
   for (const name of fs.readdirSync(projects)) {

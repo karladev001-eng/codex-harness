@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { Json, canonical, codexHome, digest, exists, git, isObject, projectSettings, readJson, rejectSymlink, safePath, taskId } from './lib';
+import { Json, canonical, dataHome, digest, exists, git, isObject, projectSettings, readJson, rejectSymlink, safePath, taskId } from './lib';
 import { Transport, RemoteError, atomic, locked, remote, metadata, commitMessage } from './records';
 export function normalizeOrigin(origin: string): string {
   if (typeof origin !== 'string' || /[\x00-\x20\x7f]/.test(origin)) throw new Error('Unsupported Git origin');
@@ -41,7 +41,7 @@ function validateRegistry(value: any): Json {
   return value;
 }
 function registryFile(args: Json, config: Json): string {
-  return safePath(codexHome(args.home), 'harness', 'registries', digest(JSON.stringify(registryTarget(config))) + '.json');
+  return safePath(dataHome(args.home), 'registries', digest(JSON.stringify(registryTarget(config))) + '.json');
 }
 export function identityStatus(args: Json, config: Json): Json {
   const key = config.preferences.project_key;

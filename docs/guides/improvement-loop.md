@@ -37,7 +37,7 @@ GitHub接続時はfresh取得したものだけを自動適用し、個別read�
 
 ### GitHubで制作の記憶を共有する
 
-既定配布は未接続（repository/keyは空、autosave=false、preferences.enabled=true）で、従来のlocal制作記憶を使えます。GitHub共有を使う人は、Node.js 22+、GitHub CLIと非公開repository/既存branchへの権限を用意し、`gh auth login --hostname github.com` で認証します。個人設定 `~/.codex/harness/settings.json`（CODEX_HOME指定時はその配下）へ既存項目を残して次を一度設定します。tokenは書きません。以下のrepositoryは今回承認された保存先です。別利用者は自分が権限を持つ非公開保存先へ置き換えます。
+既定配布は未接続（repository/keyは空、autosave=false、preferences.enabled=true）で、従来のlocal制作記憶を使えます。GitHub共有を使う人は、Node.js 22+、GitHub CLIと非公開repository/既存branchへの権限を用意し、`gh auth login --hostname github.com` で認証します。個人設定 `~/.agents/harness/settings.json`（HARNESS_HOME指定時はその配下。保存先は[設定](configuration.md)を参照）へ既存項目を残して次を一度設定します。tokenは書きません。以下のrepositoryは今回承認された保存先です。別利用者は自分が権限を持つ非公開保存先へ置き換えます。
 
 ```json
 {

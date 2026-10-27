@@ -78,6 +78,7 @@ node dist/skill/runtime.js install
 | 読込入口 | `$CODEX_HOME/AGENTS.md`、未設定なら `~/.codex/AGENTS.md` に所有する区切り付きblockを追加 |
 | 所有記録 | `$CODEX_HOME/harness/install.json` |
 | バックアップ | `$CODEX_HOME/harness/backups/` |
+| 共有データ | `~/.agents/harness/`（`HARNESS_HOME`）。install時に旧 `$CODEX_HOME/harness/` の設定・記憶をコピー |
 
 既存の無関係な指示・個人設定を保持します。入口は恒久導入先の `runtime.js` を参照し、npxキャッシュに依存しません。`AGENTS.override.md` が入口を隠す環境では導入を拒否するので、既存指示を確認して解決します。
 

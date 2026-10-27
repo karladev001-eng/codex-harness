@@ -41,6 +41,35 @@ export function safePath(root: string, ...parts: string[]): string {
 export function codexHome(home?: string): string {
   return canonical(home ? path.join(canonical(home), '.codex') : process.env.CODEX_HOME || path.join(os.homedir(), '.codex'));
 }
+// Data shared by every host (settings, preferences, lessons, sync state). Host-owned
+// install manifests and backups stay under each host's own home.
+export const SHARED_DATA = ['settings.json', 'projects', 'targets', 'registries'] as const;
+export const sharedHome = (home?: string): string =>
+  canonical(home ? path.join(canonical(home), '.agents', 'harness') : process.env.HARNESS_HOME || path.join(os.homedir(), '.agents', 'harness'));
+export const legacyHome = (home?: string): string => path.join(codexHome(home), 'harness');
+// Read-only resolution: until `data migrate` runs, an existing pre-0.5 Codex store stays authoritative.
+export function dataHome(home?: string): string {
+  const shared = sharedHome(home), legacy = legacyHome(home);
+  if (exists(shared)) return shared;
+  return SHARED_DATA.some(name => exists(path.join(legacy, name))) ? legacy : shared;
+}
+// Copy (never move) so a not-yet-updated Codex runtime keeps working; the staged
+// rename makes the shared store appear complete or not at all.
+export function migrateData(home?: string): Json {
+  const shared = sharedHome(home), legacy = legacyHome(home);
+  if (exists(shared)) return { status: 'current', data_home: shared };
+  const items = SHARED_DATA.filter(name => exists(path.join(legacy, name)));
+  if (!items.length) return { status: 'nothing_to_migrate', data_home: shared };
+  for (const name of items) rejectSymlink(path.join(legacy, name), 'Legacy ' + name);
+  fs.mkdirSync(path.dirname(shared), { recursive: true });
+  const staged = fs.mkdtempSync(path.join(path.dirname(shared), '.harness-migrate-'));
+  try {
+    for (const name of items) fs.cpSync(path.join(legacy, name), path.join(staged, name), { recursive: true });
+    fs.renameSync(staged, shared);
+  } catch (error) { fs.rmSync(staged, { recursive: true, force: true }); throw error; }
+  fs.writeFileSync(path.join(legacy, 'MIGRATED.json'), JSON.stringify({ migrated_to: shared, migrated_at: new Date().toISOString(), items }, null, 2) + '\n');
+  return { status: 'migrated', from: legacy, data_home: shared, items, legacy_kept: true };
+}
 export function readJson(file: string): any {
   try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (error) { throw new Error(`Cannot read JSON ${file}: ${error}`); }
 }
@@ -90,7 +119,7 @@ export function resolveSettings(project: string, home?: string): { config: Json;
   const pins: Json = {};
   let explicitLoop = false;
   for (const [source, file] of [
-    ['personal', path.join(codexHome(home), 'harness/settings.json')],
+    ['personal', path.join(dataHome(home), 'settings.json')],
     ...projectSettings(project).map(file => ['project', file]),
   ]) {
     if (!fs.existsSync(file)) continue;
@@ -131,7 +160,7 @@ export function taskId(value: unknown): string {
   return value;
 }
 export const digest = (data: string | Buffer): string => crypto.createHash('sha256').update(data).digest('hex');
-export const localRoot = (project: string, home?: string): string => safePath(codexHome(home), 'harness', 'projects', digest(canonical(project)).slice(0, 20));
+export const localRoot = (project: string, home?: string): string => safePath(dataHome(home), 'projects', digest(canonical(project)).slice(0, 20));
 export function saveNew(file: string, data: unknown): void {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, JSON.stringify(data, null, 2) + '\n', { encoding: 'utf8', flag: 'wx' });

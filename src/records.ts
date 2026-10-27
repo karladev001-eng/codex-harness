@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { Json, codexHome, digest, exists, isObject, readJson, rejectSymlink, safePath, canonical } from './lib';
+import { Json, dataHome, digest, exists, isObject, readJson, rejectSymlink, safePath, canonical } from './lib';
 export type Transport = (method: string, endpoint: string, body?: Json) => any;
 export class RemoteError extends Error {
   constructor(public kind: string) { super('GitHub preferences: ' + kind); }
@@ -72,7 +72,7 @@ export function remote(target: Json, transport: Transport): Json {
   }
 }
 export const targetId = (target: Json): string => digest(JSON.stringify(target));
-export const targetRoot = (home?: string): string => safePath(codexHome(home), 'harness', 'targets');
+export const targetRoot = (home?: string): string => safePath(dataHome(home), 'targets');
 export const targetDirectory = (target: Json, home?: string): string => safePath(targetRoot(home), targetId(target));
 export function metadata(projectKey: string, kind: string, recordKind = 'preferences'): Json {
   if (!['create', 'update', 'correction', 'forget', 'migrate', 'register'].includes(kind)) throw new Error('Invalid record operation kind');
