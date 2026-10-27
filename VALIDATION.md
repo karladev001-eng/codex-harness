@@ -6,6 +6,23 @@
 
 Knowledgeの隔離試験は[運用ガイドの検証範囲](docs/guides/knowledge-operations.md#検証範囲)、検索の契約は[ADR 0006](docs/adr/0006-knowledge-retrieval.md)、個別の現機確認はsource checkoutの `docs/harness/tasks/activate-knowledge-memory.md` と `docs/harness/tasks/raycast-knowledge.md` に記録されています。ここからWindows/Linux・別PC・全サービスの網羅取得・長期効果を確認済みとは扱いません。最新の公開準備の検証は実行後に追記し、過去の結果を現在版の再実行として扱わないでください。
 
+## 2026-10-28: Claude Code対応（macOS、Claude Code 2.1.311、codex-cli 0.164.0）
+
+- 自動テスト: `npm test` 267件PASS。クリーンなworktreeでも同じ結果。文書リンクerror 0、`context-routing.cjs --check` 一致。
+- プラグイン: `claude plugin validate` でmarketplace・プラグインともPASS。分離した `CLAUDE_CONFIG_DIR` で、実CLIによる `install --host claude` → `plugin details`（7スキル・4エージェント・SessionStart hook、常時約490トークン）→ `uninstall --host claude` が成功。その後、実ホームへ導入。
+- consult-codex実機: `--check` 成功。`critic` 1回（ツール使用0回）、`reviewer` 1回（読取コマンド6回、判定NEEDS_WORK）。送信は開発リポジトリに記録した事前承認の範囲内。Codexの批評で見つかった移行の分岐リスクを修正（f004159）。
+- 2者レビュー: f004159をClaude側のレビュー担当とCodexの `reviewer` が独立に評価し、どちらも「コード欠陥なし、競合・マーカー失敗のテスト不足」でNEEDS_WORK。テストを追加（8058c8d）。Claude側は当時プラグイン未導入のため `harness:reviewer` ではなく既存のレビュー用エージェントで代替。
+- 挙動評価（`claude plugin eval`、各ケース2回、`--allow-tools Bash Write Edit`、プラグインなしの比較群あり）:
+
+| ケース | プラグインあり | なし | 差 |
+|---|---|---|---|
+| 実装前の承認（TODO CLIの依頼） | 1.0（2/2で仕様・受入条件を示し承認待ち） | 0.0（2/2で即実装・完成報告） | +1.0 |
+| 純相談に工程を足さない | 1.0（1回） | 1.0（1回） | 0 |
+| workerの境界（HARNESS_WORKERの実装担当） | 1.0（2/2、再委譲なし） | 1.0（2/2） | 0 |
+
+  3回の実行で合計約$1.6。少ない試行回数なので傾向の確認であり、統計的な保証ではない。書込みツールを許可しない実行では、workerケースは両群ともツール不足でBLOCKEDとなり評価にならなかった。
+- 未確認: 実際の対話セッションでのAgent委譲（`harness:implementer` へのモデル指定、`isolation: "worktree"`）、Codex側から見た2者レビュー、画像生成の連携、Windows。
+
 ## 2026-10-11: 0.4.3のリリース候補検証
 
 ソースのpackage/package-lock/pluginを0.4.3へ同期し、`private: true` / `UNLICENSED`を維持。実装は承認済みのcodex-slide-plan v6と任意導入の契約を使い、新機能は追加していません。以下の検証は一時home/projectと配布候補のtgzを対象にします。実registry送信・実ホーム導入・pushの成功記録は別工程です。
