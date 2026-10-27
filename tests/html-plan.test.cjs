@@ -137,3 +137,76 @@ test('relocated skill packs under an ESM project without require-module support'
   assert.equal(target, path.join(relocated, 'examples/task-board.plan.html'));
   assert.equal(fs.existsSync(target), true, 'the command resolves from the relocated skill root');
 });
+
+function contrast(foreground, background) {
+  const luminance = hex => {
+    const channels = hex.slice(1).match(/../g).map(value => parseInt(value, 16) / 255)
+      .map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4);
+    return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+  };
+  const values = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+  return (values[0] + .05) / (values[1] + .05);
+}
+// Read exact CSS selectors, preserving the last declaration for that selector.
+// These fixtures use explicitly paired colors or the named ancestor background.
+function cssProperty(css, selector, property) {
+  let value;
+  for (const rule of css.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    if (!rule[1].trim().split(',').map(part => part.trim()).includes(selector)) continue;
+    for (const declaration of rule[2].matchAll(/([\w-]+)\s*:\s*([^;]+)\s*;?/g)) {
+      if (declaration[1] === property) value = declaration[2].trim();
+    }
+  }
+  assert.match(value || '', /^#[\da-f]{6}$/i, `${selector} ${property} must define an explicit color`);
+  return value;
+}
+const darkSurfaces = [
+  ['.mk-frame.terminal', '.mk-frame.terminal'],
+  ['.mk-frame.terminal .mk-bar', '.mk-frame.terminal .mk-bar'],
+  ['doc-quote[via="transcript"] .q-body', 'doc-quote[via="transcript"]'],
+  ['doc-quote[via="transcript"] .q-at', 'doc-quote[via="transcript"] .q-head']
+];
+function checkDarkSurfaces(css) {
+  for (const [text, surface] of darkSurfaces) {
+    const fg = cssProperty(css, text, 'color'), bg = cssProperty(css, surface, 'background');
+    assert.ok(contrast(fg, bg) >= 4.5, `${text} on ${surface}: ${fg}/${bg}`);
+  }
+}
+test('document palette remains light and text meets contrast on normal, soft and hover surfaces', () => {
+  const css = fs.readFileSync(path.join(skill, 'runtime/htmlplan.css'), 'utf8');
+  const tokens = Object.fromEntries([...css.matchAll(/--([\w-]+):\s*(#[\da-f]{6})\s*;/gi)].map(match => [match[1], match[2]]));
+  assert.match(css, /color-scheme:\s*light\s*;/);
+  assert.doesNotMatch(css, /prefers-color-scheme|:root\[data-theme|color-scheme:\s*light dark/);
+  for (const name of Object.keys(tokens)) assert.equal([...css.matchAll(new RegExp(`--${name}:`, 'g'))].length, 1, `${name} must not be redefined by a theme`);
+  const surfaces = ['paper', 'card', 'sunk', 'accent-soft', 'green-soft', 'amber-soft', 'red-soft', 'blue-soft', 'purple-soft'];
+  for (const surface of surfaces) {
+    assert.ok(contrast(tokens.ink, tokens[surface]) >= 7, `body on ${surface}`);
+    for (const text of ['ink-2', 'ink-3', 'accent', 'green', 'amber', 'red', 'blue', 'purple']) {
+      assert.ok(contrast(tokens[text], tokens[surface]) >= 4.5, `${text} on ${surface}: ${contrast(tokens[text], tokens[surface])}`);
+    }
+  }
+  const dim = hex => '#' + hex.slice(1).match(/../g).map(value => Math.round(parseInt(value, 16) * .97).toString(16).padStart(2, '0')).join('');
+  for (const text of ['ink', 'ink-2', 'ink-3', 'green']) assert.ok(contrast(dim(tokens[text]), dim(tokens['green-soft'])) >= 4.5, `add-row hover ${text}`);
+  assert.match(css, /\.nw-btn\[disabled\]\s*\{[^}]*background:\s*var\(--sunk\);[^}]*color:\s*var\(--ink-3\)/);
+  for (const fill of ['ink', 'accent', 'green', 'amber', 'red', 'blue', 'purple']) {
+    assert.ok(contrast(tokens.paper, tokens[fill]) >= 4.5, `inverse badge on ${fill}`);
+  }
+  assert.ok(contrast(tokens['accent-soft'], tokens.ink) >= 4.5, 'machine status on dark banner');
+  assert.doesNotMatch(css, /\.card\.drop\s*\{[^}]*opacity|\.mc-ev\[disabled\]\s*\{[^}]*opacity|\.cl-loc\s*\{[^}]*opacity/);
+  checkDarkSurfaces(css);
+  // Mutate only in memory: each real selector must fail if its text matches its background.
+  for (const [text, surface] of darkSurfaces) {
+    const bg = cssProperty(css, surface, 'background');
+    const mutated = css + `\n${text} { color: ${bg}; }`;
+    assert.throws(() => checkDarkSurfaces(mutated), assert.AssertionError, `must detect a contrast regression in ${text}`);
+  }
+});
+test('color rules are discoverable and local overview pairs shared background and text', () => {
+  const entry = fs.readFileSync(path.join(skill, 'SKILL.md'), 'utf8');
+  assert.match(entry, /\]\(references\/color-design.md\)/);
+  const rules = fs.readFileSync(path.join(skill, 'references/color-design.md'), 'utf8');
+  for (const link of rules.matchAll(/\]\(([^)]+)\)/g)) assert.ok(fs.existsSync(path.resolve(skill, 'references', link[1])), link[1]);
+  const source = fs.readFileSync(path.resolve(skill, '../../docs/harness/tasks/knowledge-autosave.src.html'), 'utf8');
+  assert.match(source, /\.overview\{[^}]*background:var\(--green-soft\);color:var\(--ink\)/);
+  assert.match(source, /\.card\{[^}]*background:var\(--card\);color:var\(--ink\)/);
+});

@@ -6,7 +6,7 @@ fs.rmSync(path.join(root, 'dist'), { recursive: true, force: true });
 const compiled = require('node:child_process').spawnSync(process.execPath, [require.resolve('typescript/bin/tsc'), '--project', path.join(root, 'tsconfig.json')], { stdio: 'inherit', cwd: root });
 if (compiled.error) throw compiled.error;
 if (compiled.status !== 0) process.exit(compiled.status || 1);
-for (const name of ['SKILL.md', 'assets', 'references']) {
+for (const name of ['SKILL.md', 'read-sections.cjs', 'assets', 'references', 'consult-claude']) {
   fs.cpSync(path.join(root, 'plugins/codex-harness/skills/harness', name), path.join(target, name), { recursive: true });
 }
 for (const name of ['create-rulebooks', 'create-subagent', 'create-harness', 'inspect-harness', 'codex-html-plan']) {
@@ -50,9 +50,18 @@ for (const source of walk(referenceSource).filter(file => file.endsWith('.md')))
   fs.writeFileSync(destination, relocate(fs.readFileSync(source, 'utf8'), source, destination, installedTarget));
 }
 
+// Rebased reader-guide links change reference bytes; index the actual installed originals.
+const crypto = require('node:crypto');
+const sectionIndexPath = path.join(target, 'references/section-index.json');
+const sectionIndex = JSON.parse(fs.readFileSync(sectionIndexPath, 'utf8'));
+for (const document of Object.values(sectionIndex.documents)) document.sha256 = crypto.createHash('sha256').update(fs.readFileSync(path.join(target, document.path))).digest('hex');
+fs.writeFileSync(sectionIndexPath, JSON.stringify(sectionIndex, null, 2) + '\n');
+
 const plugin = path.join(root, 'dist/plugins/codex-harness');
 fs.cpSync(path.join(root, 'plugins/codex-harness/.codex-plugin'), path.join(plugin, '.codex-plugin'), { recursive: true });
 fs.cpSync(target, path.join(plugin, 'skills/harness'), { recursive: true });
+// Keep the harness-relative resource and expose the same skill to plugin discovery.
+fs.cpSync(path.join(target, 'consult-claude'), path.join(plugin, 'skills/consult-claude'), { recursive: true });
 
 // Independent capture tool and unpacked MV3 extension; no installed/user configuration.
 fs.cpSync(path.join(root, 'knowledge'), path.join(root, 'dist/knowledge'), { recursive: true });

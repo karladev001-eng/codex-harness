@@ -9,11 +9,13 @@
 - `tests/`: 一時ホーム・使い捨てGitリポジトリ・実tarball/npxによるNodeテスト。
 - `.github/workflows/test.yml`: Node.js 22・macOS/Linux/WindowsのCI。
 - `VALIDATION.md`: 確認済み事項と未検証事項。
+- [Claude送信の事前承認](authorizations/claude.md): このプロジェクトに限る送信情報・目的・除外事項・撤回条件。相談前に必要時参照する。
 - [ADR 0002](../adr/0002-github-knowledge-base.md): GitHubを正本とするPC向けナレッジベースの設計判断。保存内容、同期、意味検索、キャッシュ、ハーネス連携の設計。保存・文字検索・段階取得は実装済み、意味検索は対象外。
 
 検証: `npm ci`、`npm test`。配布物作成: `npm pack`。配布は非公開GitHub Releaseのtarballを使う。個人用設定や認証情報は含めない。
 
 - `src/preferences.ts`: local/GitHub制作記録のCLI、gh transport、保存先別cache/pending、SHA/CAS、明示移行。
+- [修正記録の自動保存と再利用](tasks/knowledge-autosave.md): 仕様v1・承認待ち。安定project ID、既存3project移行、定期再送、ロック対策、重複通知抑制、将来の履歴基盤。[確認用HTML](tasks/knowledge-autosave.plan.html)。
 - `tests/preferences.test.cjs`: 隔離ホーム・偽transportによる競合/失敗/フラグ/移行検証。実remote書込なし。
 - `docs/adr/0003-github-improvement-records.md`: 小さな制作記録の共有段階。ページ収集・検索は対象外。
 
@@ -28,3 +30,5 @@
 - [公開向けリポジトリ整理の仕様案](tasks/repository-public-readiness.md): README・導入導線・詳細ガイドの整理。仕様v2/承認済み・整備完了。外部公開は対象外。
 
 - [npm配布の仕様と検証](tasks/npm-distribution.md): clone不要の導入・更新。仕様v2（GitHub Packages非公開）・N1–N4の準備完了、159テストと独立レビューPASS。実配布は別工程。
+
+- [codex-slide-planの仕様案](tasks/codex-slide-plan.md): スライドと話の流れ・発表原稿・理解しやすさの確認、箇所指定の修正、素材/出典、テンプレート/新規レイアウト/マスター。仕様v2承認済み、実装・隔離検証済み。HTML視覚比較とブラウザ実操作は未検証。

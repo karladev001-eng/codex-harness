@@ -10,7 +10,8 @@ const { Gh, gitBlobSha } = require('./github.cjs');
 const HASH = /^[0-9a-f]{40}$/;
 const destination = config => ({ repo: config.repo, branch: config.branch, library_id: config.library_id });
 const sameDestination = (a, b) => a && ['repo','branch','library_id'].every(k => a[k] === b[k]);
-const safeError = e => /^[A-Z][A-Z0-9_]{1,80}$/.test(e?.message || '') ? e.message : 'KNOWLEDGE_READ_FAILED';
+const SAFE_ERRORS = new Set(['PROCESS_AUTHENTICATION','PROCESS_FORBIDDEN','PROCESS_NETWORK','GH_AUTHENTICATION','GH_FORBIDDEN','GH_NETWORK','GH_TIMEOUT','ANALYSIS_DESTINATION_CHANGED', 'ANALYSIS_INPUT_LIMIT', 'CAPTURE_ID_REQUIRED', 'CORRUPT_LOCAL_STATE', 'DUPLICATE_ARGUMENT', 'DUPLICATE_HOOK_REGISTRATION', 'EXISTING_ORIGIN_MANUAL_REVIEW', 'EXISTING_OR_UNKNOWN_REGISTRATION', 'EXISTING_REGISTRATION_MANUAL_REVIEW', 'GH_ABSOLUTE_PATH_REQUIRED', 'GH_BLOB_MISMATCH', 'GH_INVALID_RESPONSE', 'HOOKS_FILE_CHANGED', 'HOOK_COMMAND_CHANGED_REMOVE_FIRST', 'HOOK_DEFINITION_CONFLICT', 'HOOK_REGISTRATION_DESTINATION_CHANGED', 'INSTALL_PLATFORM_MISMATCH', 'INVALID_ACTION', 'INVALID_ANALYSIS', 'INVALID_ANALYSIS_LIMIT', 'INVALID_ANALYSIS_QUEUE', 'INVALID_ANALYSIS_RESULT', 'INVALID_ARGUMENT', 'INVALID_BACKGROUND_ARGUMENT', 'INVALID_BACKGROUND_PATH', 'INVALID_BRANCH', 'INVALID_CAPTURE_ID', 'INVALID_CONFIG', 'INVALID_DETAILS', 'INVALID_FRAME', 'INVALID_GIT_HEAD', 'INVALID_GIT_TREE', 'INVALID_HEADINGS', 'INVALID_HOOKS_FILE', 'INVALID_HOOK_ARGUMENT', 'INVALID_HOOK_REGISTRATION', 'INVALID_INTERVAL', 'INVALID_KIND', 'INVALID_LIMITATIONS', 'INVALID_MESSAGE', 'INVALID_OPERATION_ID', 'INVALID_PROVIDER_CONFIG', 'INVALID_PROVIDER_EVENTS', 'INVALID_PROVIDER_OUTPUT', 'INVALID_READ_ARGUMENT', 'INVALID_READ_SNAPSHOT', 'INVALID_REGISTRATION', 'INVALID_SAVED_JPEG', 'INVALID_SCHEMA', 'INVALID_SCREENSHOT', 'INVALID_SEARCH_ARGUMENT', 'INVALID_SOURCE_IDENTITY', 'INVALID_TAGS', 'INVALID_TEXT', 'INVALID_URL', 'ITEM_CONFLICT', 'KB_CAPTURE_LIMIT', 'KB_CAPTURE_SCHEMA_CONFLICT', 'KB_SCHEMA_CONFLICT', 'KB_SIZE_LIMIT', 'KB_UNSAFE_TREE', 'LOCKED_MANUAL_INSPECTION_REQUIRED', 'MESSAGE_TOO_LARGE', 'MISSING_ANALYSIS_EVIDENCE', 'MISSING_ARGUMENT', 'NODE_22_REQUIRED', 'NONEMPTY_UNKNOWN_REPOSITORY', 'NOT_CONFIGURED', 'NO_READ_SNAPSHOT', 'OPERATION_COLLISION_OR_CORRUPTION', 'ORIGIN_NOT_ALLOWED', 'PRIVATE_READABLE_REPOSITORY_REQUIRED', 'PRIVATE_WRITABLE_REPOSITORY_REQUIRED', 'PROCESS_OUTPUT_LIMIT', 'PROCESS_TIMEOUT', 'PROCESS_UNAVAILABLE', 'PROVIDER_REQUIRED', 'PROVIDER_TOOL_CALL_FORBIDDEN', 'PROVIDER_TURN_INCOMPLETE', 'README_LIMIT', 'READ_LIMIT_SPLITS_CHARACTER', 'READ_LOCK_TICKET_LIMIT', 'READ_OFFSET_OUT_OF_RANGE', 'READ_OFFSET_SPLITS_CHARACTER', 'READ_TIMEOUT', 'REF_CONFLICT_OR_UNCONFIRMED', 'REGISTRATION_FAILED', 'REGISTRATION_ROLLBACK_FAILED_MANUAL_INSPECTION', 'REMOTE_ANALYSIS_CONFLICT', 'REMOTE_CAPTURE_CHANGED', 'REMOTE_CAPTURE_CONFLICT', 'REMOTE_OPERATION_COLLISION', 'REMOTE_PATH_CONFLICT', 'RESPONSE_TOO_LARGE', 'STATE_ABSOLUTE_PATH_REQUIRED', 'TREE_INCOMPLETE', 'TRUNCATED_FRAME', 'UNKNOWN_ARGUMENT', 'UNOWNED_HOOK_MANUAL_REVIEW', 'UNSAFE_BACKGROUND_STATE', 'UNSAFE_GH_PATH', 'UNSAFE_GIT_CACHE', 'UNSAFE_GIT_CACHE_CONFIG', 'UNSAFE_HOOKS_FILE', 'UNSAFE_HOOK_PATH', 'UNSAFE_IMAGE_CACHE', 'UNSAFE_LAUNCHER_PATH', 'UNSAFE_READ_LOCK', 'UNSAFE_REGISTRATION_STATE', 'UNSUPPORTED_HOOK_PLATFORM']);
+const safeError = e => SAFE_ERRORS.has(e?.message) ? e.message : 'KNOWLEDGE_READ_FAILED';
 async function recoveryClaim(lock,candidate) {
   // Append-only numbered tickets avoid ABA when reclaiming an abandoned mutex.
   // A killed recoverer leaves its unique ticket; no new process reuses that path.
@@ -57,7 +58,9 @@ async function libraryLock(config, fn) {
       let stat;try{stat=await fs.lstat(lock);}catch(e){if(e.code==='ENOENT')continue;throw e;}
       if (!stat.isFile() || stat.isSymbolicLink()) throw new Error('UNSAFE_READ_LOCK');
       let owner; try { owner = await read(lock); } catch { throw new Error('UNSAFE_READ_LOCK'); }
-      if (!owner)throw new Error('UNSAFE_READ_LOCK');
+      // A normal owner can release after lstat, outside recovery's mutex.
+      // read() returns null only for ENOENT; corrupt/unreadable data still throws.
+      if (!owner)continue;
       else {
         if (!Number.isInteger(owner.pid) || owner.pid <= 0 || typeof owner.token !== 'string') throw new Error('UNSAFE_READ_LOCK');
         try { process.kill(owner.pid,0); return { state: 'busy' }; } catch (error) { if (error.code !== 'ESRCH') return { state: 'busy' }; }
@@ -149,17 +152,24 @@ async function pull(store,options = {}) {
     if(!Number.isFinite(interval)||interval<0||interval>86400)throw new Error('INVALID_INTERVAL');
     if(!options.force && sameDestination(last?.destination,config) && Date.now()-Date.parse(last.at)<interval*1000)return {state:'throttled',commit:previous?.commit || null,checked_at:previous?.checked_at || null};
     await atomic(path.join(root,'attempt.json'),{destination:destination(config),at:new Date().toISOString()});
+    let stage='repository',temp;
     try {
       if(!options.remote) { const info=await (options.gh || new Gh(config.gh_path,{timeout:remaining(deadline,options.timeout||20000)})).api(`repos/${config.repo}`); if(info.private!==true||info.archived||info.disabled)throw new Error('PRIVATE_READABLE_REPOSITORY_REQUIRED'); }
-      const dir=path.join(root,sha(json(destination(config))).slice(0,32)+'.git'); const client=options.client || gitClient(config,dir,{...options,deadline});
-      try { const stat=await fs.lstat(dir); if(!stat.isDirectory()||stat.isSymbolicLink())throw new Error('UNSAFE_GIT_CACHE');try{await fs.lstat(path.join(dir,'config'));}catch(e){if(e.code==='ENOENT')await client.init();else throw e;} } catch(e) { if(e.code==='ENOENT')await client.init();else throw e; }
+      // Never reopen a previous fetch directory, even after SIGKILL. Legacy
+      // caches and their unknown Git locks/configuration are left untouched.
+      stage='fetch';
+      temp=await fs.mkdtemp(path.join(root,'.fetch-'));
+      const client=options.client || gitClient(config,path.join(temp,'repository.git'),{...options,deadline});
+      await client.init();
       const head=await client.fetch();
+      stage='validation';
       const next=head===previous?.commit?{...previous,checked_at:new Date().toISOString()}:await buildSnapshot(store,config,client,head,previous,deadline);
       next.analysis_pending=next.captures.filter(row=>require('./analysis.cjs').analysisState(row,row.analysis)!=='current').map(row=>row.capture_id);
-      remaining(deadline);await atomic(path.join(root,'snapshot.json'),next);
+      remaining(deadline);stage='snapshot';await atomic(path.join(root,'snapshot.json'),next);
       await atomic(path.join(root,'health.json'),{state:'current',at:next.checked_at});
       return {state:'current',commit:head,checked_at:next.checked_at,captures:next.captures.length};
-    } catch(e) { const reason=safeError(e); await atomic(path.join(root,'health.json'),{state:'offline',reason,at:new Date().toISOString()}); return {state:'offline',reason,commit:previous?.commit || null,checked_at:previous?.checked_at || null}; }
+    } catch(e) { const reason=safeError(e); await atomic(path.join(root,'health.json'),{state:'offline',stage,reason,at:new Date().toISOString()}); return {state:'offline',stage,reason,commit:previous?.commit || null,checked_at:previous?.checked_at || null}; }
+    finally {if(temp)await fs.rm(temp,{recursive:true,force:true});}
   });
 }
 module.exports={run,libraryLock,gitClient,pull,snapshot,destination,sameDestination,safeError,parseAnalysis,HASH};

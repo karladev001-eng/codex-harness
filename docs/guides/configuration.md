@@ -4,7 +4,7 @@
 node "$HOME/.agents/skills/codex-harness/runtime.js" status --project "/path/to/project"
 ```
 
-設定は、標準値 → 個人設定 → プロジェクトの `.harness.json` の順で上書きします。個人設定は通常 `~/.codex/harness/settings.json`、`CODEX_HOME` が設定されている場合はその配下です。更新は個人設定とプロジェクト設定を変更しません。以前のモデルを明示した設定があれば、新しい配布既定を隠したまま保持されます。上の `status` の `config.models` は設定された基準値です。`model_selection` のmode/resolution/pinsで自動選択方式とpin由来を確認し、新しい既定を使いたい項目だけ個人設定・プロジェクト設定から削除してください。`persistence=false` や `measurement=false` などのOFF設定も維持します。
+設定は、標準値 → 個人設定 → 共通Git checkoutの `.harness.json` → worktree/対象projectの `.harness.json` の順で上書きします。個人設定は通常 `~/.codex/harness/settings.json`、`CODEX_HOME` が設定されている場合はその配下です。更新は個人設定とプロジェクト設定を変更しません。以前のモデルを明示した設定があれば、新しい配布既定を隠したまま保持されます。上の `status` の `config.models` は設定された基準値です。`model_selection` のmode/resolution/pinsで自動選択方式とpin由来を確認し、新しい既定を使いたい項目だけ個人設定・プロジェクト設定から削除してください。`persistence=false` や `measurement=false` などのOFF設定も維持します。
 
 ```json
 {
@@ -22,9 +22,9 @@ node "$HOME/.agents/skills/codex-harness/runtime.js" status --project "/path/to/
 
 - `delegation`：実装を子エージェントへ委譲。ON時は小変更でも委譲します。
 - `review`：すべての実装を独立レビューし、統合後の整合性も確認します。
-- `persistence`：仕様・タスク進捗・重要な判断をプロジェクトに保存し、制作の好みをホスト内に保存します。OFFでは過去の好みを読まず、当該会話だけで扱います。
+- `persistence`：仕様・タスク進捗・重要な判断をプロジェクトに保存し、制作の好みと技術的知見を設定したlocal/GitHub保存先へ保存します。OFFでは過去の好みを読まず、当該会話だけで扱います。
 - `measurement`：明示的に取得できた利用情報・時間・手戻りを記録します。OFFでも改善ループONなら明示された好みは `persistence` に従って扱えますが、集計・利用計測は保存しません。
-- `improvement_loop`：好みの読取・記録・自動適用と候補試用（既定ON）。OFFでも保存済み記憶は消さず、依頼内の通常の修正は続けます。明示的な記憶の確認・訂正・忘却は別操作として扱えますが、永続記憶の読書きは `persistence=true` のときだけです。
+- `improvement_loop`：好み・技術的知見の自動読取・記録・適用と候補試用（既定ON）。OFFでも保存済み記憶は消さず、依頼内の通常の修正は続けます。明示的な記憶の確認・訂正・忘却は別操作として扱えますが、永続記憶の読書きは `persistence=true` のときだけです。
 - `model_selection`：`auto`（既定）は子起動時にホストの候補と対応effortから同系統の後継を選びます。`fixed` は従来の設定を使います。
 - `max_agents`：実装・調査・レビューが共有する子の同時稼働上限。ホスト上限を超えません。
 
@@ -43,11 +43,25 @@ node "$HOME/.agents/skills/codex-harness/runtime.js" status --project "/path/to/
 | 情報 | 保存先と役割 |
 | --- | --- |
 | 仕様・判断・進捗 | プロジェクトの `docs/harness/`。次の担当やチャットへ引き継ぐ |
+| 技術的知見 | [改善ループ](improvement-loop.md)のlessons保存先。原因・対策・検証・範囲・出所を扱う |
 | 制作指針 | [改善ループ](improvement-loop.md)のpreferences保存先。用途を限ったユーザー根拠を扱う |
 | 原資料・メモ・画像・生成説明 | [Knowledge](knowledge-base.md)の別保存先。保存しただけで好みへ変換しない |
 | 長いログ・計測 | statusのホスト内local_root。会話や全資料の自動投入はしない |
 
 Knowledgeは `KNOWLEDGE_HOME`（既定 `~/.codex/knowledge`）で、Codex Harnessの `CODEX_HOME` 設定とは別です。機能フラグは通常作業へ戻るための指示であり、ホストの権限や外部ツールの登録を切り替えません。
+
+## 修正記録の共有とOFF
+
+preferencesの既定はenabled=true、autosave=false、repository/project_key空、branch=mainです。未接続localの制作記憶は維持します。[個人の一回opt-inと別PC手順](improvement-loop.md#githubで制作の記憶を共有する)で共有先を設定します。明示keyを優先し、Git origin/登録簿、non-Gitの持ち運べるkeyで同一projectを解決します。worktreeは共通設定を継承します。separate Git dirに元checkoutへの逆参照がない場合はcore.worktreeを明示し、設定元を推測させません。
+
+| OFF設定 | 止まる処理 | 明示管理 |
+| --- | --- | --- |
+| enabled / persistence / preferences.enabled | 記憶の読書き・通信・自動再送 | 停止 |
+| improvement_loop | 自動参照・記録・適用・試用・再送 | persistence等がONなら可 |
+| GitHub接続時のpreferences.autosave | 自動read/write/lesson検索/再送 | 明示keyなら可 |
+| measurement | 集計・計測ログ | 根拠の保存は他flagに従う |
+
+repositoryだけを継承したOFF設定も可能です。未登録はunresolvedとして止め、旧localへ自動fallbackしません。OFFは記憶削除ではありません。公開CLIの手動入口は自動操作のflagを取らないため、エージェントがstatusを見て通信前に判定します。再送は各pending元projectの現設定を再解決し、不在/OFF/target変更を保留します。
 
 ## PowerShellのパス
 

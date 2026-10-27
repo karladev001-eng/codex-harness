@@ -6,26 +6,29 @@ import { canonical, codexHome, copySkill, equalFiles, exists, expand, inventory,
 export const START = '<!-- codex-harness:begin -->';
 export const END = '<!-- codex-harness:end -->';
 export const REQUIRED_SOURCE_FILES = [
-  'SKILL.md', 'runtime.js', 'lib.js', 'install.js', 'authoring.js', 'preferences.js', 'package.json',
+  'SKILL.md', 'read-sections.cjs', 'references/section-index.json', 'references/section-map.md', 'runtime.js', 'lib.js', 'install.js', 'authoring.js', 'preferences.js', 'records.js', 'identity.js', 'lessons.js', 'package.json',
+  'consult-claude/SKILL.md', 'consult-claude/agents/openai.yaml', 'consult-claude/scripts/consult.mjs',
   'assets/adr.md', 'assets/completion.md', 'assets/creative-preferences.md', 'assets/defaults.json', 'assets/project-map.md', 'assets/task.md',
-  'references/commands.md', 'references/creative-loop.md', 'references/measurement.md', 'references/parallel.md', 'references/reviewer.md', 'references/roles.md',
+  'references/routing/settings.md', 'references/routing/preimplementation.md', 'references/routing/claude.md', 'references/routing/web.md', 'references/routing/creative.md', 'references/routing/coordination.md', 'references/routing/continuity.md',
+  'references/routing/chart.md', 'references/routing/rule-map.md', 'references/early-compaction.md',
+  'references/commands.md', 'references/creative-loop.md', 'references/technical-lessons.md', 'references/measurement.md', 'references/parallel.md', 'references/reviewer.md', 'references/roles.md',
   'references/roles/paper-discovery.md', 'references/roles/source-verification.md', 'references/roles/web-review.md', 'references/roles/code-review.md', 'references/roles/record-keeper.md',
   'authoring-skills/create-harness/SKILL.md', 'authoring-skills/create-harness/assets/workflow.md',
   'authoring-skills/create-harness/assets/harness-index.md', 'authoring-skills/create-rulebooks/SKILL.md',
   'authoring-skills/create-rulebooks/assets/rulebook.md', 'authoring-skills/create-subagent/SKILL.md',
   'authoring-skills/create-subagent/assets/subagent.md', 'authoring-skills/inspect-harness/SKILL.md',
   'authoring-skills/codex-html-plan/SKILL.md', 'authoring-skills/codex-html-plan/UPSTREAM.md',
-  'authoring-skills/codex-html-plan/LICENSE', 'authoring-skills/codex-html-plan/agents/openai.yaml',
+  'authoring-skills/codex-html-plan/LICENSE', 'authoring-skills/codex-html-plan/read-sections.cjs', 'authoring-skills/codex-html-plan/references/section-index.json', 'authoring-skills/codex-html-plan/agents/openai.yaml',
   'authoring-skills/codex-html-plan/runtime/htmlplan.js', 'authoring-skills/codex-html-plan/runtime/htmlplan.css',
   'authoring-skills/codex-html-plan/runtime/pack.mjs', 'authoring-skills/codex-html-plan/references/blocks.md',
-  'authoring-skills/codex-html-plan/references/workflow.md',
+  'authoring-skills/codex-html-plan/references/workflow.md', 'authoring-skills/codex-html-plan/references/color-design.md',
   'authoring-skills/codex-html-plan/examples/task-board.src.html', 'authoring-skills/codex-html-plan/examples/task-board.plan.html',
   'authoring-skills/codex-html-plan/examples/records/ADR-07.md', 'authoring-skills/codex-html-plan/examples/records/TASK-42.md',
   'authoring-skills/codex-html-plan/examples/records/EXP-03.md', 'authoring-skills/codex-html-plan/examples/records/index.md',
 ];
 export interface InstallArgs { home?: string; skills_dir?: string }
 export function bootstrap(target: string): string {
-  return `${START}\nA delegated worker performs only its bounded assignment and never starts this coordinator.\nFor coding, UI/document creation/revision and feedback, or Web search/research, invoke Node.js 22+ on\n\`${path.join(target, 'runtime.js')}\` with arguments \`status --project .\`, quoting\nits path for the active shell. If inactive, continue normally without additional harness\nactions. If active, read \`${path.join(target, 'SKILL.md')}\` and follow its relevant\ninstructions. Pure creative work and Web-only research do not require coding delegation or Git steps.\nHonor higher-priority environment and project instructions. If the skill is absent, continue normally.\nIf status fails, report the configuration or compatibility error; do not activate features silently.\n${END}`;
+  return `${START}\nA delegated worker performs only its bounded assignment and never starts this coordinator.\nFor coding, UI/document creation/revision and feedback, or Web search/research, invoke Node.js 22+ on\n\`${path.join(target, 'runtime.js')}\` with arguments \`status --project .\`, quoting\nits path for the active shell. Also check status for pure ideation, strategy consultation,\nand criticism of proposals. If inactive, continue normally without additional harness\nactions. If active, read \`${path.join(target, 'SKILL.md')}\` and follow its relevant\ninstructions. Pure creative work and Web-only research do not require coding delegation or Git steps.\nPure ideation, consultation and criticism alone do not require implementation approval.\nHonor higher-priority environment and project instructions. If the skill is absent, continue normally.\nIf status fails, report the configuration or compatibility error; do not activate features silently.\n${END}`;
 }
 export function blockRange(content: string): [number, number] {
   if (content.split(START).length !== 2 || content.split(END).length !== 2) throw new Error('Managed AGENTS.md markers missing, duplicated, or modified');

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "enabled": true,
+  "delegation": true,
+  "review": true,
+  "persistence": true,
+  "measurement": true,
+  "max_agents": 3,
+  "models": {
+    "deterministic": {
+      "model": "gpt-6-luna",
+      "reasoning_effort": "low"
+    },
+    "standard": {
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium"
+    },
+    "complex": {
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high"
+    },
+    "review": {
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high"
+    }
+  },
+  "improvement_loop": true,
+  "model_selection": "auto",
+  "preferences": { "repository": "", "branch": "main", "project_key": "" }
+}

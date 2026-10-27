@@ -1,12 +1,12 @@
 # 制作フィードバックの改善ループ
 
-UI・文書などの制作と修正で、ユーザーの好みを根拠付きで少しずつ学ぶ指示ベースの手順。ユーザーの嗜好がまだ無ければ空から始め、プロフィール入力や初回許可を要求しない。自動的な品質向上や実際の長期効果は主張しない。純粋な制作にコード委譲・Git工程を追加しない。コード変更が含まれる場合はSKILL.mdの実装レビュー手順も実行する。
+UI・文書などの制作と修正で、ユーザーの好みを根拠付きで少しずつ学ぶ指示ベースの手順。ユーザーの嗜好がまだ無ければ空から始め、プロフィール入力や初回許可を要求しない。自動的な品質向上や実際の長期効果は主張しない。純粋な制作にコード委譲・Git工程を追加しない。コード変更が含まれる場合は[コード調整・実装レビュー手順](routing/coordination.md)も実行する。
 
 `improvement_loop=false` ではこの自動ループを実行しない。好みの読取・記録・自動適用と候補試用を停止し、保存済み記憶は消さない。依頼内の修正対応は通常どおり続け、タスク記録の `persistence` とは独立に扱う。明示的な記憶の確認・訂正・忘却依頼は別操作として扱えるが、`persistence=false` では永続記憶を読み書きせず会話内で扱う。
 
 ## 開始・修正・完了・次回
 
-1. **開始（適用）**：`status --project <制作対象のプロジェクト>` で実効設定と `local_root` を得る。`active=false` または `improvement_loop=false` ならここで終了し、通常の制作へ戻る。`persistence=true` なら同じruntimeで `preferences read --project <project>` を実行し、返された `content` と `revision` を使う。未設定なら従来のローカル記録、GitHub設定済みなら正本から読む。GitHubでは `ok=true`・`freshness=fresh`・`pending=false` の取得だけを自動適用する。キャッシュ・古い内容・未送信・競合・取得失敗ならその記憶の自動適用を止め、現在の依頼で制作を続けて状況を報告する。明示的なオフライン閲覧は可能だが、他PCの訂正・忘却が未反映の可能性を示す。対象の用途・媒体・読者に合う指針を選び、適用範囲の合う候補は**暫定試用**を選べる。候補は指針と区別し、項目ID・作品・実際の適用・ユーザー評価を試用結果へ残す。`今回限り` と明示された候補は次回に試用しない。現在の依頼と矛盾すれば現在の依頼を優先する。探索・別案の依頼では過去の作風を固定せず、必要なら比較案を示す。`persistence=false` ならファイルを読まず、当該会話だけを使う。
+1. **開始（適用）**：`status --project <制作対象のプロジェクト>` で実効設定と `local_root` を得る。`active=false`・`improvement_loop=false`・`preferences.enabled=false`、またはGitHub接続時の `preferences.autosave=false` ならここで終了し、通常の制作へ戻る。`persistence=true` なら同じruntimeで `preferences read --project <project>` を実行し、返された `content` と `revision` を使う。未設定なら従来のローカル記録、GitHub設定済みなら正本から読む。GitHubでは `ok=true`・`freshness=fresh`・`pending=false` の取得だけを自動適用する。キャッシュ・古い内容・未送信・競合・取得失敗ならその記憶の自動適用を止め、現在の依頼で制作を続けて状況を報告する。明示的なオフライン閲覧は可能だが、他PCの訂正・忘却が未反映の可能性を示す。対象の用途・媒体・読者に合う指針を選び、適用範囲の合う候補は**暫定試用**を選べる。候補は指針と区別し、項目ID・作品・実際の適用・ユーザー評価を試用結果へ残す。`今回限り` と明示された候補は次回に試用しない。現在の依頼と矛盾すれば現在の依頼を優先する。探索・別案の依頼では過去の作風を固定せず、必要なら比較案を示す。`persistence=false` ならファイルを読まず、当該会話だけを使う。
 2. **修正（観察→仮説）**：ユーザーの実際の言葉・修正指示・採否を観察にする。そこから好みを推測する場合は候補と明示し、根拠の無い嗜好を作らない。「今回は前置きを削って」は今回限定の候補としてその作品にだけ適用する。限定語のない単発修正は候補だが、次回の範囲の合う制作で暫定試用できる。「今後、社内報告は結論から」は用途を限定した明示指針として適用できる。同じ発言、同じ成果物への同一指摘、再開時の再読込は一つの根拠IDだけにする。
 3. **完了（評価→更新）**：成果物と指針の適用結果を分けて確認する。ユーザーの明示評価だけを評価根拠にできる。無反応、自己評価、未取得は `unknown` / `null` とし、成功や改善効果を推測しない。根拠があれば雛形に従い候補・指針・試用結果を更新し、下記CLI契約で保存する。`measurement=false` なら好みの根拠は保存可能だが利用回数・採用率・時間などの集計や計測ログを保存しない。
 4. **次回開始**：有効な指針を適用範囲と現在の依頼で再照合する。新しい独立の根拠が増えたら候補の昇格を再判断し、矛盾・訂正・取消はその時点で反映する。前回の試用結果が `unknown` なら成功扱いしない。
@@ -19,7 +19,7 @@ UI・文書などの制作と修正で、ユーザーの好みを根拠付きで
 
 ## 根拠と指針の更新契約
 
-保存先未設定では `status.local_root/creative/preferences.md` を正本とする。`preferences.repository`・`branch`・`project_key` を明示設定すると、GitHub.comの非公開リポジトリの `improvement/projects/<project-key>/preferences.md` が正本になる。端末間で同じproject keyを設定する。キャッシュ・送信待ちは `status.preferences.directory/state.json` に保存先別で置き、導入管理対象外とする。設定だけでは旧ローカル記録を送信しない。別プロジェクトは別keyとし、自動で混ぜない。別プロジェクトに適用したい場合はユーザーの明示指示で必要な指針だけを移す。個人設定やインストール更新・解除でこの領域を消さない。
+保存先未設定では `status.local_root/creative/preferences.md` を正本とする。GitHub接続はrepository/branchと明示project_key、または個人設定のautosave opt-inで行う。正本は非公開リポジトリの `improvement/projects/<project-key>/preferences.md`。Git originと登録簿で端末間のkeyを揃え、non-Gitはregisterが保存した `.harness.json` を持ち運ぶ。worktreeは共通checkout設定を継承し、固有上書きを優先する。cache/pending/排他はtargetと安定key単位で共有し、`status.preferences.directory/state.json` に置く。導入管理対象外であり未解決IDを旧localへ戻さない。設定だけでは旧ローカル記録を送信しない。別プロジェクトは別keyとし、自動で混ぜない。別プロジェクトに適用したい場合はユーザーの明示指示で必要な指針だけを移す。個人設定やインストール更新・解除でこの領域を消さない。
 
 [雛形](../assets/creative-preferences.md)を初回更新時にコピーする。観察（原発言・採否）、候補（推測・単発）、制作指針（適用可）、試用結果（具体的な適用とユーザー評価）を混同しない。各項目に安定したID、最小限の根拠IDと参照、明示か推測か、用途・範囲、日時、状態、変更履歴を記録または対象IDから参照できるようにする。観察には訂正を追える状態と履歴を持たせる。試用では対象ID・試用時の版と、当時の内容・用途・明示/推測の短い写しを残し、対象の後日の改訂と区別する。試用の `recorded` は評価が `unknown` のままでもよく、ユーザーの評価根拠があるときだけ `evaluated` にする。後の訂正で支持から外す場合は `invalidated` にする。会話全文や不要な個人情報は保存しない。根拠の参照が失われたら指針を推測で補修せず停止して報告する。
 
@@ -33,8 +33,8 @@ UI・文書などの制作と修正で、ユーザーの好みを根拠付きで
 
 ### 起動・引継ぎ
 
-- `active=true`・`persistence=true`・`improvement_loop=true`・`delegation=true` で、保存すべき根拠/更新またはread等で既知のpending再同期があるとき、親はrecord-keeperを起動する。無変更・pendingなしでは起動しない。初期readと適用判断は親が行ってよい。
-- 明示的な記憶管理はloop OFFでも同じ経路を使える。`active=false` は追加起動せず、`persistence=false` はrecord-keeper起動も記憶の読書きも行わない。`delegation=false` は親が同じ役割契約とCLI手順を実行する。
+- `active=true`・`persistence=true`・`improvement_loop=true`・`preferences.enabled=true`・`delegation=true`（GitHub接続時はautosave ON）で、保存すべき根拠/更新またはread等で既知のpending再同期があるとき、親はrecord-keeperを起動する。無変更・pendingなしでは起動しない。初期readと適用判断は親が行ってよい。
+- 公開CLIに `--automatic` はない。親は自動read/write/sync前に上の設定を判定する。明示的な記憶管理はloop/autosave OFFでも明示keyの手動経路を使えるが、enabled/persistence/preferences OFFでは行わない。`active=false` は追加起動せず、`persistence=false` はrecord-keeper起動も記憶の読書きも行わない。`delegation=false` は親が同じ役割契約とCLI手順を実行する。
 - 親はproject/保存先、許された操作、安定IDと短いユーザー根拠/参照、明示・推測・今回限り、評価、用途・適用範囲、確定判断、実効設定を必要最小限で渡す。会話全体・認証情報を渡さず、履歴なしの `HARNESS_WORKER` とする。[役割とモデル](roles.md)の既存 `standard`（既定Sol/medium）とpin/auto規則を使う。
 - 同じproject/targetではrecord-keeperが唯一のwriterになり、親・制作担当は同時更新しない。各保存先のwriterを直列化し、既存 `max_agents` とホスト上限内で空きを待つ。通常保存ごとのユーザー再承認は要求しない。曖昧な昇格や競合merge、根拠不足は親が判断する。
 - ホストが子を起動できない場合は制約を報告し、親が同じ契約で担当するか現在依頼のみ続ける。失敗した起動・未保存・pendingを成功扱いしない。親は返却された操作/changed IDs・ok・revision・pending・freshness・検証・未解決事項を確認して適用し、子の自己評価をユーザー評価にしない。
@@ -50,6 +50,10 @@ runtimeが自動spawnする機能ではなく、親が読む指示ベースの�
 5. 競合なら他方を上書きせず、`preferences read` の `remote_content`・`remote_sha` と自分のdraftを根拠IDごとに再評価する。忘却・訂正を優先し、単純連結しない。確認した最新版を新入力ファイルにし、現在のlocal `revision` と、確認した `remote_sha` を `preferences write ... --revision <token> --base-sha <SHA>` に渡して明示的に再調整する。remoteが不存在なら `--base-sha missing`。再度変われば競合で止まる。PUT直前の競合で詳細が無ければreadで取得する。必要な判断は親へ戻す。
 
 既存・不明・古いlockは自動削除しない。所有セッションの終了とpendingを確認して手動解決する。認証失敗・アクセス不能・通信失敗を空として処理しない。GitHub 404は不存在か権限不足かを一律に断定せず、private repositoryとbranchを検証できたfile 404だけを未作成として扱う。保存や同期に失敗しても制作自体を続け、記憶更新の状態を報告する。
+
+## 履歴と記録の区別
+
+技術的な修正は[lesson](technical-lessons.md)に分ける。GitHub commitはschema_version/project_key/operation_id/kind/record_kind/recorded_atの本文なしmetadataを持ち、create/update/correction/forget/migrate/registerを区別する。訂正・忘却のwriteには `--kind correction|forget` を指定する。操作IDは再送で維持され、同内容保存は履歴を増やさない。移行元ID/日付/unknownを保ち、移行日時を新規獲得日時や品質向上と扱わない。別の本文journalや成長dashboardは作らない。通常のGitHub履歴閲覧でも取消済み内容を勝手に再表示しない。
 
 ## 明示移行・忘却
 

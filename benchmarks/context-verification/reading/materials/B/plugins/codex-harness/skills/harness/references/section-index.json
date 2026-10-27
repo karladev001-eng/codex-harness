@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "documents": {
+    "commands": {
+      "path": "references/commands.md",
+      "sha256": "a8e91c2f5a344e8a8c1179d7d2036a62ad25136f8b4e2e00a9d546cf128063b0",
+      "common": [
+        "common"
+      ],
+      "sections": {
+        "common": {
+          "ranges": [
+            [
+              1,
+              16
+            ],
+            [
+              21,
+              22
+            ]
+          ],
+          "requires": [
+            "settings"
+          ]
+        },
+        "status": {
+          "ranges": [],
+          "requires": [
+            "preferences-boundary",
+            "status-models"
+          ]
+        },
+        "doctor": {
+          "ranges": [],
+          "requires": [
+            "status"
+          ]
+        },
+        "task": {
+          "ranges": [
+            [
+              17,
+              20
+            ]
+          ],
+          "requires": []
+        },
+        "worktree": {
+          "ranges": [],
+          "requires": [
+            "task"
+          ]
+        },
+        "measure": {
+          "ranges": [
+            [
+              23,
+              24
+            ]
+          ],
+          "requires": []
+        },
+        "install": {
+          "ranges": [
+            [
+              25,
+              51
+            ]
+          ],
+          "requires": [
+            "settings"
+          ]
+        },
+        "settings": {
+          "ranges": [
+            [
+              52,
+              53
+            ]
+          ],
+          "requires": []
+        },
+        "preferences-boundary": {
+          "ranges": [
+            [
+              54,
+              57
+            ]
+          ],
+          "requires": []
+        },
+        "preferences": {
+          "ranges": [
+            [
+              58,
+              69
+            ]
+          ],
+          "requires": [
+            "preferences-boundary"
+          ]
+        },
+        "status-models": {
+          "ranges": [
+            [
+              44,
+              45
+            ]
+          ],
+          "requires": []
+        }
+      }
+    },
+    "roles": {
+      "path": "references/roles.md",
+      "sha256": "b372ef45cc8be6f283422cc2e115c4ec55a2e47be81fbfb85fd2e7f783e8f222",
+      "common": [
+        "common"
+      ],
+      "sections": {
+        "common": {
+          "ranges": [
+            [
+              1,
+              18
+            ]
+          ],
+          "requires": []
+        },
+        "coordinator": {
+          "ranges": [
+            [
+              19,
+              28
+            ]
+          ],
+          "requires": []
+        },
+        "role-index": {
+          "ranges": [
+            [
+              29,
+              40
+            ]
+          ],
+          "requires": []
+        },
+        "implementation": {
+          "ranges": [
+            [
+              41,
+              44
+            ]
+          ],
+          "requires": []
+        },
+        "integration": {
+          "ranges": [
+            [
+              45,
+              47
+            ]
+          ],
+          "requires": []
+        }
+      }
+    }
+  }
+}

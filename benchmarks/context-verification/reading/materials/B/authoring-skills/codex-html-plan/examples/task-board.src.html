@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>チーム作業ボードの担当絞り込み</title>
+<link rel="stylesheet" href="../runtime/htmlplan.css">
+<script src="../runtime/htmlplan.js" defer></script>
+<style data-mock-shared>
+.ui {font:15px system-ui;color:#1e293b;background:#f8fafc;padding:18px;box-sizing:border-box}.ui *{box-sizing:border-box}.ui h3{margin:0 0 14px}.ui .filters{display:flex;gap:8px;margin-bottom:16px}.ui button{border:1px solid #cbd5e1;border-radius:8px;background:white;padding:8px 12px;color:#1e293b}.ui .active{background:#2563eb;color:white}.ui .card{background:white;border:1px solid #cbd5e1;border-radius:10px;padding:14px;margin:10px 0}.ui small{display:block;color:#64748b;margin-top:6px}.ui .empty{border:1px dashed #94a3b8;border-radius:10px;padding:25px;text-align:center}.ui .alert{background:#fff1f2;color:#9f1239;padding:14px;border-radius:8px}
+</style>
+</head>
+<body data-plan-id="TASK-42" data-version="2" data-scope="全体: 仕様1–3とAC1–4" data-approval="pending" data-persistence="off">
+<header>
+<h1>チーム作業ボードの担当絞り込み</h1>
+<doc-changes new="1" changed="2"></doc-changes>
+<details class="thread"><summary>目的・依頼原文</summary><doc-quote from="ユーザー" via="prompt">チームの作業一覧で、自分の担当だけを素早く見たい。</doc-quote></details>
+</header>
+<main>
+<section class="plan-overview">
+<h2>全体像</h2>
+<p>チームの作業を確認する利用者が、「すべて」と「自分の担当」を切り替える。既存の一覧取得APIを使い、表示時に担当IDで絞り込む。</p>
+<p>利用フロー: ボードを開く → 自分の担当を選ぶ → 担当カードを確認 → すべてに戻す。</p>
+<p>主要状態: 全件、担当あり、担当なし、読込中、取得失敗。第1段階で表示と切替、第2段階で受入確認を行う。対象はボード画面と一覧状態。認証、API契約、通知、保存済みフィルタは対象外。</p>
+<p>仕様正本は <a href="records/TASK-42.md">TASK-42 / 仕様v2</a>。承認根拠は正本だけに記録する。このHTMLは未承認 / pending。</p>
+</section>
+<h2 id="specification">確定仕様</h2>
+<doc-plan>
+<doc-claim id="spec-1">
+<p>利用者は全件と自分の担当を切り替えられる。</p>
+<doc-mock w="440" frame="none" caption="提案: 担当の切替を一覧の上に置く。"><template><div class="ui"><h3>チームの作業</h3><div class="filters"><button>すべて</button><button class="active" data-ref="mine">自分の担当</button></div><div class="card">請求書の確認<small>担当: あなた · 進行中</small></div><div class="card">来週の準備<small>担当: あなた · 未着手</small></div></div></template><doc-pin ref="mine" title="担当切替">表示だけを切り替える。</doc-pin></doc-mock>
+<doc-claim id="spec-1-1">
+<p>担当IDと利用者IDの一致でカードを絞り込む。</p>
+<doc-code lang="ts" title="提案: selectVisibleTasks"><script type="text/plain">
+type Task = { id: string; title: string; assigneeId: string | null };
+function selectVisibleTasks(tasks: Task[], userId: string, mine: boolean) {
+  return mine ? tasks.filter(task => task.assigneeId === userId) : tasks;
+}
+</script></doc-code>
+</doc-claim>
+</doc-claim>
+<doc-claim id="spec-2">
+<p>担当なし・読込中・失敗でも次の操作が分かる。</p>
+<doc-machine name="board" caption="提案: 状態を選ぶと対応する画面を確認できる。"><script type="text/plain">
+machine board initial loading
+state loading # 作業を取得中。
+state all # 全件を表示。
+state mine # 自分の担当を表示。
+state empty # 自分の担当はなし。
+state failed # 取得に失敗。
+
+| loading | all | mine |
+| failed | empty | . |
+
+loading -ok-> all : 成功
+loading -fail-> failed : 失敗
+all -filter-> mine : 担当あり
+all -none-> empty : 担当なし
+mine -clear-> all : 全件
+empty -clear-> all : 全件
+failed -retry-> loading : 再試行
+</script>
+<div data-state="loading"><doc-mock w="440" frame="none"><template><div class="ui"><h3>チームの作業</h3><div class="card">作業を読み込んでいます…</div></div></template></doc-mock></div>
+<div data-state="all"><doc-mock w="440" frame="none"><template><div class="ui"><h3>チームの作業</h3><div class="filters"><button class="active">すべて</button><button>自分の担当</button></div><div class="card">請求書の確認<small>担当: あなた</small></div><div class="card">資料を共有<small>担当: 田中</small></div></div></template></doc-mock></div>
+<div data-state="mine"><doc-mock w="440" frame="none"><template><div class="ui"><h3>チームの作業</h3><div class="filters"><button>すべて</button><button class="active">自分の担当</button></div><div class="card">請求書の確認<small>担当: あなた</small></div></div></template></doc-mock></div>
+<div data-state="empty"><doc-mock w="440" frame="none"><template><div class="ui"><h3>チームの作業</h3><div class="empty">担当作業はありません。<p><button>すべての作業を見る</button></p></div></div></template></doc-mock></div>
+<div data-state="failed"><doc-mock w="440" frame="none"><template><div class="ui"><h3>チームの作業</h3><div class="alert">作業を取得できませんでした。<p><button>再試行</button></p></div></div></template></doc-mock></div>
+</doc-machine>
+</doc-claim>
+<doc-claim id="spec-3">
+<p>フィルタを戻すと取得済みの全件を表示する。</p>
+<doc-flow caption="提案: 再取得せず同じデータから表示を選ぶ。"><script type="text/plain">
+tasks = 取得済み作業 [db]
+filter = 担当フィルタ
+list = 表示カード
+| tasks |
+| filter |
+| list |
+tasks -> filter : 利用者ID
+filter -> list : 選択結果
+</script></doc-flow>
+</doc-claim>
+<doc-claim aux="shared"><p>画面状態と利用者IDを既存の一覧に渡す。</p><doc-schema lang="ts" title="提案: BoardView" caption="表示の状態を既存取得データと分ける。"><script type="text/plain">
+type BoardView = { filter: 'all' | 'mine'; userId: string };
+</script></doc-schema></doc-claim>
+<doc-claim aux="scope"><p>認証、API契約、通知とフィルタの永続保存は対象外。</p><ul><li>担当の変更は既存の編集画面を使う。</li><li>新しいAPIや認証方式は導入しない。</li></ul></doc-claim>
+</doc-plan>
+<section class="acceptance"><h2>番号付き受入条件</h2><ol><li>AC1: 全件/担当の切替で該当カードを表示する。関連: <a href="#spec-1">仕様1</a>。</li><li>AC2: 担当なし、読込、失敗の各画面を表示し、復帰操作を示す。関連: <a href="#spec-2">仕様2</a>。</li><li>AC3: 全件への復帰で不要な再取得を行わない。関連: <a href="#spec-3">仕様3</a>。</li><li>AC4: 390px幅で表示と操作が可能。関連: <a href="#spec-1">仕様1</a>、<a href="#spec-2">仕様2</a>。</li></ol></section>
+<section class="unresolved" id="unresolved"><h2>未解決事項</h2><p>なし。質問やコメントが0件でも実装承認は別に必要。</p></section>
+<section class="related-docs"><h2>関連ドキュメント</h2><table><thead><tr><th>ID / 種別</th><th>今回の役割</th></tr></thead><tbody><tr><td><a href="records/TASK-42.md">TASK-42 / TASK</a></td><td>仕様v2・承認の正本</td></tr><tr><td><a href="records/ADR-07.md">ADR-07 / ADR</a></td><td>既存取得APIを維持する決定</td></tr><tr><td><a href="records/EXP-03.md">EXP-03 / EXP</a></td><td>狭幅操作の検証計画（成功未確認）</td></tr><tr><td><a href="records/index.md">記録体系の入口</a></td><td>命名・意味・対応範囲</td></tr></tbody></table><p>HTMLはオフラインで表示できる。関連Markdownは別ファイルのため、共有時はrecords/との相対配置を維持する。</p></section>
+</main>
+</body></html>

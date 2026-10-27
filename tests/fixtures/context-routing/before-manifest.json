@@ -1,0 +1,102 @@
+{
+  "SKILL.md": {
+    "bytes": 20625,
+    "characters": 8747,
+    "sha256": "a2a7bc118f367b46184c8a8de4e719ee9d8926cddf97c5ba17fa2b8a7180ab14"
+  },
+  "assets/adr.md": {
+    "bytes": 273,
+    "characters": 135,
+    "sha256": "7c04b5c5a72f990feb78ceada5fe060710876a52c29c166713e5c79b4ce56c54"
+  },
+  "assets/completion.md": {
+    "bytes": 363,
+    "characters": 179,
+    "sha256": "e8a0cfdcb81fc5c49bcd37c72c30a5459da858958d59c982af290b164c52c555"
+  },
+  "assets/creative-preferences.md": {
+    "bytes": 2812,
+    "characters": 1482,
+    "sha256": "1a1fd401e6d13e8ffd1051bbd335e817ecb6d24e510dc7a949e5d91cc623b0db"
+  },
+  "assets/project-map.md": {
+    "bytes": 285,
+    "characters": 123,
+    "sha256": "c1d9950cfe3438ac126a5ac717fef7225e4a3c4c12ced0409b5196cb3383dcaa"
+  },
+  "assets/task.md": {
+    "bytes": 4120,
+    "characters": 1686,
+    "sha256": "f068566b2e756d97c4a282a0cd5410e5b45f1e86a0678dbcd6acd45a2ccd0106"
+  },
+  "consult-claude/SKILL.md": {
+    "bytes": 6917,
+    "characters": 3235,
+    "sha256": "9ef8fd9eacedd12bac58b0b07dc8158d3eda623ded05f0e1d3097b790a75309b"
+  },
+  "references/commands.md": {
+    "bytes": 10079,
+    "characters": 5913,
+    "sha256": "a8e91c2f5a344e8a8c1179d7d2036a62ad25136f8b4e2e00a9d546cf128063b0"
+  },
+  "references/creative-loop.md": {
+    "bytes": 15066,
+    "characters": 6578,
+    "sha256": "cbaa6508a470f7566e6474ef1a5bb490d6ff4d01aa2b5293c03fa4884635e248"
+  },
+  "references/early-compaction.md": {
+    "bytes": 3992,
+    "characters": 1532,
+    "sha256": "69a878b24400955d8e545352f04cfd8f0ce0be60c3d1be6ef11988dcc698271b"
+  },
+  "references/knowledge-retrieval.md": {
+    "bytes": 4208,
+    "characters": 2096,
+    "sha256": "fe719f16351e400b77204b76e77cf645c968ca6969eeafeaf28bc4469eff2071"
+  },
+  "references/measurement.md": {
+    "bytes": 1085,
+    "characters": 387,
+    "sha256": "1f5dc90c05e77ac285d0438cbfe9f333f2008d2e60bd5a097e5b4ee7a94b1d36"
+  },
+  "references/parallel.md": {
+    "bytes": 2131,
+    "characters": 813,
+    "sha256": "c5d2c4325ec420aa1bacdd8b42db38e2605d0439d0a49aa2b75d0c5132e8e788"
+  },
+  "references/reviewer.md": {
+    "bytes": 3208,
+    "characters": 1254,
+    "sha256": "984755343ff14dbc5769c694a267075f811c5a9b88673f209f88fdb608534dbc"
+  },
+  "references/roles/code-review.md": {
+    "bytes": 2195,
+    "characters": 817,
+    "sha256": "bf3563a22495d05dc718853310875152003cf9f25e01388965afeb09ecc3a88f"
+  },
+  "references/roles/paper-discovery.md": {
+    "bytes": 2522,
+    "characters": 936,
+    "sha256": "10d7354a85831ac49e6f27a926d439342cec14f1cd7aa333bed8bcac04aa74bb"
+  },
+  "references/roles/record-keeper.md": {
+    "bytes": 4819,
+    "characters": 2133,
+    "sha256": "b7f57132eb3681f8f9a17b1b67d7d892d0cd2733ff60faae410f2384b18d61e1"
+  },
+  "references/roles/source-verification.md": {
+    "bytes": 2149,
+    "characters": 793,
+    "sha256": "5c82d6f893ecee0d5108f9cd05778f04aa5f18d2c019bb31588fb63ae1c6f291"
+  },
+  "references/roles/web-review.md": {
+    "bytes": 2164,
+    "characters": 800,
+    "sha256": "0d26a195a953c2ed6bba42ab026d777c34a5a30a0bd92904eb4cc491207dc3cc"
+  },
+  "references/roles.md": {
+    "bytes": 7339,
+    "characters": 3099,
+    "sha256": "00d197b1781b2fed7e13859fa91206ed16d3aad2511a5706e890b2802f29c282"
+  }
+}

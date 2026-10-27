@@ -1,0 +1,6 @@
+interface:
+  display_name: "Codex HTML Plan"
+  short_description: "実装前の仕様とモックを対話型HTMLで提示し、回答と実装承認を分離する"
+  default_prompt: "$codex-html-plan で、実装前の仕様と主要状態のモック、未解決事項、承認対象を提示してください。"
+policy:
+  allow_implicit_invocation: true

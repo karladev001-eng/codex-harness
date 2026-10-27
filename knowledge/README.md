@@ -9,6 +9,8 @@ Chrome拡張（個別導入） → Native Messaging → Knowledge CLI → PCの�
 Codex Harness → Knowledge CLI ← Raycast検索（個別導入） → ローカルsnapshot
 ```
 
+既存の毎時runnerは登録済み修正記録のpending再送を先に行い、資料の説明生成と結果を分けて確認します。同じ障害の通知はepisode単位で抑制し、未送信は成功扱いしません。
+
 本体installはKnowledge CLIを同梱します。Chrome拡張の登録やRaycastの登録、GitHub保存先の作成・設定・認証は行いません。
 
 ## 目的から選ぶ
@@ -19,6 +21,7 @@ Codex Harness → Knowledge CLI ← Raycast検索（個別導入） → ロー�
 | Codexから候補・本文・画像を取得する | [保存資料の検索](../docs/guides/search.md) |
 | Chromeでページとメモを収集する | [Chrome拡張の紹介と独立導入](extension/README.md) |
 | Macで人が保存資料を探す | [Raycast検索の紹介と独立導入](../integrations/raycast-knowledge/README.md) |
+| 修正の自動保存・lesson再利用・別PCの安定IDを理解する | [修正記録の改善ループ](../docs/guides/improvement-loop.md) |
 | hook・説明生成・毎時実行を設定する | [Knowledge運用](../docs/guides/knowledge-operations.md) |
 
 ## CLIの場所

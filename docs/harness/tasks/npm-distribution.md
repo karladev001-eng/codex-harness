@@ -152,3 +152,23 @@ approved（仕様v2・N1–N4）。提示後のユーザー本人の明示承認
 
 - ユーザーが2026-10-09に「pushして下さい」と明示し、今回のnpm-distribution v2完了変更をコミットして `origin main` へ通常pushすることを承認。これはGit変更の同期のみで、npm publish/Release/可視性変更の承認ではない。
 - 今回のコミット対象は指定済み22ファイルに限定し、既存の無関係なbenchmarks/他TASKは含めない。commit/pushを実施する。
+
+## 後続の初回非公開配布 — 2026-10-09
+
+- ユーザーが配布準備・push完了と初回認証の説明を受けた後、「初回配布も進めて下さい。」と明示指示。以下の仕様v2準備範囲で除外していた実配布を、後続操作として承認。仕様・コードは変更せず、レビュー済み0.4.2の成果物をGitHub Packagesへ非公開で登録する。
+- 対象: `@karladev001-eng/codex-harness@0.4.2`、`https://npm.pkg.github.com`、関連リポジトリ `karladev001-eng/harness`。配布物SHA256 `245456d04c74d07411986fdf7e2357f8577428964418b422c2b0725b2d9f1a32`。ソース基点 `2b803387e4e7e109e52e5cd5d93cac8c870339ac`（push済み）。一般公開・npmjs.org・ライセンス変更・実ホームへの導入は行わない。
+- 配布前に認証/送信権限、repository/packageの非公開性、版未使用、成果物一致を確認。成功後はprivate・version/latest・repository紐付けと、一時環境でのnpm取得/導入を確認する。認証不足はトークン値を求めず対話ログインの必要操作を案内する。
+- statusを再評価してactive/全機能ON/auto/pinなし。ホストcatalogのSol6.1/highを認証・初回配布の確認に選び、`npm_first_release`を履歴なしで起動。承認済み成果物の配布操作であり、新実装は含まない。
+- 初回確認時は認証設定待ち（配布未実行）。成果物SHA256・275ファイル・stage/source一致、本人 `karladev001-eng`、対象repoのprivate:true/admin権限を確認。
+- npmのuser/global/project認証設定とtoken環境は未設定。既存gh認証scopeにread:packages/write:packagesがなく、package照会は403。package既存有無・0.4.2未使用は未確認のためpublishせず停止。
+- 次の必要操作: ユーザー本人がclassic PATのread:packages/write:packagesを用意し、対象registryへ対話npm login。トークン値は会話へ送らない。ログイン後はこの実配布承認を維持して残る確認/登録/隔離取得検証を再開する。追加の配布承認は不要。
+- 証拠: `/tmp/npm-first-release-report.md`。コード/既存認証/ライセンス変更なし、実配布・今回のpushなし。これは権限審査の拒否ではなく、既存アカウント認証のpackage scope不足。
+
+### ログイン後の配布完了
+
+- ユーザーの「ログインできました」を受け、同じ実配布承認で再開。実効設定を再確認、担当Sol6.1/highを継続。npm認証で本人・配布scope・package一覧の読取り成功、対象repoのprivate/admin、package未登録を確認。
+- 状態: **初回非公開配布完了**。検証済みtgzを一度だけ `npm.pkg.github.com` へ送信し、npm publish成功。version `0.4.2`、tag `latest`、access `restricted`、取得時scripts無効。別版や再buildによる置換なし。
+- GitHub APIでvisibility `private`、repository `karladev001-eng/harness`、version `0.4.2`（version ID `1356954511`）を確認。npmでもlatest `0.4.2`を確認。[非公開パッケージ](https://github.com/users/karladev001-eng/packages/npm/package/codex-harness)。
+- 実registryから取得したtarballのSHA256は `245456d04c74d07411986fdf7e2357f8577428964418b422c2b0725b2d9f1a32` で承認済み成果物と完全一致、dist sha512も一致。
+- package.jsonのないcwd、一時home/cacheでnpm execによる初回導入installed、同版/latest再導入unchanged、cache削除後の恒久runtime status active、uninstall成功を確認。無関係なAGENTS/settingsは保持。実ホームへの導入なし。既存npmrc不変、一時認証設定削除、検査した395ファイルにtoken出現0。
+- 証拠は更新後の `/tmp/npm-first-release-report.md`。配布対象の文書は準備時点のスナップショットを保持し、この配布完了記録と区別する。今回新たなGit push/コード/ライセンス変更はなし。別PC・Windows/Linux・Node22実機は引き続き未検証。

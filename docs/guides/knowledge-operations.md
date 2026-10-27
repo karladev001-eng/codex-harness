@@ -25,7 +25,7 @@ node "/absolute/path/knowledge/cli.cjs" publish-analysis --limit 5 --state "/abs
 
 ローカルの `analysis/` は生成済componentと送信待ちの耐久領域です。中断後に完了componentを再利用し、完成した未確定状態は送信待ちへ復旧します。`publish-analysis` は現在のGitHubhead・schema・capture各blobを再確認し、`analysis.json` 一つだけを追加/更新するnonforce commitを作ります。変更/削除済captureや別の解析変更への衝突はpendingを保持します。ref競合/応答紛失は現在headで確認し直すため、再試行に再生成は不要です。別PCが同じ入力/recipeの解析を共有済みなら、その解析を取得して使います。
 
-読み取り/生成/共有はPC内の同じrepo/branch/library lock、hooks編集はさらに対象hooksファイルのlockで排他します。ownerを完成してからatomic hard-linkでlockを取得し、終了済PIDのlockだけを排他的な番号ticketで回収します。ticket番号は使い回しません。通常競合はbusyを返します。hook同期は全体8.5秒、手動同期は60秒の期限があり、期限後にsnapshotを切り替えません。subprocess timeoutは子孫も停止し、継承pipeで待ち続けません。初回の巨大catalogがhook期限内に処理できないときは一度 `pull --force` を実行してください。現在の上限は1000capture、読み取る差分32MiB、全snapshot48MiBです。破損/未知lockやcache configは消さずに停止します。
+読み取り/生成/共有はPC内の同じrepo/branch/library lock、hooks編集はさらに対象hooksファイルのlockで排他します。ownerを完成してからatomic hard-linkでlockを取得し、終了済PIDのlockだけを排他的な番号ticketで回収します。ticket番号は使い回しません。通常競合はbusyを返します。hook同期は全体8.5秒、手動同期は60秒の期限があり、期限後にsnapshotを切り替えません。subprocess timeoutは子孫も停止し、継承pipeで待ち続けません。fetchごとに新しい隔離bare repositoryを使い、検証済みsnapshotだけをatomicに切り替えます。fetch中断/timeout/検証失敗では旧snapshotを保持し、中断したrepositoryを次回fetchへ再利用しません。未知のGit lockは自動削除しません。取得失敗はrepository/fetch/validation/snapshot段階と安全なreasonを示し、生stderr・認証情報は残しません。初回の巨大catalogがhook期限内に処理できないときは一度 `pull --force` を実行してください。現在の上限は1000capture、読み取る差分32MiB、全snapshot48MiBです。破損/未知lockやcache configは消さずに停止します。
 
 毎時の説明生成には、以下のMac LaunchAgentからsessionless runnerを実行します。初回生成担当を一台に絞り、他PCはhook同期で共有済解析を取得する運用です。[設計と制限](../adr/0005-knowledge-sync-analysis.md)に責任分界を記録しています。
 
@@ -33,7 +33,7 @@ Git Data APIでblob群→base_tree付きtree→一つのcommit→ref更新（for
 
 ## Macでチャットを増やさず毎時実行
 
-Node22+の `background.cjs` は同じ配布先の `cli.cjs analyze` をshellなしで直接起動します。モデルは `gpt-6.1-sol`、limit5、publishありに固定し、既存providerの `--no-daemon exec --ephemeral` を維持します。Codexアプリの定期チャットや外側のLLMターンを作りません。ログイン済みCodex CLIとgh、設定済みのstateが必要です。登録は一台に限ります。同じ処理を行う既存の定期実行がある場合は、重複実行しないよう停止してから登録してください。
+Node22+の `background.cjs` は同じ配布先のruntimeで `preferences sync-all` を先に実行し、続いて `cli.cjs analyze` をshellなしで起動します。再送は最大5分、全体は共通30分期限です。登録済みpreferences/lessonのpendingだけを扱い、元projectの現在policyが確認不能/OFF/target変更なら保留します。任意フォルダの探索や全会話送信は行いません。説明生成に失敗しても再送は独立に試されます。モデルは `gpt-6.1-sol`、limit5、publishありに固定し、既存providerの `--no-daemon exec --ephemeral` を維持します。Codexアプリの定期チャットや外側のLLMターンを作りません。ログイン済みCodex CLIとgh、設定済みのstateが必要です。登録は一台に限ります。同じ処理を行う既存の定期実行がある場合は、重複実行しないよう停止してから登録してください。
 
 ```sh
 "/absolute/path/node" "/absolute/path/skill/knowledge/background.cjs" --state "/absolute/path/state" --codex "/absolute/path/codex"
@@ -41,9 +41,11 @@ Node22+の `background.cjs` は同じ配布先の `cli.cjs analyze` をshellな�
 
 全体の期限は30分、期限時にCLIへSIGTERMを送り、CLIの既存キャンセル処理でprovider/Git等の子プロセスも停止します。1秒後に残ったCLIのprocess groupを強制停止します。stdout/stderrはログへ保存しません。終了コード0は成功またはbusy/変更なし、1は失敗/未完了です。JSONの生成failed、publish pending、offlineも検出します。生成結果のpendingは同じ回のpublish sent/reusedで解決した場合に成功です。busyによって未送信分が残ればpublish_pendingとして次回に再試行します。
 
-最新一件だけをstateの `background/last-run.json` にmode0600・atomic renameで保存します。開始/終了時刻、状態、件数、一般化したreason、通知状態だけで、資料本文、capture ID、認証情報、生のCLI出力は保存しません。stateまでのsymlink、backgroundや出力ファイルのsymlink、出力hardlink、他ユーザー所有/書込可能なbackgroundを拒否します。既存の未知lockを削除しません。拒否時は非0終了で既存ファイルを保持し、固定の起動/状態保存失敗通知を一度だけ試みます。安全に保存できない場合は別の保存先へ迂回しません。状態を書けない場合にはlast-runが古いままになるためlaunchctlの終了状態も確認してください。通常の失敗通知を既に試みた回は重複通知しません。
+最新一件だけをstateの `background/last-run.json` にschema_version=2、mode0600・atomic renameで保存します。analysisとsyncを分けて保存し、syncにpending/失敗/保留が残れば、analysisが成功でもtop stateはsync_pending、終了コード1です。開始/終了時刻、状態、件数、一般化したreason、通知状態だけで、資料本文、capture ID、認証情報、生のCLI出力は保存しません。stateまでのsymlink、backgroundや出力ファイルのsymlink、出力hardlink、他ユーザー所有/書込可能なbackgroundを拒否します。既存の未知lockを削除しません。拒否時は非0終了で既存ファイルを保持し、固定の起動/状態保存失敗通知を一度だけ試みます。安全に保存できない場合は別の保存先へ迂回しません。状態を書けない場合にはlast-runが古いままになるためlaunchctlの終了状態も確認してください。通常の失敗通知を既に試みた回は重複通知しません。
 
-失敗/未完了時だけ `/usr/bin/osascript` で一般的なMac通知を試みます。本文やエラー原文は通知に含めません。通知状態は `pending` / `sent` / `failed` / `unsupported`、成功/skippedでは `not_needed` です。sentは通知コマンド成功であり、通知許可、集中モード、ログイン状態などにより表示は保証されません。通知失敗でも元の処理の失敗を保持します。
+失敗/未完了は `background/episodes.json` の処理段階・正規化reason・不透明target IDで障害episodeを識別し、初回だけ `/usr/bin/osascript` で一般的なMac通知を試みます。同じ障害が続く間は抑制し、初回/直近時刻・抑制回数を更新します。原因やtargetが変われば新しいepisodeです。対象段階の正常完了だけが解除し、busy/一部成功/未実行は復旧に数えません。CLIの変更なし成功はそのCLI段階だけを解除します。復旧後の再発は再び初回通知します。
+
+通知を排他的に予約して並行jobの重複を防ぎ、通知コマンド失敗時は同じepisodeを24時間に最大一度再試行します。本文・エラー原文は通知/episodeに含めません。通知状態はpending/sent/failed/unsupported、試行不要はnot_neededです。sentはコマンド成功で、通知許可・集中モード・ログイン状態による表示は保証しません。通知抑制/失敗で主処理やpendingを成功にしません。通知stateの安全性/保存を確認できないときは永続的な抑制を保証せず、固定の起動/状態保存失敗通知と非0終了を維持します。
 
 `background.cjs` の限定 `plist({node,runner,state,codex})` helperでLaunchAgent XMLを生成できます。全pathは絶対path、CLIはrunnerと同じディレクトリに固定します。次の例のpathを配布済みの恒久pathへ置き換えてください。helperは登録操作を行いません。`wx` は既存plistの上書きを拒否します。既存jobが同じlabelを使っていないことを先に確認してください。
 

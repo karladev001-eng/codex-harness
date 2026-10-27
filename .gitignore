@@ -7,3 +7,15 @@ __pycache__/
 node_modules/
 dist/
 *.tgz
+
+# Benchmark raw runs stay local; summaries and test fixtures are tracked.
+benchmarks/2026-*/
+benchmarks/section-reading/runs/
+benchmarks/section-reading/versions/
+benchmarks/context-verification/*
+!benchmarks/context-verification/reading-instructions.md
+!benchmarks/context-verification/reading/
+benchmarks/context-verification/reading/*
+!benchmarks/context-verification/reading/materials/
+benchmarks/context-verification/reading/materials/*
+!benchmarks/context-verification/reading/materials/B/
