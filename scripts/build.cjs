@@ -78,7 +78,7 @@ for (const file of ['knowledge/README.md', 'knowledge/extension/README.md']) {
 const claudeSource = path.join(root, 'plugins/claude-harness');
 const marketplace = path.join(root, 'dist/claude-marketplace'), claudePlugin = path.join(marketplace, 'plugins/harness');
 const version = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).version;
-for (const name of ['.claude-plugin', 'agents', 'hooks']) fs.cpSync(path.join(claudeSource, name), path.join(claudePlugin, name), { recursive: true });
+for (const name of ['.claude-plugin', 'agents', 'hooks', 'evals']) fs.cpSync(path.join(claudeSource, name), path.join(claudePlugin, name), { recursive: true });
 const claudeManifest = path.join(claudePlugin, '.claude-plugin/plugin.json');
 fs.writeFileSync(claudeManifest, JSON.stringify({ ...JSON.parse(fs.readFileSync(claudeManifest, 'utf8')), version }, null, 2) + '\n');
 fs.chmodSync(path.join(claudePlugin, 'hooks/session-start.cjs'), 0o755);

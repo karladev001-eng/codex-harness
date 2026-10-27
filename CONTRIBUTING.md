@@ -25,6 +25,17 @@ Raycastは独立した依存と検証を持ちます。[専用README](integratio
 
 配布・導入・更新・解除・同梱文書リンクの確認は[ローカル配布手順](docs/maintainers/releasing.md)へ。実ホームへの導入を試験代わりにしません。
 
+## 挙動の評価
+
+手順書の変更は、単体テストではなく実際のモデルの挙動で確かめます。Claude Code版には `plugins/claude-harness/evals/` に評価ケース（`prompt.md` と `graders/*.md`）があり、ビルド後に次で実行します。プラグインなしの比較群も自動で走ります。
+
+```sh
+npm run build
+claude plugin eval dist/claude-marketplace/plugins/harness --runs 3 --trust-plugin --no-publish --max-cost-usd 5
+```
+
+実行には自分のClaudeログインと利用枠を使います。承認前に実装しない、純相談に工程を足さない、workerが再委譲しない、といった境界を変えるときはケースを追加し、結果を[VALIDATION](VALIDATION.md)へ記録します。
+
 ## 提案や不具合の報告
 
 リポジトリのIssue/PR機能が利用できる環境では同梱テンプレートを使えます。現時点で公開の受付URLや対応時間は約束していません。提案には目的・対象範囲・期待動作・対象外、問題には実行環境・再現手順・実際/期待結果を記します。秘密・実資料・個人設定を含めず、必要なら一時環境の最小例を添えてください。
