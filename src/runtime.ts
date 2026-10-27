@@ -4,6 +4,7 @@ import path from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 import { active, canonical, dataHome, migrateData, git, isObject, Json, localRoot, readJson, safePath, saveNew, resolveSettings, taskId, exists } from './lib';
 import { install, uninstall } from './install';
+import { installClaude, uninstallClaude } from './claude';
 import { authoring } from './authoring';
 import { lessons } from './lessons';
 import { preferences, preferenceLocation } from './preferences';
@@ -107,7 +108,7 @@ export function measurement(data: unknown): Json {
   if (before !== null && after !== null && after < before) reasons.push('usage decreased');
   return { ...result, comparable: !reasons.length, exclusion_reasons: reasons, account_usage_delta: reasons.length ? null : after - before };
 }
-const HELP = `Codex Harness (Node.js 22+)\n\nCommands:\n  status|doctor [--project PATH] [--home PATH]\n  install [--home PATH] [--skills-dir PARENT]\n  uninstall [--home PATH]\n  data where|migrate [--home PATH]\n  task create --id ID --goal TEXT --acceptance TEXT --scope PATH [--base HEAD]\n    [--depends-on ID] [--non-goal TEXT] [--constraint TEXT] [--reference TEXT] [--spec-revision 1]\n  task show --id ID | task validate\n  worktree create --id ID --base COMMIT\n  measure record --input FILE\n  preferences register|read|sync|migrate [--offline true]\n  preferences sync-all [--project PATH] [--home PATH]\n  preferences write --input FILE --revision TOKEN [--offline true] [--base-sha SHA|missing] [--kind create|update|correction|forget]\n  lessons read|sync --id ID [--offline true]\n  lessons write --input FILE --revision TOKEN [--kind create|update|correction]\n  lessons forget --id ID --revision TOKEN\n  lessons search [--query TEXT] [--limit 1..10]\n  authoring install|uninstall [--project PATH] [--skills-dir PARENT] [--skill NAME]\n\nRuntime task/worktree/measure/preferences commands accept --project and --home.\nRepeat --acceptance, --scope, --depends-on, --non-goal, --constraint, --reference, --skill.\nSettings: improvement_loop (boolean, default true), model_selection (auto|fixed, default auto).\nShared data lives in $HARNESS_HOME or ~/.agents/harness; data migrate copies a pre-0.5 ~/.codex/harness store.\nStatus is read-only; auto models are resolved by the agent from the live host launch catalog.\nAuthoring defaults to five skills in PROJECT/.agents/skills; it never activates orchestration.\nOptional codex-slide-plan requires --skill codex-slide-plan from a supporting release package.\nUnspecified authoring install/uninstall leaves optional skills untouched.\n`;
+const HELP = `Codex Harness (Node.js 22+)\n\nCommands:\n  status|doctor [--project PATH] [--home PATH] [--host codex|claude]\n  install [--home PATH] [--skills-dir PARENT] [--host codex|claude]\n  uninstall [--home PATH] [--host codex|claude]\n  data where|migrate [--home PATH]\n  task create --id ID --goal TEXT --acceptance TEXT --scope PATH [--base HEAD]\n    [--depends-on ID] [--non-goal TEXT] [--constraint TEXT] [--reference TEXT] [--spec-revision 1]\n  task show --id ID | task validate\n  worktree create --id ID --base COMMIT\n  measure record --input FILE\n  preferences register|read|sync|migrate [--offline true]\n  preferences sync-all [--project PATH] [--home PATH]\n  preferences write --input FILE --revision TOKEN [--offline true] [--base-sha SHA|missing] [--kind create|update|correction|forget]\n  lessons read|sync --id ID [--offline true]\n  lessons write --input FILE --revision TOKEN [--kind create|update|correction]\n  lessons forget --id ID --revision TOKEN\n  lessons search [--query TEXT] [--limit 1..10]\n  authoring install|uninstall [--project PATH] [--skills-dir PARENT] [--skill NAME]\n\nRuntime task/worktree/measure/preferences commands accept --project and --home.\nRepeat --acceptance, --scope, --depends-on, --non-goal, --constraint, --reference, --skill.\nSettings: improvement_loop (boolean, default true), model_selection (auto|fixed, default auto).\nShared data lives in $HARNESS_HOME or ~/.agents/harness; data migrate copies a pre-0.5 ~/.codex/harness store.\nStatus is read-only; auto models are resolved by the agent from the live host launch catalog.\nAuthoring defaults to five skills in PROJECT/.agents/skills; it never activates orchestration.\nOptional codex-slide-plan requires --skill codex-slide-plan from a supporting release package.\nUnspecified authoring install/uninstall leaves optional skills untouched.\n`;
 function parse(argv: string[]): Json {
   const [command, ...rest] = argv;
   const args: Json = { command, project: '.', acceptance: [], scope: [], depends_on: [], non_goal: [], constraint: [], reference: [], skill: [], spec_revision: '1', base: 'HEAD' };
@@ -116,7 +117,7 @@ function parse(argv: string[]): Json {
   const key = command + (nested ? ' ' + args.action : '');
   const common = ['project', 'home'];
   const allowed: Record<string, string[]> = {
-    status: common, doctor: common, install: ['home', 'skills-dir'], uninstall: ['home'], 'data where': ['home'], 'data migrate': ['home'],
+    status: [...common, 'host'], doctor: [...common, 'host'], install: ['home', 'skills-dir', 'host'], uninstall: ['home', 'host'], 'data where': ['home'], 'data migrate': ['home'],
     'task create': [...common, 'id', 'goal', 'acceptance', 'scope', 'depends-on', 'non-goal', 'constraint', 'reference', 'spec-revision', 'base'],
     'task show': [...common, 'id'], 'task validate': common, 'worktree create': [...common, 'id', 'base'],
     'preferences register': [...common, 'project-key'], 'preferences sync-all': common,
@@ -150,13 +151,14 @@ function executable(name: string): string | null {
   return null;
 }
 export function execute(args: Json): Json {
-  if (args.command === 'install') return { ...install(args), data: migrateData(args.home) };
+  if (['install', 'uninstall'].includes(args.command) && args.host !== undefined && !['codex', 'claude'].includes(args.host)) throw new Error('Unknown host: expected codex or claude');
+  if (args.command === 'install') return { ...(args.host === 'claude' ? installClaude(args) : install(args)), data: migrateData(args.home) };
   if (args.command === 'data') return args.action === 'migrate' ? migrateData(args.home) : { data_home: dataHome(args.home) };
-  if (args.command === 'uninstall') return uninstall(args);
+  if (args.command === 'uninstall') return args.host === 'claude' ? uninstallClaude(args) : uninstall(args);
   if (args.command === 'authoring') return authoring(args);
   args.project = canonical(args.project);
   if (!fs.existsSync(args.project) || !fs.statSync(args.project).isDirectory()) throw new Error('Project directory does not exist');
-  const resolved = resolveSettings(args.project, args.home);
+  const resolved = resolveSettings(args.project, args.home, args.host);
   const config = resolved.config;
   if (args.command === 'status') return { config, model_selection: resolved.model_selection, active: active(config), project: args.project, data_home: dataHome(args.home), local_root: localRoot(args.project, args.home), preferences: preferenceLocation(args, config) };
   if (args.command === 'preferences') return preferences(args, config);
@@ -165,7 +167,7 @@ export function execute(args: Json): Json {
   if (args.command === 'doctor') {
     let root = null, committed = null;
     try { root = git(args.project, 'rev-parse', '--show-toplevel'); committed = git(args.project, 'rev-parse', '--verify', 'HEAD^{commit}'); } catch { /* non-repository or unborn HEAD */ }
-    return { node: process.versions.node, git_repository: root, git_executable: executable('git'), codex_executable: executable('codex'), parallel_worktrees: Boolean(committed), host_capabilities: 'Model availability and no-history spawning require live host validation' };
+    return { node: process.versions.node, git_repository: root, git_executable: executable('git'), codex_executable: executable('codex'), claude_executable: executable('claude'), parallel_worktrees: Boolean(committed), host_capabilities: 'Model availability and no-history spawning require live host validation' };
   }
   if (args.command === 'task') {
     if (args.action === 'create') return createTask(args, config);

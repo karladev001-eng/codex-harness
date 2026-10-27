@@ -1,0 +1,12 @@
+{
+  "description": "Resolve harness settings for Claude Code at session start",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.cjs\"", "timeout": 30 }
+        ]
+      }
+    ]
+  }
+}
