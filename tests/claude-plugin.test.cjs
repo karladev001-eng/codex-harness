@@ -82,6 +82,14 @@ test('install --host claude copies the marketplace, registers it, detects edits 
   assert.equal(run(['uninstall', '--host', 'claude', '--home', f.home], { env: claude.env }).data.status, 'not_installed');
 });
 
+test('Claude-side install and session hook never migrate a legacy Codex store', t => {
+  const f = fixture(t), claude = fakeClaude(f), legacy = path.join(f.home, '.codex/harness');
+  write(path.join(legacy, 'settings.json'), { max_agents: 7 });
+  assert.equal(run(['install', '--host', 'claude', '--home', f.home], { env: claude.env }).code, 0);
+  assert.match(hook(f).additionalContext, /max_agents=7/);
+  assert.equal(fs.existsSync(path.join(f.home, '.agents/harness')), false);
+});
+
 test('without a working claude CLI the files are kept and the manual commands are returned', t => {
   const f = fixture(t), empty = path.join(f.base, 'empty'); fs.mkdirSync(empty);
   const result = run(['install', '--host', 'claude', '--home', f.home], { env: { ...process.env, PATH: empty } });

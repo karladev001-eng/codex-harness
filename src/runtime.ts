@@ -152,7 +152,8 @@ function executable(name: string): string | null {
 }
 export function execute(args: Json): Json {
   if (['install', 'uninstall'].includes(args.command) && args.host !== undefined && !['codex', 'claude'].includes(args.host)) throw new Error('Unknown host: expected codex or claude');
-  if (args.command === 'install') return { ...(args.host === 'claude' ? installClaude(args) : install(args)), data: migrateData(args.home) };
+  // Only the Codex install migrates: it replaces the Codex runtime that would otherwise keep writing the legacy store.
+  if (args.command === 'install') return args.host === 'claude' ? installClaude(args) : { ...install(args), data: migrateData(args.home) };
   if (args.command === 'data') return args.action === 'migrate' ? migrateData(args.home) : { data_home: dataHome(args.home) };
   if (args.command === 'uninstall') return args.host === 'claude' ? uninstallClaude(args) : uninstall(args);
   if (args.command === 'authoring') return authoring(args);

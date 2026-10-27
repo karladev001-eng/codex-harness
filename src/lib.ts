@@ -53,7 +53,7 @@ export function dataHome(home?: string): string {
   if (exists(shared)) return shared;
   return SHARED_DATA.some(name => exists(path.join(legacy, name))) ? legacy : shared;
 }
-// Copy (never move) so a not-yet-updated Codex runtime keeps working; the staged
+// Copy (never move) so recovery material survives; the staged
 // rename makes the shared store appear complete or not at all.
 export function migrateData(home?: string): Json {
   const shared = sharedHome(home), legacy = legacyHome(home);
@@ -66,9 +66,17 @@ export function migrateData(home?: string): Json {
   try {
     for (const name of items) fs.cpSync(path.join(legacy, name), path.join(staged, name), { recursive: true });
     fs.renameSync(staged, shared);
-  } catch (error) { fs.rmSync(staged, { recursive: true, force: true }); throw error; }
-  fs.writeFileSync(path.join(legacy, 'MIGRATED.json'), JSON.stringify({ migrated_to: shared, migrated_at: new Date().toISOString(), items }, null, 2) + '\n');
-  return { status: 'migrated', from: legacy, data_home: shared, items, legacy_kept: true };
+  } catch (error) {
+    fs.rmSync(staged, { recursive: true, force: true });
+    // A concurrent migration that published first wins; ours is discarded unchanged.
+    if (exists(shared)) return { status: 'current', data_home: shared };
+    throw error;
+  }
+  const result: Json = { status: 'migrated', from: legacy, data_home: shared, items, legacy_kept: true };
+  // The shared store is already authoritative; a missing marker is informational only.
+  try { fs.writeFileSync(path.join(legacy, 'MIGRATED.json'), JSON.stringify({ migrated_to: shared, migrated_at: new Date().toISOString(), items }, null, 2) + '\n'); }
+  catch (error) { result.warning = 'MIGRATED.json not written: ' + error; }
+  return result;
 }
 export function readJson(file: string): any {
   try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (error) { throw new Error(`Cannot read JSON ${file}: ${error}`); }
