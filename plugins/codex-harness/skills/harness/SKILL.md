@@ -23,7 +23,7 @@ description: Coordinate coding tasks, learn from UI/document feedback, cite Web 
 |---|---|---|
 | S | 設定の解釈・互換性・切替を確認する | [設定](references/routing/settings.md)：切替 |
 | A | 実装・制作・修正へ進む | [提示・承認](references/routing/preimplementation.md)：承認 |
-| C | 開かれた発案、重要判断、停滞、批評。明示Claude依頼も判定 | [Claude](references/routing/claude.md)：条件・権限 |
+| C | 開かれた発案、重要判断、停滞、批評。明示Claude依頼も判定 | [Claude](references/routing/peer-consult.md)：条件・権限 |
 | W | Webを根拠に回答する | [出典](references/routing/web.md)：根拠 |
 | F | UI・文書等の制作・修正・フィードバックでloop ON、明示記憶管理、または制作を委譲する（自動委譲は要求しない） | [制作](references/routing/creative.md)：記憶・保存 |
 | D | コード変更、または明示的な大規模探索の委譲 | [調整](references/routing/coordination.md)：委譲・レビュー |

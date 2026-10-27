@@ -49,3 +49,29 @@ test('HARNESS_HOME overrides the shared location and symlinked legacy data is re
   assert.equal(refused.code, 2); assert.match(refused.error, /must not be a symlink/);
   assert.equal(fs.existsSync(custom), false);
 });
+
+test('a migration that loses the publish race keeps the winner intact and reports current', t => {
+  const f = fixture(t), legacy = path.join(f.home, '.codex/harness'), shared = lib.sharedHome(f.home);
+  write(path.join(legacy, 'settings.json'), { max_agents: 5 });
+  const rename = fs.renameSync;
+  t.after(() => { fs.renameSync = rename; });
+  fs.renameSync = (from, to) => {
+    if (to === shared) { write(path.join(shared, 'settings.json'), { max_agents: 8 }); throw Object.assign(new Error('ENOTEMPTY'), { code: 'ENOTEMPTY' }); }
+    return rename(from, to);
+  };
+  assert.deepEqual(lib.migrateData(f.home), { status: 'current', data_home: shared });
+  fs.renameSync = rename;
+  assert.equal(lib.readJson(path.join(shared, 'settings.json')).max_agents, 8);
+  assert.equal(fs.readdirSync(path.dirname(shared)).some(name => name.startsWith('.harness-migrate-')), false);
+  assert.equal(fs.existsSync(path.join(legacy, 'MIGRATED.json')), false);
+});
+
+test('an unwritable MIGRATED.json marker is a warning, not a failed migration', t => {
+  const f = fixture(t), legacy = path.join(f.home, '.codex/harness');
+  write(path.join(legacy, 'settings.json'), { max_agents: 5 });
+  fs.mkdirSync(path.join(legacy, 'MIGRATED.json'));
+  const result = run(['data', 'migrate', '--home', f.home]);
+  assert.equal(result.code, 0); assert.equal(result.data.status, 'migrated'); assert.match(result.data.warning, /MIGRATED\.json not written/);
+  assert.equal(command(f, 'status').data.config.max_agents, 5);
+  assert.equal(command(f, 'status').data.data_home, lib.sharedHome(f.home));
+});
