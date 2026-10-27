@@ -1,0 +1,813 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; font-src 'none'; form-action 'none'; base-uri 'none'"><title>比較の数字と条件を一緒に読む · r1 · A</title><style>:root{
+  --ink:#243246;
+  --muted:#566777;
+  --nav:#142c3a;
+  --accent:#176b70;
+  --line:#d4dfe5;
+  --back:#f3f6f7}
+*{
+  box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--back);
+  color:var(--ink);
+  font:14px/1.65 -apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif}
+button,input,textarea{
+  font:inherit}
+button{
+  cursor:pointer;
+  border:1px solid #bccdd5;
+  border-radius:5px;
+  background:#fff;
+  color:var(--ink);
+  padding:7px 11px}
+button:hover{
+  background:#eaf4f1}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{
+  outline:3px solid #b87516;
+  outline-offset:3px}
+a{
+  color:var(--accent);
+  text-underline-offset:3px;
+  overflow-wrap:anywhere}
+h1,h2,h3,h4,p{
+  margin:0 0 .6em}
+h1{
+  font-size:22px}
+h2{
+  font-size:23px}
+h3{
+  font-size:16px}
+small,.muted{
+  color:var(--muted)}
+header{
+  background:var(--nav);
+  color:white;
+  padding:22px 32px 0}
+header small{
+  color:#d2e2e8}
+.top{
+  display:flex;
+  justify-content:space-between;
+  gap:20px}
+header p{
+  color:#bdd3dc;
+  font-size:12px}
+.tabs{
+  display:flex;
+  gap:22px;
+  overflow:auto}
+.tabs button{
+  background:none;
+  color:#bfd4dd;
+  border:none;
+  border-bottom:3px solid transparent;
+  border-radius:0;
+  padding:12px 2px;
+  white-space:nowrap}
+.tabs [aria-selected=true]{
+  color:white;
+  border-bottom-color:#75c7ba}
+.notice{
+  background:#fff5df;
+  color:#735829;
+  border-bottom:1px solid #ead9b5;
+  padding:10px 32px;
+  font-size:12px}
+.shell{
+  max-width:1600px;
+  margin:auto;
+  padding:24px 32px}
+.variant-controls,.subnav,.slide-controls{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin-bottom:16px}
+.variant-controls a{
+  border:1px solid var(--line);
+  padding:6px 11px;
+  border-radius:5px;
+  background:#fff;
+  font-size:12px}
+.variant-controls [aria-current=page],.subnav [aria-pressed=true]{
+  background:#e6f2ee;
+  border-color:#76ab9c;
+  color:#205b50}
+.panel{
+  background:white;
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:20px}
+.grid3{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px}
+.summary{
+  border-top:3px solid var(--accent)}
+.summary p{
+  font-size:17px}
+.section{
+  margin-top:22px}
+.flow{
+  display:grid;
+  grid-template-columns:80px 1fr 1.1fr 1fr;
+  gap:18px;
+  padding:18px 0;
+  border-bottom:1px solid var(--line)}
+.flow:last-child{
+  border-bottom:0}
+.flow p{
+  font-size:13px}
+.flow button{
+  height:fit-content;
+  font:12px monospace}
+.bridge{
+  color:var(--accent)}
+.speech{
+  margin:14px 0}
+.paragraph{
+  white-space:pre-wrap;
+  line-height:1.9;
+  max-width:900px}
+.paragraph small{
+  display:block;
+  font:11px monospace;
+  color:var(--accent)}
+.finding{
+  margin:15px 0}
+.finding blockquote{
+  margin:12px 0;
+  padding-left:12px;
+  border-left:3px solid #caa15a}
+.review{
+  display:grid;
+  grid-template-columns:180px minmax(0,1fr) 300px;
+  gap:18px}
+.slide-stage{
+  min-width:0}
+.slide-list{
+  padding:12px}
+.slide-list button{
+  display:block;
+  width:100%;
+  text-align:left;
+  margin-bottom:8px;
+  border-color:transparent}
+.slide-list strong,.slide-list small{
+  display:block;
+  white-space:normal}
+.slide-list [aria-current=true]{
+  background:#e6f2ee;
+  border-color:#76ab9c}
+.slide-controls span{
+  font-size:12px;
+  color:var(--muted);
+  margin-right:auto}
+.slide{
+  aspect-ratio:var(--ratio);
+  background:var(--slide-bg);
+  color:var(--slide-ink);
+  padding:var(--slide-padding);
+  font-family:var(--slide-font);
+  box-shadow:0 8px 24px #203d4d0b;
+  border:1px solid #cdd7df;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  position:relative}
+.slide h2{
+  font-size:clamp(20px,2.1vw,32px);
+  line-height:1.3;
+  margin:5px 0 12px;
+  color:var(--slide-ink)}
+.slide-kicker{
+  font-size:11px;
+  letter-spacing:.04em;
+  font-weight:700;
+  color:var(--accent)}
+.slide-message{
+  font-size:clamp(13px,1.3vw,19px)}
+.slide-content{
+  flex:1;
+  display:grid;
+  gap:14px;
+  align-content:center;
+  min-height:0}
+.element{
+  min-width:0;
+  padding:2px;
+  overflow-wrap:anywhere}
+.element h3{
+  color:var(--accent)}
+.element figure{
+  margin:0}
+.element img{
+  display:block;
+  max-width:100%;
+  max-height:240px;
+  object-fit:contain;
+  user-select:none}
+.element figcaption{
+  font-size:11px;
+  color:var(--slide-muted)}
+.kind-text p,.kind-list{
+  font-size:clamp(12px,1.1vw,17px)}
+.kind-list ul{
+  padding-left:20px;
+  margin:0}
+.source-strip{
+  font-size:10px;
+  line-height:1.5;
+  border-top:1px solid #c3d0d7;
+  color:var(--slide-muted);
+  padding-top:7px;
+  margin-top:12px;
+  overflow-wrap:anywhere}
+.source-strip a{
+  color:var(--accent)}
+.source-strip span{
+  display:inline}
+.slide-id-label{
+  font-size:9px;
+  color:var(--slide-muted);
+  margin-top:4px}
+.notes{
+  margin-top:16px}
+.notes h3{
+  font-size:14px}
+.notes p{
+  font-size:12px}
+.comment-panel label,.feedback>label{
+  display:block;
+  font-weight:600;
+  font-size:12px;
+  margin:12px 0 5px}
+textarea{
+  display:block;
+  resize:vertical;
+  min-height:64px;
+  width:100%;
+  border:1px solid #c5d3db;
+  padding:9px;
+  border-radius:5px;
+  color:var(--ink);
+  background:white}
+textarea[readonly]{
+  background:#f7fafb}
+.comment-panel p{
+  font-size:12px}
+.target{
+  font:11px/1.5 monospace;
+  white-space:pre-wrap;
+  background:#eef3f5;
+  padding:10px;
+  overflow-wrap:anywhere}
+.primary{
+  background:var(--accent);
+  color:white;
+  margin-top:14px}
+.primary:hover{
+  background:#125b60}
+.selected-target{
+  outline:2px solid #a16c1e;
+  outline-offset:3px}
+.catalog{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+  margin:16px 0 26px}
+.template-card{
+  font-size:12px}
+.template-card h4{
+  font-size:16px}
+.wireframe{
+  display:flex;
+  background:#f1f5f5;
+  border:1px solid #dae4e3;
+  padding:12px;
+  height:115px;
+  gap:8px;
+  align-items:center;
+  margin:12px 0}
+.wireframe span{
+  background:#c4dcd5;
+  border-radius:3px;
+  flex:1;
+  padding:10px 4px;
+  text-align:center;
+  font-size:10px}
+.wireframe .wire-0{
+  background:#52766d;
+  color:#fff}
+.template-card:nth-child(3n+2) .wireframe{
+  flex-direction:column;
+  align-items:stretch}
+.template-card dl,.source-detail dl{
+  display:grid;
+  grid-template-columns:105px 1fr;
+  gap:5px 12px;
+  margin:12px 0}
+.template-card dt,.source-detail dt{
+  color:var(--muted)}
+dd{
+  margin:0;
+  overflow-wrap:anywhere}
+pre{
+  font-size:12px;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere}
+.warning{
+  color:#7b531b;
+  background:#fff3da;
+  padding:8px}
+.comment-item{
+  border-bottom:1px solid var(--line);
+  padding:12px 0}
+.comment-item button{
+  margin-right:8px}
+.feedback button{
+  margin:8px 8px 8px 0}
+.feedback details{
+  margin-top:18px;
+  border-top:1px solid var(--line);
+  padding-top:14px}
+.table-scroll{
+  overflow-x:auto}
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px}
+caption{
+  text-align:left;
+  font-weight:600;
+  margin-bottom:7px}
+th,td{
+  text-align:left;
+  border-bottom:1px solid #cbd8de;
+  padding:7px}
+th{
+  background:#eef4f2}
+.chart{
+  margin:10px 0}
+.chart>div{
+  margin-bottom:9px}
+.chart dt{
+  font-size:12px}
+.chart dd{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  min-height:20px}
+.bar{
+  display:inline-block;
+  background:var(--accent);
+  height:16px;
+  min-width:2px}
+.layout-comparison .slide-content{
+  grid-template-columns:1fr 1fr}
+.layout-cover .slide-content,.layout-chapter .slide-content{
+  align-content:center}
+.layout-summary .slide-content{
+  border-left:3px solid var(--accent);
+  padding-left:14px}
+.layout-roadmap .slide-content,.layout-steps .slide-content{
+  grid-auto-flow:row}
+.layout-result-chart .chart b{
+  white-space:nowrap}
+.zoomed{
+  position:fixed;
+  inset:0;
+  background:var(--back);
+  padding:22px;
+  z-index:20;
+  overflow:auto}
+.zoomed .slide{
+  max-width:1200px;
+  margin:auto}
+.presentation{
+  max-width:1200px;
+  padding:25px;
+  margin:auto}
+.presentation .slide{
+  width:100%}
+.presentation .slide-page{
+  margin-bottom:20px}
+.presentation header{
+  padding-bottom:16px}
+[hidden]{
+  display:none!important}
+body[data-mode=slides] header{
+  padding-bottom:15px}
+body[data-mode=slides] [data-target]{
+  outline-offset:0}
+#region-fields label{
+  display:inline-block;
+  width:48%;
+  font-size:11px}
+#region-fields input{
+  width:80%;
+  padding:4px;
+  border:1px solid var(--line)}
+@media(max-width:1150px){
+  .review{
+  grid-template-columns:150px minmax(0,1fr)}
+.comment-panel{
+  grid-column:1/-1}
+.catalog{
+  grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:720px){
+  header{
+  padding:18px 18px 0}
+.top{
+  display:block}
+.shell{
+  padding:20px 18px}
+.notice{
+  padding:10px 18px}
+.grid3,.review,.catalog{
+  grid-template-columns:1fr}
+.slide-list{
+  display:flex;
+  overflow:auto;
+  gap:6px}
+.slide-list button{
+  min-width:160px}
+.flow{
+  grid-template-columns:65px 1fr;
+  gap:10px}
+.flow>div:nth-child(3),.flow>.bridge{
+  grid-column:2}
+.slide{
+  aspect-ratio:auto;
+  min-height:300px;
+  padding:24px}
+.slide h2{
+  font-size:22px}
+.slide-message{
+  font-size:14px}
+.slide-content{
+  gap:12px}
+.kind-text p,.kind-list{
+  font-size:13px}
+.layout-comparison .slide-content{
+  grid-template-columns:1fr}
+.source-strip{
+  font-size:10px}
+.catalog .panel{
+  padding:17px}
+.template-card dl,.source-detail dl{
+  grid-template-columns:85px 1fr}
+.zoomed{
+  padding:15px}
+.presentation{
+  padding:15px}
+.paragraph{
+  font-size:13px}
+.bar{
+  max-width:65%}
+}
+
+/* Master-reference canvas keeps its page ratio and normalized geometry. */
+.canvas-slide .slide-content{
+  align-content:normal}
+.canvas-slide .element{
+  padding:0}
+.canvas-slide .element figure{
+  height:100%;
+  margin:0}
+.canvas-slide .element img{
+  width:100%;
+  height:100%;
+  max-height:none;
+  object-fit:contain}
+.canvas-slide .kind-image figcaption{
+  display:none}
+.canvas-slide>.source-strip{
+  position:absolute;
+  left:6%;
+  right:6%;
+  bottom:4%}
+.canvas-slide>.slide-id-label{
+  position:absolute;
+  left:6%;
+  bottom:1.5%}
+.canvas-slide{
+  isolation:isolate}
+.canvas-slide .slide-content{
+  z-index:0}
+.canvas-slide>h2,.canvas-slide>.slide-message,.canvas-slide>.source-strip,.canvas-slide>.slide-id-label{
+  z-index:1}
+@media(max-width:720px){
+  .canvas-slide{
+  aspect-ratio:var(--ratio);
+  min-height:0}
+.canvas-slide h2{
+  font-size:clamp(13px,4vw,22px)}
+.canvas-slide .kind-text p{
+  font-size:clamp(10px,3vw,16px)}
+}
+</style></head><body data-mode="review" data-deck-id="comparison-demo" data-revision="r1" data-variant="A" data-content-hash="d94b18b6921b897e4386da99fb9f1e7fe6f1ba3208e16eaf3de5bbfe9b67d15e"><header><div class="top"><div><h1>比較の数字と条件を一緒に読む</h1><p>話の筋、発表原稿、スライド、根拠を一緒に。</p></div><small>comparison-demo · REV r1 · 案 A</small></div><nav class="tabs" role="tablist" aria-label="レビュー表示"><button id="tab-overview" role="tab" aria-controls="overview" aria-selected="true" tabindex="0">全体像</button><button id="tab-slides" role="tab" aria-controls="slides" aria-selected="false" tabindex="-1">スライド</button><button id="tab-templates" role="tab" aria-controls="templates" aria-selected="false" tabindex="-1">テンプレート</button><button id="tab-assets" role="tab" aria-controls="assets" aria-selected="false" tabindex="-1">素材・出典</button></nav></header><div class="notice">HTMLは修正希望を整形するだけです。コピー・保存・閲覧は承認や自動送信になりません。</div><main class="shell"><div class="variant-controls"><a aria-current="page" href="../A/review.html">案 A · 標準の結果表示</a><a href="../B/review.html">案 B · 独自配置を比較</a><a href="output/slides.html">スライドだけを開く</a><a href="story.md" download>話の流れ MD</a><a href="script.md" download>発表原稿 MD</a></div><section id="overview" role="tabpanel" aria-labelledby="tab-overview"><h2>まず、何をどう伝えるか。</h2><div class="subnav"><button data-view="flow" aria-pressed="true">流れ</button><button data-view="script" aria-pressed="false">発表原稿を通読</button><button data-view="checks" aria-pressed="false">流れ・理解チェック</button></div><div id="view-flow"><div class="grid3"><article class="panel summary" data-target="{&quot;kind&quot;:&quot;purpose&quot;}" tabindex="0"><h3>目的</h3><p>処理手順の比較を前提と条件付きで説明する</p></article><article class="panel summary" data-target="{&quot;kind&quot;:&quot;audience&quot;}" tabindex="0"><h3>相手</h3><p>ETLを知らない企画担当。実測前に比較の見方を知りたい</p></article><article class="panel summary" data-target="{&quot;kind&quot;:&quot;message&quot;}" tabindex="0"><h3>一言の要旨</h3><p>数字と条件をセットで読む</p></article></div><div class="panel section"><article class="flow"><button data-jump-slide="S01">S01 / 1</button><div><strong>今日の判断を示す</strong><p>仮値を使って比較の見方を共有する</p></div><div data-target="{&quot;kind&quot;:&quot;notes&quot;,&quot;slideId&quot;:&quot;S01&quot;,&quot;page&quot;:1}" tabindex="0"><p>今日は比較の読み方を確認する</p><p>実測結果ではない</p><small>説明用仮値を実績として読まない。</small></div><p class="bridge">まず比較に必要な条件を整理します。<br>目安 30秒</p></article><article class="flow"><button data-jump-slide="S02">S02 / 2</button><div><strong>比較の前提を渡す</strong><p>同じ入力・対象範囲で手順を比べる</p></div><div data-target="{&quot;kind&quot;:&quot;notes&quot;,&quot;slideId&quot;:&quot;S02&quot;,&quot;page&quot;:2}" tabindex="0"><p>入力、手順、条件の順に読む</p><p>ETLの説明を補う</p><small>初稿は略語の説明が不足。指摘C01を段落に対応。</small></div><p class="bridge">ここから本番導入の判断へ進みます。<br>目安 45秒</p></article><article class="flow"><button data-jump-slide="S03">S03 / 3</button><div><strong>結果を条件付きで読む</strong><p>18分と9分の比較例。実測ではない</p></div><div data-target="{&quot;kind&quot;:&quot;notes&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3}" tabindex="0"><p>手動18分、一括9分という仮値</p><p>条件は出典から確認</p><small>系列と表の行を同じ元データへ対応。</small></div><p class="bridge">例の見方を次の確認手順にまとめます。<br>目安 60秒</p></article><article class="flow"><button data-jump-slide="S04">S04 / 4</button><div><strong>次の行動に結びつける</strong><p>入力・範囲・単位を揃えて実測を記録する</p></div><div data-target="{&quot;kind&quot;:&quot;notes&quot;,&quot;slideId&quot;:&quot;S04&quot;,&quot;page&quot;:4}" tabindex="0"><p>仮値は意思決定の根拠にしない</p><p>実測する条件を揃える</p><small>具体的担当や期日は次の作業で決める。</small></div><p class="bridge">以上です。どの条件を実測で確認するか相談します。<br>目安 35秒</p></article></div><p>期待する理解・判断: 仮値から実測の効果を決めず確認条件を選べる</p><p>制作の未解決事項: 実測の担当と期間は本資料の対象外</p></div><div id="view-script" hidden><article class="panel speech"><h3><button data-jump-slide="S01">S01 · 1. 数字と条件を一緒に読む</button></h3><p class="paragraph" data-target="{&quot;kind&quot;:&quot;paragraph&quot;,&quot;slideId&quot;:&quot;S01&quot;,&quot;page&quot;:1,&quot;paragraphId&quot;:&quot;S01-P01&quot;}" tabindex="0"><small>S01-P01</small>今日は処理手順を比べるときに何を一緒に確認するかを整理します。説明には仮の数字を使います。実測結果の報告ではありません。 <span class="muted">brief</span></p><p class="bridge">つなぎ: まず比較に必要な条件を整理します。</p></article><article class="panel speech"><h3><button data-jump-slide="S02">S02 · 2. 比較条件を揃えて読む</button></h3><p class="paragraph" data-target="{&quot;kind&quot;:&quot;paragraph&quot;,&quot;slideId&quot;:&quot;S02&quot;,&quot;page&quot;:2,&quot;paragraphId&quot;:&quot;S02-P01&quot;}" tabindex="0"><small>S02-P01</small>ETLで入力を揃えたあと手順を比べます。同じ入力を使う想定で、待ち時間は比較に含めません。 <span class="muted">brief</span></p><p class="bridge">つなぎ: ここから本番導入の判断へ進みます。</p></article><article class="panel speech"><h3><button data-jump-slide="S03">S03 · 3. 仮値では一括処理の時間が短い</button></h3><p class="paragraph" data-target="{&quot;kind&quot;:&quot;paragraph&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3,&quot;paragraphId&quot;:&quot;S03-P01&quot;}" tabindex="0"><small>S03-P01</small>こちらは説明用の仮値です。手動を18分、一括を9分としています。この差は実測の短縮効果ではありません。入力、測定範囲、待ち時間の扱いを確認するという見方を共有するための例です。 <span class="muted">illustrative-data</span></p><p class="bridge">つなぎ: 例の見方を次の確認手順にまとめます。</p></article><article class="panel speech"><h3><button data-jump-slide="S04">S04 · 4. 実測の確認事項を決める</button></h3><p class="paragraph" data-target="{&quot;kind&quot;:&quot;paragraph&quot;,&quot;slideId&quot;:&quot;S04&quot;,&quot;page&quot;:4,&quot;paragraphId&quot;:&quot;S04-P01&quot;}" tabindex="0"><small>S04-P01</small>要点は数字と条件をセットで読むことです。実測する場合は入力、測定範囲、単位を揃えて記録します。この仮値から本番導入の効果を決めることはできません。次は実測で確認する条件を決めましょう。 <span class="muted">concept-flow</span></p><p class="bridge">つなぎ: 以上です。どの条件を実測で確認するか相談します。</p></article><p>推定 57秒 / 285文字 / 毎分300文字、句読点も文字に含む。指定時間 180秒。リハーサル実測ではありません。</p></div><div id="view-checks" hidden><p>確認者: Codex sample editorial review · 2026-10-10 · revision r1</p><ul><li>聞き手の前提・用語: 要修正 / ETLを知らない聞き手に、S02-P01で略語が未説明</li><li>根拠と結論: 確認 / S03/S04で仮値を実測や導入判断に使えないと明記</li><li>ページ間の自然さ: 要修正 / S02のつなぎが導入判断と述べるが、S03は仮値の説明</li><li>図表と原稿の一致: 確認 / CSV/系列/表/原稿は手動18分、一括9分という仮値で一致</li></ul><p>未確認: 実際の聞き手による評価 / リハーサル実測 / 利用者固有マスター</p><article class="panel finding" data-target="{&quot;kind&quot;:&quot;finding&quot;,&quot;slideId&quot;:&quot;S02&quot;,&quot;page&quot;:null,&quot;findingId&quot;:&quot;C01&quot;,&quot;paragraphId&quot;:&quot;S02-P01&quot;}" tabindex="0"><button data-jump-slide="S02" data-jump-paragraph="S02-P01">S02 / S02-P01</button><blockquote>ETLで入力を揃えたあと</blockquote><p>聞き手への影響: 初めて聞く用語で話を追えなくなる</p><p>理由: 聞き手はETLの前提知識を持たない</p><p>修正案: データを取り出し、整え、保存先へ読み込む処理と初出で説明する</p></article><article class="panel finding" data-target="{&quot;kind&quot;:&quot;finding&quot;,&quot;slideId&quot;:&quot;S02&quot;,&quot;page&quot;:null,&quot;findingId&quot;:&quot;C02&quot;,&quot;paragraphId&quot;:null}" tabindex="0"><button data-jump-slide="S02">S02 / スライド</button><blockquote>ここから本番導入の判断へ進みます。</blockquote><p>聞き手への影響: 仮値が導入効果の根拠と誤解される</p><p>理由: 次ページは実測前の説明例で判断材料ではない</p><p>修正案: 条件を共有できたので次に説明用の仮値を見ます、とつなぐ</p></article></div></section><section id="slides" role="tabpanel" aria-labelledby="tab-slides" hidden><h2>ページと話す内容を確認する。</h2><div class="review"><aside class="panel slide-list"><button data-jump-slide="S01">1 · S01<strong>数字と条件を一緒に読む</strong><small>今日の判断を示す</small></button><button data-jump-slide="S02">2 · S02<strong>比較条件を揃えて読む</strong><small>比較の前提を渡す</small></button><button data-jump-slide="S03">3 · S03<strong>仮値では一括処理の時間が短い</strong><small>結果を条件付きで読む</small></button><button data-jump-slide="S04">4 · S04<strong>実測の確認事項を決める</strong><small>次の行動に結びつける</small></button></aside><div class="slide-stage"><div class="slide-controls"><button data-action="previous" aria-label="前のスライド">← 前</button><span id="page-indicator"></span><button data-action="next" aria-label="次のスライド">次 →</button><button data-action="all">一覧</button><button data-action="zoom">拡大</button></div><div id="slide-stage"><div class="slide-page" data-page="0"><section class="slide layout-cover" style="--slide-bg:#ffffff;--slide-ink:#243246;--accent:#176b70;--slide-muted:#566777;--ratio:16/9;--slide-font:Arial, sans-serif;--slide-padding:6%" data-slide-id="S01" data-target="{&quot;kind&quot;:&quot;slide&quot;,&quot;slideId&quot;:&quot;S01&quot;,&quot;page&quot;:1}" tabindex="0" aria-label="1: 数字と条件を一緒に読む"><div class="slide-kicker" data-target="{&quot;kind&quot;:&quot;chapter&quot;,&quot;slideId&quot;:&quot;S01&quot;,&quot;page&quot;:1,&quot;chapterId&quot;:&quot;intro&quot;}" tabindex="0">目的 · 1/4</div><h2 data-target="{&quot;kind&quot;:&quot;title&quot;,&quot;slideId&quot;:&quot;S01&quot;,&quot;page&quot;:1}" tabindex="0">数字と条件を一緒に読む</h2><p class="slide-message" data-target="{&quot;kind&quot;:&quot;message&quot;,&quot;slideId&quot;:&quot;S01&quot;,&quot;page&quot;:1}" tabindex="0">仮値を使って比較の見方を共有する</p><div class="slide-content"><article class="element kind-text" data-element-id="goal" data-target="{&quot;kind&quot;:&quot;element&quot;,&quot;slideId&quot;:&quot;S01&quot;,&quot;page&quot;:1,&quot;elementId&quot;:&quot;goal&quot;,&quot;dataRef&quot;:null}" tabindex="0"><p>ゴール: 数字だけで判断せず、前提と条件を確かめる。</p></article></div><footer class="source-strip"><span data-target="{&quot;kind&quot;:&quot;source&quot;,&quot;slideId&quot;:&quot;S01&quot;,&quot;page&quot;:1,&quot;sourceId&quot;:&quot;brief&quot;}" tabindex="0"><a href="review.html#source-brief">brief</a>: <a href="./sources/data/context.md">data/context.md</a> · 記録hash一致</span></footer><span class="slide-id-label">S01 · Design reference · offline HTML</span></section><article class="panel notes" data-target="{&quot;kind&quot;:&quot;notes&quot;,&quot;slideId&quot;:&quot;S01&quot;,&quot;page&quot;:1}" tabindex="0"><h3>話す要点・ノート</h3><p>今日は比較の読み方を確認する / 実測結果ではない</p><p>説明用仮値を実績として読まない。</p><p>つなぎ: まず比較に必要な条件を整理します。</p><p class="paragraph" data-target="{&quot;kind&quot;:&quot;paragraph&quot;,&quot;slideId&quot;:&quot;S01&quot;,&quot;page&quot;:1,&quot;paragraphId&quot;:&quot;S01-P01&quot;}" tabindex="0"><small>S01-P01</small>今日は処理手順を比べるときに何を一緒に確認するかを整理します。説明には仮の数字を使います。実測結果の報告ではありません。 <span class="muted">brief</span></p></article></div><div class="slide-page" data-page="1" hidden><section class="slide layout-background" style="--slide-bg:#ffffff;--slide-ink:#243246;--accent:#176b70;--slide-muted:#566777;--ratio:16/9;--slide-font:Arial, sans-serif;--slide-padding:6%" data-slide-id="S02" data-target="{&quot;kind&quot;:&quot;slide&quot;,&quot;slideId&quot;:&quot;S02&quot;,&quot;page&quot;:2}" tabindex="0" aria-label="2: 比較条件を揃えて読む"><div class="slide-kicker" data-target="{&quot;kind&quot;:&quot;chapter&quot;,&quot;slideId&quot;:&quot;S02&quot;,&quot;page&quot;:2,&quot;chapterId&quot;:&quot;evidence&quot;}" tabindex="0">条件と比較 · 2/4</div><h2 data-target="{&quot;kind&quot;:&quot;title&quot;,&quot;slideId&quot;:&quot;S02&quot;,&quot;page&quot;:2}" tabindex="0">比較条件を揃えて読む</h2><p class="slide-message" data-target="{&quot;kind&quot;:&quot;message&quot;,&quot;slideId&quot;:&quot;S02&quot;,&quot;page&quot;:2}" tabindex="0">同じ入力・対象範囲で手順を比べる</p><div class="slide-content"><article class="element kind-diagram" data-element-id="scope-diagram" data-target="{&quot;kind&quot;:&quot;element&quot;,&quot;slideId&quot;:&quot;S02&quot;,&quot;page&quot;:2,&quot;elementId&quot;:&quot;scope-diagram&quot;,&quot;dataRef&quot;:null}" tabindex="0"><figure><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3MDAgMTcwIj48cmVjdCB3aWR0aD0iNzAwIiBoZWlnaHQ9IjE3MCIgZmlsbD0iI2ZmZmZmZiIvPjxnIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzI0MzI0NiI+PHJlY3QgeD0iMjAiIHk9IjM1IiB3aWR0aD0iMTgwIiBoZWlnaHQ9Ijk1IiByeD0iOCIgZmlsbD0iI2RjZWVlOCIvPjx0ZXh0IHg9IjExMCIgeT0iOTIiPuWFpeWKm+OCkuaPg+OBiOOCizwvdGV4dD48cGF0aCBkPSJNMjEwIDgyaDc1bS0xMi0xMCAxMiAxMC0xMiAxMCIgc3Ryb2tlPSIjMTc2YjcwIiBmaWxsPSJub25lIiBzdHJva2Utd2lkdGg9IjQiLz48cmVjdCB4PSIyOTUiIHk9IjM1IiB3aWR0aD0iMTgwIiBoZWlnaHQ9Ijk1IiByeD0iOCIgZmlsbD0iI2RjZWVlOCIvPjx0ZXh0IHg9IjM4NSIgeT0iOTIiPuaJi+mghuOCkuavlOOBueOCizwvdGV4dD48cGF0aCBkPSJNNDg1IDgyaDMwbS0xMi0xMCAxMiAxMC0xMiAxMCIgc3Ryb2tlPSIjMTc2YjcwIiBmaWxsPSJub25lIiBzdHJva2Utd2lkdGg9IjQiLz48cmVjdCB4PSI1MjUiIHk9IjM1IiB3aWR0aD0iMTU1IiBoZWlnaHQ9Ijk1IiByeD0iOCIgZmlsbD0iI2RjZWVlOCIvPjx0ZXh0IHg9IjYwMiIgeT0iOTIiPuadoeS7tuOCkueiuuiqjTwvdGV4dD48L2c+PC9zdmc+" alt="入力、手順、条件の3段階" data-region-image="true"><figcaption>入力、手順、条件の3段階</figcaption></figure></article></div><footer class="source-strip"><span data-target="{&quot;kind&quot;:&quot;source&quot;,&quot;slideId&quot;:&quot;S02&quot;,&quot;page&quot;:2,&quot;sourceId&quot;:&quot;brief&quot;}" tabindex="0"><a href="review.html#source-brief">brief</a>: <a href="./sources/data/context.md">data/context.md</a> · 記録hash一致</span> ｜ <span data-target="{&quot;kind&quot;:&quot;source&quot;,&quot;slideId&quot;:&quot;S02&quot;,&quot;page&quot;:2,&quot;sourceId&quot;:&quot;concept-flow&quot;}" tabindex="0"><a href="review.html#source-concept-flow">concept-flow</a>: <span>比較の見取り図</span> · 概念図・提案</span></footer><span class="slide-id-label">S02 · Design reference · offline HTML</span></section><article class="panel notes" data-target="{&quot;kind&quot;:&quot;notes&quot;,&quot;slideId&quot;:&quot;S02&quot;,&quot;page&quot;:2}" tabindex="0"><h3>話す要点・ノート</h3><p>入力、手順、条件の順に読む / ETLの説明を補う</p><p>初稿は略語の説明が不足。指摘C01を段落に対応。</p><p>つなぎ: ここから本番導入の判断へ進みます。</p><p class="paragraph" data-target="{&quot;kind&quot;:&quot;paragraph&quot;,&quot;slideId&quot;:&quot;S02&quot;,&quot;page&quot;:2,&quot;paragraphId&quot;:&quot;S02-P01&quot;}" tabindex="0"><small>S02-P01</small>ETLで入力を揃えたあと手順を比べます。同じ入力を使う想定で、待ち時間は比較に含めません。 <span class="muted">brief</span></p></article></div><div class="slide-page" data-page="2" hidden><section class="slide layout-result-chart" style="--slide-bg:#ffffff;--slide-ink:#243246;--accent:#176b70;--slide-muted:#566777;--ratio:16/9;--slide-font:Arial, sans-serif;--slide-padding:6%" data-slide-id="S03" data-target="{&quot;kind&quot;:&quot;slide&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3}" tabindex="0" aria-label="3: 仮値では一括処理の時間が短い"><div class="slide-kicker" data-target="{&quot;kind&quot;:&quot;chapter&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3,&quot;chapterId&quot;:&quot;evidence&quot;}" tabindex="0">条件と比較 · 3/4</div><h2 data-target="{&quot;kind&quot;:&quot;title&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3}" tabindex="0">仮値では一括処理の時間が短い</h2><p class="slide-message" data-target="{&quot;kind&quot;:&quot;message&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3}" tabindex="0">18分と9分の比較例。実測ではない</p><div class="slide-content"><article class="element kind-chart" data-element-id="runtime-chart" data-target="{&quot;kind&quot;:&quot;element&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3,&quot;elementId&quot;:&quot;runtime-chart&quot;,&quot;dataRef&quot;:{&quot;path&quot;:&quot;data/illustrative.csv&quot;,&quot;position&quot;:&quot;行2–3 / minutes&quot;}}" tabindex="0"><figure><figcaption>方法ごとの時間（仮値） (分)</figcaption><dl class="chart"><div data-target="{&quot;kind&quot;:&quot;series&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3,&quot;elementId&quot;:&quot;runtime-chart&quot;,&quot;seriesId&quot;:&quot;manual&quot;,&quot;dataRef&quot;:{&quot;path&quot;:&quot;data/illustrative.csv&quot;,&quot;position&quot;:&quot;行2–3 / minutes&quot;}}" tabindex="0"><dt>手動</dt><dd><span class="bar" style="width:100%"></span><b>18 分</b></dd></div><div data-target="{&quot;kind&quot;:&quot;series&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3,&quot;elementId&quot;:&quot;runtime-chart&quot;,&quot;seriesId&quot;:&quot;batch&quot;,&quot;dataRef&quot;:{&quot;path&quot;:&quot;data/illustrative.csv&quot;,&quot;position&quot;:&quot;行2–3 / minutes&quot;}}" tabindex="0"><dt>一括</dt><dd><span class="bar" style="width:50%"></span><b>9 分</b></dd></div></dl></figure><footer class="source-strip"><span data-target="{&quot;kind&quot;:&quot;source&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3,&quot;sourceId&quot;:&quot;comparison-derived&quot;}" tabindex="0"><a href="review.html#source-comparison-derived">comparison-derived</a>: <span>比較グラフの集計</span> · 仮値（実測ではない）</span></footer></article><article class="element kind-table" data-element-id="runtime-table" data-target="{&quot;kind&quot;:&quot;element&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3,&quot;elementId&quot;:&quot;runtime-table&quot;,&quot;dataRef&quot;:{&quot;path&quot;:&quot;data/illustrative.csv&quot;,&quot;position&quot;:&quot;行2–3 / stage,minutes&quot;}}" tabindex="0"><div class="table-scroll"><table><caption>元データ（仮値）</caption><thead><tr><th scope="col">方法</th><th scope="col">時間（分）</th></tr></thead><tbody><tr><td data-target="{&quot;kind&quot;:&quot;cell&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3,&quot;elementId&quot;:&quot;runtime-table&quot;,&quot;rowId&quot;:&quot;manual&quot;,&quot;column&quot;:0,&quot;dataRef&quot;:{&quot;path&quot;:&quot;data/illustrative.csv&quot;,&quot;position&quot;:&quot;行2–3 / stage,minutes&quot;}}" tabindex="0">手動</td><td data-target="{&quot;kind&quot;:&quot;cell&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3,&quot;elementId&quot;:&quot;runtime-table&quot;,&quot;rowId&quot;:&quot;manual&quot;,&quot;column&quot;:1,&quot;dataRef&quot;:{&quot;path&quot;:&quot;data/illustrative.csv&quot;,&quot;position&quot;:&quot;行2–3 / stage,minutes&quot;}}" tabindex="0">18</td></tr><tr><td data-target="{&quot;kind&quot;:&quot;cell&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3,&quot;elementId&quot;:&quot;runtime-table&quot;,&quot;rowId&quot;:&quot;batch&quot;,&quot;column&quot;:0,&quot;dataRef&quot;:{&quot;path&quot;:&quot;data/illustrative.csv&quot;,&quot;position&quot;:&quot;行2–3 / stage,minutes&quot;}}" tabindex="0">一括</td><td data-target="{&quot;kind&quot;:&quot;cell&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3,&quot;elementId&quot;:&quot;runtime-table&quot;,&quot;rowId&quot;:&quot;batch&quot;,&quot;column&quot;:1,&quot;dataRef&quot;:{&quot;path&quot;:&quot;data/illustrative.csv&quot;,&quot;position&quot;:&quot;行2–3 / stage,minutes&quot;}}" tabindex="0">9</td></tr></tbody></table></div><footer class="source-strip"><span data-target="{&quot;kind&quot;:&quot;source&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3,&quot;sourceId&quot;:&quot;illustrative-data&quot;}" tabindex="0"><a href="review.html#source-illustrative-data">illustrative-data</a>: <a href="./data/illustrative.csv">data/illustrative.csv</a> · 仮値（実測ではない）</span></footer></article></div><footer class="source-strip"><span data-target="{&quot;kind&quot;:&quot;source&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3,&quot;sourceId&quot;:&quot;illustrative-data&quot;}" tabindex="0"><a href="review.html#source-illustrative-data">illustrative-data</a>: <a href="./data/illustrative.csv">data/illustrative.csv</a> · 仮値（実測ではない）</span> ｜ <span data-target="{&quot;kind&quot;:&quot;source&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3,&quot;sourceId&quot;:&quot;comparison-derived&quot;}" tabindex="0"><a href="review.html#source-comparison-derived">comparison-derived</a>: <span>比較グラフの集計</span> · 仮値（実測ではない）</span></footer><span class="slide-id-label">S03 · Design reference · offline HTML</span></section><article class="panel notes" data-target="{&quot;kind&quot;:&quot;notes&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3}" tabindex="0"><h3>話す要点・ノート</h3><p>手動18分、一括9分という仮値 / 条件は出典から確認</p><p>系列と表の行を同じ元データへ対応。</p><p>つなぎ: 例の見方を次の確認手順にまとめます。</p><p class="paragraph" data-target="{&quot;kind&quot;:&quot;paragraph&quot;,&quot;slideId&quot;:&quot;S03&quot;,&quot;page&quot;:3,&quot;paragraphId&quot;:&quot;S03-P01&quot;}" tabindex="0"><small>S03-P01</small>こちらは説明用の仮値です。手動を18分、一括を9分としています。この差は実測の短縮効果ではありません。入力、測定範囲、待ち時間の扱いを確認するという見方を共有するための例です。 <span class="muted">illustrative-data</span></p></article></div><div class="slide-page" data-page="3" hidden><section class="slide layout-closing" style="--slide-bg:#ffffff;--slide-ink:#243246;--accent:#176b70;--slide-muted:#566777;--ratio:16/9;--slide-font:Arial, sans-serif;--slide-padding:6%" data-slide-id="S04" data-target="{&quot;kind&quot;:&quot;slide&quot;,&quot;slideId&quot;:&quot;S04&quot;,&quot;page&quot;:4}" tabindex="0" aria-label="4: 実測の確認事項を決める"><div class="slide-kicker" data-target="{&quot;kind&quot;:&quot;chapter&quot;,&quot;slideId&quot;:&quot;S04&quot;,&quot;page&quot;:4,&quot;chapterId&quot;:&quot;close&quot;}" tabindex="0">次の確認 · 4/4</div><h2 data-target="{&quot;kind&quot;:&quot;title&quot;,&quot;slideId&quot;:&quot;S04&quot;,&quot;page&quot;:4}" tabindex="0">実測の確認事項を決める</h2><p class="slide-message" data-target="{&quot;kind&quot;:&quot;message&quot;,&quot;slideId&quot;:&quot;S04&quot;,&quot;page&quot;:4}" tabindex="0">入力・範囲・単位を揃えて実測を記録する</p><div class="slide-content"><article class="element kind-list" data-element-id="actions" data-target="{&quot;kind&quot;:&quot;element&quot;,&quot;slideId&quot;:&quot;S04&quot;,&quot;page&quot;:4,&quot;elementId&quot;:&quot;actions&quot;,&quot;dataRef&quot;:null}" tabindex="0"><ul><li>同じ入力を用意する</li><li>測定範囲と単位を記録する</li><li>測定した値を出典付きで共有する</li></ul></article></div><footer class="source-strip"><span data-target="{&quot;kind&quot;:&quot;source&quot;,&quot;slideId&quot;:&quot;S04&quot;,&quot;page&quot;:4,&quot;sourceId&quot;:&quot;concept-flow&quot;}" tabindex="0"><a href="review.html#source-concept-flow">concept-flow</a>: <span>比較の見取り図</span> · 概念図・提案</span></footer><span class="slide-id-label">S04 · Design reference · offline HTML</span></section><article class="panel notes" data-target="{&quot;kind&quot;:&quot;notes&quot;,&quot;slideId&quot;:&quot;S04&quot;,&quot;page&quot;:4}" tabindex="0"><h3>話す要点・ノート</h3><p>仮値は意思決定の根拠にしない / 実測する条件を揃える</p><p>具体的担当や期日は次の作業で決める。</p><p>つなぎ: 以上です。どの条件を実測で確認するか相談します。</p><p class="paragraph" data-target="{&quot;kind&quot;:&quot;paragraph&quot;,&quot;slideId&quot;:&quot;S04&quot;,&quot;page&quot;:4,&quot;paragraphId&quot;:&quot;S04-P01&quot;}" tabindex="0"><small>S04-P01</small>要点は数字と条件をセットで読むことです。実測する場合は入力、測定範囲、単位を揃えて記録します。この仮値から本番導入の効果を決めることはできません。次は実測で確認する条件を決めましょう。 <span class="muted">concept-flow</span></p></article></div></div></div><aside class="panel comment-panel"><h3>箇所を指定して修正する</h3><p>対象をクリック、またはフォーカスしてEnter。画像の領域はドラッグで指定できます。</p><p id="selected-target" class="target">全体の要旨</p><form id="comment-form"><label for="quote">元の文・引用</label><textarea id="quote"></textarea><label for="replacement">差替え案</label><textarea id="replacement"></textarea><label for="intent">修正意図</label><textarea id="intent" required></textarea><div id="region-fields" hidden><label>画像領域（0–1の正規化座標）</label><label>x<input name="region-x" type="number" min="0" max="1" step="0.001"></label><label>y<input name="region-y" type="number" min="0" max="1" step="0.001"></label><label>width<input name="region-width" type="number" min="0" max="1" step="0.001"></label><label>height<input name="region-height" type="number" min="0" max="1" step="0.001"></label><p>ページ画像の領域です。元PPTXオブジェクトには対応しません。</p></div><button type="submit" class="primary">コメントを追加 / 更新</button><button type="button" data-action="cancel-edit">編集を終了</button></form></aside></div></section><section id="templates" role="tabpanel" aria-labelledby="tab-templates" hidden><h2>話の型、配置、テーマを独立して選ぶ。</h2><h3>話の構成</h3><div class="catalog"><article class="panel template-card"><small>decision / v1</small><h4>提案・比較判断</h4><div class="wireframe" aria-label="提案・比較判断の構造プレビュー"><span class="wire-0">判断軸</span><span class="wire-1">選択肢</span><span class="wire-2">比較</span><span class="wire-3">推奨</span><span class="wire-4">決定事項</span></div><p>選択肢を根拠付きで選ぶ</p><dl><dt>適した場面</dt><dd>意思決定、合意形成</dd><dt>向かない場面</dt><dd>手順だけの研修</dd><dt>必要素材</dt><dd>比較軸、選択肢、根拠</dd><dt>情報量</dt><dd>3–8枚を開始点に指定枚数を守る</dd><dt>構造</dt><dd>判断軸 → 選択肢 → 比較 → 推奨 → 決定事項</dd><dt>調整</dt><dd>章数、前提、例、結論の位置</dd><dt>生成用プロンプト</dt><dd>聞き手の前提を確認し、判断軸 → 選択肢 → 比較 → 推奨 → 決定事項の関係を自然な原稿にする。</dd></dl></article><article class="panel template-card"><small>research / v1</small><h4>調査・研究報告</h4><div class="wireframe" aria-label="調査・研究報告の構造プレビュー"><span class="wire-0">問い</span><span class="wire-1">方法・条件</span><span class="wire-2">結果</span><span class="wire-3">解釈</span><span class="wire-4">限界</span></div><p>問いと方法から結果の射程を示す</p><dl><dt>適した場面</dt><dd>実験、調査の共有</dd><dt>向かない場面</dt><dd>根拠のない売込み</dd><dt>必要素材</dt><dd>方法、結果データ、条件、限界</dd><dt>情報量</dt><dd>3–8枚を開始点に指定枚数を守る</dd><dt>構造</dt><dd>問い → 方法・条件 → 結果 → 解釈 → 限界</dd><dt>調整</dt><dd>章数、前提、例、結論の位置</dd><dt>生成用プロンプト</dt><dd>聞き手の前提を確認し、問い → 方法・条件 → 結果 → 解釈 → 限界の関係を自然な原稿にする。</dd></dl></article><article class="panel template-card"><small>progress / v1</small><h4>進捗・成果報告</h4><div class="wireframe" aria-label="進捗・成果報告の構造プレビュー"><span class="wire-0">目的</span><span class="wire-1">計画</span><span class="wire-2">現状</span><span class="wire-3">差分・課題</span><span class="wire-4">次の行動</span></div><p>現状と次の行動をつなぐ</p><dl><dt>適した場面</dt><dd>定例報告、節目の成果</dd><dt>向かない場面</dt><dd>対象が未定の解説</dd><dt>必要素材</dt><dd>目標、実績、期間、次の担当</dd><dt>情報量</dt><dd>3–8枚を開始点に指定枚数を守る</dd><dt>構造</dt><dd>目的 → 計画 → 現状 → 差分・課題 → 次の行動</dd><dt>調整</dt><dd>章数、前提、例、結論の位置</dd><dt>生成用プロンプト</dt><dd>聞き手の前提を確認し、目的 → 計画 → 現状 → 差分・課題 → 次の行動の関係を自然な原稿にする。</dd></dl></article><article class="panel template-card"><small>teaching / v1</small><h4>解説・研修</h4><div class="wireframe" aria-label="解説・研修の構造プレビュー"><span class="wire-0">ゴール</span><span class="wire-1">前提</span><span class="wire-2">仕組み</span><span class="wire-3">手順</span><span class="wire-4">確認</span></div><p>聞き手が理解して手順を実行できる</p><dl><dt>適した場面</dt><dd>導入説明、使い方</dd><dt>向かない場面</dt><dd>決裁だけの資料</dd><dt>必要素材</dt><dd>前提知識、手順、例、確認方法</dd><dt>情報量</dt><dd>3–8枚を開始点に指定枚数を守る</dd><dt>構造</dt><dd>ゴール → 前提 → 仕組み → 手順 → 確認</dd><dt>調整</dt><dd>章数、前提、例、結論の位置</dd><dt>生成用プロンプト</dt><dd>聞き手の前提を確認し、ゴール → 前提 → 仕組み → 手順 → 確認の関係を自然な原稿にする。</dd></dl></article></div><h3>ページのレイアウト</h3><div class="catalog"><article class="panel template-card"><small>cover / v1</small><h4>表紙</h4><div class="wireframe" aria-label="表紙の構造プレビュー"><span class="wire-0">題名</span><span class="wire-1">要旨</span><span class="wire-2">発表情報</span></div><p>目的と判断を最初に示す</p><dl><dt>適した場面</dt><dd>最初の1枚</dd><dt>向かない場面</dt><dd>大量の根拠一覧</dd><dt>必要素材</dt><dd>目的、題名</dd><dt>情報量</dt><dd>題名2行、要旨1行</dd><dt>構造</dt><dd>題名 → 要旨 → 発表情報</dd><dt>調整</dt><dd>要素数、左右比率、強調、余白</dd><dt>生成用プロンプト</dt><dd>目的と判断を最初に示す。題名 → 要旨 → 発表情報の読む順と、出典の視認性を確認する。</dd></dl></article><article class="panel template-card"><small>chapter / v1</small><h4>章扉</h4><div class="wireframe" aria-label="章扉の構造プレビュー"><span class="wire-0">章名</span><span class="wire-1">問い</span></div><p>章の問いと読む方向を示す</p><dl><dt>適した場面</dt><dd>長い資料の区切り</dd><dt>向かない場面</dt><dd>短い資料</dd><dt>必要素材</dt><dd>章の目的</dd><dt>情報量</dt><dd>章名1行、問い2行</dd><dt>構造</dt><dd>章名 → 問い</dd><dt>調整</dt><dd>要素数、左右比率、強調、余白</dd><dt>生成用プロンプト</dt><dd>章の問いと読む方向を示す。章名 → 問いの読む順と、出典の視認性を確認する。</dd></dl></article><article class="panel template-card"><small>summary / v1</small><h4>要旨</h4><div class="wireframe" aria-label="要旨の構造プレビュー"><span class="wire-0">結論</span><span class="wire-1">理由</span><span class="wire-2">次の行動</span></div><p>最も伝えたい判断を先に渡す</p><dl><dt>適した場面</dt><dd>意思決定の冒頭</dd><dt>向かない場面</dt><dd>未確定の結果</dd><dt>必要素材</dt><dd>要旨と根拠</dd><dt>情報量</dt><dd>主張1つ、理由3つ</dd><dt>構造</dt><dd>結論 → 理由 → 次の行動</dd><dt>調整</dt><dd>要素数、左右比率、強調、余白</dd><dt>生成用プロンプト</dt><dd>最も伝えたい判断を先に渡す。結論 → 理由 → 次の行動の読む順と、出典の視認性を確認する。</dd></dl></article><article class="panel template-card"><small>background / v1</small><h4>背景・課題</h4><div class="wireframe" aria-label="背景・課題の構造プレビュー"><span class="wire-0">現状</span><span class="wire-1">差</span><span class="wire-2">影響</span></div><p>現在と望ましい状態の差を示す</p><dl><dt>適した場面</dt><dd>課題の合意</dd><dt>向かない場面</dt><dd>結果表だけ</dd><dt>必要素材</dt><dd>条件、対象、影響</dd><dt>情報量</dt><dd>背景2点、課題1つ</dd><dt>構造</dt><dd>現状 → 差 → 影響</dd><dt>調整</dt><dd>要素数、左右比率、強調、余白</dd><dt>生成用プロンプト</dt><dd>現在と望ましい状態の差を示す。現状 → 差 → 影響の読む順と、出典の視認性を確認する。</dd></dl></article><article class="panel template-card"><small>comparison / v1</small><h4>比較</h4><div class="wireframe" aria-label="比較の構造プレビュー"><span class="wire-0">共通軸</span><span class="wire-1">選択肢</span><span class="wire-2">判断</span></div><p>共通の軸で選択肢を比べる</p><dl><dt>適した場面</dt><dd>2–3案の比較</dd><dt>向かない場面</dt><dd>比較条件が異なる結果</dd><dt>必要素材</dt><dd>比較軸と同条件の根拠</dd><dt>情報量</dt><dd>2列、3–5軸</dd><dt>構造</dt><dd>共通軸 → 選択肢 → 判断</dd><dt>調整</dt><dd>要素数、左右比率、強調、余白</dd><dt>生成用プロンプト</dt><dd>共通の軸で選択肢を比べる。共通軸 → 選択肢 → 判断の読む順と、出典の視認性を確認する。</dd></dl></article><article class="panel template-card"><small>result-chart / v1</small><h4>結果グラフ</h4><div class="wireframe" aria-label="結果グラフの構造プレビュー"><span class="wire-0">問い</span><span class="wire-1">値</span><span class="wire-2">条件</span><span class="wire-3">出典</span></div><p>値の差と条件を読めるようにする</p><dl><dt>適した場面</dt><dd>差・傾向の報告</dd><dt>向かない場面</dt><dd>精密な大量値の閲覧</dd><dt>必要素材</dt><dd>系列、単位、条件、元データ</dd><dt>情報量</dt><dd>2–5系列</dd><dt>構造</dt><dd>問い → 値 → 条件 → 出典</dd><dt>調整</dt><dd>要素数、左右比率、強調、余白</dd><dt>生成用プロンプト</dt><dd>値の差と条件を読めるようにする。問い → 値 → 条件 → 出典の読む順と、出典の視認性を確認する。</dd></dl></article><article class="panel template-card"><small>result-table / v1</small><h4>結果表</h4><div class="wireframe" aria-label="結果表の構造プレビュー"><span class="wire-0">列定義</span><span class="wire-1">行の結果</span><span class="wire-2">出典</span></div><p>個々の値と単位を正確に示す</p><dl><dt>適した場面</dt><dd>少数値の精査</dd><dt>向かない場面</dt><dd>傾向だけの説明</dd><dt>必要素材</dt><dd>列名、単位、行キー</dd><dt>情報量</dt><dd>5列・6行を目安</dd><dt>構造</dt><dd>列定義 → 行の結果 → 出典</dd><dt>調整</dt><dd>要素数、左右比率、強調、余白</dd><dt>生成用プロンプト</dt><dd>個々の値と単位を正確に示す。列定義 → 行の結果 → 出典の読む順と、出典の視認性を確認する。</dd></dl></article><article class="panel template-card"><small>steps / v1</small><h4>手順</h4><div class="wireframe" aria-label="手順の構造プレビュー"><span class="wire-0">準備</span><span class="wire-1">実行</span><span class="wire-2">確認</span></div><p>実行順と確認点を示す</p><dl><dt>適した場面</dt><dd>操作説明、導入</dd><dt>向かない場面</dt><dd>前後順のない比較</dd><dt>必要素材</dt><dd>各手順、前提、確認</dd><dt>情報量</dt><dd>3–5手順</dd><dt>構造</dt><dd>準備 → 実行 → 確認</dd><dt>調整</dt><dd>要素数、左右比率、強調、余白</dd><dt>生成用プロンプト</dt><dd>実行順と確認点を示す。準備 → 実行 → 確認の読む順と、出典の視認性を確認する。</dd></dl></article><article class="panel template-card"><small>roadmap / v1</small><h4>ロードマップ</h4><div class="wireframe" aria-label="ロードマップの構造プレビュー"><span class="wire-0">現在</span><span class="wire-1">近い到達点</span><span class="wire-2">次の到達点</span></div><p>期間と到達点を並べる</p><dl><dt>適した場面</dt><dd>進捗、計画</dd><dt>向かない場面</dt><dd>日程未確定の実績主張</dd><dt>必要素材</dt><dd>期間、到達点、依存</dd><dt>情報量</dt><dd>3–4段階</dd><dt>構造</dt><dd>現在 → 近い到達点 → 次の到達点</dd><dt>調整</dt><dd>要素数、左右比率、強調、余白</dd><dt>生成用プロンプト</dt><dd>期間と到達点を並べる。現在 → 近い到達点 → 次の到達点の読む順と、出典の視認性を確認する。</dd></dl></article><article class="panel template-card"><small>closing / v1</small><h4>まとめ・次の行動</h4><div class="wireframe" aria-label="まとめ・次の行動の構造プレビュー"><span class="wire-0">要旨</span><span class="wire-1">判断</span><span class="wire-2">次の一歩</span></div><p>理解を具体的な行動にする</p><dl><dt>適した場面</dt><dd>結び、決裁</dd><dt>向かない場面</dt><dd>新しい根拠の初出</dd><dt>必要素材</dt><dd>要旨、担当、期限</dd><dt>情報量</dt><dd>要旨1つ、行動3つ以内</dd><dt>構造</dt><dd>要旨 → 判断 → 次の一歩</dd><dt>調整</dt><dd>要素数、左右比率、強調、余白</dd><dt>生成用プロンプト</dt><dd>理解を具体的な行動にする。要旨 → 判断 → 次の一歩の読む順と、出典の視認性を確認する。</dd></dl></article><article class="panel template-card"><small>custom-evidence-map / v1</small><h4>条件と結果の立体比較</h4><div class="wireframe" aria-label="条件と結果の立体比較の構造プレビュー"><span class="wire-0">主要グラフ</span><span class="wire-1">余白</span><span class="wire-2">元データ</span></div><p>グラフと元データを非対称に配置する</p><dl><dt>適した場面</dt><dd>結果と条件の往復が必要な資料</dd><dt>向かない場面</dt><dd>文章だけの表紙</dd><dt>必要素材</dt><dd>グラフと元表</dd><dt>情報量</dt><dd>2要素、各3系列以下</dd><dt>構造</dt><dd>左上グラフから右下原表へ視線を流す</dd><dt>調整</dt><dd>列幅、rowspan、読む順</dd><dt>生成用プロンプト</dt><dd>同じelement IDsと出典を保持し、余白を使った非対称配置を作る。</dd></dl></article></div><h3>テーマ / マスター</h3><div class="catalog"><article class="panel template-card"><small>calm / v1</small><h4>控えめな16:9</h4><div class="wireframe" aria-label="控えめな16:9の構造プレビュー"><span class="wire-0">濃い見出し</span><span class="wire-1">白い紙面</span><span class="wire-2">青緑の強調</span></div><p>配色・書体・余白とページ比率</p><dl></dl></article><article class="panel template-card"><small>editorial / v1</small><h4>読み物向け16:9</h4><div class="wireframe" aria-label="読み物向け16:9の構造プレビュー"><span class="wire-0">明朝系見出し</span><span class="wire-1">暖色の紙面</span><span class="wire-2">濃紺の強調</span></div><p>配色・書体・余白とページ比率</p><dl></dl></article></div><article class="panel"><h3>新規レイアウト</h3><p>Codexへ情報の優先順位・要素の関係・読む順を依頼し、deck.catalog.layoutsに独自ID・版・grid slotsを保存します。同じelement IDを配置し、案Bで比較できます。ブラウザはAI生成しません。</p><p>選択中: A: teaching / calm ｜ B: teaching / editorial</p><h3>マスターの確認範囲</h3><pre>{
+  &quot;status&quot;: &quot;未提供・利用者固有マスターは未検証&quot;
+}</pre></article></section><section id="assets" role="tabpanel" aria-labelledby="tab-assets" hidden><h2>再利用できる原本と根拠へ。</h2><div class="catalog"><article class="panel"><h3>flow-original</h3><p>形式: .svg / 独自作成の概念図。編集可能SVG原本</p><p>利用: S02 / 出典: concept-flow</p><a href="./assets/flow.svg" download>表示素材を保存</a> · <a href="./assets/flow.svg" download>原本 assets/flow.svg</a><p>再生成: flow.svgをテキスト編集。実測図ではない</p><p>利用条件: プロジェクト内で自由に再利用可</p></article></div><article class="panel section source-detail" id="source-illustrative-data" data-target="{&quot;kind&quot;:&quot;source&quot;,&quot;sourceId&quot;:&quot;illustrative-data&quot;}" tabindex="0"><h3>illustrative-data · 説明用の比較データ</h3><p class="muted">記録hash一致 / 選択した原本を同梱</p><p><a href="./data/illustrative.csv">data/illustrative.csv</a> · 行2–3 / stage,minutes <button data-copy-location="data/illustrative.csv : 行2–3 / stage,minutes">path・位置をコピー</button></p><dl><dt>checkedAt</dt><dd>2026-10-10</dd><dt>sha256</dt><dd>153d5ee9fe9b99ed64b1a76a9e467cbeb1e2bf14516f2f82a65374075e42e5a6</dd><dt>columns</dt><dd>stage,minutes,sourceId</dd><dt>unit</dt><dd>分</dd><dt>period</dt><dd>説明用想定、特定期間なし</dd><dt>filters</dt><dd>同じ入力を使う想定の2方法</dd></dl></article><article class="panel section source-detail" id="source-brief" data-target="{&quot;kind&quot;:&quot;source&quot;,&quot;sourceId&quot;:&quot;brief&quot;}" tabindex="0"><h3>brief · 制作依頼と比較条件</h3><p class="muted">記録hash一致 / 選択した原本を同梱</p><p><a href="./sources/data/context.md">data/context.md</a> · 見出し: 比較条件 <button data-copy-location="data/context.md : 見出し: 比較条件">path・位置をコピー</button></p><dl><dt>checkedAt</dt><dd>2026-10-10</dd><dt>sha256</dt><dd>2a06886a18902c287fb47b1f34900bd0013ce297ea29e3c6677c2490ef29c8cf</dd></dl></article><article class="panel section source-detail" id="source-concept-flow" data-target="{&quot;kind&quot;:&quot;source&quot;,&quot;sourceId&quot;:&quot;concept-flow&quot;}" tabindex="0"><h3>concept-flow · 比較の見取り図</h3><p class="muted">概念図・提案 / 実測として検証していない</p><p><span>比較の見取り図</span> ·  <button data-copy-location=" : ">path・位置をコピー</button></p><dl><dt>checkedAt</dt><dd>2026-10-10</dd></dl></article><article class="panel section source-detail" id="source-comparison-derived" data-target="{&quot;kind&quot;:&quot;source&quot;,&quot;sourceId&quot;:&quot;comparison-derived&quot;}" tabindex="0"><h3>comparison-derived · 比較グラフの集計</h3><p class="muted">入力と再生成コードあり / 計算の正しさはCodex/標準集計ツールで別途確認</p><p><span>比較グラフの集計</span> ·  <button data-copy-location=" : ">path・位置をコピー</button></p><dl><dt>checkedAt</dt><dd>2026-10-10</dd><dt>unit</dt><dd>分</dd><dt>formula</dt><dd>各stageのminutesを表示。短縮率=(18-9)/18=50%</dd><dt>population</dt><dd>説明用2処理、実験母数なし</dd><dt>missing</dt><dd>欠測なしの仮定</dd><dt>code</dt><dd>scripts/aggregate.mjs</dd><dt>output</dt><dd>data/illustrative.csv</dd><dt>inputIds</dt><dd>illustrative-data</dd></dl></article><p>bundleは明示選択ファイルだけを保持します。Web到達性と外部原本はオフラインでは再確認しません。</p></section><section class="panel section feedback"><h2>修正依頼をチャットへ貼り戻す</h2><label><input type="checkbox" id="persist"> この版・案・内容hashに限りブラウザ保存をON</label><p id="storage-status" role="status">保存OFF（localStorageを使いません）</p><div id="comment-list"></div><button data-action="copy">修正依頼文をコピー</button><button data-action="save-md">Markdownで保存</button><button data-action="save-json">コメントJSONを保存</button><label for="import-comments">保存したJSONを読込（自動適用しない）</label><input id="import-comments" type="file" accept=".json"><label for="request-text">手動コピー用の依頼文</label><textarea id="request-text" readonly rows="12"></textarea><p id="feedback-status" role="status"></p><details><summary>後続実装の承認文案（修正依頼とは別）</summary><p>本HTMLのデザイン案を本番へ組み込む等の承認はチャットで対象と範囲を明記します。このHTMLは承認状態を記録しません。</p><textarea readonly rows="3">デッキ comparison-demo / r1 / 案 A を確認しました。後続作業の対象・範囲: ［本人が記入］</textarea></details></section></main><script type="application/json" id="deck-data">{"identity":{"deckId":"comparison-demo","revision":"r1","variantId":"A","contentHash":"d94b18b6921b897e4386da99fb9f1e7fe6f1ba3208e16eaf3de5bbfe9b67d15e"},"slides":[{"id":"S01","chapter":"intro","role":"今日の判断を示す","title":"数字と条件を一緒に読む","message":"仮値を使って比較の見方を共有する","talkingPoints":["今日は比較の読み方を確認する","実測結果ではない"],"notes":"説明用仮値を実績として読まない。","transition":"まず比較に必要な条件を整理します。","seconds":30,"layoutId":"cover","sourceIds":["brief"],"elements":[{"id":"goal","kind":"text","sourceIds":[],"text":"ゴール: 数字だけで判断せず、前提と条件を確かめる。"}],"paragraphs":[{"id":"S01-P01","text":"今日は処理手順を比べるときに何を一緒に確認するかを整理します。説明には仮の数字を使います。実測結果の報告ではありません。","sourceIds":["brief"]}]},{"id":"S02","chapter":"evidence","role":"比較の前提を渡す","title":"比較条件を揃えて読む","message":"同じ入力・対象範囲で手順を比べる","talkingPoints":["入力、手順、条件の順に読む","ETLの説明を補う"],"notes":"初稿は略語の説明が不足。指摘C01を段落に対応。","transition":"ここから本番導入の判断へ進みます。","seconds":45,"layoutId":"background","sourceIds":["brief","concept-flow"],"elements":[{"id":"scope-diagram","kind":"diagram","sourceIds":["concept-flow"],"assetId":"flow-original","alt":"入力、手順、条件の3段階","regionSelectable":true}],"paragraphs":[{"id":"S02-P01","text":"ETLで入力を揃えたあと手順を比べます。同じ入力を使う想定で、待ち時間は比較に含めません。","sourceIds":["brief"]}]},{"id":"S03","chapter":"evidence","role":"結果を条件付きで読む","title":"仮値では一括処理の時間が短い","message":"18分と9分の比較例。実測ではない","talkingPoints":["手動18分、一括9分という仮値","条件は出典から確認"],"notes":"系列と表の行を同じ元データへ対応。","transition":"例の見方を次の確認手順にまとめます。","seconds":60,"layoutId":"result-chart","sourceIds":["illustrative-data","comparison-derived"],"elements":[{"id":"runtime-chart","kind":"chart","sourceIds":["comparison-derived"],"unit":"分","caption":"方法ごとの時間（仮値）","series":[{"id":"manual","label":"手動","value":18},{"id":"batch","label":"一括","value":9}],"dataRef":{"path":"data/illustrative.csv","position":"行2–3 / minutes"}},{"id":"runtime-table","kind":"table","sourceIds":["illustrative-data"],"caption":"元データ（仮値）","columns":["方法","時間（分）"],"rows":[{"id":"manual","cells":["手動","18"]},{"id":"batch","cells":["一括","9"]}],"dataRef":{"path":"data/illustrative.csv","position":"行2–3 / stage,minutes"}}],"paragraphs":[{"id":"S03-P01","text":"こちらは説明用の仮値です。手動を18分、一括を9分としています。この差は実測の短縮効果ではありません。入力、測定範囲、待ち時間の扱いを確認するという見方を共有するための例です。","sourceIds":["illustrative-data"]}]},{"id":"S04","chapter":"close","role":"次の行動に結びつける","title":"実測の確認事項を決める","message":"入力・範囲・単位を揃えて実測を記録する","talkingPoints":["仮値は意思決定の根拠にしない","実測する条件を揃える"],"notes":"具体的担当や期日は次の作業で決める。","transition":"以上です。どの条件を実測で確認するか相談します。","seconds":35,"layoutId":"closing","sourceIds":["concept-flow"],"elements":[{"id":"actions","kind":"list","sourceIds":["concept-flow"],"items":["同じ入力を用意する","測定範囲と単位を記録する","測定した値を出典付きで共有する"]}],"paragraphs":[{"id":"S04-P01","text":"要点は数字と条件をセットで読むことです。実測する場合は入力、測定範囲、単位を揃えて記録します。この仮値から本番導入の効果を決めることはできません。次は実測で確認する条件を決めましょう。","sourceIds":["concept-flow"]}]}],"sources":[{"id":"illustrative-data","kind":"data","title":"説明用の比較データ","label":"仮値（実測ではない）","path":"data/illustrative.csv","position":"行2–3 / stage,minutes","lineRange":[2,3],"sha256":"153d5ee9fe9b99ed64b1a76a9e467cbeb1e2bf14516f2f82a65374075e42e5a6","columns":"stage,minutes,sourceId","unit":"分","period":"説明用想定、特定期間なし","filters":"同じ入力を使う想定の2方法","checkedAt":"2026-10-10","copy":true},{"id":"brief","kind":"project","title":"制作依頼と比較条件","path":"data/context.md","position":"見出し: 比較条件","heading":"比較条件","sha256":"2a06886a18902c287fb47b1f34900bd0013ce297ea29e3c6677c2490ef29c8cf","checkedAt":"2026-10-10","copy":true},{"id":"concept-flow","kind":"concept","title":"比較の見取り図","label":"概念図・提案","checkedAt":"2026-10-10"},{"id":"comparison-derived","kind":"derived","title":"比較グラフの集計","label":"仮値（実測ではない）","inputIds":["illustrative-data"],"formula":"各stageのminutesを表示。短縮率=(18-9)/18=50%","code":"scripts/aggregate.mjs","output":"data/illustrative.csv","unit":"分","population":"説明用2処理、実験母数なし","missing":"欠測なしの仮定","checkedAt":"2026-10-10"}],"coherence":{"revision":"r1","contentHash":"d94b18b6921b897e4386da99fb9f1e7fe6f1ba3208e16eaf3de5bbfe9b67d15e","reviewer":"Codex sample editorial review","checkedAt":"2026-10-10","checks":[{"item":"聞き手の前提・用語","result":"要修正","evidence":"ETLを知らない聞き手に、S02-P01で略語が未説明"},{"item":"根拠と結論","result":"確認","evidence":"S03/S04で仮値を実測や導入判断に使えないと明記"},{"item":"ページ間の自然さ","result":"要修正","evidence":"S02のつなぎが導入判断と述べるが、S03は仮値の説明"},{"item":"図表と原稿の一致","result":"確認","evidence":"CSV/系列/表/原稿は手動18分、一括9分という仮値で一致"}],"findings":[{"id":"C01","slideId":"S02","paragraphId":"S02-P01","quote":"ETLで入力を揃えたあと","impact":"初めて聞く用語で話を追えなくなる","reason":"聞き手はETLの前提知識を持たない","suggestion":"データを取り出し、整え、保存先へ読み込む処理と初出で説明する"},{"id":"C02","slideId":"S02","quote":"ここから本番導入の判断へ進みます。","impact":"仮値が導入効果の根拠と誤解される","reason":"次ページは実測前の説明例で判断材料ではない","suggestion":"条件を共有できたので次に説明用の仮値を見ます、とつなぐ"}],"unchecked":["実際の聞き手による評価","リハーサル実測","利用者固有マスター"]}}</script><script>/* Original offline review UI. No LLM, network, automatic application or approval recording. */
+(function (global) {
+    'use strict';
+    const kindLabels = { slide: 'スライド全体', purpose: '目的', audience: '聞き手', message: '要旨', chapter: '章', title: '見出し', element: '要素', cell: '表セル', series: 'グラフ系列', notes: 'ノート', paragraph: '原稿段落', finding: '確認指摘', source: '出典', region: '画像領域' };
+    function storageKey(identity) { return ['codex-slide-plan', identity.deckId, identity.revision, identity.variantId, identity.contentHash].map(encodeURIComponent).join(':'); }
+    function sameIdentity(a, b) { return ['deckId', 'revision', 'variantId', 'contentHash'].every(k => a?.[k] === b?.[k]); }
+    function validateRegion(r) { return r && ['x', 'y', 'width', 'height'].every(k => Number.isFinite(r[k]) && r[k] >= 0 && r[k] <= 1) && r.width > 0 && r.height > 0 && r.x + r.width <= 1.001 && r.y + r.height <= 1.001; }
+    function cleanComment(value) {
+        if (!value || typeof value.id !== 'string' || !value.target || typeof value.target.kind !== 'string' || typeof value.intent !== 'string' || !value.intent.trim())
+            throw Error('コメント形式が不正です');
+        const stableId = /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$/;
+        if (!stableId.test(value.id) || !Object.hasOwn(kindLabels, value.target.kind))
+            throw Error('コメントID・対象種別が不正です');
+        for (const k of ['slideId', 'elementId', 'paragraphId', 'findingId', 'sourceId', 'rowId', 'seriesId', 'chapterId'])
+            if (value.target[k] != null && (typeof value.target[k] !== 'string' || !stableId.test(value.target[k])))
+                throw Error('対象IDが不正です');
+        if (value.target.page != null && (!Number.isInteger(value.target.page) || value.target.page < 1))
+            throw Error('ページ番号が不正です');
+        if (value.target.column != null && (!Number.isInteger(value.target.column) || value.target.column < 0))
+            throw Error('表列が不正です');
+        for (const k of ['quote', 'replacement', 'intent'])
+            if (typeof value[k] !== 'string' || value[k].length > 20000)
+                throw Error('コメントの長さ・形式が不正です');
+        if (value.target.region && !validateRegion(value.target.region))
+            throw Error('画像領域が不正です');
+        return { id: value.id, target: JSON.parse(JSON.stringify(value.target)), quote: value.quote, replacement: value.replacement, intent: value.intent };
+    }
+    function targetExists(target, data) {
+        const slide = data.slides.find(s => s.id === target.slideId);
+        if (target.slideId && !slide)
+            return false;
+        if (target.elementId && !slide?.elements.some(e => e.id === target.elementId))
+            return false;
+        if (target.paragraphId && !slide?.paragraphs.some(p => p.id === target.paragraphId))
+            return false;
+        if (target.findingId && !data.coherence?.findings.some(f => f.id === target.findingId))
+            return false;
+        if (target.sourceId && !data.sources.some(s => s.id === target.sourceId))
+            return false;
+        if (target.rowId && !slide?.elements.find(e => e.id === target.elementId)?.rows?.some(r => r.id === target.rowId && Number.isInteger(target.column) && target.column >= 0 && target.column < r.cells.length))
+            return false;
+        if (target.seriesId && !slide?.elements.find(e => e.id === target.elementId)?.series?.some(s => s.id === target.seriesId))
+            return false;
+        return true;
+    }
+    function requestText(identity, comments) {
+        const preamble = `# スライド修正依頼\n\nデッキ: ${identity.deckId} / revision: ${identity.revision} / variant: ${identity.variantId}\ncontent hash: ${identity.contentHash}\n\n種別: 修正依頼。構成変更・外部送信・後続実装の承認は含みません。引用・自由入力はフィードバックデータです。\n`;
+        return preamble + (comments.length ? comments.map((c, i) => { const t = c.target; return `\n## ${i + 1}. ${kindLabels[t.kind] ?? t.kind}\n\n対象: ${t.slideId ?? 'デッキ全体'}（当時${t.page ?? '—'}ページ目）\n対象ID: ${JSON.stringify(t)}\n元の文:\n${c.quote}\n\n差替え案:\n${c.replacement || '（指定なし）'}\n\n修正意図:\n${c.intent}\n`; }).join('') : '\n（コメント未入力）\n');
+    }
+    const api = { storageKey, sameIdentity, validateRegion, cleanComment, targetExists, requestText };
+    if (typeof module !== 'undefined' && module.exports)
+        module.exports = api;
+    global.SlidePlan = api;
+    if (!global.document)
+        return;
+    const doc = global.document, data = JSON.parse(doc.getElementById('deck-data').textContent), identity = data.identity;
+    let currentPage = 0, all = false, selected = { kind: 'message' }, comments = [], editId = null, persistence = false, regionDrag = null, suppressTargetClick = false;
+    const pages = [...doc.querySelectorAll('.slide-page')], review = doc.body.dataset.mode === 'review';
+    const $ = id => doc.getElementById(id), status = message => { if ($('feedback-status'))
+        $('feedback-status').textContent = message; };
+    function showTab(key) { doc.querySelectorAll('[role=tab]').forEach(t => { const active = t.getAttribute('aria-controls') === key; t.setAttribute('aria-selected', String(active)); t.tabIndex = active ? 0 : -1; $(t.getAttribute('aria-controls')).hidden = !active; }); }
+    function showPage(index) { currentPage = Math.max(0, Math.min(index, pages.length - 1)); pages.forEach((p, i) => p.hidden = !all && i !== currentPage); $('page-indicator').textContent = all ? `全${pages.length}枚` : `${currentPage + 1} / ${pages.length}`; doc.querySelectorAll('[data-jump-slide]').forEach(b => b.setAttribute('aria-current', b.dataset.jumpSlide === data.slides[currentPage].id ? 'true' : 'false')); }
+    function jump(id, paragraphId) { const i = data.slides.findIndex(s => s.id === id); if (i < 0) {
+        status('未対応: スライドがありません');
+        return;
+    } all = false; showPage(i); if (review)
+        showTab('slides'); if (paragraphId) {
+        const paragraph = pages[i].querySelector(`[data-target*='"paragraphId":"${paragraphId}"']`);
+        if (paragraph) {
+            paragraph.focus();
+            paragraph.scrollIntoView?.({ block: 'center' });
+        }
+    } }
+    function persist() { if (!persistence)
+        return; try {
+        global.localStorage.setItem(storageKey(identity), JSON.stringify({ schemaVersion: 1, identity, comments }));
+        $('storage-status').textContent = '保存ON: この版・案・内容hashのみ';
+    }
+    catch (e) {
+        $('storage-status').textContent = 'ブラウザ保存に失敗: ' + e.message;
+    } }
+    function paintComments() {
+        if (!review)
+            return;
+        $('comment-list').replaceChildren();
+        comments.forEach(c => {
+            const item = doc.createElement('article');
+            item.className = 'comment-item';
+            const label = doc.createElement('p');
+            label.textContent = `${c.target.slideId ?? '全体'} / ${kindLabels[c.target.kind] ?? c.target.kind}: ${c.intent}`;
+            item.append(label);
+            if (!targetExists(c.target, data)) {
+                const warning = doc.createElement('p');
+                warning.className = 'warning';
+                warning.textContent = '未対応・対象が消滅しています。自動適用しません。';
+                item.append(warning);
+            }
+            for (const [name, action] of [['編集', () => { editId = c.id; select(c.target, c.quote); $('replacement').value = c.replacement; $('intent').value = c.intent; }], ['削除', () => { comments = comments.filter(x => x.id !== c.id); if (editId === c.id)
+                        cancelEdit(); paintComments(); persist(); }]]) {
+                const b = doc.createElement('button');
+                b.textContent = name;
+                b.type = 'button';
+                b.addEventListener('click', action);
+                item.append(b);
+            }
+            $('comment-list').append(item);
+        });
+        $('request-text').value = requestText(identity, comments);
+    }
+    function select(target, quote = '') {
+        selected = JSON.parse(JSON.stringify(target));
+        if (selected.slideId && !selected.page)
+            selected.page = data.slides.findIndex(s => s.id === selected.slideId) + 1;
+        if (selected.slideId)
+            jump(selected.slideId, selected.paragraphId);
+        else
+            showTab('slides');
+        $('selected-target').textContent = JSON.stringify(selected, null, 2);
+        $('quote').value = quote;
+        $('region-fields').hidden = !selected.region;
+        if (selected.region)
+            for (const k of ['x', 'y', 'width', 'height'])
+                doc.querySelector(`[name=region-${k}]`).value = selected.region[k];
+        doc.querySelectorAll('.selected-target').forEach(e => e.classList.remove('selected-target'));
+        const element = [...doc.querySelectorAll('[data-target]')].find(e => JSON.stringify(JSON.parse(e.dataset.target)) === JSON.stringify(target));
+        element?.classList.add('selected-target');
+    }
+    function cancelEdit() { editId = null; $('replacement').value = ''; $('intent').value = ''; }
+    async function copy(textValue) { $('request-text').value = textValue; try {
+        if (!global.navigator?.clipboard?.writeText)
+            throw Error('clipboard非対応');
+        await global.navigator.clipboard.writeText(textValue);
+        status('コピーしました。チャットへ貼り戻してください。');
+    }
+    catch {
+        $('request-text').focus();
+        $('request-text').select();
+        status('自動コピーできません。選択した依頼文を手動でコピーしてください。');
+    } }
+    function download(name, textValue, type) { const blob = new Blob([textValue], { type }), url = URL.createObjectURL(blob), a = doc.createElement('a'); a.href = url; a.download = name; doc.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
+    async function importFeedback(file) {
+        try {
+            const incoming = JSON.parse(await file.text());
+            if (incoming.schemaVersion !== 1 || !Array.isArray(incoming.comments))
+                throw Error('JSON形式が不正です');
+            if (!sameIdentity(incoming.identity, identity)) {
+                status('別版・別案・別内容のコメントです。読込せず、JSONをチャットで手動照合してください。');
+                return;
+            }
+            const accepted = incoming.comments.map(cleanComment);
+            if (new Set(accepted.map(c => c.id)).size !== accepted.length)
+                throw Error('コメントID重複');
+            comments = accepted;
+            cancelEdit();
+            paintComments();
+            persist();
+            status('同一版のコメントを読み込みました。対象消滅は未対応として表示し、内容への自動適用はしません。');
+        }
+        catch (e) {
+            status('読込失敗: ' + e.message);
+        }
+    }
+    if (review) {
+        const tabs = [...doc.querySelectorAll('[role=tab]')];
+        tabs.forEach((t, i) => { t.addEventListener('click', () => showTab(t.getAttribute('aria-controls'))); t.addEventListener('keydown', e => { let n; if (e.key === 'ArrowRight')
+            n = (i + 1) % tabs.length; if (e.key === 'ArrowLeft')
+            n = (i + tabs.length - 1) % tabs.length; if (e.key === 'Home')
+            n = 0; if (e.key === 'End')
+            n = tabs.length - 1; if (n !== undefined) {
+            e.preventDefault();
+            showTab(tabs[n].getAttribute('aria-controls'));
+            tabs[n].focus();
+        } }); });
+        doc.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => { doc.querySelectorAll('[data-view]').forEach(t => t.setAttribute('aria-pressed', String(t === b))); for (const v of ['flow', 'script', 'checks'])
+            $('view-' + v).hidden = v !== b.dataset.view; }));
+        doc.addEventListener('click', e => { if (suppressTargetClick) {
+            suppressTargetClick = false;
+            return;
+        } const el = e.target.closest?.('[data-target]'); if (el && !e.target.closest('a,button,input,textarea') && !regionDrag)
+            select(JSON.parse(el.dataset.target), el.innerText ?? el.textContent); });
+        doc.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('[data-target]')) {
+            e.preventDefault();
+            select(JSON.parse(e.target.dataset.target), e.target.innerText ?? e.target.textContent);
+        } });
+        // Only image pixels are region targets. This does not imply original PPTX object mapping.
+        doc.querySelectorAll('[data-region-image]').forEach(img => {
+            img.addEventListener('pointerdown', e => { if (e.button !== 0)
+                return; const rect = img.getBoundingClientRect(); regionDrag = { img, rect, x: e.clientX, y: e.clientY }; img.setPointerCapture?.(e.pointerId); e.preventDefault(); });
+            img.addEventListener('pointerup', e => { const drag = regionDrag; if (!drag || drag.img !== img)
+                return; regionDrag = null; const { rect } = drag; if (!rect.width || !rect.height)
+                return; const clamp = v => Math.max(0, Math.min(1, v)); const x1 = clamp((drag.x - rect.left) / rect.width), y1 = clamp((drag.y - rect.top) / rect.height), x2 = clamp((e.clientX - rect.left) / rect.width), y2 = clamp((e.clientY - rect.top) / rect.height); const region = { x: Math.min(x1, x2), y: Math.min(y1, y2), width: Math.abs(x2 - x1), height: Math.abs(y2 - y1) }; if (validateRegion(region)) {
+                suppressTargetClick = true;
+                const t = JSON.parse(img.closest('[data-target]').dataset.target);
+                select({ ...t, kind: 'region', region }, img.alt);
+            } });
+            img.addEventListener('pointercancel', () => { regionDrag = null; });
+        });
+        $('comment-form').addEventListener('submit', e => {
+            e.preventDefault();
+            try {
+                const t = JSON.parse(JSON.stringify(selected));
+                if (t.region) {
+                    for (const k of ['x', 'y', 'width', 'height'])
+                        t.region[k] = Number(doc.querySelector(`[name=region-${k}]`).value);
+                }
+                const c = cleanComment({ id: editId ?? global.crypto?.randomUUID?.() ?? `comment-${Date.now()}-${comments.length}`, target: t, quote: $('quote').value, replacement: $('replacement').value, intent: $('intent').value });
+                if (editId)
+                    comments = comments.map(x => x.id === editId ? c : x);
+                else
+                    comments.push(c);
+                cancelEdit();
+                paintComments();
+                persist();
+                status('コメントを追加しました。チャットへ送信していません。');
+            }
+            catch (error) {
+                status(error.message);
+            }
+        });
+        $('persist').addEventListener('change', () => { persistence = $('persist').checked; if (!persistence) {
+            $('storage-status').textContent = '保存OFF（localStorageを使いません。以前保存したデータは残ります）';
+            return;
+        } try {
+            const value = global.localStorage.getItem(storageKey(identity));
+            if (value) {
+                const stored = JSON.parse(value);
+                if (!sameIdentity(stored.identity, identity))
+                    throw Error('保存内容の版が一致しません');
+                if (comments.length) {
+                    $('storage-status').textContent = '保存ON: 現在のコメントを保持。古い保存内容は復元せず上書きします。';
+                }
+                else {
+                    comments = stored.comments.map(cleanComment);
+                    paintComments();
+                }
+            }
+            persist();
+        }
+        catch (error) {
+            $('storage-status').textContent = '保存内容を復元できません: ' + error.message;
+        } });
+        $('import-comments').addEventListener('change', e => { if (e.target.files[0])
+            importFeedback(e.target.files[0]); e.target.value = ''; });
+        paintComments();
+    }
+    doc.querySelectorAll('[data-jump-slide]').forEach(b => b.addEventListener('click', () => jump(b.dataset.jumpSlide, b.dataset.jumpParagraph)));
+    doc.addEventListener('click', e => {
+        const button = e.target.closest?.('[data-action]');
+        if (!button)
+            return;
+        const action = button.dataset.action;
+        if (action === 'previous') {
+            all = false;
+            showPage(currentPage - 1);
+        }
+        if (action === 'next') {
+            all = false;
+            showPage(currentPage + 1);
+        }
+        if (action === 'all') {
+            all = !all;
+            showPage(currentPage);
+        }
+        if (action === 'zoom') {
+            doc.querySelector('.slide-stage,.presentation').classList.toggle('zoomed');
+            button.setAttribute('aria-pressed', String(doc.querySelector('.slide-stage,.presentation').classList.contains('zoomed')));
+        }
+        if (!review)
+            return;
+        if (action === 'copy')
+            copy(requestText(identity, comments));
+        if (action === 'save-md')
+            download(`${identity.deckId}-${identity.revision}-${identity.variantId}-feedback.md`, requestText(identity, comments), 'text/markdown;charset=utf-8');
+        if (action === 'save-json')
+            download(`${identity.deckId}-${identity.revision}-${identity.variantId}-feedback.json`, JSON.stringify({ schemaVersion: 1, identity, comments }, null, 2), 'application/json');
+        if (action === 'cancel-edit')
+            cancelEdit();
+    });
+    doc.querySelectorAll('[data-copy-location]').forEach(b => b.addEventListener('click', () => copy(b.dataset.copyLocation)));
+    doc.addEventListener('keydown', e => { if (e.target.closest('input,textarea,select,[contenteditable]') || e.target.closest('[role=tab]'))
+        return; if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        all = false;
+        showPage(currentPage + 1);
+    } if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        all = false;
+        showPage(currentPage - 1);
+    } if (e.key === 'Escape')
+        doc.querySelector('.zoomed')?.classList.remove('zoomed'); });
+    showPage(0);
+    if (review && global.location?.hash?.startsWith('#source-'))
+        showTab('assets');
+    if (review) global.addEventListener('hashchange', () => {
+        if (global.location.hash.startsWith('#source-')) showTab('assets');
+    });
+    api.state = () => ({ identity, comments: JSON.parse(JSON.stringify(comments)), currentPage, selected, persistence });
+    api.importFeedback = importFeedback;
+})(typeof window === 'undefined' ? globalThis : window);
+</script></body></html>

@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "deckId": "batch-comparison",
+    "revision": "r3",
+    "variantId": "B",
+    "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+    "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
+    "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+  },
+  "files": [
+    {
+      "path": "data/measurements.csv",
+      "sha256": "255218396f846432b398f976294294a708ce8e08e034081548a59a385d809142"
+    },
+    {
+      "path": "data/summary.json",
+      "sha256": "31a7d450b1f4b529957f2bc608ceb8843109d7ce59eecb5c378433822695f6ec"
+    },
+    {
+      "path": "scripts/aggregate.mjs",
+      "sha256": "c95c1c381c8a0a48b54e7a7117238aad7f36891b8d64704b9e2b10d5c7e651d1"
+    },
+    {
+      "path": "data/brief.md",
+      "sha256": "ef045f6075dea388a73c9765394e12b896f4650bdd05e7d11d4bfd3db2786fba"
+    },
+    {
+      "path": "references/r2-deck.json",
+      "sha256": "2ef48ab494fb4409b416ea74007d61e3080e797af8756b54ab9001f822413daa"
+    },
+    {
+      "path": "references/revision-notes.md",
+      "sha256": "67f1f8709d6f33db491ca63566bca47ab43950edcc8b4eb1ddb7a821c73e3d10"
+    },
+    {
+      "path": "assets/comparison.svg",
+      "sha256": "72fab354eebb36eb7bff6490ce420f45580a222d10c84e59d0ae25f9cc74dd90"
+    },
+    {
+      "path": "sources/data/brief.md",
+      "sha256": "ef045f6075dea388a73c9765394e12b896f4650bdd05e7d11d4bfd3db2786fba"
+    },
+    {
+      "path": "deck.json",
+      "sha256": "9d9f9d2163916673d0ea00e9f881ab7d9ef2a76f5cca1a069cc69339725b8649"
+    },
+    {
+      "path": "story.md",
+      "sha256": "77f8ee277b995b0f69dc1b7f9c0b91f83ca6aeb5e8f743dc0614c2b908324d3d"
+    },
+    {
+      "path": "script.md",
+      "sha256": "65c3b4661c7be757d81ac1ffb18d01f49588d7ec3b237cf0e2952fb934d0148f"
+    },
+    {
+      "path": "sources.json",
+      "sha256": "67c672855a3cc772074108a95fd90010abcd2de39781a4df84246f94025ee230"
+    },
+    {
+      "path": "assets/registry.json",
+      "sha256": "744a0adcafcf36d69587d747fa31643ff6e8abe2a0fed3956e5a2e86b2afc93d"
+    },
+    {
+      "path": "reviews.json",
+      "sha256": "bd987d8005b54f70adb5bddd497d20956ffd280ece3209623cf508025a56c5ce"
+    },
+    {
+      "path": "review.html",
+      "sha256": "deeb2c1f216ef462a85426f033741d03e94edc4cc6a1eebefee41390a24cc15e"
+    },
+    {
+      "path": "output/slides.html",
+      "sha256": "2ec043597fdacc21fd96d9bdacbeb2037c54deaaaf0b61879b5812928a39261c"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "means": [
+    {
+      "method": "現行",
+      "n": 3,
+      "meanSeconds": 40,
+      "minSeconds": 38,
+      "maxSeconds": 42
+    },
+    {
+      "method": "改善案",
+      "n": 3,
+      "meanSeconds": 25,
+      "minSeconds": 24,
+      "maxSeconds": 26
+    }
+  ],
+  "differenceSeconds": 15,
+  "reductionPercent": 37.5
+}

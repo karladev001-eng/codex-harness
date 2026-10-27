@@ -1,0 +1,22 @@
+<!doctype html><html lang="ja" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Claude連携仕様 2</title><link rel="stylesheet" href="../../../authoring-skills/codex-html-plan/runtime/htmlplan.css"><style>
+:root[data-theme="light"] { color-scheme: light; --paper:#f6f8fb; --card:#ffffff; --sunk:#e9eef5; --ink:#162033; --ink-2:#3b4c63; --ink-3:#52637a; --accent:#944128; --line:#c5d0de; --line-2:#dbe3ed; }
+html, body { background:var(--paper); color:var(--ink); }
+</style>
+<style data-mock-shared>
+.nw-root.none { color:#162033; background:#ffffff; padding:16px; }
+.cols { display:grid; gap:12px; }
+.card { color:#162033; background:#ffffff; border:1px solid #c5d0de; border-radius:8px; padding:12px; }
+h4 { color:#162033; margin:0 0 6px; font-size:15px; }
+p { margin:0; line-height:1.65; }
+</style></head><body data-plan-id="claude-consultation" data-version="2" data-scope="3役の連携スキルとharnessの自動使用条件、元情報による矛盾の確認、仕様HTMLの可読性改善" data-approval="pending"><header><h1>Claude連携仕様 2</h1><p>承認済みの会話方針を具体化。承認根拠は関連文書の正本を参照。</p></header><doc-plan><doc-claim id="roles"><p>目的に応じた3役で、別の視点を得る</p><doc-mock frame="none" w="470"><template><div class="cols"><div class="card"><h4>アイデアマン</h4><p>開かれた企画・改善案に独立した発想を返す。</p></div><div class="card"><h4>コンサルタント</h4><p>方針・重要設計・停滞に比較と判断材料を返す。</p></div><div class="card"><h4>批評役</h4><p>重要提案を固める前に弱点と改善案を返す。</p></div></div></template></doc-mock></doc-claim><doc-claim id="flow"><p>harnessが使用条件を判定し、Codexが結果を統合する</p><doc-flow caption="harnessが役割を選び、Codexが回答を評価する"><script type="text/plain">
+h = harness
+c = Claude
+m = Codex
+| h | c |
+| . | m |
+h -> c : 1回、必要なら追加1回
+c -> m : 助言
+</script></doc-flow><doc-note>単純変更は通常対象外。inactive・委譲OFF・workerからは自動起動しない。既存コードレビューは継続。</doc-note></doc-claim><doc-claim id="verification"><p>食い違いは元データ・一次情報へ戻って確かめる</p><doc-mock frame="none" w="470"><template><div class="cols"><div class="card"><h4>1. 相違点を特定</h4><p>Codex案・Claude案・資料・実際のコードやテストで、何が一致していないかを分ける。</p></div><div class="card"><h4>2. 原資料を確認</h4><p>Codexが元ファイル・原文・公式資料・実測を調べ、版・日時・適用条件を照合する。</p></div><div class="card"><h4>3. 根拠と残る疑問を示す</h4><p>多数決やAI同士の合意で決めない。解消できない重要な矛盾は未確定として報告する。</p></div></div></template></doc-mock></doc-claim><doc-claim id="runtime"><p>ツールなしのCLI実行で、回答と失敗理由を受け取る</p><doc-mock frame="terminal" w="470" title="提案するCLI出力"><template><b>consult-claude / ideator</b>
+<span class="g">成功</span> → 回答を比較・検証して統合
+<span class="y">未認証</span> → 理由を通知しCodexで続行
+<span class="y">時間切れ</span> → 停止、無限再試行しない</template></doc-mock><doc-note>npm・plugin・恒久インストールに同梱。プロジェクトのファイル編集をClaudeへ委譲しない。</doc-note></doc-claim><doc-claim aux="shared"><p>受入条件と未解決事項</p><doc-mock frame="none" w="470"><template><div class="card"><p>受入条件1〜7は正本に記載。仕様上の未解決事項なし。通常環境ではClaudeログインを確認済み。実際のアイデア相談でJSON回答まで確認済み。</p></div></template></doc-mock></doc-claim><doc-claim aux="scope"><p>対象外</p><doc-note>Claudeへのコード編集・調査委譲、ユーザー承認の代行、認証設定の変更は追加しない。</doc-note></doc-claim></doc-plan><footer><h2>関連ドキュメント</h2><a href="claude-consultation.md">claude-consultation / TASK / 仕様と承認の正本</a></footer><script src="../../../authoring-skills/codex-html-plan/runtime/htmlplan.js"></script></body></html>

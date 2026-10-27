@@ -1,0 +1,437 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "deckId": "batch-comparison",
+    "revision": "r3",
+    "variantId": "B",
+    "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+    "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
+    "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+  },
+  "records": [
+    {
+      "id": "B-visual-S01",
+      "kind": "visual",
+      "slideId": "S01",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "pending",
+      "reviewer": "Codex sample author",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "structure",
+      "environment": {
+        "surface": "actual HTML not rendered"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "実表示",
+          "result": "未検証",
+          "reason": "許可された実表示経路を利用できず、構造検査を目視審査の代用にしない"
+        }
+      ],
+      "findings": [],
+      "unchecked": [
+        "全幅・レビュー/単独/一覧/拡大の実HTML表示"
+      ],
+      "stale": false,
+      "evidenceIssues": [],
+      "effectiveStatus": "pending"
+    },
+    {
+      "id": "B-visual-S02",
+      "kind": "visual",
+      "slideId": "S02",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "pending",
+      "reviewer": "Codex sample author",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "structure",
+      "environment": {
+        "surface": "actual HTML not rendered"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "実表示",
+          "result": "未検証",
+          "reason": "許可された実表示経路を利用できず、構造検査を目視審査の代用にしない"
+        }
+      ],
+      "findings": [],
+      "unchecked": [
+        "全幅・レビュー/単独/一覧/拡大の実HTML表示"
+      ],
+      "stale": false,
+      "evidenceIssues": [],
+      "effectiveStatus": "pending"
+    },
+    {
+      "id": "B-visual-S04",
+      "kind": "visual",
+      "slideId": "S04",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "pending",
+      "reviewer": "Codex sample author",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "structure",
+      "environment": {
+        "surface": "actual HTML not rendered"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "実表示",
+          "result": "未検証",
+          "reason": "許可された実表示経路を利用できず、構造検査を目視審査の代用にしない"
+        }
+      ],
+      "findings": [],
+      "unchecked": [
+        "全幅・レビュー/単独/一覧/拡大の実HTML表示"
+      ],
+      "stale": false,
+      "evidenceIssues": [],
+      "effectiveStatus": "pending"
+    },
+    {
+      "id": "B-visual-S03",
+      "kind": "visual",
+      "slideId": "S03",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "pending",
+      "reviewer": "Codex sample author",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "structure",
+      "environment": {
+        "surface": "actual HTML not rendered"
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "実表示",
+          "result": "未検証",
+          "reason": "許可された実表示経路を利用できず、構造検査を目視審査の代用にしない"
+        }
+      ],
+      "findings": [],
+      "unchecked": [
+        "全幅・レビュー/単独/一覧/拡大の実HTML表示"
+      ],
+      "stale": false,
+      "evidenceIssues": [],
+      "effectiveStatus": "pending"
+    },
+    {
+      "id": "B-page-S01",
+      "kind": "page",
+      "slideId": "S01",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "verified",
+      "reviewer": "Codex integration worker semantic re-review",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "semantic",
+      "environment": {
+        "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
+        "operatingSystem": "macOS",
+        "runtime": "Node.js 26.10.0",
+        "finalCheck": "Regenerated r3 after renderer integration; reread A/B story.md and script.md (identical wording), deck.json, brief.md, measurements.csv, summary.json, and comparison.svg. One-message-per-page, flow, virtual-value limits, and 40/25 means, 15-second difference, 37.5% reduction were rechecked. Content and artifact hashes match the reviewed version; renderer hash was updated after this semantic re-review."
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "一要点と表現",
+          "result": "確認",
+          "reason": "同じPC・各3回・演習用仮想値の短い条件ラベルが比較前提の一要点を支える。バッチ処理の定義はS01-P01へ移し、結果や次の行動を混ぜていない。"
+        },
+        {
+          "item": "必要な条件",
+          "result": "確認",
+          "reason": "messageとconditionsに同じPC・各3回・仮想値を残した。入力・測定範囲が未指定という詳細はbriefと限界ページで確認できる。"
+        }
+      ],
+      "findings": [],
+      "unchecked": [],
+      "stale": false,
+      "evidenceIssues": [],
+      "effectiveStatus": "verified"
+    },
+    {
+      "id": "B-page-S02",
+      "kind": "page",
+      "slideId": "S02",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "verified",
+      "reviewer": "Codex integration worker semantic re-review",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "semantic",
+      "environment": {
+        "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
+        "operatingSystem": "macOS",
+        "runtime": "Node.js 26.10.0",
+        "finalCheck": "Regenerated r3 after renderer integration; reread A/B story.md and script.md (identical wording), deck.json, brief.md, measurements.csv, summary.json, and comparison.svg. One-message-per-page, flow, virtual-value limits, and 40/25 means, 15-second difference, 37.5% reduction were rechecked. Content and artifact hashes match the reviewed version; renderer hash was updated after this semantic re-review."
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "一要点と視覚表現",
+          "result": "確認",
+          "reason": "比較グラフだけを主役にして、平均の差15秒という一要点を同一title/messageで示す。スライド上は同文messageを繰り返さず、comparison-table/differenceを除き、37.5%・範囲・解釈はS02-P01/出典へ移した。グラフの秒単位、同じPC・各3回、仮想値表示は維持。"
+        },
+        {
+          "item": "数値・尺度・根拠",
+          "result": "確認",
+          "reason": "CSVの現行40/42/38と改善案25/24/26を集計し平均40/25、差15、現行40を分母として37.5%に一致。SVGは0から50秒の同一線形尺度で幅512/320、比40:25、各3回と仮想値の表示も維持。"
+        }
+      ],
+      "findings": [],
+      "unchecked": [],
+      "stale": false,
+      "evidenceIssues": [],
+      "effectiveStatus": "verified"
+    },
+    {
+      "id": "B-page-S04",
+      "kind": "page",
+      "slideId": "S04",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "verified",
+      "reviewer": "Codex integration worker semantic re-review",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "semantic",
+      "environment": {
+        "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
+        "operatingSystem": "macOS",
+        "runtime": "Node.js 26.10.0",
+        "finalCheck": "Regenerated r3 after renderer integration; reread A/B story.md and script.md (identical wording), deck.json, brief.md, measurements.csv, summary.json, and comparison.svg. One-message-per-page, flow, virtual-value limits, and 40/25 means, 15-second difference, 37.5% reduction were rechecked. Content and artifact hashes match the reviewed version; renderer hash was updated after this semantic re-review."
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "一要点と説明量",
+          "result": "確認",
+          "reason": "実運用効果未検証の一要点を同一title/messageで示し、同文messageはスライド上で繰り返さない。limitは理由となる入力量/測定範囲未指定だけを示す。適切な数値表現がない限界には短い言葉を選ぶ。"
+        },
+        {
+          "item": "推論の範囲",
+          "result": "確認",
+          "reason": "S04-P01は演習の15秒/37.5%から本番効果を確定できない理由を説明し、次の具体手順はS03に分離している。"
+        }
+      ],
+      "findings": [],
+      "unchecked": [],
+      "stale": false,
+      "evidenceIssues": [],
+      "effectiveStatus": "verified"
+    },
+    {
+      "id": "B-page-S03",
+      "kind": "page",
+      "slideId": "S03",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "verified",
+      "reviewer": "Codex integration worker semantic re-review",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "semantic",
+      "environment": {
+        "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
+        "operatingSystem": "macOS",
+        "runtime": "Node.js 26.10.0",
+        "finalCheck": "Regenerated r3 after renderer integration; reread A/B story.md and script.md (identical wording), deck.json, brief.md, measurements.csv, summary.json, and comparison.svg. One-message-per-page, flow, virtual-value limits, and 40/25 means, 15-second difference, 37.5% reduction were rechecked. Content and artifact hashes match the reviewed version; renderer hash was updated after this semantic re-review."
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "一要点と行動",
+          "result": "確認",
+          "reason": "next-conditionsの3項目はいずれも同じ条件で実測するという一つの提案を支える。takeawayとlimitを外し、結果再掲や限界との二つの主張を混在させない。"
+        },
+        {
+          "item": "提案と根拠",
+          "result": "確認",
+          "reason": "next-proposalとして扱い、S03-P01は未決の担当者・期間も明示する。実測済み/実運用効果という新しい結果を追加していない。"
+        }
+      ],
+      "findings": [],
+      "unchecked": [],
+      "stale": false,
+      "evidenceIssues": [],
+      "effectiveStatus": "verified"
+    },
+    {
+      "id": "B-flow-deck",
+      "kind": "flow",
+      "identity": {
+        "deckId": "batch-comparison",
+        "revision": "r3",
+        "variantId": "B",
+        "contentHash": "15839eccd2266c4ec818fd0ef030c71edae72087fb758a20e4981510db86560c",
+        "rendererHash": "f88e9343428f0807af7c508839533eb9062ad9011be437b9e6a1d5971dfb9033",
+        "artifactHash": "1b570cb13912d068bcb036cd0b565dd37c33e3d2cbe53c93a09b1a7f6992d423"
+      },
+      "status": "verified",
+      "reviewer": "Codex integration worker semantic re-review",
+      "reviewMode": "self",
+      "checkedAt": "2026-10-10",
+      "verification": "semantic",
+      "environment": {
+        "surface": "generated story.md/script.md and deck.json; CSV/summary/SVG source inspection",
+        "operatingSystem": "macOS",
+        "runtime": "Node.js 26.10.0",
+        "finalCheck": "Regenerated r3 after renderer integration; reread A/B story.md and script.md (identical wording), deck.json, brief.md, measurements.csv, summary.json, and comparison.svg. One-message-per-page, flow, virtual-value limits, and 40/25 means, 15-second difference, 37.5% reduction were rechecked. Content and artifact hashes match the reviewed version; renderer hash was updated after this semantic re-review."
+      },
+      "evidence": [],
+      "checks": [
+        {
+          "item": "前提と用語",
+          "result": "確認",
+          "reason": "S01-P01の冒頭でバッチ処理を平易に定義。演習用仮想値を最初に説明し、各3回と同じPCを示してから結果へ進む。"
+        },
+        {
+          "item": "流れと論理",
+          "result": "改訂後確認",
+          "reason": "重複削減後の生成story/scriptをS01→S02→S04→S03で再通読。前提、差、推論の限界、次の実測条件を一ページずつ示し、各transitionと次ページが対応。title/message同一でも読み上げ原稿は詳細を保つ。"
+        },
+        {
+          "item": "図表と原稿",
+          "result": "確認",
+          "reason": "CSV、集計JSON、SVG、S02-P01の平均40/25、差15秒、37.5%、各回の範囲が一致。結果の再掲をS03から外しても主旨はS02に保持。"
+        },
+        {
+          "item": "持ち時間",
+          "result": "計画上確認",
+          "reason": "ページ秒数40+50+35+55=180秒。300文字/分の想定で原稿を見直した。3分の実リハーサルは別確認であり未実施。"
+        }
+      ],
+      "findings": [
+        {
+          "id": "R3-separated-limit",
+          "target": {
+            "slideId": "S03",
+            "paragraphId": "S03-P01"
+          },
+          "severity": "major",
+          "problem": "旧r2のS03に結果再掲・限界・次の行動が混在していた",
+          "reason": "聞き手が次の行動の要点を見分けにくい",
+          "suggestion": "限界を独立ページにし、S03は実測条件の提案へ絞る",
+          "resolution": "resolved",
+          "resolutionReason": "r3の新S04へ限界を分離し、S03のtakeawayを廃止して行動3条件だけに修正。新版の生成原稿/ストーリーを再読した。"
+        }
+      ],
+      "unchecked": [],
+      "stale": false,
+      "evidenceIssues": [],
+      "effectiveStatus": "verified"
+    }
+  ],
+  "scopes": [
+    {
+      "kind": "visual",
+      "slideId": "S01",
+      "status": "pending"
+    },
+    {
+      "kind": "page",
+      "slideId": "S01",
+      "status": "verified"
+    },
+    {
+      "kind": "visual",
+      "slideId": "S02",
+      "status": "pending"
+    },
+    {
+      "kind": "page",
+      "slideId": "S02",
+      "status": "verified"
+    },
+    {
+      "kind": "visual",
+      "slideId": "S04",
+      "status": "pending"
+    },
+    {
+      "kind": "page",
+      "slideId": "S04",
+      "status": "verified"
+    },
+    {
+      "kind": "visual",
+      "slideId": "S03",
+      "status": "pending"
+    },
+    {
+      "kind": "page",
+      "slideId": "S03",
+      "status": "verified"
+    },
+    {
+      "kind": "flow",
+      "status": "verified"
+    }
+  ],
+  "status": "pending"
+}

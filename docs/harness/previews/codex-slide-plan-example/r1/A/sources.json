@@ -1,0 +1,63 @@
+[
+  {
+    "id": "illustrative-data",
+    "kind": "data",
+    "title": "説明用の比較データ",
+    "label": "仮値（実測ではない）",
+    "path": "data/illustrative.csv",
+    "position": "行2–3 / stage,minutes",
+    "lineRange": [
+      2,
+      3
+    ],
+    "sha256": "153d5ee9fe9b99ed64b1a76a9e467cbeb1e2bf14516f2f82a65374075e42e5a6",
+    "columns": "stage,minutes,sourceId",
+    "unit": "分",
+    "period": "説明用想定、特定期間なし",
+    "filters": "同じ入力を使う想定の2方法",
+    "checkedAt": "2026-10-10",
+    "copy": true,
+    "status": "記録hash一致",
+    "detail": "選択した原本を同梱"
+  },
+  {
+    "id": "brief",
+    "kind": "project",
+    "title": "制作依頼と比較条件",
+    "path": "data/context.md",
+    "position": "見出し: 比較条件",
+    "heading": "比較条件",
+    "sha256": "2a06886a18902c287fb47b1f34900bd0013ce297ea29e3c6677c2490ef29c8cf",
+    "checkedAt": "2026-10-10",
+    "copy": true,
+    "status": "記録hash一致",
+    "detail": "選択した原本を同梱"
+  },
+  {
+    "id": "concept-flow",
+    "kind": "concept",
+    "title": "比較の見取り図",
+    "label": "概念図・提案",
+    "checkedAt": "2026-10-10",
+    "status": "概念図・提案",
+    "detail": "実測として検証していない"
+  },
+  {
+    "id": "comparison-derived",
+    "kind": "derived",
+    "title": "比較グラフの集計",
+    "label": "仮値（実測ではない）",
+    "inputIds": [
+      "illustrative-data"
+    ],
+    "formula": "各stageのminutesを表示。短縮率=(18-9)/18=50%",
+    "code": "scripts/aggregate.mjs",
+    "output": "data/illustrative.csv",
+    "unit": "分",
+    "population": "説明用2処理、実験母数なし",
+    "missing": "欠測なしの仮定",
+    "checkedAt": "2026-10-10",
+    "status": "入力と再生成コードあり",
+    "detail": "計算の正しさはCodex/標準集計ツールで別途確認"
+  }
+]

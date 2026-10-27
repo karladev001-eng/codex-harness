@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "deckId": "comparison-demo",
+    "revision": "r1",
+    "variantId": "B",
+    "contentHash": "d94b18b6921b897e4386da99fb9f1e7fe6f1ba3208e16eaf3de5bbfe9b67d15e"
+  },
+  "files": [
+    {
+      "path": "data/illustrative.csv",
+      "sha256": "153d5ee9fe9b99ed64b1a76a9e467cbeb1e2bf14516f2f82a65374075e42e5a6"
+    },
+    {
+      "path": "scripts/aggregate.mjs",
+      "sha256": "fc886f7a42e7d31f259d5c7b6adccee21aad176d0809a0961f91642722d8157e"
+    },
+    {
+      "path": "assets/flow.svg",
+      "sha256": "1953d626b05fb5ee74f19a0a14b2253216a9736c742153b94807863916ee9e04"
+    },
+    {
+      "path": "sources/data/context.md",
+      "sha256": "2a06886a18902c287fb47b1f34900bd0013ce297ea29e3c6677c2490ef29c8cf"
+    },
+    {
+      "path": "deck.json",
+      "sha256": "f4f5f77d73718f820d3b1660dc84e5b90e9b66e7c811a5e9bac45e894b0d9255"
+    },
+    {
+      "path": "story.md",
+      "sha256": "272b45b85be878f3f5d9bd1fe90b3a386e16933204e47e01e69fe2c34202d845"
+    },
+    {
+      "path": "script.md",
+      "sha256": "0dd5930fc97b6bd4bb3c7d3e1511800fd3b0e992acdeef17558509a9dc34dcf8"
+    },
+    {
+      "path": "sources.json",
+      "sha256": "d0ab9773a2bd32b5977dbc04b148c0a0eec82b4fe2a670268636ce91fe0dde73"
+    },
+    {
+      "path": "assets/registry.json",
+      "sha256": "5fcac49f674e27183ff1cf5bea00d47485919f079a98cb96b7822ad59da2841f"
+    },
+    {
+      "path": "catalog.json",
+      "sha256": "394fa7a9302bc26c3fe209355aecb6c25bb5cfec8b1bfb6866c22f4b8030f816"
+    },
+    {
+      "path": "review.html",
+      "sha256": "29552e81ecc572361988c10c3690717c1b801453ee8dd8ffc8e1e033305cb0f8"
+    },
+    {
+      "path": "output/slides.html",
+      "sha256": "bb3e515c836193620b9b4f9da63a92c000c60c2ad511ebf6dce75da4144fbaf8"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+[
+  {
+    "id": "measurements",
+    "kind": "data",
+    "title": "演習用バッチ処理の仮想測定値",
+    "label": "仮想値（演習用）",
+    "path": "data/measurements.csv",
+    "position": "行2–7 / method,run,seconds",
+    "lineRange": [
+      2,
+      7
+    ],
+    "sha256": "255218396f846432b398f976294294a708ce8e08e034081548a59a385d809142",
+    "columns": "method,run,seconds",
+    "unit": "秒",
+    "period": "演習用の仮想測定、測定日時未指定",
+    "filters": "同じPC、現行・改善案を各3回、全6行、除外なし",
+    "checkedAt": "2026-10-10",
+    "copy": true,
+    "status": "記録hash一致",
+    "detail": "選択した原本を同梱"
+  },
+  {
+    "id": "brief",
+    "kind": "project",
+    "title": "合同会議の依頼と比較条件",
+    "path": "input/brief.txt",
+    "position": "行1",
+    "lineRange": [
+      1,
+      1
+    ],
+    "sha256": "2ea6d63419411694e01c9efa874f5f5d41dc96f1280b08d4ca331f81db001e92",
+    "checkedAt": "2026-10-10",
+    "copy": true,
+    "status": "記録hash一致",
+    "detail": "選択した原本を同梱"
+  },
+  {
+    "id": "summary",
+    "kind": "derived",
+    "title": "方式別の算術平均と現行比短縮率",
+    "label": "仮想値（演習用）",
+    "inputIds": [
+      "measurements"
+    ],
+    "formula": "現行平均=(40+42+38)/3=40秒、改善案平均=(25+24+26)/3=25秒、差=40−25=15秒、短縮率=(40−25)/40×100=37.5%",
+    "code": "scripts/aggregate.mjs",
+    "output": "data/summary.json",
+    "unit": "秒／%",
+    "population": "同じPCの仮想測定、各方式3回、全6行",
+    "missing": "欠測なし、全行使用",
+    "checkedAt": "2026-10-10",
+    "status": "入力と再生成コードあり",
+    "detail": "計算の正しさはCodex/標準集計ツールで別途確認"
+  },
+  {
+    "id": "next-proposal",
+    "kind": "concept",
+    "title": "実測でそろえる条件の提案",
+    "label": "提案・実運用効果未検証",
+    "checkedAt": "2026-10-10",
+    "status": "提案・実運用効果未検証",
+    "detail": "実測として検証していない"
+  }
+]

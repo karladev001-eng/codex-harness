@@ -1,0 +1,19 @@
+[
+  {
+    "id": "comparison-svg",
+    "file": "assets/comparison.svg",
+    "preview": true,
+    "originals": [
+      "assets/comparison.svg"
+    ],
+    "origin": "CSVの平均値から独自生成した編集可能SVG",
+    "license": "この演習用プロジェクト内で再利用可",
+    "regenerate": "node scripts/aggregate.mjs",
+    "slideIds": [
+      "S02"
+    ],
+    "sourceIds": [
+      "summary"
+    ]
+  }
+]
