@@ -4,7 +4,7 @@
 node "$HOME/.agents/skills/codex-harness/runtime.js" status --project "/path/to/project"
 ```
 
-設定は、標準値 → 個人設定 → 共通Git checkoutの `.harness.json` → worktree/対象projectの `.harness.json` の順で上書きします。個人設定は通常 `~/.codex/harness/settings.json`、`CODEX_HOME` が設定されている場合はその配下です。更新は個人設定とプロジェクト設定を変更しません。以前のモデルを明示した設定があれば、新しい配布既定を隠したまま保持されます。上の `status` の `config.models` は設定された基準値です。`model_selection` のmode/resolution/pinsで自動選択方式とpin由来を確認し、新しい既定を使いたい項目だけ個人設定・プロジェクト設定から削除してください。`persistence=false` や `measurement=false` などのOFF設定も維持します。
+設定は、標準値 → 個人設定 → 共通Git checkoutの `.harness.json` → worktree/対象projectの `.harness.json` の順で上書きします。個人設定は `~/.agents/harness/settings.json`（`HARNESS_HOME` 指定時はその配下）で、CodexとClaude Codeが共有します。0.5より前の `~/.codex/harness/`（`CODEX_HOME` 指定時はその配下）にデータがあり共有先が未作成なら、移行まではそちらを読みます。`codex-harness data migrate`（installとClaude Codeプラグインの起動時にも実行）が設定・制作記憶・技術的知見・同期状態を共有先へコピーし、旧データは `MIGRATED.json` を付けて残します。移行後に旧パスを編集しても反映されません。保存先は `codex-harness data where` か `status` の `data_home` で確認できます。更新は個人設定とプロジェクト設定を変更しません。以前のモデルを明示した設定があれば、新しい配布既定を隠したまま保持されます。上の `status` の `config.models` は設定された基準値です。`model_selection` のmode/resolution/pinsで自動選択方式とpin由来を確認し、新しい既定を使いたい項目だけ個人設定・プロジェクト設定から削除してください。`persistence=false` や `measurement=false` などのOFF設定も維持します。
 
 ```json
 {
