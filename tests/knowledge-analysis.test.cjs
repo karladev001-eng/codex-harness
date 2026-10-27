@@ -52,12 +52,12 @@ test('bare reference fetch updates changed/deleted captures, preserves working c
   assert.equal((await pull(f.store,{remote:f.remote})).state,'throttled');
   await fs.rm(path.join(f.remote,f.bundle.base,'captures',f.capture.operation_id),{recursive:true});git(f.remote,['add','-A']);git(f.remote,['commit','-m','delete']);assert.equal((await pull(f.store,{remote:f.remote,force:true})).captures,0);
 });
-test('untrusted schema and planted Git config fail without replacing valid snapshot; inherited Git execution is disabled',async t=>{
+test('isolated fetch ignores abandoned Git config/lock and rejects schema; inherited Git execution is disabled',async t=>{
   const f=await fetched(t);const snapshotFile=path.join(f.store.root,'read/snapshot.json'),valid=await fs.readFile(snapshotFile);
   const planted=path.join(f.root,'executed');const previous=process.env.GIT_CONFIG_PARAMETERS;process.env.GIT_CONFIG_PARAMETERS="'core.hooksPath'='"+f.root+"'";
   try {assert.equal((await pull(f.store,{remote:f.remote,force:true})).state,'current');}finally{if(previous===undefined)delete process.env.GIT_CONFIG_PARAMETERS;else process.env.GIT_CONFIG_PARAMETERS=previous;}
-  const dirs=await fs.readdir(path.join(f.store.root,'read'));const cache=path.join(f.store.root,'read',dirs.find(name=>name.endsWith('.git')));
-  await fs.appendFile(path.join(cache,'config'),`[credential]\n\thelper = !touch ${planted}\n`);assert.equal((await pull(f.store,{remote:f.remote,force:true})).reason,'UNSAFE_GIT_CACHE_CONFIG');await assert.rejects(()=>fs.stat(planted),{code:'ENOENT'});
+  const cache=path.join(f.store.root,'read','legacy.git');await fs.mkdir(cache);await fs.writeFile(path.join(cache,'config'),'[core]\n');await fs.writeFile(path.join(cache,'shallow.lock'),'unknown lock');
+  await fs.appendFile(path.join(cache,'config'),`[credential]\n\thelper = !touch ${planted}\n`);assert.equal((await pull(f.store,{remote:f.remote,force:true})).state,'current');assert.equal(await fs.readFile(path.join(cache,'shallow.lock'),'utf8'),'unknown lock');await assert.rejects(()=>fs.stat(planted),{code:'ENOENT'});
   const preserved=await fs.readFile(snapshotFile);assert.equal(JSON.parse(preserved).commit,JSON.parse(valid).commit);
   await fs.rm(cache,{recursive:true});await fs.writeFile(path.join(f.remote,'kb.json'),json({schema_version:99,library_id:f.config.library_id,format:'codex-knowledge-capture'}));git(f.remote,['add','.']);git(f.remote,['commit','-m','bad schema']);assert.equal((await pull(f.store,{remote:f.remote,force:true})).reason,'KB_SCHEMA_CONFLICT');assert.deepEqual(await fs.readFile(snapshotFile),preserved);
 });
@@ -66,7 +66,12 @@ test('shared library lock excludes concurrent operations and recovers killed hol
   const child=spawn(process.execPath,['-e',`const {libraryLock}=require(${JSON.stringify(module)});libraryLock(JSON.parse(process.argv[1]),async()=>{process.stdout.write('locked\\n');await new Promise(()=>{});});setInterval(()=>{},1000);`,JSON.stringify(f.config)],{stdio:['ignore','pipe','pipe']});
   t.after(()=>child.kill('SIGKILL'));await new Promise((resolve,reject)=>{child.stdout.once('data',resolve);child.once('error',reject);});
   assert.equal((await libraryLock(f.config,async()=>({entered:true}))).state,'busy');child.kill('SIGKILL');await new Promise(resolve=>child.once('exit',resolve));
-  const entries=[];const outcomes=await Promise.all(Array.from({length:8},()=>libraryLock(f.config,async()=>{entries.push('enter');await new Promise(resolve=>setTimeout(resolve,20));entries.push('exit');return {entered:true};})));
+  // Hold the winner until all seven contenders have observed contention;
+  // a scheduling delay must not turn valid sequential acquisition into failure.
+  const entries=[];let release,busy=0,timedOut=false;const held=new Promise(resolve=>release=resolve);
+  const watchdog=setTimeout(()=>{timedOut=true;release();},3000);t.after(()=>clearTimeout(watchdog));
+  const outcomes=await Promise.all(Array.from({length:8},async()=>{const outcome=await libraryLock(f.config,async()=>{entries.push('enter');await held;entries.push('exit');return {entered:true};});if(outcome.state==='busy'&&++busy===7)release();return outcome;}));
+  clearTimeout(watchdog);assert.equal(timedOut,false,'contenders did not observe the held winner');
   assert.equal(outcomes.filter(row=>row.entered).length,1);assert.deepEqual(entries,['enter','exit']);assert.equal((await libraryLock(f.config,async()=>({entered:true}))).entered,true);
 });
 test('hook install/status/remove preserve ORCA/trust, are idempotent, reject broken/conflicting definitions and quote safe paths',async t=>{
@@ -126,8 +131,8 @@ test('subprocess timeout settles on deadline even when a descendant holds inheri
   const start=Date.now();await assert.rejects(()=>run(process.execPath,['-e',"require('node:child_process').spawn(process.execPath,['-e','setTimeout(()=>{},5000)'],{stdio:'inherit'});setTimeout(()=>{},10000);"],{timeout:1000}),/PROCESS_TIMEOUT/);assert.ok(Date.now()-start<2000);
 });
 test('full read deadline preserves previous snapshot and interrupted cache init is retried safely',async t=>{
-  const f=await fetched(t),file=path.join(f.store.root,'read/snapshot.json'),valid=await fs.readFile(file);const names=await fs.readdir(path.join(f.store.root,'read'));const cache=path.join(f.store.root,'read',names.find(name=>name.endsWith('.git')));
-  const client={async fetch(){await new Promise(resolve=>setTimeout(resolve,30));return git(f.remote,['rev-parse','HEAD']);},async invoke(){throw Error('should not read unchanged head');}};
+  const f=await fetched(t),file=path.join(f.store.root,'read/snapshot.json'),valid=await fs.readFile(file);const cache=path.join(f.store.root,'read','.fetch-left-by-kill');await fs.mkdir(cache);
+  const client={async init(){},async fetch(){await new Promise(resolve=>setTimeout(resolve,30));return git(f.remote,['rev-parse','HEAD']);},async invoke(){throw Error('should not read unchanged head');}};
   assert.equal((await pull(f.store,{force:true,remote:f.remote,client,timeoutTotal:5})).reason,'READ_TIMEOUT');assert.deepEqual(await fs.readFile(file),valid);
   await fs.rm(cache,{recursive:true});await fs.mkdir(cache);assert.equal((await pull(f.store,{force:true,remote:f.remote})).state,'current');
 });
@@ -137,10 +142,10 @@ test('serialized source input budget includes escaped newlines quotes controls a
   const p=provider();assert.equal((await analyze(f.store,{provider:p})).results[0].state,'pending');const actual=p.calls[0].data.text;assert.ok(Buffer.byteLength(JSON.stringify(actual))<=100000);assert.ok(Buffer.byteLength(json(actual))<=100000);assert.match(actual.generator_scope,/切り詰め/);
   const row=(await snapshot(f.store,f.config)).captures[0],state=await read(path.join(f.store.root,'analysis',f.capture.operation_id+'.json'));assert.equal(state.analysis.input_hashes.text,inputs(row).text);assert.equal(row.content,rawBody);assert.equal(row.note,rawNote);
 });
-test('remote symlink and cache config symlink are rejected without replacing snapshot or modifying link target',async t=>{
+test('remote symlink is rejected while legacy config symlink stays untouched',async t=>{
   if(process.platform==='win32')return t.skip('POSIX symlink fixture; Windows symlink permission differs');
   const f=await fetched(t),snapshotFile=path.join(f.store.root,'read/snapshot.json'),valid=await fs.readFile(snapshotFile);await fs.symlink('kb.json',path.join(f.remote,'remote-script'));git(f.remote,['add','.']);git(f.remote,['commit','-m','symlink']);assert.equal((await pull(f.store,{force:true,remote:f.remote})).reason,'KB_UNSAFE_TREE');assert.deepEqual(await fs.readFile(snapshotFile),valid);
-  const names=await fs.readdir(path.join(f.store.root,'read')),cache=path.join(f.store.root,'read',names.find(name=>name.endsWith('.git'))),configFile=path.join(cache,'config'),bytes=await fs.readFile(configFile),target=path.join(f.root,'config-target');await fs.writeFile(target,bytes);await fs.unlink(configFile);await fs.symlink(target,configFile);assert.equal((await pull(f.store,{force:true,remote:f.remote})).reason,'UNSAFE_GIT_CACHE');assert.deepEqual(await fs.readFile(target),bytes);assert.deepEqual(await fs.readFile(snapshotFile),valid);
+  const cache=path.join(f.store.root,'read','legacy.git');await fs.mkdir(cache);const configFile=path.join(cache,'config'),bytes=Buffer.from('[credential]\nhelper=!false\n'),target=path.join(f.root,'config-target');await fs.writeFile(target,bytes);await fs.symlink(target,configFile);assert.equal((await pull(f.store,{force:true,remote:f.remote})).reason,'KB_UNSAFE_TREE');assert.deepEqual(await fs.readFile(target),bytes);assert.deepEqual(await fs.readFile(snapshotFile),valid);
 });
 
 test('retrieval preserves AND search, tags, exact IDs and bounded source positions',async t=>{
@@ -196,4 +201,66 @@ test('installed CLI is self contained outside the source checkout',async t=>{
   // A current attempt throttles network checks, so this exercises the bundled retrieval path.
   const found=spawnSync(process.execPath,[cli,'read','--capture',f.capture.operation_id,'--limit','8','--state',f.store.root],{cwd:os.tmpdir(),encoding:'utf8'});assert.equal(found.status,0,found.stderr);assert.equal(JSON.parse(found.stdout).text,f.capture.content.text.slice(0,8));
   assert.equal((await fs.readdir(path.join(installed,'knowledge'))).includes('extension'),false);
+});
+
+test('SIGKILL during isolated fetch leaves prior snapshot and abandoned locks harmless on next pull',async t=>{
+  if(process.platform==='win32')return t.skip('POSIX force-kill fixture');
+  const f=await fetched(t),file=path.join(f.store.root,'read/snapshot.json'),valid=await fs.readFile(file);
+  const signal=path.join(f.root,'fetch-started.json'),fake=path.join(f.root,'fake-git.cjs');
+  await fs.writeFile(fake,`#!${process.execPath}\nconst fs=require('node:fs'),cp=require('node:child_process'),path=require('node:path');const args=process.argv.slice(2);if(args.includes('fetch')){const dir=args.find(x=>x.startsWith('--git-dir=')).slice(10);fs.writeFileSync(path.join(dir,'shallow.lock'),'abandoned');fs.writeFileSync(${JSON.stringify(signal)},JSON.stringify({pid:process.pid,dir}));setInterval(()=>{},1000);}else{const result=cp.spawnSync('git',args,{stdio:'inherit'});process.exit(result.status||0);}\n`,{mode:0o700});
+  const child=spawn(process.execPath,['-e',`const {Store}=require('./knowledge/core.cjs');require('./knowledge/reader.cjs').pull(new Store(process.argv[1]),{force:true,remote:process.argv[2],git:process.argv[3]}).then(()=>process.exit());`,f.store.root,f.remote,fake],{cwd:path.resolve(__dirname,'..'),stdio:'ignore'});
+  t.after(()=>child.kill('SIGKILL'));let started;
+  for(let i=0;i<200;i++){try{started=JSON.parse(await fs.readFile(signal,'utf8'));break;}catch{}await new Promise(resolve=>setTimeout(resolve,10));}
+  assert(started,'fixture fetch did not start');const exited=new Promise(resolve=>child.once('exit',resolve));child.kill('SIGKILL');process.kill(started.pid,'SIGKILL');await exited;
+  assert.deepEqual(await fs.readFile(file),valid);assert.equal(await fs.readFile(path.join(started.dir,'shallow.lock'),'utf8'),'abandoned');
+  assert.equal((await pull(f.store,{remote:f.remote,force:true})).state,'current');
+  assert.equal(await fs.readFile(path.join(started.dir,'shallow.lock'),'utf8'),'abandoned');
+  const dirs=(await fs.readdir(path.join(f.store.root,'read'))).filter(name=>name.startsWith('.fetch-'));assert.deepEqual(dirs,[path.basename(path.dirname(started.dir))]);
+});
+test('process failures retain only allowlisted communication/authentication reasons and reader persists stage',async t=>{
+  for(const [stderr,reason]of [['fatal: Authentication failed for https://SECRET@host','PROCESS_AUTHENTICATION'],['fatal: Could not resolve host: SECRET','PROCESS_NETWORK'],['remote: HTTP 403 SECRET','PROCESS_FORBIDDEN'],['SECRET_UNRECOGNIZED_ERROR','PROCESS_FAILED']]) {
+    await assert.rejects(run(process.execPath,['-e',`process.stderr.write(${JSON.stringify(stderr)});process.exit(1)`]),error=>error.message===reason&&!JSON.stringify(error).includes('SECRET'));
+  }
+  const f=await fetched(t),valid=await fs.readFile(path.join(f.store.root,'read/snapshot.json'));
+  for(const [message,reason]of [['PROCESS_AUTHENTICATION','PROCESS_AUTHENTICATION'],['SECRET_RAW_ERROR','KNOWLEDGE_READ_FAILED'],['PROCESS_TIMEOUT','PROCESS_TIMEOUT']]) {
+    const result=await pull(f.store,{force:true,remote:f.remote,client:{async init(){},async fetch(){throw Error(message);}}});assert.equal(result.stage,'fetch');assert.equal(result.reason,reason);
+    assert.deepEqual(await fs.readFile(path.join(f.store.root,'read/snapshot.json')),valid);
+    assert(!String(await fs.readFile(path.join(f.store.root,'read/health.json'))).includes('SECRET'));
+    assert(!(await fs.readdir(path.join(f.store.root,'read'))).some(name=>name.startsWith('.fetch-')));
+  }
+});
+
+test('recovery retries when a normally released lock disappears between lstat and read',async t=>{
+  const f=await fixture(t),dead=spawnSync(process.execPath,['-e',''],{encoding:'utf8'});assert.equal(dead.status,0);
+  // Isolate readFile injection from all other tests and model the precise
+  // normal-release race: lstat sees a real lock; its subsequent read is ENOENT.
+  const script=`const fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os');
+const {sha,json}=require('./knowledge/core.cjs');const {libraryLock,destination}=require('./knowledge/reader.cjs');
+(async()=>{const config=JSON.parse(process.argv[1]);const lock=path.join(os.tmpdir(),'codex-knowledge-'+sha(json(destination(config))).slice(0,32)+'.lock');
+await fs.writeFile(lock,json({pid:Number(process.argv[2]),token:'dead-owner'}),{flag:'wx',mode:0o600});
+const original=fs.readFile;let reads=0,removed=false;fs.readFile=async function(file,...args){if(file===lock&&++reads===2){await fs.unlink(lock);removed=true;}return original.call(this,file,...args);};
+try{const outcome=await libraryLock(config,async()=>({entered:true}));process.stdout.write(JSON.stringify({outcome,removed}));}catch(error){process.stdout.write(JSON.stringify({error:error.message,removed}));}finally{fs.readFile=original;await fs.rm(lock,{force:true});}})();`;
+  const result=JSON.parse((await run(process.execPath,['-e',script,JSON.stringify(f.config),String(dead.pid)],{cwd:path.resolve(__dirname,'..')})).toString());
+  assert.deepEqual(result,{outcome:{entered:true},removed:true});
+});
+test('lock disappearance recovery preserves malformed and symlink locks and rejects unreadable owners',async t=>{
+  const f=await fixture(t),lock=path.join(os.tmpdir(),`codex-knowledge-${sha(json(destination(f.config))).slice(0,32)}.lock`);
+  t.after(()=>fs.rm(lock,{force:true}));
+  for(const content of ['null','{broken',JSON.stringify({pid:-1,token:'unknown'})]) {
+    await fs.writeFile(lock,content,{flag:'wx',mode:0o600});
+    await assert.rejects(libraryLock(f.config,async()=>assert.fail('unsafe owner acquired')),/UNSAFE_READ_LOCK|CORRUPT_LOCAL_STATE/);
+    assert.equal(await fs.readFile(lock,'utf8'),content);await fs.unlink(lock);
+  }
+  if(process.platform!=='win32') {
+    const target=path.join(f.root,'unknown-lock');await fs.writeFile(target,'KEEP');await fs.symlink(target,lock);
+    await assert.rejects(libraryLock(f.config,async()=>assert.fail('symlink acquired')),/UNSAFE_READ_LOCK/);
+    assert.equal((await fs.lstat(lock)).isSymbolicLink(),true);assert.equal(await fs.readFile(target,'utf8'),'KEEP');await fs.unlink(lock);
+  }
+  const dead=spawnSync(process.execPath,['-e',''],{encoding:'utf8'});assert.equal(dead.status,0);
+  const content=json({pid:dead.pid,token:'fixture-owner'});await fs.writeFile(lock,content,{flag:'wx',mode:0o600});
+  const script=`const fs=require('node:fs/promises'),{libraryLock}=require('./knowledge/reader.cjs');const original=fs.readFile;let count=0;
+fs.readFile=async function(file,...args){if(file===process.argv[2]&&++count===2){const error=Error('fixture unreadable');error.code='EACCES';throw error;}return original.call(this,file,...args);};
+libraryLock(JSON.parse(process.argv[1]),async()=>({entered:true})).then(value=>process.stdout.write(JSON.stringify(value)),error=>process.stdout.write(JSON.stringify({error:error.message})));`;
+  const value=JSON.parse((await run(process.execPath,['-e',script,JSON.stringify(f.config),lock],{cwd:path.resolve(__dirname,'..')})).toString());
+  assert.deepEqual(value,{error:'UNSAFE_READ_LOCK'});assert.equal(await fs.readFile(lock,'utf8'),content);
 });

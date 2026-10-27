@@ -55,6 +55,35 @@ export function mergeSettings(base: Json, override: unknown): Json {
   }
   return base;
 }
+// Linked worktrees inherit the common checkout's policy, then their own explicit override.
+export function projectSettings(project: string): string[] {
+  const files: string[] = [];
+  let common: string, top: string;
+  try {
+    common = canonical(git(project, 'rev-parse', '--path-format=absolute', '--git-common-dir'));
+    top = canonical(git(project, 'rev-parse', '--show-toplevel'));
+  } catch { return [path.join(canonical(project), '.harness.json')]; }
+  // Git lists its main locator first. With --separate-git-dir and no
+  // core.worktree, that locator can be the metadata directory itself: Git
+  // stores no reverse reference to the actual checkout in that configuration.
+  const unresolved = () => new Error('Common project settings unresolved; configure core.worktree in the common Git configuration');
+  let main: string[];
+  try { main = git(project, 'worktree', 'list', '--porcelain', '-z').split('\0\0')[0].split('\0'); }
+  catch { throw unresolved(); }
+  if (!main.includes('bare')) {
+    let configured: string | null = null;
+    try { configured = git(project, 'config', '--path', '--get', 'core.worktree'); } catch { /* unset */ }
+    const locator = configured ? canonical(path.resolve(common, configured)) : main[0]?.startsWith('worktree ') ? canonical(main[0].slice(9)) : null;
+    if (!locator) throw unresolved();
+    try {
+      if (canonical(git(locator, 'rev-parse', '--show-toplevel')) !== locator ||
+          canonical(git(locator, 'rev-parse', '--path-format=absolute', '--git-common-dir')) !== common) throw unresolved();
+    } catch { throw unresolved(); }
+    files.push(path.join(locator, '.harness.json'));
+  }
+  files.push(path.join(top, '.harness.json'), path.join(project, '.harness.json'));
+  return [...new Set(files.map(file => canonical(file)))];
+}
 // Resolve configuration and model origins together so provenance cannot diverge from values.
 export function resolveSettings(project: string, home?: string): { config: Json; model_selection: Json } {
   const result = structuredClone(DEFAULTS);
@@ -62,7 +91,7 @@ export function resolveSettings(project: string, home?: string): { config: Json;
   let explicitLoop = false;
   for (const [source, file] of [
     ['personal', path.join(codexHome(home), 'harness/settings.json')],
-    ['project', path.join(project, '.harness.json')],
+    ...projectSettings(project).map(file => ['project', file]),
   ]) {
     if (!fs.existsSync(file)) continue;
     const override = readJson(file);
@@ -81,7 +110,7 @@ export function resolveSettings(project: string, home?: string): { config: Json;
   const preferences = result.preferences;
   if ((preferences.repository || preferences.project_key) &&
       (!/^[A-Za-z0-9][A-Za-z0-9-]*\/[A-Za-z0-9_.-]+$/.test(preferences.repository) ||
-       !/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(preferences.project_key) ||
+       (preferences.project_key && !/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(preferences.project_key)) ||
        !preferences.branch.trim() || /[\x00-\x20\x7f]/.test(preferences.branch)))
     throw new Error('preferences requires valid repository, branch and project_key');
   return { config: result, model_selection: {

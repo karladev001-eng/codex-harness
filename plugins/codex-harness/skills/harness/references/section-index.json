@@ -1,0 +1,184 @@
+{
+  "schema": 1,
+  "documents": {
+    "commands": {
+      "path": "references/commands.md",
+      "sha256": "d702e10f493bddbbaf9e22ef10a7e771542b0fc032c8e0337a72aaddaa1061a0",
+      "common": [
+        "common"
+      ],
+      "sections": {
+        "common": {
+          "ranges": [
+            [
+              1,
+              16
+            ],
+            [
+              21,
+              22
+            ]
+          ],
+          "requires": [
+            "settings"
+          ]
+        },
+        "status": {
+          "ranges": [],
+          "requires": [
+            "preferences-boundary",
+            "status-models"
+          ]
+        },
+        "doctor": {
+          "ranges": [],
+          "requires": [
+            "status"
+          ]
+        },
+        "task": {
+          "ranges": [
+            [
+              17,
+              20
+            ]
+          ],
+          "requires": []
+        },
+        "worktree": {
+          "ranges": [],
+          "requires": [
+            "task"
+          ]
+        },
+        "measure": {
+          "ranges": [
+            [
+              23,
+              24
+            ]
+          ],
+          "requires": []
+        },
+        "install": {
+          "ranges": [
+            [
+              25,
+              51
+            ]
+          ],
+          "requires": [
+            "settings"
+          ]
+        },
+        "settings": {
+          "ranges": [
+            [
+              52,
+              53
+            ]
+          ],
+          "requires": []
+        },
+        "preferences-boundary": {
+          "ranges": [
+            [
+              54,
+              59
+            ],
+            [
+              77,
+              78
+            ]
+          ],
+          "requires": []
+        },
+        "preferences": {
+          "ranges": [
+            [
+              60,
+              76
+            ]
+          ],
+          "requires": [
+            "preferences-boundary"
+          ]
+        },
+        "status-models": {
+          "ranges": [
+            [
+              44,
+              45
+            ]
+          ],
+          "requires": []
+        },
+        "lessons": {
+          "ranges": [
+            [
+              79,
+              93
+            ]
+          ],
+          "requires": [
+            "preferences"
+          ]
+        }
+      }
+    },
+    "roles": {
+      "path": "references/roles.md",
+      "sha256": "4646cd8a8ea85f93f85b4f08a689e69a44e2b90cc4322f701018e60dd250b245",
+      "common": [
+        "common"
+      ],
+      "sections": {
+        "common": {
+          "ranges": [
+            [
+              1,
+              18
+            ]
+          ],
+          "requires": []
+        },
+        "coordinator": {
+          "ranges": [
+            [
+              19,
+              28
+            ]
+          ],
+          "requires": []
+        },
+        "role-index": {
+          "ranges": [
+            [
+              29,
+              40
+            ]
+          ],
+          "requires": []
+        },
+        "implementation": {
+          "ranges": [
+            [
+              41,
+              44
+            ]
+          ],
+          "requires": []
+        },
+        "integration": {
+          "ranges": [
+            [
+              45,
+              47
+            ]
+          ],
+          "requires": []
+        }
+      }
+    }
+  }
+}

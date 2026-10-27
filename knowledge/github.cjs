@@ -8,7 +8,7 @@ class Gh {
     return (async () => {
       const args = ['api', '--hostname', 'github.com', endpoint, '--method', method, '-H', 'Accept: application/vnd.github+json', '-H', 'X-GitHub-Api-Version: 2022-11-28'];
       if (body !== undefined) args.push('--input', '-');
-      let bytes;try{bytes=await run(this.binary,args,{timeout:this.timeout,max:12*1024*1024,input:body===undefined?undefined:JSON.stringify(body),env:{...process.env,GH_DEBUG:'',GH_HOST:'github.com'}});}catch(e){throw new Error(e.message==='PROCESS_UNAVAILABLE'?'GH_UNAVAILABLE':'GH_REQUEST_FAILED');}
+      let bytes;try{bytes=await run(this.binary,args,{timeout:this.timeout,max:12*1024*1024,input:body===undefined?undefined:JSON.stringify(body),env:{...process.env,GH_DEBUG:'',GH_HOST:'github.com'}});}catch(e){throw new Error(({PROCESS_UNAVAILABLE:'GH_UNAVAILABLE',PROCESS_TIMEOUT:'GH_TIMEOUT',PROCESS_AUTHENTICATION:'GH_AUTHENTICATION',PROCESS_FORBIDDEN:'GH_FORBIDDEN',PROCESS_NETWORK:'GH_NETWORK'})[e.message]||'GH_REQUEST_FAILED');}
       try{return JSON.parse(bytes.toString('utf8'));}catch{throw new Error('GH_INVALID_RESPONSE');}
     })();
   }

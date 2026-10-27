@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "documents": {
+    "blocks": {
+      "path": "references/blocks.md",
+      "sha256": "65ea755ccde08fd7c798590f5bebf222afc43a40de8bbf603439ad16df9cce6a",
+      "common": [
+        "common",
+        "doc-plan",
+        "pack"
+      ],
+      "sections": {
+        "common": {
+          "ranges": [
+            [
+              1,
+              14
+            ]
+          ],
+          "requires": []
+        },
+        "doc-plan": {
+          "ranges": [
+            [
+              15,
+              27
+            ]
+          ],
+          "requires": []
+        },
+        "doc-changes": {
+          "ranges": [
+            [
+              28,
+              35
+            ]
+          ],
+          "requires": []
+        },
+        "doc-mock": {
+          "ranges": [
+            [
+              36,
+              57
+            ]
+          ],
+          "requires": []
+        },
+        "doc-machine": {
+          "ranges": [
+            [
+              58,
+              91
+            ]
+          ],
+          "requires": [
+            "doc-mock"
+          ]
+        },
+        "doc-calls": {
+          "ranges": [
+            [
+              92,
+              113
+            ]
+          ],
+          "requires": []
+        },
+        "doc-schema": {
+          "ranges": [
+            [
+              114,
+              134
+            ]
+          ],
+          "requires": []
+        },
+        "doc-code": {
+          "ranges": [
+            [
+              135,
+              156
+            ]
+          ],
+          "requires": []
+        },
+        "doc-ask": {
+          "ranges": [
+            [
+              157,
+              173
+            ]
+          ],
+          "requires": [
+            "doc-note"
+          ]
+        },
+        "doc-quote": {
+          "ranges": [
+            [
+              174,
+              184
+            ]
+          ],
+          "requires": []
+        },
+        "doc-note": {
+          "ranges": [
+            [
+              185,
+              188
+            ]
+          ],
+          "requires": []
+        },
+        "other": {
+          "ranges": [
+            [
+              189,
+              222
+            ]
+          ],
+          "requires": []
+        },
+        "pack": {
+          "ranges": [
+            [
+              223,
+              232
+            ]
+          ],
+          "requires": []
+        },
+        "doc-claim": {
+          "ranges": [],
+          "requires": [
+            "doc-plan"
+          ]
+        },
+        "doc-pin": {
+          "ranges": [],
+          "requires": [
+            "doc-mock",
+            "doc-code"
+          ]
+        },
+        "doc-shot": {
+          "ranges": [],
+          "requires": [
+            "doc-mock"
+          ]
+        },
+        "doc-flow": {
+          "ranges": [],
+          "requires": [
+            "other"
+          ]
+        },
+        "doc-tree": {
+          "ranges": [],
+          "requires": [
+            "other"
+          ]
+        },
+        "doc-draft": {
+          "ranges": [],
+          "requires": [
+            "other"
+          ]
+        }
+      }
+    }
+  }
+}

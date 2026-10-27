@@ -1,0 +1,3327 @@
+{
+  "schema": 1,
+  "scope": "Single-run independent coordinator document-selection rehearsals, not completed tasks or whole-conversation token measurements",
+  "rawManifestSha256": "cf6cfdcc93d65d058f6f3ec9c937959af481f49e5f531811d2fba2599861b350",
+  "sourceInventorySha256": "290f891c29946a1b7c510a4cdf9c4cdb7bd729710bc4bad9bbf2378ee681c184",
+  "conditions": {
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "config": {
+      "active": true,
+      "delegation": true,
+      "review": true,
+      "persistence": true,
+      "measurement": true,
+      "improvement_loop": true,
+      "max_agents": 3,
+      "model_selection": "auto",
+      "pins": []
+    },
+    "maxStdoutBytes": 24000,
+    "toolMaxOutputTokens": 30000
+  },
+  "wrappers": [
+    {
+      "file": "versions/audit-v1.cjs",
+      "sha256": "fd56671d85f4658cf4186cf4cb91e05c169ebaa7428751cb2d892d86fd7e66d7"
+    },
+    {
+      "file": "../../scripts/section-reading-audit.cjs",
+      "sha256": "72143fc40338c97508588d247fd2297b8b9e3a32f5e4370bd882d2706cc453e5"
+    }
+  ],
+  "attribution": "commands/roles/blocks groups include stdout attributed to that same source Markdown, including document-specific indexes and helper metadata; unattributed shared indexes stay in other. All stdout is included exactly once.",
+  "runs": [
+    {
+      "id": "before-code",
+      "originalDirectory": "/private/tmp/section-code-before",
+      "stage": "baseline",
+      "excluded": false,
+      "exclusionReason": null,
+      "summary": {
+        "schema": 1,
+        "root": "/private/tmp/harness-sections-before-d7dgz7zn",
+        "label": "before",
+        "scenario": "code",
+        "model": "gpt-6.1-sol",
+        "effort": "high",
+        "fixtureSha256": "b36c14b9c9a0568c9e592910f52353c02e0f8f4d4ca24fb19e2f27f7bc4240ba",
+        "auditSha256": "fd56671d85f4658cf4186cf4cb91e05c169ebaa7428751cb2d892d86fd7e66d7",
+        "config": {
+          "active": true,
+          "delegation": true,
+          "review": true,
+          "persistence": true,
+          "measurement": true,
+          "improvement_loop": true,
+          "max_agents": 3,
+          "model_selection": "auto",
+          "pins": []
+        },
+        "scope": "Independent coordinator document-selection rehearsal; no code work, children, web browsing, or task completion",
+        "maxStdoutBytes": 24000,
+        "toolMaxOutputTokens": 30000,
+        "createdAt": "2026-10-24T11:39:11.042Z",
+        "events": 21,
+        "stdoutBytes": 61579,
+        "bodyBytes": 61518,
+        "metadataBytes": 0,
+        "indexBytes": 61,
+        "stderrBytes": 51,
+        "duplicateBodyBytes": 0,
+        "failedInvocations": 1,
+        "finalEventSha256": "5d809a86d439baefcc11c4898056f5a413b3f5a0c716e1a9f4ec1460b0699d7b"
+      },
+      "initial": {
+        "stdoutBytes": 52072,
+        "bodyBytes": 52011,
+        "metadataBytes": 0,
+        "indexBytes": 61,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 0,
+        "events": 17,
+        "failedInvocations": 0,
+        "stdoutPlusStderrBytes": 52072
+      },
+      "supplement": {
+        "stdoutBytes": 9507,
+        "bodyBytes": 9507,
+        "metadataBytes": 0,
+        "indexBytes": 0,
+        "stderrBytes": 51,
+        "duplicateBodyBytes": 0,
+        "events": 4,
+        "failedInvocations": 1,
+        "stdoutPlusStderrBytes": 9558
+      },
+      "groups": {
+        "commands": {
+          "stdoutBytes": 10140,
+          "bodyBytes": 10079,
+          "metadataBytes": 0,
+          "indexBytes": 61,
+          "stderrBytes": 51,
+          "duplicateBodyBytes": 0,
+          "events": 5,
+          "failedInvocations": 1,
+          "stdoutPlusStderrBytes": 10191
+        },
+        "roles": {
+          "stdoutBytes": 7339,
+          "bodyBytes": 7339,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 7339
+        },
+        "blocks": {
+          "stdoutBytes": 0,
+          "bodyBytes": 0,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 0,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 0
+        },
+        "other": {
+          "stdoutBytes": 44100,
+          "bodyBytes": 44100,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 15,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 44100
+        }
+      },
+      "initialGroups": {
+        "commands": {
+          "stdoutBytes": 2703,
+          "bodyBytes": 2642,
+          "metadataBytes": 0,
+          "indexBytes": 61,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 2,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 2703
+        },
+        "roles": {
+          "stdoutBytes": 7339,
+          "bodyBytes": 7339,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 7339
+        },
+        "blocks": {
+          "stdoutBytes": 0,
+          "bodyBytes": 0,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 0,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 0
+        },
+        "other": {
+          "stdoutBytes": 42030,
+          "bodyBytes": 42030,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 14,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 42030
+        }
+      },
+      "eventAttribution": [
+        {
+          "sequence": 1,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/SKILL.md",
+          "group": "other",
+          "stdoutBytes": 4119,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 2,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/preimplementation.md",
+          "group": "other",
+          "stdoutBytes": 5114,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 3,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/coordination.md",
+          "group": "other",
+          "stdoutBytes": 4717,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 4,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/continuity.md",
+          "group": "other",
+          "stdoutBytes": 1675,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 5,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles.md",
+          "group": "roles",
+          "stdoutBytes": 7339,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 6,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/parallel.md",
+          "group": "other",
+          "stdoutBytes": 2131,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 7,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/reviewer.md",
+          "group": "other",
+          "stdoutBytes": 3225,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 8,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles/code-review.md",
+          "group": "other",
+          "stdoutBytes": 2195,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 9,
+          "operation": "headings",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 61,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 10,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 2642,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 11,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/measurement.md",
+          "group": "other",
+          "stdoutBytes": 1085,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 12,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/task.md",
+          "group": "other",
+          "stdoutBytes": 4120,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 13,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/claude.md",
+          "group": "other",
+          "stdoutBytes": 2334,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 14,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/completion.md",
+          "group": "other",
+          "stdoutBytes": 363,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 15,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/project-map.md",
+          "group": "other",
+          "stdoutBytes": 285,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 16,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/SKILL.md",
+          "group": "other",
+          "stdoutBytes": 7194,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 17,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/references/workflow.md",
+          "group": "other",
+          "stdoutBytes": 3473,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 18,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 0,
+          "stderrBytes": 51,
+          "exitCode": 1
+        },
+        {
+          "sequence": 19,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 4466,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 20,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 2971,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 21,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/settings.md",
+          "group": "other",
+          "stdoutBytes": 2070,
+          "stderrBytes": 0,
+          "exitCode": 0
+        }
+      ],
+      "failures": [
+        {
+          "sequence": 18,
+          "error": "Line range outside document",
+          "stderr": "section-reading-audit: Line range outside document\n"
+        }
+      ]
+    },
+    {
+      "id": "before-mixed",
+      "originalDirectory": "/private/tmp/section-mixed-before",
+      "stage": "baseline",
+      "excluded": false,
+      "exclusionReason": null,
+      "summary": {
+        "schema": 1,
+        "root": "/private/tmp/harness-sections-before-d7dgz7zn",
+        "label": "before",
+        "scenario": "mixed",
+        "model": "gpt-6.1-sol",
+        "effort": "high",
+        "fixtureSha256": "226d73b316f7adb4cb3c7ae397a897b688cf4d226efd71d8a9f845af5b2f5252",
+        "auditSha256": "fd56671d85f4658cf4186cf4cb91e05c169ebaa7428751cb2d892d86fd7e66d7",
+        "config": {
+          "active": true,
+          "delegation": true,
+          "review": true,
+          "persistence": true,
+          "measurement": true,
+          "improvement_loop": true,
+          "max_agents": 3,
+          "model_selection": "auto",
+          "pins": []
+        },
+        "scope": "Independent coordinator document-selection rehearsal; no code work, children, web browsing, or task completion",
+        "maxStdoutBytes": 24000,
+        "toolMaxOutputTokens": 30000,
+        "createdAt": "2026-10-24T11:39:11.040Z",
+        "events": 27,
+        "stdoutBytes": 103889,
+        "bodyBytes": 103291,
+        "metadataBytes": 0,
+        "indexBytes": 598,
+        "stderrBytes": 51,
+        "duplicateBodyBytes": 0,
+        "failedInvocations": 1,
+        "finalEventSha256": "493d62683a408dd2e7da8a6f31db83f40bc54ce9594b9beedfc44cc46f5ada3e"
+      },
+      "initial": {
+        "stdoutBytes": 103889,
+        "bodyBytes": 103291,
+        "metadataBytes": 0,
+        "indexBytes": 598,
+        "stderrBytes": 51,
+        "duplicateBodyBytes": 0,
+        "events": 27,
+        "failedInvocations": 1,
+        "stdoutPlusStderrBytes": 103940
+      },
+      "supplement": {
+        "stdoutBytes": 0,
+        "bodyBytes": 0,
+        "metadataBytes": 0,
+        "indexBytes": 0,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 0,
+        "events": 0,
+        "failedInvocations": 0,
+        "stdoutPlusStderrBytes": 0
+      },
+      "groups": {
+        "commands": {
+          "stdoutBytes": 10079,
+          "bodyBytes": 10079,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 10079
+        },
+        "roles": {
+          "stdoutBytes": 7339,
+          "bodyBytes": 7339,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 7339
+        },
+        "blocks": {
+          "stdoutBytes": 10330,
+          "bodyBytes": 9732,
+          "metadataBytes": 0,
+          "indexBytes": 598,
+          "stderrBytes": 51,
+          "duplicateBodyBytes": 0,
+          "events": 5,
+          "failedInvocations": 1,
+          "stdoutPlusStderrBytes": 10381
+        },
+        "other": {
+          "stdoutBytes": 76141,
+          "bodyBytes": 76141,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 20,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 76141
+        }
+      },
+      "initialGroups": {
+        "commands": {
+          "stdoutBytes": 10079,
+          "bodyBytes": 10079,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 10079
+        },
+        "roles": {
+          "stdoutBytes": 7339,
+          "bodyBytes": 7339,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 7339
+        },
+        "blocks": {
+          "stdoutBytes": 10330,
+          "bodyBytes": 9732,
+          "metadataBytes": 0,
+          "indexBytes": 598,
+          "stderrBytes": 51,
+          "duplicateBodyBytes": 0,
+          "events": 5,
+          "failedInvocations": 1,
+          "stdoutPlusStderrBytes": 10381
+        },
+        "other": {
+          "stdoutBytes": 76141,
+          "bodyBytes": 76141,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 20,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 76141
+        }
+      },
+      "eventAttribution": [
+        {
+          "sequence": 1,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/SKILL.md",
+          "group": "other",
+          "stdoutBytes": 4119,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 2,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/preimplementation.md",
+          "group": "other",
+          "stdoutBytes": 5114,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 3,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/web.md",
+          "group": "other",
+          "stdoutBytes": 1960,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 4,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/claude.md",
+          "group": "other",
+          "stdoutBytes": 2334,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 5,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/creative.md",
+          "group": "other",
+          "stdoutBytes": 2153,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 6,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/coordination.md",
+          "group": "other",
+          "stdoutBytes": 4717,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 7,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/continuity.md",
+          "group": "other",
+          "stdoutBytes": 1675,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 8,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/SKILL.md",
+          "group": "other",
+          "stdoutBytes": 7194,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 9,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/creative-loop.md",
+          "group": "other",
+          "stdoutBytes": 15100,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 10,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles.md",
+          "group": "roles",
+          "stdoutBytes": 7339,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 11,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/parallel.md",
+          "group": "other",
+          "stdoutBytes": 2131,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 12,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/reviewer.md",
+          "group": "other",
+          "stdoutBytes": 3225,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 13,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles/code-review.md",
+          "group": "other",
+          "stdoutBytes": 2195,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 14,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles/web-review.md",
+          "group": "other",
+          "stdoutBytes": 2164,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 15,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 10079,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 16,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/measurement.md",
+          "group": "other",
+          "stdoutBytes": 1085,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 17,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/references/workflow.md",
+          "group": "other",
+          "stdoutBytes": 3473,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 18,
+          "operation": "headings",
+          "sourcePath": "authoring-skills/codex-html-plan/references/blocks.md",
+          "group": "blocks",
+          "stdoutBytes": 598,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 19,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/references/blocks.md",
+          "group": "blocks",
+          "stdoutBytes": 4823,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 20,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/references/blocks.md",
+          "group": "blocks",
+          "stdoutBytes": 0,
+          "stderrBytes": 51,
+          "exitCode": 1
+        },
+        {
+          "sequence": 21,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/references/blocks.md",
+          "group": "blocks",
+          "stdoutBytes": 4179,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 22,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/references/blocks.md",
+          "group": "blocks",
+          "stdoutBytes": 730,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 23,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/knowledge-retrieval.md",
+          "group": "other",
+          "stdoutBytes": 4208,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 24,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles/record-keeper.md",
+          "group": "other",
+          "stdoutBytes": 4819,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 25,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/task.md",
+          "group": "other",
+          "stdoutBytes": 4120,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 26,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/completion.md",
+          "group": "other",
+          "stdoutBytes": 363,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 27,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/early-compaction.md",
+          "group": "other",
+          "stdoutBytes": 3992,
+          "stderrBytes": 0,
+          "exitCode": 0
+        }
+      ],
+      "failures": [
+        {
+          "sequence": 20,
+          "error": "Line range outside document",
+          "stderr": "section-reading-audit: Line range outside document\n"
+        }
+      ]
+    },
+    {
+      "id": "first-after-code",
+      "originalDirectory": "/private/tmp/section-code-after",
+      "stage": "initial implementation",
+      "excluded": false,
+      "exclusionReason": null,
+      "summary": {
+        "schema": 1,
+        "root": "/Users/kan/dev/harness",
+        "label": "after",
+        "scenario": "code",
+        "model": "gpt-6.1-sol",
+        "effort": "high",
+        "fixtureSha256": "b36c14b9c9a0568c9e592910f52353c02e0f8f4d4ca24fb19e2f27f7bc4240ba",
+        "auditSha256": "fd56671d85f4658cf4186cf4cb91e05c169ebaa7428751cb2d892d86fd7e66d7",
+        "config": {
+          "active": true,
+          "delegation": true,
+          "review": true,
+          "persistence": true,
+          "measurement": true,
+          "improvement_loop": true,
+          "max_agents": 3,
+          "model_selection": "auto",
+          "pins": []
+        },
+        "scope": "Independent coordinator document-selection rehearsal; no code work, children, web browsing, or task completion",
+        "maxStdoutBytes": 24000,
+        "toolMaxOutputTokens": 30000,
+        "createdAt": "2026-10-24T11:43:15.236Z",
+        "events": 21,
+        "stdoutBytes": 68261,
+        "bodyBytes": 67531,
+        "metadataBytes": 669,
+        "indexBytes": 61,
+        "stderrBytes": 51,
+        "duplicateBodyBytes": 3990,
+        "failedInvocations": 1,
+        "finalEventSha256": "391d915b2ff46fbc61017fff2dfbc2a9653e4a25d3e1115f9658e70910d8a12e"
+      },
+      "initial": {
+        "stdoutBytes": 61664,
+        "bodyBytes": 60995,
+        "metadataBytes": 669,
+        "indexBytes": 0,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 2872,
+        "events": 17,
+        "failedInvocations": 0,
+        "stdoutPlusStderrBytes": 61664
+      },
+      "supplement": {
+        "stdoutBytes": 6597,
+        "bodyBytes": 6536,
+        "metadataBytes": 0,
+        "indexBytes": 61,
+        "stderrBytes": 51,
+        "duplicateBodyBytes": 1118,
+        "events": 4,
+        "failedInvocations": 1,
+        "stdoutPlusStderrBytes": 6648
+      },
+      "groups": {
+        "commands": {
+          "stdoutBytes": 9174,
+          "bodyBytes": 8815,
+          "metadataBytes": 298,
+          "indexBytes": 61,
+          "stderrBytes": 51,
+          "duplicateBodyBytes": 1118,
+          "events": 4,
+          "failedInvocations": 1,
+          "stdoutPlusStderrBytes": 9225
+        },
+        "roles": {
+          "stdoutBytes": 9490,
+          "bodyBytes": 9119,
+          "metadataBytes": 371,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 2872,
+          "events": 2,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 9490
+        },
+        "blocks": {
+          "stdoutBytes": 0,
+          "bodyBytes": 0,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 0,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 0
+        },
+        "other": {
+          "stdoutBytes": 49597,
+          "bodyBytes": 49597,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 15,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 49597
+        }
+      },
+      "initialGroups": {
+        "commands": {
+          "stdoutBytes": 4647,
+          "bodyBytes": 4349,
+          "metadataBytes": 298,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 4647
+        },
+        "roles": {
+          "stdoutBytes": 9490,
+          "bodyBytes": 9119,
+          "metadataBytes": 371,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 2872,
+          "events": 2,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 9490
+        },
+        "blocks": {
+          "stdoutBytes": 0,
+          "bodyBytes": 0,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 0,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 0
+        },
+        "other": {
+          "stdoutBytes": 47527,
+          "bodyBytes": 47527,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 14,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 47527
+        }
+      },
+      "eventAttribution": [
+        {
+          "sequence": 1,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/SKILL.md",
+          "group": "other",
+          "stdoutBytes": 5107,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 2,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/preimplementation.md",
+          "group": "other",
+          "stdoutBytes": 5114,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 3,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/coordination.md",
+          "group": "other",
+          "stdoutBytes": 4717,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 4,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/continuity.md",
+          "group": "other",
+          "stdoutBytes": 1675,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 5,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles.md",
+          "group": "roles",
+          "stdoutBytes": 5360,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 6,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/parallel.md",
+          "group": "other",
+          "stdoutBytes": 2131,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 7,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/reviewer.md",
+          "group": "other",
+          "stdoutBytes": 3225,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 8,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles/code-review.md",
+          "group": "other",
+          "stdoutBytes": 2195,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 9,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles.md",
+          "group": "roles",
+          "stdoutBytes": 4130,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 10,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/claude.md",
+          "group": "other",
+          "stdoutBytes": 2334,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 11,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 4647,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 12,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/measurement.md",
+          "group": "other",
+          "stdoutBytes": 1085,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 13,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/task.md",
+          "group": "other",
+          "stdoutBytes": 4120,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 14,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/SKILL.md",
+          "group": "other",
+          "stdoutBytes": 7996,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 15,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/references/workflow.md",
+          "group": "other",
+          "stdoutBytes": 3473,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 16,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/completion.md",
+          "group": "other",
+          "stdoutBytes": 363,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 17,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/early-compaction.md",
+          "group": "other",
+          "stdoutBytes": 3992,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 18,
+          "operation": "headings",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 61,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 19,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 4466,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 20,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/settings.md",
+          "group": "other",
+          "stdoutBytes": 2070,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 21,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 0,
+          "stderrBytes": 51,
+          "exitCode": 1
+        }
+      ],
+      "failures": [
+        {
+          "sequence": 21,
+          "error": "Line range outside document",
+          "stderr": "section-reading-audit: Line range outside document\n"
+        }
+      ]
+    },
+    {
+      "id": "first-after-mixed",
+      "originalDirectory": "/private/tmp/section-mixed-after",
+      "stage": "initial implementation",
+      "excluded": false,
+      "exclusionReason": null,
+      "summary": {
+        "schema": 1,
+        "root": "/Users/kan/dev/harness",
+        "label": "after",
+        "scenario": "mixed",
+        "model": "gpt-6.1-sol",
+        "effort": "high",
+        "fixtureSha256": "226d73b316f7adb4cb3c7ae397a897b688cf4d226efd71d8a9f845af5b2f5252",
+        "auditSha256": "fd56671d85f4658cf4186cf4cb91e05c169ebaa7428751cb2d892d86fd7e66d7",
+        "config": {
+          "active": true,
+          "delegation": true,
+          "review": true,
+          "persistence": true,
+          "measurement": true,
+          "improvement_loop": true,
+          "max_agents": 3,
+          "model_selection": "auto",
+          "pins": []
+        },
+        "scope": "Independent coordinator document-selection rehearsal; no code work, children, web browsing, or task completion",
+        "maxStdoutBytes": 24000,
+        "toolMaxOutputTokens": 30000,
+        "createdAt": "2026-10-24T11:44:10.728Z",
+        "events": 27,
+        "stdoutBytes": 107199,
+        "bodyBytes": 106088,
+        "metadataBytes": 1111,
+        "indexBytes": 0,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 3042,
+        "failedInvocations": 0,
+        "finalEventSha256": "6b334b6cb45a1044225831094b2d2b228605f20c04bd43ebe31c1a4a4eec6411"
+      },
+      "initial": {
+        "stdoutBytes": 107199,
+        "bodyBytes": 106088,
+        "metadataBytes": 1111,
+        "indexBytes": 0,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 3042,
+        "events": 27,
+        "failedInvocations": 0,
+        "stdoutPlusStderrBytes": 107199
+      },
+      "supplement": {
+        "stdoutBytes": 0,
+        "bodyBytes": 0,
+        "metadataBytes": 0,
+        "indexBytes": 0,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 0,
+        "events": 0,
+        "failedInvocations": 0,
+        "stdoutPlusStderrBytes": 0
+      },
+      "groups": {
+        "commands": {
+          "stdoutBytes": 7041,
+          "bodyBytes": 6731,
+          "metadataBytes": 310,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 7041
+        },
+        "roles": {
+          "stdoutBytes": 6471,
+          "bodyBytes": 6247,
+          "metadataBytes": 224,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 6471
+        },
+        "blocks": {
+          "stdoutBytes": 12386,
+          "bodyBytes": 11809,
+          "metadataBytes": 577,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 3042,
+          "events": 2,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 12386
+        },
+        "other": {
+          "stdoutBytes": 81301,
+          "bodyBytes": 81301,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 23,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 81301
+        }
+      },
+      "initialGroups": {
+        "commands": {
+          "stdoutBytes": 7041,
+          "bodyBytes": 6731,
+          "metadataBytes": 310,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 7041
+        },
+        "roles": {
+          "stdoutBytes": 6471,
+          "bodyBytes": 6247,
+          "metadataBytes": 224,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 6471
+        },
+        "blocks": {
+          "stdoutBytes": 12386,
+          "bodyBytes": 11809,
+          "metadataBytes": 577,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 3042,
+          "events": 2,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 12386
+        },
+        "other": {
+          "stdoutBytes": 81301,
+          "bodyBytes": 81301,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 23,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 81301
+        }
+      },
+      "eventAttribution": [
+        {
+          "sequence": 1,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/SKILL.md",
+          "group": "other",
+          "stdoutBytes": 5107,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 2,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/preimplementation.md",
+          "group": "other",
+          "stdoutBytes": 5114,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 3,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/claude.md",
+          "group": "other",
+          "stdoutBytes": 2334,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 4,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/web.md",
+          "group": "other",
+          "stdoutBytes": 1960,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 5,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/creative.md",
+          "group": "other",
+          "stdoutBytes": 2153,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 6,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/coordination.md",
+          "group": "other",
+          "stdoutBytes": 4717,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 7,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/continuity.md",
+          "group": "other",
+          "stdoutBytes": 1675,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 8,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/SKILL.md",
+          "group": "other",
+          "stdoutBytes": 7996,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 9,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 7041,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 10,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles.md",
+          "group": "roles",
+          "stdoutBytes": 6471,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 11,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/creative-loop.md",
+          "group": "other",
+          "stdoutBytes": 15100,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 12,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/knowledge-retrieval.md",
+          "group": "other",
+          "stdoutBytes": 4208,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 13,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/parallel.md",
+          "group": "other",
+          "stdoutBytes": 2131,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 14,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/reviewer.md",
+          "group": "other",
+          "stdoutBytes": 3225,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 15,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles/code-review.md",
+          "group": "other",
+          "stdoutBytes": 2195,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 16,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles/web-review.md",
+          "group": "other",
+          "stdoutBytes": 2164,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 17,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/measurement.md",
+          "group": "other",
+          "stdoutBytes": 1085,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 18,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/early-compaction.md",
+          "group": "other",
+          "stdoutBytes": 3992,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 19,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/references/workflow.md",
+          "group": "other",
+          "stdoutBytes": 3473,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 20,
+          "operation": "reader",
+          "sourcePath": "authoring-skills/codex-html-plan/references/blocks.md",
+          "group": "blocks",
+          "stdoutBytes": 7263,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 21,
+          "operation": "reader",
+          "sourcePath": "authoring-skills/codex-html-plan/references/blocks.md",
+          "group": "blocks",
+          "stdoutBytes": 5123,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 22,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/task.md",
+          "group": "other",
+          "stdoutBytes": 4120,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 23,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/completion.md",
+          "group": "other",
+          "stdoutBytes": 363,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 24,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/project-map.md",
+          "group": "other",
+          "stdoutBytes": 285,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 25,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/adr.md",
+          "group": "other",
+          "stdoutBytes": 273,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 26,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles/record-keeper.md",
+          "group": "other",
+          "stdoutBytes": 4819,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 27,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/creative-preferences.md",
+          "group": "other",
+          "stdoutBytes": 2812,
+          "stderrBytes": 0,
+          "exitCode": 0
+        }
+      ],
+      "failures": []
+    },
+    {
+      "id": "receipt-after-code",
+      "originalDirectory": "/private/tmp/section-code-after-verified",
+      "stage": "receipt implementation",
+      "excluded": false,
+      "exclusionReason": null,
+      "summary": {
+        "schema": 1,
+        "root": "/Users/kan/dev/harness",
+        "label": "after-verified",
+        "scenario": "code",
+        "model": "gpt-6.1-sol",
+        "effort": "high",
+        "fixtureSha256": "b36c14b9c9a0568c9e592910f52353c02e0f8f4d4ca24fb19e2f27f7bc4240ba",
+        "auditSha256": "72143fc40338c97508588d247fd2297b8b9e3a32f5e4370bd882d2706cc453e5",
+        "config": {
+          "active": true,
+          "delegation": true,
+          "review": true,
+          "persistence": true,
+          "measurement": true,
+          "improvement_loop": true,
+          "max_agents": 3,
+          "model_selection": "auto",
+          "pins": []
+        },
+        "scope": "Independent coordinator document-selection rehearsal; no code work, children, web browsing, or task completion",
+        "maxStdoutBytes": 24000,
+        "toolMaxOutputTokens": 30000,
+        "createdAt": "2026-10-24T11:56:06.933Z",
+        "events": 21,
+        "stdoutBytes": 64512,
+        "bodyBytes": 63214,
+        "metadataBytes": 943,
+        "indexBytes": 355,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 1707,
+        "failedInvocations": 0,
+        "finalEventSha256": "b06190423176576f44070abd2e88d2f8e9e7adcfcc308d8590eab951db8bca87"
+      },
+      "initial": {
+        "stdoutBytes": 54944,
+        "bodyBytes": 53707,
+        "metadataBytes": 943,
+        "indexBytes": 294,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 0,
+        "events": 17,
+        "failedInvocations": 0,
+        "stdoutPlusStderrBytes": 54944
+      },
+      "supplement": {
+        "stdoutBytes": 9568,
+        "bodyBytes": 9507,
+        "metadataBytes": 0,
+        "indexBytes": 61,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 1707,
+        "events": 4,
+        "failedInvocations": 0,
+        "stdoutPlusStderrBytes": 9568
+      },
+      "groups": {
+        "commands": {
+          "stdoutBytes": 12668,
+          "bodyBytes": 11786,
+          "metadataBytes": 527,
+          "indexBytes": 355,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 1707,
+          "events": 5,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 12668
+        },
+        "roles": {
+          "stdoutBytes": 6663,
+          "bodyBytes": 6247,
+          "metadataBytes": 416,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 6663
+        },
+        "blocks": {
+          "stdoutBytes": 0,
+          "bodyBytes": 0,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 0,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 0
+        },
+        "other": {
+          "stdoutBytes": 45181,
+          "bodyBytes": 45181,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 15,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 45181
+        }
+      },
+      "initialGroups": {
+        "commands": {
+          "stdoutBytes": 5170,
+          "bodyBytes": 4349,
+          "metadataBytes": 527,
+          "indexBytes": 294,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 2,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 5170
+        },
+        "roles": {
+          "stdoutBytes": 6663,
+          "bodyBytes": 6247,
+          "metadataBytes": 416,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 6663
+        },
+        "blocks": {
+          "stdoutBytes": 0,
+          "bodyBytes": 0,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 0,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 0
+        },
+        "other": {
+          "stdoutBytes": 43111,
+          "bodyBytes": 43111,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 14,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 43111
+        }
+      },
+      "eventAttribution": [
+        {
+          "sequence": 1,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/SKILL.md",
+          "group": "other",
+          "stdoutBytes": 4752,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 2,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/preimplementation.md",
+          "group": "other",
+          "stdoutBytes": 5114,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 3,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/coordination.md",
+          "group": "other",
+          "stdoutBytes": 4717,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 4,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/continuity.md",
+          "group": "other",
+          "stdoutBytes": 1675,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 5,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/claude.md",
+          "group": "other",
+          "stdoutBytes": 2334,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 6,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 294,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 7,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 4876,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 8,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles.md",
+          "group": "roles",
+          "stdoutBytes": 6663,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 9,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/parallel.md",
+          "group": "other",
+          "stdoutBytes": 2131,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 10,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/reviewer.md",
+          "group": "other",
+          "stdoutBytes": 3225,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 11,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles/code-review.md",
+          "group": "other",
+          "stdoutBytes": 2195,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 12,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/measurement.md",
+          "group": "other",
+          "stdoutBytes": 1085,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 13,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/task.md",
+          "group": "other",
+          "stdoutBytes": 4120,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 14,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/completion.md",
+          "group": "other",
+          "stdoutBytes": 363,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 15,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/SKILL.md",
+          "group": "other",
+          "stdoutBytes": 7642,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 16,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/references/workflow.md",
+          "group": "other",
+          "stdoutBytes": 3473,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 17,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/project-map.md",
+          "group": "other",
+          "stdoutBytes": 285,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 18,
+          "operation": "headings",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 61,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 19,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 4466,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 20,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/settings.md",
+          "group": "other",
+          "stdoutBytes": 2070,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 21,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 2971,
+          "stderrBytes": 0,
+          "exitCode": 0
+        }
+      ],
+      "failures": []
+    },
+    {
+      "id": "receipt-after-mixed",
+      "originalDirectory": "/private/tmp/section-mixed-after-verified",
+      "stage": "receipt implementation",
+      "excluded": false,
+      "exclusionReason": null,
+      "summary": {
+        "schema": 1,
+        "root": "/Users/kan/dev/harness",
+        "label": "after-verified",
+        "scenario": "mixed",
+        "model": "gpt-6.1-sol",
+        "effort": "high",
+        "fixtureSha256": "226d73b316f7adb4cb3c7ae397a897b688cf4d226efd71d8a9f845af5b2f5252",
+        "auditSha256": "72143fc40338c97508588d247fd2297b8b9e3a32f5e4370bd882d2706cc453e5",
+        "config": {
+          "active": true,
+          "delegation": true,
+          "review": true,
+          "persistence": true,
+          "measurement": true,
+          "improvement_loop": true,
+          "max_agents": 3,
+          "model_selection": "auto",
+          "pins": []
+        },
+        "scope": "Independent coordinator document-selection rehearsal; no code work, children, web browsing, or task completion",
+        "maxStdoutBytes": 24000,
+        "toolMaxOutputTokens": 30000,
+        "createdAt": "2026-10-24T11:56:06.933Z",
+        "events": 27,
+        "stdoutBytes": 101325,
+        "bodyBytes": 98121,
+        "metadataBytes": 2232,
+        "indexBytes": 972,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 5381,
+        "failedInvocations": 0,
+        "finalEventSha256": "7482caff31b1b43b221eb4467e59885b3bd3b9dec31537f66c83b394e4d2a2f9"
+      },
+      "initial": {
+        "stdoutBytes": 101325,
+        "bodyBytes": 98121,
+        "metadataBytes": 2232,
+        "indexBytes": 972,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 5381,
+        "events": 27,
+        "failedInvocations": 0,
+        "stdoutPlusStderrBytes": 101325
+      },
+      "supplement": {
+        "stdoutBytes": 0,
+        "bodyBytes": 0,
+        "metadataBytes": 0,
+        "indexBytes": 0,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 0,
+        "events": 0,
+        "failedInvocations": 0,
+        "stdoutPlusStderrBytes": 0
+      },
+      "groups": {
+        "commands": {
+          "stdoutBytes": 10525,
+          "bodyBytes": 9240,
+          "metadataBytes": 991,
+          "indexBytes": 294,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 2509,
+          "events": 3,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 10525
+        },
+        "roles": {
+          "stdoutBytes": 9835,
+          "bodyBytes": 9119,
+          "metadataBytes": 716,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 2872,
+          "events": 2,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 9835
+        },
+        "blocks": {
+          "stdoutBytes": 8271,
+          "bodyBytes": 7359,
+          "metadataBytes": 525,
+          "indexBytes": 387,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 2,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 8271
+        },
+        "other": {
+          "stdoutBytes": 72694,
+          "bodyBytes": 72403,
+          "metadataBytes": 0,
+          "indexBytes": 291,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 20,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 72694
+        }
+      },
+      "initialGroups": {
+        "commands": {
+          "stdoutBytes": 10525,
+          "bodyBytes": 9240,
+          "metadataBytes": 991,
+          "indexBytes": 294,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 2509,
+          "events": 3,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 10525
+        },
+        "roles": {
+          "stdoutBytes": 9835,
+          "bodyBytes": 9119,
+          "metadataBytes": 716,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 2872,
+          "events": 2,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 9835
+        },
+        "blocks": {
+          "stdoutBytes": 8271,
+          "bodyBytes": 7359,
+          "metadataBytes": 525,
+          "indexBytes": 387,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 2,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 8271
+        },
+        "other": {
+          "stdoutBytes": 72694,
+          "bodyBytes": 72403,
+          "metadataBytes": 0,
+          "indexBytes": 291,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 20,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 72694
+        }
+      },
+      "eventAttribution": [
+        {
+          "sequence": 1,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/SKILL.md",
+          "group": "other",
+          "stdoutBytes": 4752,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 2,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/preimplementation.md",
+          "group": "other",
+          "stdoutBytes": 5114,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 3,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/claude.md",
+          "group": "other",
+          "stdoutBytes": 2334,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 4,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/web.md",
+          "group": "other",
+          "stdoutBytes": 1960,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 5,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/creative.md",
+          "group": "other",
+          "stdoutBytes": 2153,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 6,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/coordination.md",
+          "group": "other",
+          "stdoutBytes": 4717,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 7,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/continuity.md",
+          "group": "other",
+          "stdoutBytes": 1675,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 8,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 3546,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 9,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/measurement.md",
+          "group": "other",
+          "stdoutBytes": 1085,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 10,
+          "operation": "headings",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/creative-loop.md",
+          "group": "other",
+          "stdoutBytes": 291,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 11,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/creative-loop.md",
+          "group": "other",
+          "stdoutBytes": 15100,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 12,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/knowledge-retrieval.md",
+          "group": "other",
+          "stdoutBytes": 4208,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 13,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/SKILL.md",
+          "group": "other",
+          "stdoutBytes": 7642,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 14,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/references/workflow.md",
+          "group": "other",
+          "stdoutBytes": 3473,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 15,
+          "operation": "reader",
+          "sourcePath": "authoring-skills/codex-html-plan/references/blocks.md",
+          "group": "blocks",
+          "stdoutBytes": 387,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 16,
+          "operation": "reader",
+          "sourcePath": "authoring-skills/codex-html-plan/references/blocks.md",
+          "group": "blocks",
+          "stdoutBytes": 7884,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 17,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles.md",
+          "group": "roles",
+          "stdoutBytes": 5525,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 18,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/parallel.md",
+          "group": "other",
+          "stdoutBytes": 2131,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 19,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/reviewer.md",
+          "group": "other",
+          "stdoutBytes": 3225,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 20,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles/code-review.md",
+          "group": "other",
+          "stdoutBytes": 2195,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 21,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles/web-review.md",
+          "group": "other",
+          "stdoutBytes": 2164,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 22,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles.md",
+          "group": "roles",
+          "stdoutBytes": 4310,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 23,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/task.md",
+          "group": "other",
+          "stdoutBytes": 4120,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 24,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 294,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 25,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 6685,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 26,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/early-compaction.md",
+          "group": "other",
+          "stdoutBytes": 3992,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 27,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/completion.md",
+          "group": "other",
+          "stdoutBytes": 363,
+          "stderrBytes": 0,
+          "exitCode": 0
+        }
+      ],
+      "failures": []
+    },
+    {
+      "id": "final-after-code",
+      "originalDirectory": "/private/tmp/section-code-after-last",
+      "stage": "final guidance",
+      "excluded": false,
+      "exclusionReason": null,
+      "summary": {
+        "schema": 1,
+        "root": "/Users/kan/dev/harness",
+        "label": "after-final",
+        "scenario": "code",
+        "model": "gpt-6.1-sol",
+        "effort": "high",
+        "fixtureSha256": "b36c14b9c9a0568c9e592910f52353c02e0f8f4d4ca24fb19e2f27f7bc4240ba",
+        "auditSha256": "72143fc40338c97508588d247fd2297b8b9e3a32f5e4370bd882d2706cc453e5",
+        "config": {
+          "active": true,
+          "delegation": true,
+          "review": true,
+          "persistence": true,
+          "measurement": true,
+          "improvement_loop": true,
+          "max_agents": 3,
+          "model_selection": "auto",
+          "pins": []
+        },
+        "scope": "Independent coordinator document-selection rehearsal; no code work, children, web browsing, or task completion",
+        "maxStdoutBytes": 24000,
+        "toolMaxOutputTokens": 30000,
+        "createdAt": "2026-10-24T12:02:00.824Z",
+        "events": 24,
+        "stdoutBytes": 72660,
+        "bodyBytes": 70439,
+        "metadataBytes": 1866,
+        "indexBytes": 355,
+        "stderrBytes": 205,
+        "duplicateBodyBytes": 3760,
+        "failedInvocations": 1,
+        "finalEventSha256": "c21f19fd11040dc3276d2232287bdd997f17156539c5adb74f9cbf83d19aa68c"
+      },
+      "initial": {
+        "stdoutBytes": 64286,
+        "bodyBytes": 62126,
+        "metadataBytes": 1866,
+        "indexBytes": 294,
+        "stderrBytes": 205,
+        "duplicateBodyBytes": 0,
+        "events": 20,
+        "failedInvocations": 1,
+        "stdoutPlusStderrBytes": 64491
+      },
+      "supplement": {
+        "stdoutBytes": 8374,
+        "bodyBytes": 8313,
+        "metadataBytes": 0,
+        "indexBytes": 61,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 3760,
+        "events": 4,
+        "failedInvocations": 0,
+        "stdoutPlusStderrBytes": 8374
+      },
+      "groups": {
+        "commands": {
+          "stdoutBytes": 11913,
+          "bodyBytes": 10592,
+          "metadataBytes": 966,
+          "indexBytes": 355,
+          "stderrBytes": 205,
+          "duplicateBodyBytes": 3760,
+          "events": 7,
+          "failedInvocations": 1,
+          "stdoutPlusStderrBytes": 12118
+        },
+        "roles": {
+          "stdoutBytes": 6663,
+          "bodyBytes": 6247,
+          "metadataBytes": 416,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 6663
+        },
+        "blocks": {
+          "stdoutBytes": 5108,
+          "bodyBytes": 4624,
+          "metadataBytes": 484,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 5108
+        },
+        "other": {
+          "stdoutBytes": 48976,
+          "bodyBytes": 48976,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 15,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 48976
+        }
+      },
+      "initialGroups": {
+        "commands": {
+          "stdoutBytes": 5609,
+          "bodyBytes": 4349,
+          "metadataBytes": 966,
+          "indexBytes": 294,
+          "stderrBytes": 205,
+          "duplicateBodyBytes": 0,
+          "events": 4,
+          "failedInvocations": 1,
+          "stdoutPlusStderrBytes": 5814
+        },
+        "roles": {
+          "stdoutBytes": 6663,
+          "bodyBytes": 6247,
+          "metadataBytes": 416,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 6663
+        },
+        "blocks": {
+          "stdoutBytes": 5108,
+          "bodyBytes": 4624,
+          "metadataBytes": 484,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 5108
+        },
+        "other": {
+          "stdoutBytes": 46906,
+          "bodyBytes": 46906,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 14,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 46906
+        }
+      },
+      "eventAttribution": [
+        {
+          "sequence": 1,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/SKILL.md",
+          "group": "other",
+          "stdoutBytes": 4790,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 2,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/preimplementation.md",
+          "group": "other",
+          "stdoutBytes": 5114,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 3,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/coordination.md",
+          "group": "other",
+          "stdoutBytes": 4717,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 4,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/continuity.md",
+          "group": "other",
+          "stdoutBytes": 1675,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 5,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/claude.md",
+          "group": "other",
+          "stdoutBytes": 2334,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 6,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 0,
+          "stderrBytes": 205,
+          "exitCode": 1
+        },
+        {
+          "sequence": 7,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 3546,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 8,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles.md",
+          "group": "roles",
+          "stdoutBytes": 6663,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 9,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/parallel.md",
+          "group": "other",
+          "stdoutBytes": 2131,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 10,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/reviewer.md",
+          "group": "other",
+          "stdoutBytes": 3225,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 11,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles/code-review.md",
+          "group": "other",
+          "stdoutBytes": 2195,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 12,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/measurement.md",
+          "group": "other",
+          "stdoutBytes": 1085,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 13,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/task.md",
+          "group": "other",
+          "stdoutBytes": 4120,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 14,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/completion.md",
+          "group": "other",
+          "stdoutBytes": 363,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 15,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/SKILL.md",
+          "group": "other",
+          "stdoutBytes": 7692,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 16,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/references/workflow.md",
+          "group": "other",
+          "stdoutBytes": 3473,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 17,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 294,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 18,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 1769,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 19,
+          "operation": "reader",
+          "sourcePath": "authoring-skills/codex-html-plan/references/blocks.md",
+          "group": "blocks",
+          "stdoutBytes": 5108,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 20,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/early-compaction.md",
+          "group": "other",
+          "stdoutBytes": 3992,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 21,
+          "operation": "headings",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 61,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 22,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 3601,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 23,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/settings.md",
+          "group": "other",
+          "stdoutBytes": 2070,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 24,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 2642,
+          "stderrBytes": 0,
+          "exitCode": 0
+        }
+      ],
+      "failures": [
+        {
+          "sequence": 6,
+          "error": null,
+          "stderr": "Unknown section: roles; use --list or read the original full reference.\nUsage: node \"<skill-dir>/read-sections.cjs\" <document> <section>... [--json] [--held <receipt>] | --list [document] | <document> all\n"
+        }
+      ]
+    },
+    {
+      "id": "final-after-mixed",
+      "originalDirectory": "/private/tmp/section-mixed-after-last",
+      "stage": "final guidance",
+      "excluded": false,
+      "exclusionReason": null,
+      "summary": {
+        "schema": 1,
+        "root": "/Users/kan/dev/harness",
+        "label": "after-final",
+        "scenario": "mixed",
+        "model": "gpt-6.1-sol",
+        "effort": "high",
+        "fixtureSha256": "226d73b316f7adb4cb3c7ae397a897b688cf4d226efd71d8a9f845af5b2f5252",
+        "auditSha256": "72143fc40338c97508588d247fd2297b8b9e3a32f5e4370bd882d2706cc453e5",
+        "config": {
+          "active": true,
+          "delegation": true,
+          "review": true,
+          "persistence": true,
+          "measurement": true,
+          "improvement_loop": true,
+          "max_agents": 3,
+          "model_selection": "auto",
+          "pins": []
+        },
+        "scope": "Independent coordinator document-selection rehearsal; no code work, children, web browsing, or task completion",
+        "maxStdoutBytes": 24000,
+        "toolMaxOutputTokens": 30000,
+        "createdAt": "2026-10-24T12:02:00.819Z",
+        "events": 30,
+        "stdoutBytes": 98553,
+        "bodyBytes": 95212,
+        "metadataBytes": 2369,
+        "indexBytes": 972,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 0,
+        "failedInvocations": 0,
+        "finalEventSha256": "a13fd0cf5d669d849fe77c5b1cb13497750540d7f652028154b4da00606a7ab2"
+      },
+      "initial": {
+        "stdoutBytes": 98553,
+        "bodyBytes": 95212,
+        "metadataBytes": 2369,
+        "indexBytes": 972,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 0,
+        "events": 30,
+        "failedInvocations": 0,
+        "stdoutPlusStderrBytes": 98553
+      },
+      "supplement": {
+        "stdoutBytes": 0,
+        "bodyBytes": 0,
+        "metadataBytes": 0,
+        "indexBytes": 0,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 0,
+        "events": 0,
+        "failedInvocations": 0,
+        "stdoutPlusStderrBytes": 0
+      },
+      "groups": {
+        "commands": {
+          "stdoutBytes": 8074,
+          "bodyBytes": 6731,
+          "metadataBytes": 1049,
+          "indexBytes": 294,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 3,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 8074
+        },
+        "roles": {
+          "stdoutBytes": 6663,
+          "bodyBytes": 6247,
+          "metadataBytes": 416,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 6663
+        },
+        "blocks": {
+          "stdoutBytes": 10058,
+          "bodyBytes": 8767,
+          "metadataBytes": 904,
+          "indexBytes": 387,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 3,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 10058
+        },
+        "other": {
+          "stdoutBytes": 73758,
+          "bodyBytes": 73467,
+          "metadataBytes": 0,
+          "indexBytes": 291,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 23,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 73758
+        }
+      },
+      "initialGroups": {
+        "commands": {
+          "stdoutBytes": 8074,
+          "bodyBytes": 6731,
+          "metadataBytes": 1049,
+          "indexBytes": 294,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 3,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 8074
+        },
+        "roles": {
+          "stdoutBytes": 6663,
+          "bodyBytes": 6247,
+          "metadataBytes": 416,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 1,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 6663
+        },
+        "blocks": {
+          "stdoutBytes": 10058,
+          "bodyBytes": 8767,
+          "metadataBytes": 904,
+          "indexBytes": 387,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 3,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 10058
+        },
+        "other": {
+          "stdoutBytes": 73758,
+          "bodyBytes": 73467,
+          "metadataBytes": 0,
+          "indexBytes": 291,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 23,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 73758
+        }
+      },
+      "eventAttribution": [
+        {
+          "sequence": 1,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/SKILL.md",
+          "group": "other",
+          "stdoutBytes": 4790,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 2,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 3546,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 3,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/preimplementation.md",
+          "group": "other",
+          "stdoutBytes": 5114,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 4,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/claude.md",
+          "group": "other",
+          "stdoutBytes": 2334,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 5,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/web.md",
+          "group": "other",
+          "stdoutBytes": 1960,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 6,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/creative.md",
+          "group": "other",
+          "stdoutBytes": 2153,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 7,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/coordination.md",
+          "group": "other",
+          "stdoutBytes": 4717,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 8,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/continuity.md",
+          "group": "other",
+          "stdoutBytes": 1675,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 9,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/SKILL.md",
+          "group": "other",
+          "stdoutBytes": 7692,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 10,
+          "operation": "read",
+          "sourcePath": "authoring-skills/codex-html-plan/references/workflow.md",
+          "group": "other",
+          "stdoutBytes": 3473,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 11,
+          "operation": "reader",
+          "sourcePath": "authoring-skills/codex-html-plan/references/blocks.md",
+          "group": "blocks",
+          "stdoutBytes": 387,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 12,
+          "operation": "reader",
+          "sourcePath": "authoring-skills/codex-html-plan/references/blocks.md",
+          "group": "blocks",
+          "stdoutBytes": 7864,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 13,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles.md",
+          "group": "roles",
+          "stdoutBytes": 6663,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 14,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/parallel.md",
+          "group": "other",
+          "stdoutBytes": 2131,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 15,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/reviewer.md",
+          "group": "other",
+          "stdoutBytes": 3225,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 16,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles/code-review.md",
+          "group": "other",
+          "stdoutBytes": 2195,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 17,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles/web-review.md",
+          "group": "other",
+          "stdoutBytes": 2164,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 18,
+          "operation": "headings",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/creative-loop.md",
+          "group": "other",
+          "stdoutBytes": 291,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 19,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/creative-loop.md",
+          "group": "other",
+          "stdoutBytes": 10699,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 20,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/roles/record-keeper.md",
+          "group": "other",
+          "stdoutBytes": 4819,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 21,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/knowledge-retrieval.md",
+          "group": "other",
+          "stdoutBytes": 4208,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 22,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/measurement.md",
+          "group": "other",
+          "stdoutBytes": 1085,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 23,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/early-compaction.md",
+          "group": "other",
+          "stdoutBytes": 3992,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 24,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 294,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 25,
+          "operation": "reader",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/commands.md",
+          "group": "commands",
+          "stdoutBytes": 4234,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 26,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/task.md",
+          "group": "other",
+          "stdoutBytes": 4120,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 27,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/completion.md",
+          "group": "other",
+          "stdoutBytes": 363,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 28,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/project-map.md",
+          "group": "other",
+          "stdoutBytes": 285,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 29,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/assets/adr.md",
+          "group": "other",
+          "stdoutBytes": 273,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 30,
+          "operation": "reader",
+          "sourcePath": "authoring-skills/codex-html-plan/references/blocks.md",
+          "group": "blocks",
+          "stdoutBytes": 1807,
+          "stderrBytes": 0,
+          "exitCode": 0
+        }
+      ],
+      "failures": []
+    },
+    {
+      "id": "interrupted-after-code",
+      "originalDirectory": "/private/tmp/section-code-after-final",
+      "stage": "interrupted setup",
+      "excluded": true,
+      "exclusionReason": "Aborted after four reads because the audit wrapper did not accept held receipts.",
+      "summary": {
+        "schema": 1,
+        "root": "/Users/kan/dev/harness",
+        "label": "after-final",
+        "scenario": "code",
+        "model": "gpt-6.1-sol",
+        "effort": "high",
+        "fixtureSha256": "b36c14b9c9a0568c9e592910f52353c02e0f8f4d4ca24fb19e2f27f7bc4240ba",
+        "auditSha256": "fd56671d85f4658cf4186cf4cb91e05c169ebaa7428751cb2d892d86fd7e66d7",
+        "config": {
+          "active": true,
+          "delegation": true,
+          "review": true,
+          "persistence": true,
+          "measurement": true,
+          "improvement_loop": true,
+          "max_agents": 3,
+          "model_selection": "auto",
+          "pins": []
+        },
+        "scope": "Independent coordinator document-selection rehearsal; no code work, children, web browsing, or task completion",
+        "maxStdoutBytes": 24000,
+        "toolMaxOutputTokens": 30000,
+        "createdAt": "2026-10-24T11:52:12.169Z",
+        "events": 4,
+        "stdoutBytes": 16258,
+        "bodyBytes": 16258,
+        "metadataBytes": 0,
+        "indexBytes": 0,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 0,
+        "failedInvocations": 0,
+        "finalEventSha256": "1e8912aa2d97b8395dc97cb9d06e38aa9ddcdb4a2b9f2a83812184145531d104"
+      },
+      "initial": null,
+      "supplement": null,
+      "groups": {
+        "commands": {
+          "stdoutBytes": 0,
+          "bodyBytes": 0,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 0,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 0
+        },
+        "roles": {
+          "stdoutBytes": 0,
+          "bodyBytes": 0,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 0,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 0
+        },
+        "blocks": {
+          "stdoutBytes": 0,
+          "bodyBytes": 0,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 0,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 0
+        },
+        "other": {
+          "stdoutBytes": 16258,
+          "bodyBytes": 16258,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 4,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 16258
+        }
+      },
+      "initialGroups": null,
+      "eventAttribution": [
+        {
+          "sequence": 1,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/SKILL.md",
+          "group": "other",
+          "stdoutBytes": 4752,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 2,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/preimplementation.md",
+          "group": "other",
+          "stdoutBytes": 5114,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 3,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/coordination.md",
+          "group": "other",
+          "stdoutBytes": 4717,
+          "stderrBytes": 0,
+          "exitCode": 0
+        },
+        {
+          "sequence": 4,
+          "operation": "read",
+          "sourcePath": "plugins/codex-harness/skills/harness/references/routing/continuity.md",
+          "group": "other",
+          "stdoutBytes": 1675,
+          "stderrBytes": 0,
+          "exitCode": 0
+        }
+      ],
+      "failures": []
+    },
+    {
+      "id": "not-started-after-mixed",
+      "originalDirectory": "/private/tmp/section-mixed-after-final",
+      "stage": "not started",
+      "excluded": true,
+      "exclusionReason": "Initialized only; reader never started.",
+      "summary": {
+        "schema": 1,
+        "root": "/Users/kan/dev/harness",
+        "label": "after-final",
+        "scenario": "mixed",
+        "model": "gpt-6.1-sol",
+        "effort": "high",
+        "fixtureSha256": "226d73b316f7adb4cb3c7ae397a897b688cf4d226efd71d8a9f845af5b2f5252",
+        "auditSha256": "fd56671d85f4658cf4186cf4cb91e05c169ebaa7428751cb2d892d86fd7e66d7",
+        "config": {
+          "active": true,
+          "delegation": true,
+          "review": true,
+          "persistence": true,
+          "measurement": true,
+          "improvement_loop": true,
+          "max_agents": 3,
+          "model_selection": "auto",
+          "pins": []
+        },
+        "scope": "Independent coordinator document-selection rehearsal; no code work, children, web browsing, or task completion",
+        "maxStdoutBytes": 24000,
+        "toolMaxOutputTokens": 30000,
+        "createdAt": "2026-10-24T11:52:12.169Z",
+        "events": 0,
+        "stdoutBytes": 0,
+        "bodyBytes": 0,
+        "metadataBytes": 0,
+        "indexBytes": 0,
+        "stderrBytes": 0,
+        "duplicateBodyBytes": 0,
+        "failedInvocations": 0,
+        "finalEventSha256": null
+      },
+      "initial": null,
+      "supplement": null,
+      "groups": {
+        "commands": {
+          "stdoutBytes": 0,
+          "bodyBytes": 0,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 0,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 0
+        },
+        "roles": {
+          "stdoutBytes": 0,
+          "bodyBytes": 0,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 0,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 0
+        },
+        "blocks": {
+          "stdoutBytes": 0,
+          "bodyBytes": 0,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 0,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 0
+        },
+        "other": {
+          "stdoutBytes": 0,
+          "bodyBytes": 0,
+          "metadataBytes": 0,
+          "indexBytes": 0,
+          "stderrBytes": 0,
+          "duplicateBodyBytes": 0,
+          "events": 0,
+          "failedInvocations": 0,
+          "stdoutPlusStderrBytes": 0
+        }
+      },
+      "initialGroups": null,
+      "eventAttribution": [],
+      "failures": []
+    }
+  ]
+}

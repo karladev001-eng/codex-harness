@@ -6,6 +6,7 @@ Codexで仕様を共有し、実装・独立レビュー・制作の改善を進
 
 - **仕様と承認** — 実装前に範囲・受入条件を示し、UIには視覚モックを添えます。
 - **実装と独立レビュー** — 担当へ必要な情報だけを渡し、Git worktreeで独立したコード作業を隔離します。
+- **Claudeへの相談** — 開かれたアイデア、重要な判断、提案の批評で必要な役割を選び、Codexが助言を統合します。
 - **改善ループ** — UI・文書へのフィードバックを、用途を限った候補・制作指針として次回へ使います。
 - **ナレッジベースと検索** — 保存した本文・メモ・画像・説明から少数の候補を探し、必要な箇所だけ読みます。
 - **再利用可能な6スキル** — ルール・担当・調整手順の作成、構成の確認、仕様計画とスライド制作を個別に使えます。
@@ -78,6 +79,8 @@ npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@
 
 呼出し例と成果物は[スキル一覧](authoring-skills/README.md)を参照してください。
 
+Claude連携の[consult-claude](plugins/codex-harness/skills/harness/consult-claude/SKILL.md)は本体に同梱されます。Claude CLIと既存ログインが必要です。activeかつdelegation ONの親が使用条件を判定し、`「Claudeにも独立した案を出してもらって」`、`「この設計をClaudeに批評してもらって」` と明示しても使えます。`「今回は外部相談を使わないで」` を優先します。本体install/updateでは同梱資材を更新し、plugin版では個別スキルとしても公開します。CLI診断は `node "<導入先>/consult-claude/scripts/consult.mjs" --check`、モデル指定は必要なときだけ行います。外部へ渡すのはCodexが選んだ必要な文脈だけで、Claudeにプロジェクトの読書きやツール実行をさせません。
+
 ## 詳しい使い方
 
 <a id="動作と設定"></a>
@@ -97,7 +100,7 @@ npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@
 
 ## 対応状況
 
-ローカルCLI、6スキル、改善記録、Knowledgeの同期・文字検索・本文/画像取得、Chrome拡張、Raycast検索の実装があります。検証は[VALIDATION.md](VALIDATION.md)に日付と対象を分けて記載します。利用枠削減、長期的な制作改善、すべてのOS・別PCでの動作は確認済みとは扱いません。ベクトル意味検索、自動compact、会話削除は実装対象外です。
+ローカルCLI、6スキル、改善記録、Knowledgeの同期・文字検索・本文/画像取得、Chrome拡張、Raycast検索の実装があります。検証は[VALIDATION.md](VALIDATION.md)に日付と対象を分けて記載します。利用枠削減、長期的な制作改善、すべてのOS・別PCでの動作は確認済みとは扱いません。ベクトル意味検索、独自の使用量監視やcompact API、会話削除は実装対象外です。早期compactは配布スキルの指示ベース運用で、実行にはホストの正式な機能が必要です。
 
 <a id="開発検証"></a>
 <a id="参考"></a>
@@ -108,3 +111,9 @@ npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@
 開発は[CONTRIBUTING.md](CONTRIBUTING.md)、配布物は[リリース手順](docs/maintainers/releasing.md)、将来公開時の判断は[公開前の整理](docs/maintainers/publication.md)を参照してください。[SPEC.md](SPEC.md)は実装仕様、[ADR](docs/adr/0001-portable-skill-harness.md)とタスク記録は設計・開発の履歴です。
 
 全体への利用ライセンスは未付与です。`codex-html-plan`のApache-2.0由来部分など、個別の出典とライセンスは[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)に分けて示します。
+
+### 必要な手順だけ読む
+
+active時は[短い入口](plugins/codex-harness/skills/harness/SKILL.md)のYes/No表を各行独立に判定し、該当する本文から必要な詳細へ進みます。複合依頼では複数Yesです。純相談・Web調査には実装工程を追加せず、範囲や版が変わったら再判定し、要約で失った内容は再確認します。人向けの[チャート](plugins/codex-harness/skills/harness/references/routing/chart.md)と[旧規則の対応表](plugins/codex-harness/skills/harness/references/routing/rule-map.md)もあります。図は入口表から生成し、配布には参照本文をすべて同梱します。
+
+読込量の比較は `node scripts/context-routing.cjs --write`、生成物の一致確認は `node scripts/context-routing.cjs --check`。開発checkoutの `benchmarks/context-routing.md` とJSONには入口単体/依頼別の文書量、範囲・前提・SHA-256を残します。これは会話トークン・利用枠・速度の測定ではありません。

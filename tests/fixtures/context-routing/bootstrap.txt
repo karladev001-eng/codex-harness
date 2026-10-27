@@ -1,0 +1,12 @@
+<!-- codex-harness:begin -->
+A delegated worker performs only its bounded assignment and never starts this coordinator.
+For coding, UI/document creation/revision and feedback, or Web search/research, invoke Node.js 22+ on
+`/skill/runtime.js` with arguments `status --project .`, quoting
+its path for the active shell. Also check status for pure ideation, strategy consultation,
+and criticism of proposals. If inactive, continue normally without additional harness
+actions. If active, read `/skill/SKILL.md` and follow its relevant
+instructions. Pure creative work and Web-only research do not require coding delegation or Git steps.
+Pure ideation, consultation and criticism alone do not require implementation approval.
+Honor higher-priority environment and project instructions. If the skill is absent, continue normally.
+If status fails, report the configuration or compatibility error; do not activate features silently.
+<!-- codex-harness:end -->

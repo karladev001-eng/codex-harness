@@ -1,0 +1,1422 @@
+{
+  "schema": 1,
+  "units": "UTF-8 bytes and Unicode code points; not model tokens",
+  "scope": "Parent documentation only, except explicit worker scenario. Unique files once per side/scenario; incremental scenarios count only new reads. Full required workflow documents in examples are listed explicitly, including shared original leaf documents. No claims about conversation totals, account limits, speed or quality.",
+  "assumptions": [
+    "Static examples of instruction-based selection, not executed agent traces or a runtime classifier.",
+    "Same normalized bootstrap path and same documents/conditions on both sides; status output, current task packets/ADRs, project code, actual user reference materials and tool/CLI source are excluded equally because they vary by task. No missing document is silently skipped.",
+    "Every active nonworker initial example reads commands.md for its startup status on both sides. Unless explicitly OFF, each applies the original measurement requirement: measurement.md on both sides and continuity on the new side. Pure advice/Web does not create an extra task packet merely to record it. Retained commands/measurement/continuity documents are not double charged on continuation or a version update.",
+    "The ambiguous example measures the precise first paragraph range for A/F, but full continuity and measurement; all other selected documents are full files. Downstream documents are opened when their described action is actually needed.",
+    "HTML plan examples count skill, workflow and blocks in both versions. Broader plans may need more sources and are outside these fixed examples.",
+    "Reviewers and workers receive their own packet and role; their actual code/material reads are not mixed into the parent total. The worker example keeps its original role document charge.",
+    "Original sections are preserved; selecting every branch adds entry/routing overhead and can increase total documentation.",
+    "Version-update assumes only entry and A change. If more document versions change or their contents are lost, re-read those too."
+  ],
+  "entry": {
+    "before": {
+      "bytes": 20625,
+      "characters": 8747,
+      "sha256": "a2a7bc118f367b46184c8a8de4e719ee9d8926cddf97c5ba17fa2b8a7180ab14"
+    },
+    "after": {
+      "bytes": 4119,
+      "characters": 2093,
+      "sha256": "df27073e0020bf9358fb53f28ae8d64e3509c65c600ffb2d7fc200d51f5b5bf6"
+    },
+    "savedBytes": 16506,
+    "savedPercent": 80.03
+  },
+  "scenarios": [
+    {
+      "id": "advice",
+      "description": "定型的な方針相談。外部相談・コード変更・制作・記録なし。measurement ONの既存計測規則を適用",
+      "yes": [
+        "R"
+      ],
+      "commands": true,
+      "measurement": true,
+      "details": [
+        "references/measurement.md",
+        "references/commands.md"
+      ],
+      "beforeFiles": [
+        "before:@bootstrap",
+        "before:SKILL.md",
+        "before:references/measurement.md",
+        "before:references/commands.md"
+      ],
+      "afterFiles": [
+        "after:@bootstrap",
+        "after:SKILL.md",
+        "after:references/routing/continuity.md",
+        "after:references/measurement.md",
+        "after:references/commands.md"
+      ],
+      "before": {
+        "bytes": 32740,
+        "characters": 15998
+      },
+      "after": {
+        "bytes": 17909,
+        "characters": 10081
+      },
+      "commonBootstrapBytes": 951,
+      "beforeInstructionBytes": 31789,
+      "afterInstructionBytes": 16958,
+      "savedBytes": 14831,
+      "savedPercent": 45.3
+    },
+    {
+      "id": "claude",
+      "description": "開かれた企画相談。Claudeへ独立発案を1回依頼",
+      "yes": [
+        "C",
+        "R"
+      ],
+      "details": [
+        "consult-claude/SKILL.md",
+        "references/measurement.md",
+        "references/commands.md"
+      ],
+      "commands": true,
+      "measurement": true,
+      "beforeFiles": [
+        "before:@bootstrap",
+        "before:SKILL.md",
+        "before:consult-claude/SKILL.md",
+        "before:references/measurement.md",
+        "before:references/commands.md"
+      ],
+      "afterFiles": [
+        "after:@bootstrap",
+        "after:SKILL.md",
+        "after:references/routing/claude.md",
+        "after:references/routing/continuity.md",
+        "after:consult-claude/SKILL.md",
+        "after:references/measurement.md",
+        "after:references/commands.md"
+      ],
+      "before": {
+        "bytes": 39657,
+        "characters": 19233
+      },
+      "after": {
+        "bytes": 27160,
+        "characters": 14266
+      },
+      "commonBootstrapBytes": 951,
+      "beforeInstructionBytes": 38706,
+      "afterInstructionBytes": 26209,
+      "savedBytes": 12497,
+      "savedPercent": 31.51
+    },
+    {
+      "id": "simple-code",
+      "description": "単純コード修正の準備から完了。HTML計画あり、UIなし、全機能ON、親が必要な役割・検証資料を読む",
+      "yes": [
+        "A",
+        "D",
+        "R"
+      ],
+      "details": [
+        "references/roles.md",
+        "references/parallel.md",
+        "references/reviewer.md",
+        "references/roles/code-review.md",
+        "assets/task.md",
+        "assets/completion.md",
+        "assets/project-map.md",
+        "references/measurement.md",
+        "@authoring/codex-html-plan/SKILL.md",
+        "@authoring/codex-html-plan/references/workflow.md",
+        "@authoring/codex-html-plan/references/blocks.md",
+        "references/commands.md"
+      ],
+      "commands": true,
+      "measurement": true,
+      "beforeFiles": [
+        "before:@bootstrap",
+        "before:SKILL.md",
+        "before:references/roles.md",
+        "before:references/parallel.md",
+        "before:references/reviewer.md",
+        "before:references/roles/code-review.md",
+        "before:assets/task.md",
+        "before:assets/completion.md",
+        "before:assets/project-map.md",
+        "before:references/measurement.md",
+        "before:@authoring/codex-html-plan/SKILL.md",
+        "before:@authoring/codex-html-plan/references/workflow.md",
+        "before:@authoring/codex-html-plan/references/blocks.md",
+        "before:references/commands.md"
+      ],
+      "afterFiles": [
+        "after:@bootstrap",
+        "after:SKILL.md",
+        "after:references/routing/preimplementation.md",
+        "after:references/routing/coordination.md",
+        "after:references/routing/continuity.md",
+        "after:references/roles.md",
+        "after:references/parallel.md",
+        "after:references/reviewer.md",
+        "after:references/roles/code-review.md",
+        "after:assets/task.md",
+        "after:assets/completion.md",
+        "after:assets/project-map.md",
+        "after:references/measurement.md",
+        "after:@authoring/codex-html-plan/SKILL.md",
+        "after:@authoring/codex-html-plan/references/workflow.md",
+        "after:@authoring/codex-html-plan/references/blocks.md",
+        "after:references/commands.md"
+      ],
+      "before": {
+        "bytes": 77468,
+        "characters": 42547
+      },
+      "after": {
+        "bytes": 72485,
+        "characters": 40540
+      },
+      "commonBootstrapBytes": 951,
+      "beforeInstructionBytes": 76517,
+      "afterInstructionBytes": 71534,
+      "savedBytes": 4983,
+      "savedPercent": 6.43
+    },
+    {
+      "id": "web",
+      "description": "Web調査のみ。探索委譲・コード変更・制作なし",
+      "yes": [
+        "W",
+        "R"
+      ],
+      "commands": true,
+      "measurement": true,
+      "details": [
+        "references/measurement.md",
+        "references/commands.md"
+      ],
+      "beforeFiles": [
+        "before:@bootstrap",
+        "before:SKILL.md",
+        "before:references/measurement.md",
+        "before:references/commands.md"
+      ],
+      "afterFiles": [
+        "after:@bootstrap",
+        "after:SKILL.md",
+        "after:references/routing/web.md",
+        "after:references/routing/continuity.md",
+        "after:references/measurement.md",
+        "after:references/commands.md"
+      ],
+      "before": {
+        "bytes": 32740,
+        "characters": 15998
+      },
+      "after": {
+        "bytes": 19869,
+        "characters": 10815
+      },
+      "commonBootstrapBytes": 951,
+      "beforeInstructionBytes": 31789,
+      "afterInstructionBytes": 18918,
+      "savedBytes": 12871,
+      "savedPercent": 39.31
+    },
+    {
+      "id": "creative",
+      "description": "文書制作。仕様・承認と改善ループ、保存資料検索あり。好み更新なし、コード・CLIなし",
+      "yes": [
+        "A",
+        "F",
+        "R"
+      ],
+      "details": [
+        "references/creative-loop.md",
+        "references/knowledge-retrieval.md",
+        "references/measurement.md",
+        "references/commands.md"
+      ],
+      "commands": true,
+      "measurement": true,
+      "beforeFiles": [
+        "before:@bootstrap",
+        "before:SKILL.md",
+        "before:references/creative-loop.md",
+        "before:references/knowledge-retrieval.md",
+        "before:references/measurement.md",
+        "before:references/commands.md"
+      ],
+      "afterFiles": [
+        "after:@bootstrap",
+        "after:SKILL.md",
+        "after:references/routing/preimplementation.md",
+        "after:references/routing/creative.md",
+        "after:references/routing/continuity.md",
+        "after:references/creative-loop.md",
+        "after:references/knowledge-retrieval.md",
+        "after:references/measurement.md",
+        "after:references/commands.md"
+      ],
+      "before": {
+        "bytes": 52014,
+        "characters": 24672
+      },
+      "after": {
+        "bytes": 44484,
+        "characters": 21638
+      },
+      "commonBootstrapBytes": 951,
+      "beforeInstructionBytes": 51063,
+      "afterInstructionBytes": 43533,
+      "savedBytes": 7530,
+      "savedPercent": 14.48
+    },
+    {
+      "id": "mixed",
+      "description": "Web根拠のあるUI実装・Claude批評・設定互換性確認・保存資料参照・記録完了の複合。全分岐Yes",
+      "yes": [
+        "S",
+        "A",
+        "C",
+        "W",
+        "F",
+        "D",
+        "R"
+      ],
+      "details": [
+        "references/roles.md",
+        "references/parallel.md",
+        "references/reviewer.md",
+        "references/roles/code-review.md",
+        "assets/task.md",
+        "assets/completion.md",
+        "assets/project-map.md",
+        "references/measurement.md",
+        "@authoring/codex-html-plan/SKILL.md",
+        "@authoring/codex-html-plan/references/workflow.md",
+        "@authoring/codex-html-plan/references/blocks.md",
+        "references/creative-loop.md",
+        "references/knowledge-retrieval.md",
+        "consult-claude/SKILL.md",
+        "references/commands.md"
+      ],
+      "commands": true,
+      "measurement": true,
+      "beforeFiles": [
+        "before:@bootstrap",
+        "before:SKILL.md",
+        "before:references/roles.md",
+        "before:references/parallel.md",
+        "before:references/reviewer.md",
+        "before:references/roles/code-review.md",
+        "before:assets/task.md",
+        "before:assets/completion.md",
+        "before:assets/project-map.md",
+        "before:references/measurement.md",
+        "before:@authoring/codex-html-plan/SKILL.md",
+        "before:@authoring/codex-html-plan/references/workflow.md",
+        "before:@authoring/codex-html-plan/references/blocks.md",
+        "before:references/creative-loop.md",
+        "before:references/knowledge-retrieval.md",
+        "before:consult-claude/SKILL.md",
+        "before:references/commands.md"
+      ],
+      "afterFiles": [
+        "after:@bootstrap",
+        "after:SKILL.md",
+        "after:references/routing/settings.md",
+        "after:references/routing/preimplementation.md",
+        "after:references/routing/claude.md",
+        "after:references/routing/web.md",
+        "after:references/routing/creative.md",
+        "after:references/routing/coordination.md",
+        "after:references/routing/continuity.md",
+        "after:references/roles.md",
+        "after:references/parallel.md",
+        "after:references/reviewer.md",
+        "after:references/roles/code-review.md",
+        "after:assets/task.md",
+        "after:assets/completion.md",
+        "after:assets/project-map.md",
+        "after:references/measurement.md",
+        "after:@authoring/codex-html-plan/SKILL.md",
+        "after:@authoring/codex-html-plan/references/workflow.md",
+        "after:@authoring/codex-html-plan/references/blocks.md",
+        "after:references/creative-loop.md",
+        "after:references/knowledge-retrieval.md",
+        "after:consult-claude/SKILL.md",
+        "after:references/commands.md"
+      ],
+      "before": {
+        "bytes": 103659,
+        "characters": 54456
+      },
+      "after": {
+        "bytes": 107227,
+        "characters": 56106
+      },
+      "commonBootstrapBytes": 951,
+      "beforeInstructionBytes": 102708,
+      "afterInstructionBytes": 106276,
+      "savedBytes": -3568,
+      "savedPercent": -3.44
+    },
+    {
+      "id": "worker",
+      "description": "親から仕様・設定・役割を受領済みの実装worker。親の入口や調整本文を加算しない。役割全文のみを共通費に算入",
+      "worker": true,
+      "yes": [],
+      "details": [
+        "references/roles.md"
+      ],
+      "commands": false,
+      "measurement": false,
+      "beforeFiles": [
+        "before:@bootstrap",
+        "before:references/roles.md"
+      ],
+      "afterFiles": [
+        "after:@bootstrap",
+        "after:references/roles.md"
+      ],
+      "before": {
+        "bytes": 8290,
+        "characters": 4050
+      },
+      "after": {
+        "bytes": 8290,
+        "characters": 4050
+      },
+      "commonBootstrapBytes": 951,
+      "beforeInstructionBytes": 7339,
+      "afterInstructionBytes": 7339,
+      "savedBytes": 0,
+      "savedPercent": 0
+    },
+    {
+      "id": "inactive",
+      "description": "inactive（enabled=false、全機能OFFを含む）。bootstrap以外の文書読込なし",
+      "inactive": true,
+      "yes": [],
+      "commands": false,
+      "measurement": false,
+      "details": [],
+      "beforeFiles": [
+        "before:@bootstrap"
+      ],
+      "afterFiles": [
+        "after:@bootstrap"
+      ],
+      "before": {
+        "bytes": 951,
+        "characters": 951
+      },
+      "after": {
+        "bytes": 951,
+        "characters": 951
+      },
+      "commonBootstrapBytes": 951,
+      "beforeInstructionBytes": 0,
+      "afterInstructionBytes": 0,
+      "savedBytes": 0,
+      "savedPercent": 0
+    },
+    {
+      "id": "delegation-off",
+      "description": "コード修正、delegation OFF/review ON。親が実装し別担当がレビュー。並列実装なし、HTML計画あり",
+      "yes": [
+        "A",
+        "D",
+        "R"
+      ],
+      "details": [
+        "references/roles.md",
+        "references/reviewer.md",
+        "references/roles/code-review.md",
+        "assets/task.md",
+        "assets/completion.md",
+        "assets/project-map.md",
+        "references/measurement.md",
+        "@authoring/codex-html-plan/SKILL.md",
+        "@authoring/codex-html-plan/references/workflow.md",
+        "@authoring/codex-html-plan/references/blocks.md",
+        "references/commands.md"
+      ],
+      "commands": true,
+      "measurement": true,
+      "beforeFiles": [
+        "before:@bootstrap",
+        "before:SKILL.md",
+        "before:references/roles.md",
+        "before:references/reviewer.md",
+        "before:references/roles/code-review.md",
+        "before:assets/task.md",
+        "before:assets/completion.md",
+        "before:assets/project-map.md",
+        "before:references/measurement.md",
+        "before:@authoring/codex-html-plan/SKILL.md",
+        "before:@authoring/codex-html-plan/references/workflow.md",
+        "before:@authoring/codex-html-plan/references/blocks.md",
+        "before:references/commands.md"
+      ],
+      "afterFiles": [
+        "after:@bootstrap",
+        "after:SKILL.md",
+        "after:references/routing/preimplementation.md",
+        "after:references/routing/coordination.md",
+        "after:references/routing/continuity.md",
+        "after:references/roles.md",
+        "after:references/reviewer.md",
+        "after:references/roles/code-review.md",
+        "after:assets/task.md",
+        "after:assets/completion.md",
+        "after:assets/project-map.md",
+        "after:references/measurement.md",
+        "after:@authoring/codex-html-plan/SKILL.md",
+        "after:@authoring/codex-html-plan/references/workflow.md",
+        "after:@authoring/codex-html-plan/references/blocks.md",
+        "after:references/commands.md"
+      ],
+      "before": {
+        "bytes": 75337,
+        "characters": 41734
+      },
+      "after": {
+        "bytes": 70354,
+        "characters": 39727
+      },
+      "commonBootstrapBytes": 951,
+      "beforeInstructionBytes": 74386,
+      "afterInstructionBytes": 69403,
+      "savedBytes": 4983,
+      "savedPercent": 6.61
+    },
+    {
+      "id": "review-off",
+      "description": "コード修正、review OFF。他機能ON。レビュー資料を読まない、HTML計画あり",
+      "yes": [
+        "A",
+        "D",
+        "R"
+      ],
+      "details": [
+        "references/roles.md",
+        "references/parallel.md",
+        "assets/task.md",
+        "assets/completion.md",
+        "assets/project-map.md",
+        "references/measurement.md",
+        "@authoring/codex-html-plan/SKILL.md",
+        "@authoring/codex-html-plan/references/workflow.md",
+        "@authoring/codex-html-plan/references/blocks.md",
+        "references/commands.md"
+      ],
+      "commands": true,
+      "measurement": true,
+      "beforeFiles": [
+        "before:@bootstrap",
+        "before:SKILL.md",
+        "before:references/roles.md",
+        "before:references/parallel.md",
+        "before:assets/task.md",
+        "before:assets/completion.md",
+        "before:assets/project-map.md",
+        "before:references/measurement.md",
+        "before:@authoring/codex-html-plan/SKILL.md",
+        "before:@authoring/codex-html-plan/references/workflow.md",
+        "before:@authoring/codex-html-plan/references/blocks.md",
+        "before:references/commands.md"
+      ],
+      "afterFiles": [
+        "after:@bootstrap",
+        "after:SKILL.md",
+        "after:references/routing/preimplementation.md",
+        "after:references/routing/coordination.md",
+        "after:references/routing/continuity.md",
+        "after:references/roles.md",
+        "after:references/parallel.md",
+        "after:assets/task.md",
+        "after:assets/completion.md",
+        "after:assets/project-map.md",
+        "after:references/measurement.md",
+        "after:@authoring/codex-html-plan/SKILL.md",
+        "after:@authoring/codex-html-plan/references/workflow.md",
+        "after:@authoring/codex-html-plan/references/blocks.md",
+        "after:references/commands.md"
+      ],
+      "before": {
+        "bytes": 72065,
+        "characters": 40476
+      },
+      "after": {
+        "bytes": 67065,
+        "characters": 38452
+      },
+      "commonBootstrapBytes": 951,
+      "beforeInstructionBytes": 71114,
+      "afterInstructionBytes": 66114,
+      "savedBytes": 5000,
+      "savedPercent": 6.94
+    },
+    {
+      "id": "storage-off",
+      "measurement": false,
+      "description": "コード修正、persistence/measurement/improvement_loop OFF、delegation/review ON。仕様をインライン、HTML計画あり",
+      "yes": [
+        "A",
+        "D",
+        "R"
+      ],
+      "details": [
+        "references/roles.md",
+        "references/parallel.md",
+        "references/reviewer.md",
+        "references/roles/code-review.md",
+        "@authoring/codex-html-plan/SKILL.md",
+        "@authoring/codex-html-plan/references/workflow.md",
+        "@authoring/codex-html-plan/references/blocks.md",
+        "references/commands.md"
+      ],
+      "commands": true,
+      "beforeFiles": [
+        "before:@bootstrap",
+        "before:SKILL.md",
+        "before:references/roles.md",
+        "before:references/parallel.md",
+        "before:references/reviewer.md",
+        "before:references/roles/code-review.md",
+        "before:@authoring/codex-html-plan/SKILL.md",
+        "before:@authoring/codex-html-plan/references/workflow.md",
+        "before:@authoring/codex-html-plan/references/blocks.md",
+        "before:references/commands.md"
+      ],
+      "afterFiles": [
+        "after:@bootstrap",
+        "after:SKILL.md",
+        "after:references/routing/preimplementation.md",
+        "after:references/routing/coordination.md",
+        "after:references/routing/continuity.md",
+        "after:references/roles.md",
+        "after:references/parallel.md",
+        "after:references/reviewer.md",
+        "after:references/roles/code-review.md",
+        "after:@authoring/codex-html-plan/SKILL.md",
+        "after:@authoring/codex-html-plan/references/workflow.md",
+        "after:@authoring/codex-html-plan/references/blocks.md",
+        "after:references/commands.md"
+      ],
+      "before": {
+        "bytes": 71615,
+        "characters": 40172
+      },
+      "after": {
+        "bytes": 66632,
+        "characters": 38165
+      },
+      "commonBootstrapBytes": 951,
+      "beforeInstructionBytes": 70664,
+      "afterInstructionBytes": 65681,
+      "savedBytes": 4983,
+      "savedPercent": 6.96
+    },
+    {
+      "id": "loop-off",
+      "description": "文書制作、improvement_loop OFF。通常の仕様・承認と有効な計測、記憶管理依頼・制作委譲なし",
+      "yes": [
+        "A",
+        "R"
+      ],
+      "commands": true,
+      "measurement": true,
+      "details": [
+        "references/measurement.md",
+        "references/commands.md"
+      ],
+      "beforeFiles": [
+        "before:@bootstrap",
+        "before:SKILL.md",
+        "before:references/measurement.md",
+        "before:references/commands.md"
+      ],
+      "afterFiles": [
+        "after:@bootstrap",
+        "after:SKILL.md",
+        "after:references/routing/preimplementation.md",
+        "after:references/routing/continuity.md",
+        "after:references/measurement.md",
+        "after:references/commands.md"
+      ],
+      "before": {
+        "bytes": 32740,
+        "characters": 15998
+      },
+      "after": {
+        "bytes": 23023,
+        "characters": 11961
+      },
+      "commonBootstrapBytes": 951,
+      "beforeInstructionBytes": 31789,
+      "afterInstructionBytes": 22072,
+      "savedBytes": 9717,
+      "savedPercent": 29.68
+    },
+    {
+      "id": "delegated-creative-loop-off",
+      "description": "loop OFFで純文書制作をユーザーが明示委譲。自動的な委譲要求は追加せず、既存の制作委譲時モデル規則を読む",
+      "yes": [
+        "A",
+        "F",
+        "R"
+      ],
+      "details": [
+        "references/roles.md",
+        "references/measurement.md",
+        "references/commands.md"
+      ],
+      "commands": true,
+      "measurement": true,
+      "beforeFiles": [
+        "before:@bootstrap",
+        "before:SKILL.md",
+        "before:references/roles.md",
+        "before:references/measurement.md",
+        "before:references/commands.md"
+      ],
+      "afterFiles": [
+        "after:@bootstrap",
+        "after:SKILL.md",
+        "after:references/routing/preimplementation.md",
+        "after:references/routing/creative.md",
+        "after:references/routing/continuity.md",
+        "after:references/roles.md",
+        "after:references/measurement.md",
+        "after:references/commands.md"
+      ],
+      "before": {
+        "bytes": 40079,
+        "characters": 19097
+      },
+      "after": {
+        "bytes": 32515,
+        "characters": 16039
+      },
+      "commonBootstrapBytes": 951,
+      "beforeInstructionBytes": 39128,
+      "afterInstructionBytes": 31564,
+      "savedBytes": 7564,
+      "savedPercent": 18.87
+    },
+    {
+      "id": "advice-measurement-off",
+      "measurement": false,
+      "description": "定型的な純相談。measurement OFF、パケット記録・起動status以外のCLI操作・長い作業の境界なし。commandsは必要",
+      "yes": [
+        "R"
+      ],
+      "commands": true,
+      "details": [
+        "references/commands.md"
+      ],
+      "beforeFiles": [
+        "before:@bootstrap",
+        "before:SKILL.md",
+        "before:references/commands.md"
+      ],
+      "afterFiles": [
+        "after:@bootstrap",
+        "after:SKILL.md",
+        "after:references/routing/continuity.md",
+        "after:references/commands.md"
+      ],
+      "before": {
+        "bytes": 31655,
+        "characters": 15611
+      },
+      "after": {
+        "bytes": 16824,
+        "characters": 9694
+      },
+      "commonBootstrapBytes": 951,
+      "beforeInstructionBytes": 30704,
+      "afterInstructionBytes": 15873,
+      "savedBytes": 14831,
+      "savedPercent": 46.85
+    },
+    {
+      "id": "explicit-memory-off",
+      "description": "loop OFFで明示的な好み訂正。persistence ON/delegation OFF、親が同じwriter契約とCLIを使う",
+      "yes": [
+        "F",
+        "R"
+      ],
+      "details": [
+        "references/creative-loop.md",
+        "references/roles/record-keeper.md",
+        "references/commands.md",
+        "assets/creative-preferences.md",
+        "references/measurement.md"
+      ],
+      "commands": true,
+      "measurement": true,
+      "beforeFiles": [
+        "before:@bootstrap",
+        "before:SKILL.md",
+        "before:references/creative-loop.md",
+        "before:references/roles/record-keeper.md",
+        "before:references/commands.md",
+        "before:assets/creative-preferences.md",
+        "before:references/measurement.md"
+      ],
+      "afterFiles": [
+        "after:@bootstrap",
+        "after:SKILL.md",
+        "after:references/routing/creative.md",
+        "after:references/routing/continuity.md",
+        "after:references/creative-loop.md",
+        "after:references/roles/record-keeper.md",
+        "after:references/commands.md",
+        "after:assets/creative-preferences.md",
+        "after:references/measurement.md"
+      ],
+      "before": {
+        "bytes": 55437,
+        "characters": 26191
+      },
+      "after": {
+        "bytes": 42793,
+        "characters": 21277
+      },
+      "commonBootstrapBytes": 951,
+      "beforeInstructionBytes": 54486,
+      "afterInstructionBytes": 41842,
+      "savedBytes": 12644,
+      "savedPercent": 22.81
+    },
+    {
+      "id": "ambiguous",
+      "description": "「この資料をよくしたい」。関連A/Fの先頭段落だけを確認、まだ着手しない。A/Fは全文を読んだ数値ではない。Rと有効な計測手順は全文",
+      "yes": [
+        "A",
+        "F",
+        "R"
+      ],
+      "overview": true,
+      "commands": true,
+      "measurement": true,
+      "details": [
+        "references/measurement.md",
+        "references/commands.md"
+      ],
+      "beforeFiles": [
+        "before:@bootstrap",
+        "before:SKILL.md",
+        "before:references/measurement.md",
+        "before:references/commands.md"
+      ],
+      "afterFiles": [
+        "after:@bootstrap",
+        "after:SKILL.md",
+        "after:references/routing/preimplementation.md:first-paragraph",
+        "after:references/routing/creative.md:first-paragraph",
+        "after:references/routing/continuity.md",
+        "after:references/measurement.md",
+        "after:references/commands.md"
+      ],
+      "before": {
+        "bytes": 32740,
+        "characters": 15998
+      },
+      "after": {
+        "bytes": 19406,
+        "characters": 10736
+      },
+      "commonBootstrapBytes": 951,
+      "beforeInstructionBytes": 31789,
+      "afterInstructionBytes": 18455,
+      "savedBytes": 13334,
+      "savedPercent": 40.73
+    },
+    {
+      "id": "advice-to-code",
+      "description": "adviceを読込済みで保持。単純修正へ移行した時の追加読込。beforeは既読root再加算なし",
+      "yes": [
+        "A",
+        "D",
+        "R"
+      ],
+      "incremental": true,
+      "retainedRoutes": [
+        "R"
+      ],
+      "retainedMeasurement": true,
+      "retainedCommands": true,
+      "details": [
+        "references/roles.md",
+        "references/parallel.md",
+        "references/reviewer.md",
+        "references/roles/code-review.md",
+        "assets/task.md",
+        "assets/completion.md",
+        "assets/project-map.md",
+        "@authoring/codex-html-plan/SKILL.md",
+        "@authoring/codex-html-plan/references/workflow.md",
+        "@authoring/codex-html-plan/references/blocks.md"
+      ],
+      "commands": true,
+      "measurement": true,
+      "beforeFiles": [
+        "before:references/roles.md",
+        "before:references/parallel.md",
+        "before:references/reviewer.md",
+        "before:references/roles/code-review.md",
+        "before:assets/task.md",
+        "before:assets/completion.md",
+        "before:assets/project-map.md",
+        "before:@authoring/codex-html-plan/SKILL.md",
+        "before:@authoring/codex-html-plan/references/workflow.md",
+        "before:@authoring/codex-html-plan/references/blocks.md"
+      ],
+      "afterFiles": [
+        "after:references/routing/preimplementation.md",
+        "after:references/routing/coordination.md",
+        "after:references/roles.md",
+        "after:references/parallel.md",
+        "after:references/reviewer.md",
+        "after:references/roles/code-review.md",
+        "after:assets/task.md",
+        "after:assets/completion.md",
+        "after:assets/project-map.md",
+        "after:@authoring/codex-html-plan/SKILL.md",
+        "after:@authoring/codex-html-plan/references/workflow.md",
+        "after:@authoring/codex-html-plan/references/blocks.md"
+      ],
+      "before": {
+        "bytes": 44728,
+        "characters": 26549
+      },
+      "after": {
+        "bytes": 54576,
+        "characters": 30459
+      },
+      "commonBootstrapBytes": 0,
+      "beforeInstructionBytes": 44728,
+      "afterInstructionBytes": 54576,
+      "savedBytes": -9848,
+      "savedPercent": -22.02
+    },
+    {
+      "id": "same-version",
+      "description": "simple-codeの全資料を同じ版で保持。追加資料なし",
+      "yes": [],
+      "retained": true,
+      "commands": true,
+      "measurement": true,
+      "details": [],
+      "beforeFiles": [],
+      "afterFiles": [],
+      "before": {
+        "bytes": 0,
+        "characters": 0
+      },
+      "after": {
+        "bytes": 0,
+        "characters": 0
+      },
+      "commonBootstrapBytes": 0,
+      "beforeInstructionBytes": 0,
+      "afterInstructionBytes": 0,
+      "savedBytes": 0,
+      "savedPercent": null
+    },
+    {
+      "id": "version-update",
+      "description": "simple-codeの後で入口とA本文の版だけ更新。他の既読資料は保持。変更した文書だけ再確認",
+      "yes": [
+        "A",
+        "R"
+      ],
+      "changedOnly": true,
+      "retainedRoutes": [
+        "R"
+      ],
+      "retainedMeasurement": true,
+      "retainedCommands": true,
+      "commands": true,
+      "measurement": true,
+      "details": [],
+      "beforeFiles": [
+        "before:SKILL.md"
+      ],
+      "afterFiles": [
+        "after:SKILL.md",
+        "after:references/routing/preimplementation.md"
+      ],
+      "before": {
+        "bytes": 20625,
+        "characters": 8747
+      },
+      "after": {
+        "bytes": 9233,
+        "characters": 3973
+      },
+      "commonBootstrapBytes": 0,
+      "beforeInstructionBytes": 20625,
+      "afterInstructionBytes": 9233,
+      "savedBytes": 11392,
+      "savedPercent": 55.23
+    },
+    {
+      "id": "after-compact",
+      "description": "simple-codeの内容をcompactで失った。必要資料を再読（保持している資料があればその分は不要）",
+      "yes": [
+        "A",
+        "D",
+        "R"
+      ],
+      "details": [
+        "references/roles.md",
+        "references/parallel.md",
+        "references/reviewer.md",
+        "references/roles/code-review.md",
+        "assets/task.md",
+        "assets/completion.md",
+        "assets/project-map.md",
+        "references/measurement.md",
+        "@authoring/codex-html-plan/SKILL.md",
+        "@authoring/codex-html-plan/references/workflow.md",
+        "@authoring/codex-html-plan/references/blocks.md",
+        "references/commands.md"
+      ],
+      "commands": true,
+      "measurement": true,
+      "beforeFiles": [
+        "before:@bootstrap",
+        "before:SKILL.md",
+        "before:references/roles.md",
+        "before:references/parallel.md",
+        "before:references/reviewer.md",
+        "before:references/roles/code-review.md",
+        "before:assets/task.md",
+        "before:assets/completion.md",
+        "before:assets/project-map.md",
+        "before:references/measurement.md",
+        "before:@authoring/codex-html-plan/SKILL.md",
+        "before:@authoring/codex-html-plan/references/workflow.md",
+        "before:@authoring/codex-html-plan/references/blocks.md",
+        "before:references/commands.md"
+      ],
+      "afterFiles": [
+        "after:@bootstrap",
+        "after:SKILL.md",
+        "after:references/routing/preimplementation.md",
+        "after:references/routing/coordination.md",
+        "after:references/routing/continuity.md",
+        "after:references/roles.md",
+        "after:references/parallel.md",
+        "after:references/reviewer.md",
+        "after:references/roles/code-review.md",
+        "after:assets/task.md",
+        "after:assets/completion.md",
+        "after:assets/project-map.md",
+        "after:references/measurement.md",
+        "after:@authoring/codex-html-plan/SKILL.md",
+        "after:@authoring/codex-html-plan/references/workflow.md",
+        "after:@authoring/codex-html-plan/references/blocks.md",
+        "after:references/commands.md"
+      ],
+      "before": {
+        "bytes": 77468,
+        "characters": 42547
+      },
+      "after": {
+        "bytes": 72485,
+        "characters": 40540
+      },
+      "commonBootstrapBytes": 951,
+      "beforeInstructionBytes": 76517,
+      "afterInstructionBytes": 71534,
+      "savedBytes": 4983,
+      "savedPercent": 6.43
+    }
+  ],
+  "files": {
+    "before:@bootstrap": {
+      "path": "@bootstrap",
+      "side": "before",
+      "range": "full file",
+      "bytes": 951,
+      "characters": 951,
+      "sha256": "a82d15f5b2c02824c08a2781125d2afc89961a3d101aabb4157b0c2e63fe3b3c"
+    },
+    "after:@bootstrap": {
+      "path": "@bootstrap",
+      "side": "after",
+      "range": "full file",
+      "bytes": 951,
+      "characters": 951,
+      "sha256": "a82d15f5b2c02824c08a2781125d2afc89961a3d101aabb4157b0c2e63fe3b3c"
+    },
+    "before:SKILL.md": {
+      "path": "SKILL.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 20625,
+      "characters": 8747,
+      "sha256": "a2a7bc118f367b46184c8a8de4e719ee9d8926cddf97c5ba17fa2b8a7180ab14"
+    },
+    "after:SKILL.md": {
+      "path": "SKILL.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 4119,
+      "characters": 2093,
+      "sha256": "df27073e0020bf9358fb53f28ae8d64e3509c65c600ffb2d7fc200d51f5b5bf6"
+    },
+    "after:references/routing/continuity.md": {
+      "path": "references/routing/continuity.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 1675,
+      "characters": 737,
+      "sha256": "7462e73b95e85d8d4e82502e361422533fd45b47863a4b36cce8d1b28b5b9b00"
+    },
+    "before:references/measurement.md": {
+      "path": "references/measurement.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 1085,
+      "characters": 387,
+      "sha256": "1f5dc90c05e77ac285d0438cbfe9f333f2008d2e60bd5a097e5b4ee7a94b1d36"
+    },
+    "before:references/commands.md": {
+      "path": "references/commands.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 10079,
+      "characters": 5913,
+      "sha256": "a8e91c2f5a344e8a8c1179d7d2036a62ad25136f8b4e2e00a9d546cf128063b0"
+    },
+    "after:references/measurement.md": {
+      "path": "references/measurement.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 1085,
+      "characters": 387,
+      "sha256": "1f5dc90c05e77ac285d0438cbfe9f333f2008d2e60bd5a097e5b4ee7a94b1d36"
+    },
+    "after:references/commands.md": {
+      "path": "references/commands.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 10079,
+      "characters": 5913,
+      "sha256": "a8e91c2f5a344e8a8c1179d7d2036a62ad25136f8b4e2e00a9d546cf128063b0"
+    },
+    "after:references/routing/claude.md": {
+      "path": "references/routing/claude.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 2334,
+      "characters": 950,
+      "sha256": "8d939b893091295dd3c215b6ce9fc94502b29e894f935c1551351c62d2511123"
+    },
+    "before:consult-claude/SKILL.md": {
+      "path": "consult-claude/SKILL.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 6917,
+      "characters": 3235,
+      "sha256": "9ef8fd9eacedd12bac58b0b07dc8158d3eda623ded05f0e1d3097b790a75309b"
+    },
+    "after:consult-claude/SKILL.md": {
+      "path": "consult-claude/SKILL.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 6917,
+      "characters": 3235,
+      "sha256": "9ef8fd9eacedd12bac58b0b07dc8158d3eda623ded05f0e1d3097b790a75309b"
+    },
+    "after:references/routing/preimplementation.md": {
+      "path": "references/routing/preimplementation.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 5114,
+      "characters": 1880,
+      "sha256": "ea6f3e73eb9dcc769816661a65878a2085cb02a35c325398933d64da43cae7dd"
+    },
+    "after:references/routing/coordination.md": {
+      "path": "references/routing/coordination.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 4717,
+      "characters": 2013,
+      "sha256": "2105a761e1471c7958d2f2dec19592a7df19427b16d8ba6cc98a982d867f5833"
+    },
+    "before:references/roles.md": {
+      "path": "references/roles.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 7339,
+      "characters": 3099,
+      "sha256": "00d197b1781b2fed7e13859fa91206ed16d3aad2511a5706e890b2802f29c282"
+    },
+    "before:references/parallel.md": {
+      "path": "references/parallel.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 2131,
+      "characters": 813,
+      "sha256": "c5d2c4325ec420aa1bacdd8b42db38e2605d0439d0a49aa2b75d0c5132e8e788"
+    },
+    "before:references/reviewer.md": {
+      "path": "references/reviewer.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 3208,
+      "characters": 1254,
+      "sha256": "984755343ff14dbc5769c694a267075f811c5a9b88673f209f88fdb608534dbc"
+    },
+    "before:references/roles/code-review.md": {
+      "path": "references/roles/code-review.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 2195,
+      "characters": 817,
+      "sha256": "bf3563a22495d05dc718853310875152003cf9f25e01388965afeb09ecc3a88f"
+    },
+    "before:assets/task.md": {
+      "path": "assets/task.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 4120,
+      "characters": 1686,
+      "sha256": "f068566b2e756d97c4a282a0cd5410e5b45f1e86a0678dbcd6acd45a2ccd0106"
+    },
+    "before:assets/completion.md": {
+      "path": "assets/completion.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 363,
+      "characters": 179,
+      "sha256": "e8a0cfdcb81fc5c49bcd37c72c30a5459da858958d59c982af290b164c52c555"
+    },
+    "before:assets/project-map.md": {
+      "path": "assets/project-map.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 285,
+      "characters": 123,
+      "sha256": "c1d9950cfe3438ac126a5ac717fef7225e4a3c4c12ced0409b5196cb3383dcaa"
+    },
+    "before:@authoring/codex-html-plan/SKILL.md": {
+      "path": "@authoring/codex-html-plan/SKILL.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 7194,
+      "characters": 3214,
+      "sha256": "9784ecbf036e57bb9bb312452667538dfe26e83d8c1f1ee54302810ce1c268d3"
+    },
+    "before:@authoring/codex-html-plan/references/workflow.md": {
+      "path": "@authoring/codex-html-plan/references/workflow.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 3473,
+      "characters": 1505,
+      "sha256": "620c30ad7650d88ede6637f4473252e4851a27396499eef20975248995153e5f"
+    },
+    "before:@authoring/codex-html-plan/references/blocks.md": {
+      "path": "@authoring/codex-html-plan/references/blocks.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 14420,
+      "characters": 13859,
+      "sha256": "65ea755ccde08fd7c798590f5bebf222afc43a40de8bbf603439ad16df9cce6a"
+    },
+    "after:references/roles.md": {
+      "path": "references/roles.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 7339,
+      "characters": 3099,
+      "sha256": "00d197b1781b2fed7e13859fa91206ed16d3aad2511a5706e890b2802f29c282"
+    },
+    "after:references/parallel.md": {
+      "path": "references/parallel.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 2131,
+      "characters": 813,
+      "sha256": "c5d2c4325ec420aa1bacdd8b42db38e2605d0439d0a49aa2b75d0c5132e8e788"
+    },
+    "after:references/reviewer.md": {
+      "path": "references/reviewer.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 3225,
+      "characters": 1271,
+      "sha256": "86d8c44342cbb4b8ac063777b556797014d0eba7a676239df8bdeebe627cf034"
+    },
+    "after:references/roles/code-review.md": {
+      "path": "references/roles/code-review.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 2195,
+      "characters": 817,
+      "sha256": "bf3563a22495d05dc718853310875152003cf9f25e01388965afeb09ecc3a88f"
+    },
+    "after:assets/task.md": {
+      "path": "assets/task.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 4120,
+      "characters": 1686,
+      "sha256": "f068566b2e756d97c4a282a0cd5410e5b45f1e86a0678dbcd6acd45a2ccd0106"
+    },
+    "after:assets/completion.md": {
+      "path": "assets/completion.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 363,
+      "characters": 179,
+      "sha256": "e8a0cfdcb81fc5c49bcd37c72c30a5459da858958d59c982af290b164c52c555"
+    },
+    "after:assets/project-map.md": {
+      "path": "assets/project-map.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 285,
+      "characters": 123,
+      "sha256": "c1d9950cfe3438ac126a5ac717fef7225e4a3c4c12ced0409b5196cb3383dcaa"
+    },
+    "after:@authoring/codex-html-plan/SKILL.md": {
+      "path": "@authoring/codex-html-plan/SKILL.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 7194,
+      "characters": 3214,
+      "sha256": "9784ecbf036e57bb9bb312452667538dfe26e83d8c1f1ee54302810ce1c268d3"
+    },
+    "after:@authoring/codex-html-plan/references/workflow.md": {
+      "path": "@authoring/codex-html-plan/references/workflow.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 3473,
+      "characters": 1505,
+      "sha256": "620c30ad7650d88ede6637f4473252e4851a27396499eef20975248995153e5f"
+    },
+    "after:@authoring/codex-html-plan/references/blocks.md": {
+      "path": "@authoring/codex-html-plan/references/blocks.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 14420,
+      "characters": 13859,
+      "sha256": "65ea755ccde08fd7c798590f5bebf222afc43a40de8bbf603439ad16df9cce6a"
+    },
+    "after:references/routing/web.md": {
+      "path": "references/routing/web.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 1960,
+      "characters": 734,
+      "sha256": "a39f4f96e3f76ba21ccf8abc8861d0d2611e040bcd2fc3c9576c1de114a7b602"
+    },
+    "after:references/routing/creative.md": {
+      "path": "references/routing/creative.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 2153,
+      "characters": 979,
+      "sha256": "37b3362c34f4a8147a0a2f8ff7066d8f7cebb73f831c86753725bff5d030e7f3"
+    },
+    "before:references/creative-loop.md": {
+      "path": "references/creative-loop.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 15066,
+      "characters": 6578,
+      "sha256": "cbaa6508a470f7566e6474ef1a5bb490d6ff4d01aa2b5293c03fa4884635e248"
+    },
+    "before:references/knowledge-retrieval.md": {
+      "path": "references/knowledge-retrieval.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 4208,
+      "characters": 2096,
+      "sha256": "fe719f16351e400b77204b76e77cf645c968ca6969eeafeaf28bc4469eff2071"
+    },
+    "after:references/creative-loop.md": {
+      "path": "references/creative-loop.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 15100,
+      "characters": 6602,
+      "sha256": "04ead6426e49d66685adbad6c0463d9ca95e11f116fe991aadc02a7bbdc5dbe1"
+    },
+    "after:references/knowledge-retrieval.md": {
+      "path": "references/knowledge-retrieval.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 4208,
+      "characters": 2096,
+      "sha256": "fe719f16351e400b77204b76e77cf645c968ca6969eeafeaf28bc4469eff2071"
+    },
+    "after:references/routing/settings.md": {
+      "path": "references/routing/settings.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 2070,
+      "characters": 970,
+      "sha256": "5d2946b576aca587cb64059bb1a9c48132f2d71a637ff87624f8360e1b5baf45"
+    },
+    "before:references/roles/record-keeper.md": {
+      "path": "references/roles/record-keeper.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 4819,
+      "characters": 2133,
+      "sha256": "b7f57132eb3681f8f9a17b1b67d7d892d0cd2733ff60faae410f2384b18d61e1"
+    },
+    "before:assets/creative-preferences.md": {
+      "path": "assets/creative-preferences.md",
+      "side": "before",
+      "range": "full file",
+      "bytes": 2812,
+      "characters": 1482,
+      "sha256": "1a1fd401e6d13e8ffd1051bbd335e817ecb6d24e510dc7a949e5d91cc623b0db"
+    },
+    "after:references/roles/record-keeper.md": {
+      "path": "references/roles/record-keeper.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 4819,
+      "characters": 2133,
+      "sha256": "b7f57132eb3681f8f9a17b1b67d7d892d0cd2733ff60faae410f2384b18d61e1"
+    },
+    "after:assets/creative-preferences.md": {
+      "path": "assets/creative-preferences.md",
+      "side": "after",
+      "range": "full file",
+      "bytes": 2812,
+      "characters": 1482,
+      "sha256": "1a1fd401e6d13e8ffd1051bbd335e817ecb6d24e510dc7a949e5d91cc623b0db"
+    },
+    "after:references/routing/preimplementation.md:first-paragraph": {
+      "path": "references/routing/preimplementation.md",
+      "side": "after",
+      "range": "heading + first paragraph (exact text through first paragraph newline)",
+      "bytes": 744,
+      "characters": 298,
+      "sha256": "bb4860af2454585936835a92f6785ef7fd31332aa809a103e87eebc405e52037"
+    },
+    "after:references/routing/creative.md:first-paragraph": {
+      "path": "references/routing/creative.md",
+      "side": "after",
+      "range": "heading + first paragraph (exact text through first paragraph newline)",
+      "bytes": 753,
+      "characters": 357,
+      "sha256": "3b938c67869523db9e3f7ef8dd40acd0cee3e4483ce2a5805722900c704f1cad"
+    }
+  }
+}

@@ -205,7 +205,7 @@ for (const explicitModels of [false, true]) test(`actual old JS release upgrades
   assert.deepEqual(result.data.config.models.review, explicitModels ? { model: 'gpt-6-astra', reasoning_effort: 'medium' } : { model: 'gpt-6.1-sol', reasoning_effort: 'high' });
   assert.equal(result.data.config.persistence, false); assert.equal(result.data.config.measurement, false); assert.equal(result.data.config.max_agents, 2);
   assert.deepEqual(fs.readFileSync(personal), beforePersonal); assert.deepEqual(fs.readFileSync(project), beforeProject); assert.deepEqual(fs.readFileSync(preference), memory);
-  assert.match(fs.readFileSync(path.join(old.target, 'SKILL.md'), 'utf8'), /references\/creative-loop\.md/);
+  assert.match(fs.readFileSync(path.join(old.target, 'SKILL.md'), 'utf8'), /references\/routing\/creative\.md/);
   assert.equal(fs.statSync(path.join(old.target, 'assets/creative-preferences.md')).isFile(), true);
   assert.deepEqual(fs.readFileSync(path.join(old.target, 'references/roles/record-keeper.md')), fs.readFileSync(path.join(root, 'dist/skill/references/roles/record-keeper.md')));
   assert.equal(installer.install(l.args).status, 'unchanged');

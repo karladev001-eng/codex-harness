@@ -5,6 +5,7 @@ import { isDeepStrictEqual } from 'node:util';
 import { active, canonical, git, isObject, Json, localRoot, readJson, safePath, saveNew, resolveSettings, taskId, exists } from './lib';
 import { install, uninstall } from './install';
 import { authoring } from './authoring';
+import { lessons } from './lessons';
 import { preferences, preferenceLocation } from './preferences';
 
 export function packets(project: string): Record<string, Json> {
@@ -106,11 +107,11 @@ export function measurement(data: unknown): Json {
   if (before !== null && after !== null && after < before) reasons.push('usage decreased');
   return { ...result, comparable: !reasons.length, exclusion_reasons: reasons, account_usage_delta: reasons.length ? null : after - before };
 }
-const HELP = `Codex Harness (Node.js 22+)\n\nCommands:\n  status|doctor [--project PATH] [--home PATH]\n  install [--home PATH] [--skills-dir PARENT]\n  uninstall [--home PATH]\n  task create --id ID --goal TEXT --acceptance TEXT --scope PATH [--base HEAD]\n    [--depends-on ID] [--non-goal TEXT] [--constraint TEXT] [--reference TEXT] [--spec-revision 1]\n  task show --id ID | task validate\n  worktree create --id ID --base COMMIT\n  measure record --input FILE\n  preferences read|sync|migrate [--offline true]\n  preferences write --input FILE --revision TOKEN [--offline true] [--base-sha SHA|missing]\n  authoring install|uninstall [--project PATH] [--skills-dir PARENT] [--skill NAME]\n\nRuntime task/worktree/measure/preferences commands accept --project and --home.\nRepeat --acceptance, --scope, --depends-on, --non-goal, --constraint, --reference, --skill.\nSettings: improvement_loop (boolean, default true), model_selection (auto|fixed, default auto).\nStatus is read-only; auto models are resolved by the agent from the live host launch catalog.\nAuthoring defaults to five skills in PROJECT/.agents/skills; it never activates orchestration.\nOptional codex-slide-plan requires --skill codex-slide-plan from a supporting release package.\nUnspecified authoring install/uninstall leaves optional skills untouched.\n`;
+const HELP = `Codex Harness (Node.js 22+)\n\nCommands:\n  status|doctor [--project PATH] [--home PATH]\n  install [--home PATH] [--skills-dir PARENT]\n  uninstall [--home PATH]\n  task create --id ID --goal TEXT --acceptance TEXT --scope PATH [--base HEAD]\n    [--depends-on ID] [--non-goal TEXT] [--constraint TEXT] [--reference TEXT] [--spec-revision 1]\n  task show --id ID | task validate\n  worktree create --id ID --base COMMIT\n  measure record --input FILE\n  preferences register|read|sync|migrate [--offline true]\n  preferences sync-all [--project PATH] [--home PATH]\n  preferences write --input FILE --revision TOKEN [--offline true] [--base-sha SHA|missing] [--kind create|update|correction|forget]\n  lessons read|sync --id ID [--offline true]\n  lessons write --input FILE --revision TOKEN [--kind create|update|correction]\n  lessons forget --id ID --revision TOKEN\n  lessons search [--query TEXT] [--limit 1..10]\n  authoring install|uninstall [--project PATH] [--skills-dir PARENT] [--skill NAME]\n\nRuntime task/worktree/measure/preferences commands accept --project and --home.\nRepeat --acceptance, --scope, --depends-on, --non-goal, --constraint, --reference, --skill.\nSettings: improvement_loop (boolean, default true), model_selection (auto|fixed, default auto).\nStatus is read-only; auto models are resolved by the agent from the live host launch catalog.\nAuthoring defaults to five skills in PROJECT/.agents/skills; it never activates orchestration.\nOptional codex-slide-plan requires --skill codex-slide-plan from a supporting release package.\nUnspecified authoring install/uninstall leaves optional skills untouched.\n`;
 function parse(argv: string[]): Json {
   const [command, ...rest] = argv;
   const args: Json = { command, project: '.', acceptance: [], scope: [], depends_on: [], non_goal: [], constraint: [], reference: [], skill: [], spec_revision: '1', base: 'HEAD' };
-  const nested = ['task', 'worktree', 'measure', 'authoring', 'preferences'].includes(command);
+  const nested = ['task', 'worktree', 'measure', 'authoring', 'preferences', 'lessons'].includes(command);
   if (nested) args.action = rest.shift();
   const key = command + (nested ? ' ' + args.action : '');
   const common = ['project', 'home'];
@@ -118,8 +119,12 @@ function parse(argv: string[]): Json {
     status: common, doctor: common, install: ['home', 'skills-dir'], uninstall: ['home'],
     'task create': [...common, 'id', 'goal', 'acceptance', 'scope', 'depends-on', 'non-goal', 'constraint', 'reference', 'spec-revision', 'base'],
     'task show': [...common, 'id'], 'task validate': common, 'worktree create': [...common, 'id', 'base'],
+    'preferences register': [...common, 'project-key'], 'preferences sync-all': common,
     'preferences read': [...common, 'offline'], 'preferences sync': [...common, 'offline'],
-    'preferences migrate': [...common, 'offline'], 'preferences write': [...common, 'input', 'revision', 'offline', 'base-sha'],
+    'preferences migrate': [...common, 'offline'], 'preferences write': [...common, 'input', 'revision', 'offline', 'base-sha', 'kind'],
+    'lessons read': [...common, 'id', 'offline'], 'lessons sync': [...common, 'id', 'offline'],
+    'lessons write': [...common, 'input', 'revision', 'offline', 'base-sha', 'kind'],
+    'lessons forget': [...common, 'id', 'revision', 'offline', 'base-sha'], 'lessons search': [...common, 'query', 'limit', 'offline'],
     'measure record': [...common, 'input'], 'authoring install': ['project', 'skills-dir', 'skill'], 'authoring uninstall': ['project', 'skills-dir', 'skill'],
   };
   if (!Object.hasOwn(allowed, key)) throw new Error('Unknown or missing command; use --help');
@@ -132,7 +137,7 @@ function parse(argv: string[]): Json {
     const option = match[1].replaceAll('-', '_'); provided.add(option);
     if (Array.isArray(args[option])) args[option].push(value); else args[option] = value;
   }
-  const required: Record<string, string[]> = { 'task create': ['id', 'goal'], 'task show': ['id'], 'worktree create': ['id', 'base'], 'measure record': ['input'], 'preferences write': ['input', 'revision'] };
+  const required: Record<string, string[]> = { 'task create': ['id', 'goal'], 'task show': ['id'], 'worktree create': ['id', 'base'], 'measure record': ['input'], 'preferences write': ['input', 'revision'], 'lessons write': ['input', 'revision'], 'lessons read': ['id'], 'lessons sync': ['id'], 'lessons forget': ['id', 'revision'] };
   for (const option of required[key] || []) if (!provided.has(option)) throw new Error('Missing required --' + option);
   return args;
 }
@@ -154,6 +159,7 @@ export function execute(args: Json): Json {
   const config = resolved.config;
   if (args.command === 'status') return { config, model_selection: resolved.model_selection, active: active(config), project: args.project, local_root: localRoot(args.project, args.home), preferences: preferenceLocation(args, config) };
   if (args.command === 'preferences') return preferences(args, config);
+  if (args.command === 'lessons') return lessons(args, config);
   if (!active(config)) return { active: false, skipped: 'harness disabled' };
   if (args.command === 'doctor') {
     let root = null, committed = null;

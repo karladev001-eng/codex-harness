@@ -32,7 +32,9 @@
     "plugins/codex-harness/skills/harness/SKILL.md",
     "plugins/codex-harness/skills/harness/references",
     "plugins/codex-harness/skills/harness/assets",
-    "authoring-skills"
+    "plugins/codex-harness/skills/harness/consult-claude",
+    "authoring-skills",
+    "plugins/codex-harness/skills/harness/read-sections.cjs"
   ],
   "scripts": {
     "build": "node scripts/build.cjs",

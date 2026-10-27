@@ -26,6 +26,10 @@ test('packed release runs through actual npx outside repo without compiler/netwo
   assert.ok(files.includes('dist/skill/preferences.js'));
   assert.ok(files.includes('dist/plugins/codex-harness/skills/harness/preferences.js'));
   assert.ok(files.includes('dist/skill/references/creative-loop.md'));
+  for (const prefix of ['dist/skill', 'dist/plugins/codex-harness/skills/harness', 'plugins/codex-harness/skills/harness']) {
+    assert.ok(files.includes(prefix + '/references/technical-lessons.md'), prefix + ':technical-lessons');
+    for (const file of ['settings', 'preimplementation', 'claude', 'web', 'creative', 'coordination', 'continuity', 'chart', 'rule-map']) assert.ok(files.includes(prefix + '/references/routing/' + file + '.md'), prefix + ':' + file);
+  }
   assert.ok(files.includes('dist/skill/references/roles/record-keeper.md'));
   assert.ok(files.includes('dist/skill/assets/creative-preferences.md'));
   assert.ok(files.includes('dist/plugins/codex-harness/.codex-plugin/plugin.json'));
@@ -33,7 +37,10 @@ test('packed release runs through actual npx outside repo without compiler/netwo
   assert.ok(files.includes('dist/plugins/codex-harness/skills/harness/references/roles/record-keeper.md'));
   assert.ok(files.includes('dist/plugins/codex-harness/skills/harness/assets/creative-preferences.md'));
   assert.ok(files.includes('dist/plugins/codex-harness/skills/harness/runtime.js')); assert.ok(files.includes('dist/skill/authoring-skills/inspect-harness/SKILL.md'));
-  for (const file of ['SKILL.md', 'UPSTREAM.md', 'LICENSE', 'runtime/pack.mjs', 'runtime/htmlplan.js', 'runtime/htmlplan.css', 'references/blocks.md', 'references/workflow.md', 'examples/task-board.src.html', 'examples/task-board.plan.html', 'examples/records/ADR-07.md', 'examples/records/TASK-42.md', 'examples/records/EXP-03.md', 'examples/records/index.md']) {
+  for (const prefix of ['dist/skill/consult-claude', 'dist/plugins/codex-harness/skills/harness/consult-claude', 'dist/plugins/codex-harness/skills/consult-claude', 'plugins/codex-harness/skills/harness/consult-claude']) {
+    for (const file of ['SKILL.md', 'agents/openai.yaml', 'scripts/consult.mjs']) assert.ok(files.includes(prefix + '/' + file), prefix + '/' + file);
+  }
+  for (const file of ['SKILL.md', 'UPSTREAM.md', 'LICENSE', 'runtime/pack.mjs', 'runtime/htmlplan.js', 'runtime/htmlplan.css', 'references/blocks.md', 'references/workflow.md', 'references/color-design.md', 'examples/task-board.src.html', 'examples/task-board.plan.html', 'examples/records/ADR-07.md', 'examples/records/TASK-42.md', 'examples/records/EXP-03.md', 'examples/records/index.md']) {
     assert.ok(files.includes('dist/skill/authoring-skills/codex-html-plan/' + file), file);
   }
   for (const file of ['SKILL.md', 'agents/openai.yaml', 'references/schema.md', 'references/workflow.md', 'references/masters.md', 'scripts/legacy-v1.json', 'scripts/pack.mjs', 'scripts/review.js', 'scripts/style.css', 'scripts/inspect-master.py', 'scripts/make-fixtures.py', 'examples/deck.json']) {
@@ -78,7 +85,7 @@ test('packed release runs through actual npx outside repo without compiler/netwo
     complex: { model: 'gpt-6.1-sol', reasoning_effort: 'high' },
     review: { model: 'gpt-6.1-sol', reasoning_effort: 'high' },
   });
-  assert.match(fs.readFileSync(path.join(installed.target, 'SKILL.md'), 'utf8'), /references\/creative-loop\.md/);
+  assert.match(fs.readFileSync(path.join(installed.target, 'SKILL.md'), 'utf8'), /references\/routing\/creative\.md/);
   assert.equal(fs.statSync(path.join(installed.target, 'assets/creative-preferences.md')).isFile(), true);
   assert.equal(packaged('install', '--home', f.home).status, 'unchanged');
   assert.equal(fs.existsSync(path.join(installed.target, 'authoring-skills/codex-slide-plan')), false);
@@ -117,6 +124,7 @@ test('packed release runs through actual npx outside repo without compiler/netwo
   const upgraded = run(['status', '--project', f.project, '--home', f.home], { cli: path.join(installed.target, 'runtime.js') });
   assert.equal(upgraded.code, 0, upgraded.error); assert.deepEqual(upgraded.data.config.models, direct.data.config.models);
   assert.equal(fs.statSync(path.join(installed.target, 'references/creative-loop.md')).isFile(), true);
+  assert.deepEqual(fs.readFileSync(path.join(installed.target, 'references/technical-lessons.md')), fs.readFileSync(path.join(root, 'dist/skill/references/technical-lessons.md')));
   assert.deepEqual(fs.readFileSync(path.join(installed.target, 'references/roles/record-keeper.md')), fs.readFileSync(path.join(root, 'dist/skill/references/roles/record-keeper.md')));
   assert.equal(packaged('install', '--home', f.home).status, 'unchanged');
 });

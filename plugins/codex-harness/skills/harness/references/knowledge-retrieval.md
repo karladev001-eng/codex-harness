@@ -6,6 +6,8 @@
 
 この文書を持つ **SKILL.mdのディレクトリ** を `<skill-root>` とする。CLIはそこから相対の `knowledge/cli.cjs`。ユーザーのcheckoutやcwdを基準に探さない。Node.js 22+で、実際に解決した絶対パスを引用して実行する。通常installerとpluginの両方に同梱される。
 
+技術的な修正の知見は別の[lesson入口](technical-lessons.md)でprojectを限って取得する。資料の保存・利用から好みやlessonを自動生成しない。
+
 自動参照はstatusの `active=true`・`improvement_loop=true`・`persistence=true` の場合のみ。いずれかOFFならこの手順を止め、通常制作へ戻る。明示的な資料検索はユーザーの依頼とアクセス範囲に従う別操作で、好みを自動適用する許可にはならない。
 
 ```sh

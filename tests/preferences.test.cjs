@@ -142,7 +142,7 @@ test('CLI management, invalid configuration, status read-only and disabled flags
   const noCache = command(f, 'preferences', 'read', '--offline', 'true'); assert.equal(noCache.code, 2); assert.equal(noCache.data.error, 'no_cache');
   write(configPath, { persistence: false, preferences: f.config.preferences });
   assert.equal(command(f, 'preferences', 'write', '--input', 'missing', '--revision', 'bad').data.skipped, 'persistence disabled');
-  for (const value of [{ repository: 'owner/repo' }, { project_key: '../bad' }, { repository: 'https://other/repo', project_key: 'p' }, { repository: 'o/r', project_key: 'p', branch: '' }]) {
+  for (const value of [{ repository: 'owner/repo', branch: '' }, { project_key: '../bad' }, { repository: 'https://other/repo', project_key: 'p' }, { repository: 'o/r', project_key: 'p', branch: '' }]) {
     write(configPath, { preferences: value }); assert.equal(command(f, 'status').code, 2);
   }
   for (const args of [['preferences'], ['preferences', 'write', '--input', 'x'], ['preferences', 'read', '--offline', 'yes']]) assert.equal(command(f, ...args).code, 2);

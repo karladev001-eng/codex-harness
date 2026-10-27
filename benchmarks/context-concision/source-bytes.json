@@ -1,0 +1,466 @@
+{
+  "kind": "same-required-file-set-source-bytes",
+  "note": "2026-10-24 concision only. Full source bytes; no reader/model/tool invocation benchmark or token/latency claim.",
+  "scenarios": [
+    {
+      "id": "simple-code",
+      "files": [
+        {
+          "path": "plugins/codex-harness/skills/harness/SKILL.md",
+          "before": {
+            "bytes": 4790,
+            "sha256": "a6f3cab48957e0f7f210d727073aef452f05f46fc2562e6e8c448880c3e5bca6"
+          },
+          "after": {
+            "bytes": 3507,
+            "sha256": "f626b46f6c317b413c58bdba4adfc115344f4b5b343564c3c08523699dc6d549"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/routing/preimplementation.md",
+          "before": {
+            "bytes": 5114,
+            "sha256": "ea6f3e73eb9dcc769816661a65878a2085cb02a35c325398933d64da43cae7dd"
+          },
+          "after": {
+            "bytes": 3681,
+            "sha256": "025f4aabe18bb92d10041b70f74eeeab193bfbd068d5d7f07a6742e9079d1da1"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/routing/coordination.md",
+          "before": {
+            "bytes": 4717,
+            "sha256": "2105a761e1471c7958d2f2dec19592a7df19427b16d8ba6cc98a982d867f5833"
+          },
+          "after": {
+            "bytes": 3482,
+            "sha256": "c9d8f5df071d9b0fb068ac32889ab5d45ecd86595507f0f119a5d19801e5ef6d"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/routing/continuity.md",
+          "before": {
+            "bytes": 1675,
+            "sha256": "7462e73b95e85d8d4e82502e361422533fd45b47863a4b36cce8d1b28b5b9b00"
+          },
+          "after": {
+            "bytes": 1319,
+            "sha256": "4ecbec1780ec63a3570f21b6906290fba41d4b09fabc9ac25cf770473d1f5192"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/roles.md",
+          "before": {
+            "bytes": 7339,
+            "sha256": "00d197b1781b2fed7e13859fa91206ed16d3aad2511a5706e890b2802f29c282"
+          },
+          "after": {
+            "bytes": 5381,
+            "sha256": "b372ef45cc8be6f283422cc2e115c4ec55a2e47be81fbfb85fd2e7f783e8f222"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/parallel.md",
+          "before": {
+            "bytes": 2131,
+            "sha256": "c5d2c4325ec420aa1bacdd8b42db38e2605d0439d0a49aa2b75d0c5132e8e788"
+          },
+          "after": {
+            "bytes": 2131,
+            "sha256": "c5d2c4325ec420aa1bacdd8b42db38e2605d0439d0a49aa2b75d0c5132e8e788"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/reviewer.md",
+          "before": {
+            "bytes": 3225,
+            "sha256": "86d8c44342cbb4b8ac063777b556797014d0eba7a676239df8bdeebe627cf034"
+          },
+          "after": {
+            "bytes": 2434,
+            "sha256": "33eafc1e115ab84a1bb675acf6006bda169c1790fac1d153038654608bdbc696"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/roles/code-review.md",
+          "before": {
+            "bytes": 2195,
+            "sha256": "bf3563a22495d05dc718853310875152003cf9f25e01388965afeb09ecc3a88f"
+          },
+          "after": {
+            "bytes": 2195,
+            "sha256": "bf3563a22495d05dc718853310875152003cf9f25e01388965afeb09ecc3a88f"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/assets/task.md",
+          "before": {
+            "bytes": 4120,
+            "sha256": "f068566b2e756d97c4a282a0cd5410e5b45f1e86a0678dbcd6acd45a2ccd0106"
+          },
+          "after": {
+            "bytes": 4120,
+            "sha256": "f068566b2e756d97c4a282a0cd5410e5b45f1e86a0678dbcd6acd45a2ccd0106"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/assets/completion.md",
+          "before": {
+            "bytes": 363,
+            "sha256": "e8a0cfdcb81fc5c49bcd37c72c30a5459da858958d59c982af290b164c52c555"
+          },
+          "after": {
+            "bytes": 363,
+            "sha256": "e8a0cfdcb81fc5c49bcd37c72c30a5459da858958d59c982af290b164c52c555"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/assets/project-map.md",
+          "before": {
+            "bytes": 285,
+            "sha256": "c1d9950cfe3438ac126a5ac717fef7225e4a3c4c12ced0409b5196cb3383dcaa"
+          },
+          "after": {
+            "bytes": 285,
+            "sha256": "c1d9950cfe3438ac126a5ac717fef7225e4a3c4c12ced0409b5196cb3383dcaa"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/measurement.md",
+          "before": {
+            "bytes": 1085,
+            "sha256": "1f5dc90c05e77ac285d0438cbfe9f333f2008d2e60bd5a097e5b4ee7a94b1d36"
+          },
+          "after": {
+            "bytes": 1085,
+            "sha256": "1f5dc90c05e77ac285d0438cbfe9f333f2008d2e60bd5a097e5b4ee7a94b1d36"
+          }
+        },
+        {
+          "path": "authoring-skills/codex-html-plan/SKILL.md",
+          "before": {
+            "bytes": 7692,
+            "sha256": "dc71db9e162ffe65ec2ed6f3baa63f71ef5ca5a2e1e063d5120a7d5a512defd2"
+          },
+          "after": {
+            "bytes": 5962,
+            "sha256": "b1ae37b73974bdedd83310b0ff9b5635d2484379be7b3c36019fca8596232c1c"
+          }
+        },
+        {
+          "path": "authoring-skills/codex-html-plan/references/workflow.md",
+          "before": {
+            "bytes": 3473,
+            "sha256": "620c30ad7650d88ede6637f4473252e4851a27396499eef20975248995153e5f"
+          },
+          "after": {
+            "bytes": 3473,
+            "sha256": "620c30ad7650d88ede6637f4473252e4851a27396499eef20975248995153e5f"
+          }
+        },
+        {
+          "path": "authoring-skills/codex-html-plan/references/blocks.md",
+          "before": {
+            "bytes": 14420,
+            "sha256": "65ea755ccde08fd7c798590f5bebf222afc43a40de8bbf603439ad16df9cce6a"
+          },
+          "after": {
+            "bytes": 14420,
+            "sha256": "65ea755ccde08fd7c798590f5bebf222afc43a40de8bbf603439ad16df9cce6a"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/commands.md",
+          "before": {
+            "bytes": 10079,
+            "sha256": "a8e91c2f5a344e8a8c1179d7d2036a62ad25136f8b4e2e00a9d546cf128063b0"
+          },
+          "after": {
+            "bytes": 10079,
+            "sha256": "a8e91c2f5a344e8a8c1179d7d2036a62ad25136f8b4e2e00a9d546cf128063b0"
+          }
+        }
+      ],
+      "beforeBytes": 72703,
+      "afterBytes": 63917,
+      "savedBytes": 8786,
+      "savedPercent": 12.08
+    },
+    {
+      "id": "mixed",
+      "files": [
+        {
+          "path": "plugins/codex-harness/skills/harness/SKILL.md",
+          "before": {
+            "bytes": 4790,
+            "sha256": "a6f3cab48957e0f7f210d727073aef452f05f46fc2562e6e8c448880c3e5bca6"
+          },
+          "after": {
+            "bytes": 3507,
+            "sha256": "f626b46f6c317b413c58bdba4adfc115344f4b5b343564c3c08523699dc6d549"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/routing/settings.md",
+          "before": {
+            "bytes": 2070,
+            "sha256": "5d2946b576aca587cb64059bb1a9c48132f2d71a637ff87624f8360e1b5baf45"
+          },
+          "after": {
+            "bytes": 1185,
+            "sha256": "3b213d005ee88d3d40713c7d3cb8c9b269e96c835960ea03c1647ac8dc22f225"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/routing/preimplementation.md",
+          "before": {
+            "bytes": 5114,
+            "sha256": "ea6f3e73eb9dcc769816661a65878a2085cb02a35c325398933d64da43cae7dd"
+          },
+          "after": {
+            "bytes": 3681,
+            "sha256": "025f4aabe18bb92d10041b70f74eeeab193bfbd068d5d7f07a6742e9079d1da1"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/routing/claude.md",
+          "before": {
+            "bytes": 2334,
+            "sha256": "8d939b893091295dd3c215b6ce9fc94502b29e894f935c1551351c62d2511123"
+          },
+          "after": {
+            "bytes": 1845,
+            "sha256": "afb8f740c899d901969589413f8d722ab112557a98026b1dc0eebe7bb50a15cf"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/routing/web.md",
+          "before": {
+            "bytes": 1960,
+            "sha256": "a39f4f96e3f76ba21ccf8abc8861d0d2611e040bcd2fc3c9576c1de114a7b602"
+          },
+          "after": {
+            "bytes": 1385,
+            "sha256": "225068523615d405d878438b7f367bd65ca86285b69b789b9b8f34998b6fc15e"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/routing/creative.md",
+          "before": {
+            "bytes": 2153,
+            "sha256": "37b3362c34f4a8147a0a2f8ff7066d8f7cebb73f831c86753725bff5d030e7f3"
+          },
+          "after": {
+            "bytes": 1664,
+            "sha256": "2e12f4e75625aacbdd38ce2df287ac50f9533cfd476cdc57d7368e597b61a7e8"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/routing/coordination.md",
+          "before": {
+            "bytes": 4717,
+            "sha256": "2105a761e1471c7958d2f2dec19592a7df19427b16d8ba6cc98a982d867f5833"
+          },
+          "after": {
+            "bytes": 3482,
+            "sha256": "c9d8f5df071d9b0fb068ac32889ab5d45ecd86595507f0f119a5d19801e5ef6d"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/routing/continuity.md",
+          "before": {
+            "bytes": 1675,
+            "sha256": "7462e73b95e85d8d4e82502e361422533fd45b47863a4b36cce8d1b28b5b9b00"
+          },
+          "after": {
+            "bytes": 1319,
+            "sha256": "4ecbec1780ec63a3570f21b6906290fba41d4b09fabc9ac25cf770473d1f5192"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/roles.md",
+          "before": {
+            "bytes": 7339,
+            "sha256": "00d197b1781b2fed7e13859fa91206ed16d3aad2511a5706e890b2802f29c282"
+          },
+          "after": {
+            "bytes": 5381,
+            "sha256": "b372ef45cc8be6f283422cc2e115c4ec55a2e47be81fbfb85fd2e7f783e8f222"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/parallel.md",
+          "before": {
+            "bytes": 2131,
+            "sha256": "c5d2c4325ec420aa1bacdd8b42db38e2605d0439d0a49aa2b75d0c5132e8e788"
+          },
+          "after": {
+            "bytes": 2131,
+            "sha256": "c5d2c4325ec420aa1bacdd8b42db38e2605d0439d0a49aa2b75d0c5132e8e788"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/reviewer.md",
+          "before": {
+            "bytes": 3225,
+            "sha256": "86d8c44342cbb4b8ac063777b556797014d0eba7a676239df8bdeebe627cf034"
+          },
+          "after": {
+            "bytes": 2434,
+            "sha256": "33eafc1e115ab84a1bb675acf6006bda169c1790fac1d153038654608bdbc696"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/roles/code-review.md",
+          "before": {
+            "bytes": 2195,
+            "sha256": "bf3563a22495d05dc718853310875152003cf9f25e01388965afeb09ecc3a88f"
+          },
+          "after": {
+            "bytes": 2195,
+            "sha256": "bf3563a22495d05dc718853310875152003cf9f25e01388965afeb09ecc3a88f"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/assets/task.md",
+          "before": {
+            "bytes": 4120,
+            "sha256": "f068566b2e756d97c4a282a0cd5410e5b45f1e86a0678dbcd6acd45a2ccd0106"
+          },
+          "after": {
+            "bytes": 4120,
+            "sha256": "f068566b2e756d97c4a282a0cd5410e5b45f1e86a0678dbcd6acd45a2ccd0106"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/assets/completion.md",
+          "before": {
+            "bytes": 363,
+            "sha256": "e8a0cfdcb81fc5c49bcd37c72c30a5459da858958d59c982af290b164c52c555"
+          },
+          "after": {
+            "bytes": 363,
+            "sha256": "e8a0cfdcb81fc5c49bcd37c72c30a5459da858958d59c982af290b164c52c555"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/assets/project-map.md",
+          "before": {
+            "bytes": 285,
+            "sha256": "c1d9950cfe3438ac126a5ac717fef7225e4a3c4c12ced0409b5196cb3383dcaa"
+          },
+          "after": {
+            "bytes": 285,
+            "sha256": "c1d9950cfe3438ac126a5ac717fef7225e4a3c4c12ced0409b5196cb3383dcaa"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/measurement.md",
+          "before": {
+            "bytes": 1085,
+            "sha256": "1f5dc90c05e77ac285d0438cbfe9f333f2008d2e60bd5a097e5b4ee7a94b1d36"
+          },
+          "after": {
+            "bytes": 1085,
+            "sha256": "1f5dc90c05e77ac285d0438cbfe9f333f2008d2e60bd5a097e5b4ee7a94b1d36"
+          }
+        },
+        {
+          "path": "authoring-skills/codex-html-plan/SKILL.md",
+          "before": {
+            "bytes": 7692,
+            "sha256": "dc71db9e162ffe65ec2ed6f3baa63f71ef5ca5a2e1e063d5120a7d5a512defd2"
+          },
+          "after": {
+            "bytes": 5962,
+            "sha256": "b1ae37b73974bdedd83310b0ff9b5635d2484379be7b3c36019fca8596232c1c"
+          }
+        },
+        {
+          "path": "authoring-skills/codex-html-plan/references/workflow.md",
+          "before": {
+            "bytes": 3473,
+            "sha256": "620c30ad7650d88ede6637f4473252e4851a27396499eef20975248995153e5f"
+          },
+          "after": {
+            "bytes": 3473,
+            "sha256": "620c30ad7650d88ede6637f4473252e4851a27396499eef20975248995153e5f"
+          }
+        },
+        {
+          "path": "authoring-skills/codex-html-plan/references/blocks.md",
+          "before": {
+            "bytes": 14420,
+            "sha256": "65ea755ccde08fd7c798590f5bebf222afc43a40de8bbf603439ad16df9cce6a"
+          },
+          "after": {
+            "bytes": 14420,
+            "sha256": "65ea755ccde08fd7c798590f5bebf222afc43a40de8bbf603439ad16df9cce6a"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/creative-loop.md",
+          "before": {
+            "bytes": 15100,
+            "sha256": "04ead6426e49d66685adbad6c0463d9ca95e11f116fe991aadc02a7bbdc5dbe1"
+          },
+          "after": {
+            "bytes": 15100,
+            "sha256": "04ead6426e49d66685adbad6c0463d9ca95e11f116fe991aadc02a7bbdc5dbe1"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/knowledge-retrieval.md",
+          "before": {
+            "bytes": 4208,
+            "sha256": "fe719f16351e400b77204b76e77cf645c968ca6969eeafeaf28bc4469eff2071"
+          },
+          "after": {
+            "bytes": 4208,
+            "sha256": "fe719f16351e400b77204b76e77cf645c968ca6969eeafeaf28bc4469eff2071"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/consult-claude/SKILL.md",
+          "before": {
+            "bytes": 6917,
+            "sha256": "9ef8fd9eacedd12bac58b0b07dc8158d3eda623ded05f0e1d3097b790a75309b"
+          },
+          "after": {
+            "bytes": 6917,
+            "sha256": "9ef8fd9eacedd12bac58b0b07dc8158d3eda623ded05f0e1d3097b790a75309b"
+          }
+        },
+        {
+          "path": "plugins/codex-harness/skills/harness/references/commands.md",
+          "before": {
+            "bytes": 10079,
+            "sha256": "a8e91c2f5a344e8a8c1179d7d2036a62ad25136f8b4e2e00a9d546cf128063b0"
+          },
+          "after": {
+            "bytes": 10079,
+            "sha256": "a8e91c2f5a344e8a8c1179d7d2036a62ad25136f8b4e2e00a9d546cf128063b0"
+          }
+        }
+      ],
+      "beforeBytes": 107445,
+      "afterBytes": 96221,
+      "savedBytes": 11224,
+      "savedPercent": 10.45
+    }
+  ],
+  "entry": {
+    "path": "plugins/codex-harness/skills/harness/SKILL.md",
+    "before": {
+      "bytes": 4790,
+      "sha256": "a6f3cab48957e0f7f210d727073aef452f05f46fc2562e6e8c448880c3e5bca6"
+    },
+    "after": {
+      "bytes": 3507,
+      "sha256": "f626b46f6c317b413c58bdba4adfc115344f4b5b343564c3c08523699dc6d549"
+    },
+    "savedBytes": 1283,
+    "savedPercent": 26.78
+  }
+}

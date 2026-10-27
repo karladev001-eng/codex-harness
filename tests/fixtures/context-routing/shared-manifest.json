@@ -1,0 +1,17 @@
+{
+  "@authoring/codex-html-plan/SKILL.md": {
+    "bytes": 7194,
+    "characters": 3214,
+    "sha256": "9784ecbf036e57bb9bb312452667538dfe26e83d8c1f1ee54302810ce1c268d3"
+  },
+  "@authoring/codex-html-plan/references/workflow.md": {
+    "bytes": 3473,
+    "characters": 1505,
+    "sha256": "620c30ad7650d88ede6637f4473252e4851a27396499eef20975248995153e5f"
+  },
+  "@authoring/codex-html-plan/references/blocks.md": {
+    "bytes": 14420,
+    "characters": 13859,
+    "sha256": "65ea755ccde08fd7c798590f5bebf222afc43a40de8bbf603439ad16df9cce6a"
+  }
+}
