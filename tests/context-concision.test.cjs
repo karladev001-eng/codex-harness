@@ -49,7 +49,7 @@ test('independent flags, consultation and source checks retain negative boundari
     ['legacy OFF behavior and explicit override', /旧4機能全OFFかつ新キー未指定[\s\S]*明示trueを優先/],
     ['learning OFF allows explicit memory but persistence controls access', /明示的な確認・訂正・忘却は別操作[\s\S]*persistence=true/],
   ]);
-  expectRules(body('references/routing/claude.md'), [
+  expectRules(body('references/routing/peer-consult.md'), [
     ['parent/delegation gate and explicit exception', /activeな親でdelegation ON[\s\S]*停止指定がなければ[\s\S]*該当1役[\s\S]*workerは自動起動しない[\s\S]*明示Claude依頼は別扱い/],
     ['independent initial ideas and stalled attempts', /初回はCodex案を渡さず[\s\S]*2回修正[\s\S]*原因の見立てが更新できない/],
     ['bounded external consultation', /同時実行枠[\s\S]*空きを待つ[\s\S]*ツールなしCLI[\s\S]*通常1回[\s\S]*追加質問1回まで[\s\S]*再帰委譲・無限再試行は禁止/],

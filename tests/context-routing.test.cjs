@@ -9,7 +9,7 @@ const root = path.resolve(__dirname, '..');
 const skill = path.join(root, 'plugins/codex-harness/skills/harness');
 const fixture = path.join(__dirname, 'fixtures/context-routing');
 const read = file => fs.readFileSync(file, 'utf8');
-const keys = ['settings', 'preimplementation', 'claude', 'web', 'creative', 'coordination', 'continuity'];
+const keys = ['settings', 'preimplementation', 'peer-consult', 'web', 'creative', 'coordination', 'continuity'];
 const original = read(path.join(fixture, 'before-SKILL.md'));
 
 test('historical source remains immutable and each original block has an explicit semantic mapping', () => {

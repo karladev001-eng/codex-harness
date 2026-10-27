@@ -39,6 +39,7 @@ Codexへ渡した内容はOpenAIに送られます。`reviewer` はリポジト�
 `collaboration.code_review` が `both` のとき、Claude側の `harness:reviewer` とCodexの `reviewer` を並行して動かします。
 
 - 両方に同じ基点・結果commit・受入条件を渡します。互いの結果は渡しません。
+- `repository` には、結果commitをcheckoutしたクリーンなworktreeを渡します（例：`git worktree add --detach <tmp> <head>`）。作業中のcheckoutを渡すと、未コミットの変更がレビュー対象と混ざります。終わったらそのworktreeを削除します。
 - 親が指摘を突き合わせ、同じ問題の重複をまとめ、重大度を揃えます。片方だけの指摘も、実差分で確認できれば採用します。
 - 判定はPASSが揃ったときだけPASSです。片方がNEEDS_WORK・BLOCKEDなら、根拠を確認して修正するか、却下の理由を記録します。
 - Codexが使えないときは、その旨を報告し、Claude側のレビューだけで進めます。黙って省略しません。

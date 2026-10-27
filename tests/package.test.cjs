@@ -28,7 +28,7 @@ test('packed release runs through actual npx outside repo without compiler/netwo
   assert.ok(files.includes('dist/skill/references/creative-loop.md'));
   for (const prefix of ['dist/skill', 'dist/plugins/codex-harness/skills/harness', 'plugins/codex-harness/skills/harness']) {
     assert.ok(files.includes(prefix + '/references/technical-lessons.md'), prefix + ':technical-lessons');
-    for (const file of ['settings', 'preimplementation', 'claude', 'web', 'creative', 'coordination', 'continuity', 'chart', 'rule-map']) assert.ok(files.includes(prefix + '/references/routing/' + file + '.md'), prefix + ':' + file);
+    for (const file of ['settings', 'preimplementation', 'peer-consult', 'web', 'creative', 'coordination', 'continuity', 'chart', 'rule-map']) assert.ok(files.includes(prefix + '/references/routing/' + file + '.md'), prefix + ':' + file);
   }
   assert.ok(files.includes('dist/skill/references/roles/record-keeper.md'));
   assert.ok(files.includes('dist/skill/assets/creative-preferences.md'));

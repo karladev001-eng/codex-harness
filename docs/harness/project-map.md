@@ -9,7 +9,7 @@
 - `tests/`: 一時ホーム・使い捨てGitリポジトリ・実tarball/npxによるNodeテスト。
 - `.github/workflows/test.yml`: Node.js 22・macOS/Linux/WindowsのCI。
 - `VALIDATION.md`: 確認済み事項と未検証事項。
-- [Claude送信の事前承認](authorizations/claude.md): このプロジェクトに限る送信情報・目的・除外事項・撤回条件。相談前に必要時参照する。
+- [Claude送信の事前承認](authorizations/claude-send.md): このプロジェクトに限る送信情報・目的・除外事項・撤回条件。相談前に必要時参照する。
 - [ADR 0002](../adr/0002-github-knowledge-base.md): GitHubを正本とするPC向けナレッジベースの設計判断。保存内容、同期、意味検索、キャッシュ、ハーネス連携の設計。保存・文字検索・段階取得は実装済み、意味検索は対象外。
 
 検証: `npm ci`、`npm test`。配布物作成: `npm pack`。配布は非公開GitHub Releaseのtarballを使う。個人用設定や認証情報は含めない。
