@@ -41,8 +41,8 @@ test('independent flags, consultation and source checks retain negative boundari
   expectRules(entry, [
     ['worker and inactive boundaries', /HARNESS_WORKER[\s\S]*再委譲しない[\s\S]*active=false[\s\S]*追加文書・委譲・レビュー・計測なし/],
     ['delegation is independent of review', /delegation OFFは親が実装可、review ONの独立レビューは必要/],
-    ['storage versus measurement versus learning', /persistence OFF[\s\S]*永続記憶を読書きしない[\s\S]*measurement OFF[\s\S]*保存しない[\s\S]*improvement_loop OFF[\s\S]*通常修正・明示管理は別/],
-    ['no receipt obligation', /任意helper[\s\S]*receipt不要[\s\S]*不明・旧版・実行不能[\s\S]*全文へ戻る/],
+    ['storage versus measurement versus learning', /persistence OFF[\s\S]*永続記憶を読書きしない[\s\S]*measurement OFF[\s\S]*保存しない[\s\S]*improvement_loop OFF[\s\S]*通常の修正と明示的な記憶管理は別/],
+    ['no receipt obligation', /任意helper[\s\S]*receipt不要[\s\S]*不明・旧版・実行不能[\s\S]*全文へ戻/],
     ['retention and invalidation', /再読不要[\s\S]*全行を再判定[\s\S]*compact[\s\S]*本文を失えば再確認[\s\S]*永続既読cacheは禁止/],
   ]);
   expectRules(settings, [
