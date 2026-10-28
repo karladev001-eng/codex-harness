@@ -13,12 +13,17 @@ const INPUT_MS = 30000;
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp']);
 const SIZES = ['auto', '1024x1024', '1536x1024', '1024x1536'];
 const MAX_REFERENCES = 4;
-const PURPOSES = ['advice', 'review', 'image'];
 // Same switches as consult-codex, except that image_generation stays on and is the only tool.
 const DISABLED_FEATURES = ['hooks', 'plugins', 'apps', 'multi_agent', 'computer_use', 'browser_use', 'view_image', 'goals', 'sleep_tool', 'workspace_dependencies', 'in_app_browser', 'skill_search'];
-// The single place that decides which event items are acceptable. The image item's real type
-// name is confirmed against the CLI after integration; any type containing "image" passes for now.
+// The single place that decides which event items are acceptable. An `error` item is a nonfatal
+// notice (codex-cli 0.164.0 sends one warning that the feature is unfinished). On 0.164.0 the image
+// generation itself emits no item in the JSON stream; any type containing "image" stays allowed.
 const ALLOWED_ITEMS = { exact: ['agent_message', 'reasoning', 'error'], pattern: /image/i };
+// Codex names the image directory after the thread: generated_images/<thread_id>/.
+const THREAD_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// Only the classification is reported; the raw error text is never shown.
+const BUSY = /at capacity|rate[ _-]?limit|overloaded|too many requests|server is busy/i;
+const BUSY_MESSAGE = 'Codexのモデルが混雑しています。時間を置くか --model で別モデルを指定してください。';
 const INPUT_HINT = 'Pass the JSON with a heredoc on stdin (<<\'EOF\') or with --input <file>.';
 
 class ImageError extends Error {
@@ -88,7 +93,8 @@ async function prepare(input) {
 }
 
 // No user content is placed in argv, inherited stdio, error messages or logs.
-function execute(executable, args, { cwd, input = '', timeoutMs, env }) {
+// With settle, an unsuccessful exit resolves as { text, exited: false } so the events can still be read.
+function execute(executable, args, { cwd, input = '', timeoutMs, env, settle = false }) {
   return new Promise((resolve, reject) => {
     let child, timeout, forceKill, closed = false, failure, size = 0;
     const stdout = [];
@@ -112,9 +118,11 @@ function execute(executable, args, { cwd, input = '', timeoutMs, env }) {
     child.on('error', () => { failure ??= new ImageError('cli_unavailable', 'Codex CLI is unavailable or could not be started.'); });
     child.on('close', (code, signal) => {
       closed = true; clearTimeout(timeout); clearTimeout(forceKill);
+      const text = Buffer.concat(stdout).toString('utf8'), exited = code === 0 && !signal;
       if (failure) reject(failure);
-      else if (code !== 0 || signal) reject(new ImageError('cli_failed', 'Codex CLI exited unsuccessfully; its raw output was withheld.'));
-      else resolve(Buffer.concat(stdout).toString('utf8'));
+      else if (settle) resolve({ text, exited });
+      else if (!exited) reject(new ImageError('cli_failed', 'Codex CLI exited unsuccessfully; its raw output was withheld.'));
+      else resolve(text);
     });
     child.stdin.end(input);
   });
@@ -170,6 +178,19 @@ async function eventImages(strings, root, before, startedAt) {
   }
   return result;
 }
+// With a thread_id only generated_images/<thread_id>/ is read, so images from other Codex sessions
+// running at the same time are never picked up. Without one, new files anywhere under root are used.
+async function findSources(root, threadId, strings, before, startedAt) {
+  if (threadId !== undefined) {
+    const directory = path.join(root, threadId);
+    const info = await lstat(directory).catch(() => null);
+    if (!info?.isDirectory()) return [];
+    const reported = await eventImages(strings, directory, before, startedAt);
+    return reported.length ? reported : [...(await listImages(directory)).keys()].filter(file => !before.has(file)).sort();
+  }
+  const reported = await eventImages(strings, root, before, startedAt);
+  return reported.length ? reported : [...(await listImages(root)).keys()].filter(file => !before.has(file)).sort();
+}
 function detectExtension(head, fallback) {
   if (head.length >= 8 && head.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return '.png';
   if (head.length >= 3 && head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff) return '.jpg';
@@ -218,6 +239,7 @@ export async function generate(value, { executable = 'codex', timeoutMs = 300000
       return { ok: true, cli: 'available', authenticated: true, image_generation: true };
     }
     const root = await imagesRoot(env);
+    // The snapshot drives the fallback used when no thread_id is reported.
     const before = await listImages(root), startedAt = Date.now();
     // References come first so a variadic -i cannot swallow the trailing stdin marker.
     const args = ['exec'];
@@ -227,21 +249,35 @@ export async function generate(value, { executable = 'codex', timeoutMs = 300000
     args.push('-c', 'features.image_generation=true', '-c', 'features.shell_tool=false', '-c', 'features.skip_host_skill_discovery=true');
     if (model !== undefined) args.push('--model', model);
     args.push('-');
-    const events = await execute(executable, args, { cwd: scratch, input: buildPrompt(input), timeoutMs: remaining(), env });
-    let completed = false;
+    const run = await execute(executable, args, { cwd: scratch, input: buildPrompt(input), timeoutMs: remaining(), env, settle: true });
+    let completed = false, failed = false, busy = false, threadId;
     const strings = [];
-    for (const line of events.split('\n').filter(line => line.trim())) {
-      const event = parse(line, 'invalid_events', 'Codex CLI returned invalid event JSON.');
-      if (!object(event) || typeof event.type !== 'string') fail('invalid_events', 'Codex CLI returned an unexpected event.');
+    for (const line of run.text.split('\n').filter(line => line.trim())) {
+      let event;
+      try { event = JSON.parse(line); } catch { if (run.exited) fail('invalid_events', 'Codex CLI returned invalid event JSON.'); continue; }
+      if (!object(event) || typeof event.type !== 'string') { if (run.exited) fail('invalid_events', 'Codex CLI returned an unexpected event.'); continue; }
       if (event.item?.type !== undefined && (typeof event.item.type !== 'string' || !itemAllowed(event.item.type))) fail('tool_forbidden', 'Codex used a tool other than image generation; the result was discarded.');
-      if (event.type === 'turn.failed' || event.type === 'error') fail('response_error', 'Codex CLI reported an unsuccessful image generation.');
+      if (event.type === 'thread.started' && threadId === undefined && typeof event.thread_id === 'string' && THREAD_ID.test(event.thread_id)) threadId = event.thread_id;
+      if (event.type === 'turn.failed' || event.type === 'error') {
+        failed = true;
+        const message = event.type === 'error' ? event.message : event.error?.message;
+        if (typeof message === 'string' && BUSY.test(message.slice(0, 4096))) busy = true;
+      }
       if (event.type === 'turn.completed') completed = true;
       if (event.item && ALLOWED_ITEMS.pattern.test(event.item.type)) collectStrings(event.item, strings);
     }
-    if (!completed) fail('response_error', 'Codex CLI did not complete the image generation.');
-    let sources = await eventImages(strings, root, before, startedAt);
-    if (!sources.length) sources = [...(await listImages(root)).keys()].filter(file => !before.has(file)).sort();
-    if (!sources.length) fail('empty_response', 'Codex did not produce a new image file.');
+    const sources = await findSources(root, threadId, strings, before, startedAt);
+    // An image already on disk is the result, even if the turn or the CLI failed afterwards.
+    if (!sources.length) {
+      if (busy) fail('peer_busy', BUSY_MESSAGE);
+      if (failed) fail('response_error', 'Codex CLI reported an unsuccessful image generation.');
+      if (!run.exited) fail('cli_failed', 'Codex CLI exited unsuccessfully; its raw output was withheld.');
+      if (!completed) fail('response_error', 'Codex CLI did not complete the image generation.');
+      fail('empty_response', 'Codex did not produce a new image file.');
+    }
+    const warning = failed ? 'turn ended with an error after the image was generated'
+      : !run.exited ? 'Codex CLI exited unsuccessfully after the image was generated'
+      : !completed ? 'turn did not complete after the image was generated' : undefined;
     const directory = await confinedDirectory(prepared.projectReal, path.dirname(input.out));
     const requested = path.extname(input.out), stem = path.basename(input.out, requested), files = [];
     for (const [index, source] of sources.entries()) {
@@ -254,60 +290,66 @@ export async function generate(value, { executable = 'codex', timeoutMs = 300000
       const same = actual === requested.toLowerCase() || (actual === '.jpg' && requested.toLowerCase() === '.jpeg');
       files.push(await copyNew(source, directory, index === 0 ? stem : `${stem}-${index + 1}`, same ? requested : actual));
     }
-    return { ok: true, peer: 'codex', files, sources };
+    return { ok: true, peer: 'codex', files, sources, ...(warning ? { warning } : {}) };
   } finally { await rm(scratch, { recursive: true, force: true }); }
 }
 
-function unquote(text) { const match = /^(["'])(.*)\1$/.exec(text); return match ? match[2] : text; }
-function malformed(line, message) { return { line, message }; }
-export function parseRecord(text) {
+// BEGIN shared send-approval check (keep identical across consult-codex, consult-claude, codex-image)
+// Send approval is decided from the record's frontmatter only; this helper never writes a record.
+const APPROVAL_PEER = 'codex';
+export const PURPOSES = ['advice', 'review', 'image'];
+const unquote = value => value.length >= 2 && /^(["']).*\1$/.test(value) ? value.slice(1, -1) : value;
+function parseFrontmatter(text) {
   const lines = text.replace(/^﻿/, '').split(/\r?\n/);
-  if (lines[0] !== '---') return { error: malformed(1, 'line 1: the record must start with a --- frontmatter line.') };
-  const fields = {};
-  let end = -1;
-  for (let i = 1; i < lines.length; i++) {
-    if (lines[i] === '---') { end = i; break; }
-    if (!lines[i].trim()) continue;
-    const match = /^([a-z_]+):\s*(.*?)\s*$/.exec(lines[i]);
-    if (!match) return { error: malformed(i + 1, `line ${i + 1}: expected "key: value".`) };
-    const [, key, raw] = match;
-    if (!['peer', 'project', 'purposes', 'status', 'recorded'].includes(key)) return { error: malformed(i + 1, `line ${i + 1}: unknown key "${key}".`) };
-    if (Object.hasOwn(fields, key)) return { error: malformed(i + 1, `line ${i + 1}: duplicate key "${key}".`) };
-    fields[key] = { value: raw, line: i + 1 };
+  if (lines[0] !== '---') return { error: 'line 1: the record must start with a --- frontmatter line' };
+  const close = lines.indexOf('---', 1);
+  if (close === -1) return { error: 'line 1: the frontmatter has no closing --- line' };
+  const fields = {}; let last;
+  for (let i = 1; i < close; i++) {
+    const line = lines[i], number = i + 1;
+    if (!line.trim() || line.trimStart().startsWith('#')) continue;
+    const item = /^\s+-\s*(.*)$/.exec(line);
+    if (item) {
+      if (last !== 'purposes' || fields.purposes.inline) return { error: `line ${number}: a list item is allowed only under an empty purposes: line` };
+      fields.purposes.items.push({ value: unquote(item[1].trim()), line: number }); continue;
+    }
+    const match = /^([A-Za-z_][\w-]*):\s*(.*)$/.exec(line);
+    if (!match) return { error: `line ${number}: expected "key: value"` };
+    const [, key, raw] = match, value = raw.trim();
+    if (Object.hasOwn(fields, key)) return { error: `line ${number}: duplicate ${key}` };
+    last = key;
+    if (key !== 'purposes') { fields[key] = { value: unquote(value), line: number }; continue; }
+    if (value === '') fields.purposes = { items: [], line: number, inline: false };
+    else if (/^\[.*\]$/.test(value)) fields.purposes = { items: value.slice(1, -1).split(',').map(part => part.trim()).filter(Boolean).map(part => ({ value: unquote(part), line: number })), line: number, inline: true };
+    else return { error: `line ${number}: purposes must be a list such as [advice, review]` };
   }
-  if (end < 0) return { error: malformed(lines.length, 'the frontmatter has no closing --- line.') };
-  for (const key of ['peer', 'project', 'purposes', 'status', 'recorded']) if (!fields[key]) return { error: malformed(end + 1, `line ${end + 1}: the frontmatter is missing "${key}".`) };
-  const at = key => fields[key].line;
-  const peer = unquote(fields.peer.value);
-  if (!['codex', 'claude'].includes(peer)) return { error: malformed(at('peer'), `line ${at('peer')}: peer must be codex or claude.`) };
-  const project = unquote(fields.project.value);
-  if (!path.isAbsolute(project)) return { error: malformed(at('project'), `line ${at('project')}: project must be an absolute path.`) };
-  const list = /^\[(.*)\]$/.exec(fields.purposes.value);
-  if (!list) return { error: malformed(at('purposes'), `line ${at('purposes')}: purposes must be a list such as [advice, review].`) };
-  const purposes = list[1].trim() ? list[1].split(',').map(item => unquote(item.trim())) : [];
-  const bad = purposes.find(item => !PURPOSES.includes(item));
-  if (bad !== undefined) return { error: malformed(at('purposes'), `line ${at('purposes')}: unknown purpose "${bad.slice(0, 32)}"; use ${PURPOSES.join(', ')}.`) };
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(unquote(fields.recorded.value))) return { error: malformed(at('recorded'), `line ${at('recorded')}: recorded must be a YYYY-MM-DD date.`) };
-  return { peer, project, purposes: [...new Set(purposes)], status: unquote(fields.status.value) };
+  return { fields };
 }
-export async function approval(projectArg, purpose = 'image', peer = 'codex') {
-  if (typeof projectArg !== 'string' || !path.isAbsolute(projectArg)) fail('invalid_options', '--approval needs --project <absolute path>.');
-  if (!PURPOSES.includes(purpose)) fail('invalid_options', `--purpose must be one of ${PURPOSES.join(', ')}.`);
-  const project = await realpath(projectArg).catch(() => path.resolve(projectArg));
+const canonical = file => realpath(file).catch(() => path.resolve(file));
+export async function checkApproval({ project, purpose, peer = APPROVAL_PEER }) {
+  if (typeof project !== 'string' || !path.isAbsolute(project)) fail('invalid_options', '--project must be an absolute path.');
+  if (purpose !== undefined && !PURPOSES.includes(purpose)) fail('invalid_options', `--purpose must be one of ${PURPOSES.join(', ')}.`);
   const record = path.join(project, 'docs/harness/authorizations', `${peer}-send.md`);
-  const answer = (approved, reason, purposes = [], message) => ({ ok: true, approved, reason, record, purposes, ...(message ? { message } : {}) });
-  const info = await lstat(record).catch(() => null);
-  if (!info) return answer(false, 'missing');
-  if (!info.isFile() || info.size > 64 * 1024) return answer(false, 'malformed', [], 'The record must be a regular file of at most 64 KiB.');
-  const parsed = parseRecord(await readFile(record, 'utf8'));
-  if (parsed.error) return answer(false, 'malformed', [], parsed.error.message);
-  if (parsed.peer !== peer) return answer(false, 'malformed', parsed.purposes, `peer must be ${peer} in ${peer}-send.md.`);
-  const recorded = await realpath(parsed.project).catch(() => path.resolve(parsed.project));
-  if (recorded !== project) return answer(false, 'project_mismatch', parsed.purposes);
-  if (parsed.status !== 'approved') return answer(false, 'revoked', parsed.purposes);
-  if (!parsed.purposes.includes(purpose)) return answer(false, 'purpose_missing', parsed.purposes);
-  return answer(true, 'approved', parsed.purposes);
+  const result = (approved, reason, purposes, message) => ({ ok: true, approved, reason, record, purposes, ...(message ? { message } : {}) });
+  const info = await stat(record).catch(() => null);
+  if (!info) return result(false, 'missing', [], 'No send approval record exists for this project.');
+  if (!info.isFile() || info.size > 65536) return result(false, 'malformed', [], 'The approval record is not a regular file of at most 64 KiB.');
+  const parsed = parseFrontmatter(await readFile(record, 'utf8'));
+  if (parsed.error) return result(false, 'malformed', [], parsed.error);
+  const { fields } = parsed;
+  for (const key of ['peer', 'project', 'purposes', 'status', 'recorded']) if (!fields[key] || (key !== 'purposes' && !fields[key].value)) return result(false, 'malformed', [], `frontmatter: ${key} is required`);
+  if (fields.peer.value !== peer) return result(false, 'malformed', [], `line ${fields.peer.line}: peer must be ${peer}`);
+  if (!path.isAbsolute(fields.project.value)) return result(false, 'malformed', [], `line ${fields.project.line}: project must be an absolute path`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fields.recorded.value)) return result(false, 'malformed', [], `line ${fields.recorded.line}: recorded must be a YYYY-MM-DD date`);
+  const bad = fields.purposes.items.find(item => !PURPOSES.includes(item.value));
+  if (bad) return result(false, 'malformed', [], `line ${bad.line}: purposes may contain only ${PURPOSES.join(', ')}`);
+  const purposes = [...new Set(fields.purposes.items.map(item => item.value))];
+  if (fields.status.value !== 'approved') return result(false, 'revoked', purposes);
+  if (await canonical(fields.project.value) !== await canonical(project)) return result(false, 'project_mismatch', purposes);
+  if (purpose !== undefined && !purposes.includes(purpose)) return result(false, 'purpose_missing', purposes);
+  return result(true, 'approved', purposes);
 }
+// END shared send-approval check
 
 function waitMs(name, fallback) {
   const value = Number(process.env[name]);
@@ -350,7 +392,9 @@ async function main(args) {
   }
   if (approvalMode) {
     if (options.checkOnly || file || options.model || options.timeoutMs !== undefined) fail('invalid_options', '--approval accepts only --project and --purpose.');
-    return approval(project, purpose);
+    if (project === undefined) fail('invalid_options', '--approval requires --project <abs>.');
+    // Image generation is checked against the image purpose unless another one is named.
+    return checkApproval({ project, purpose: purpose ?? 'image' });
   }
   if (project !== undefined || purpose !== undefined) fail('invalid_options', '--project and --purpose are only for --approval.');
   if (options.checkOnly && (file || options.model)) fail('invalid_options', '--check does not accept image input or model.');

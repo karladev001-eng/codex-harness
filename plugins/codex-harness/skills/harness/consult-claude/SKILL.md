@@ -22,7 +22,7 @@ harnessからの自動利用は、activeな親が `status` の `collaboration` �
 
 ## 送信の承認
 
-Claudeへ渡した内容はAnthropicに送られます。`reviewer` は差分をプロンプトに入れ、リポジトリも読むので、コードもそのまま送られます。承認はプロジェクトの `docs/harness/authorizations/claude-send.md` に、次の形で記録します。
+Claudeへ渡した内容はAnthropicに送られます。`reviewer` は差分をプロンプトに入れ、リポジトリも読むので、コードもそのまま送られます。承認はプロジェクトの `docs/harness/authorizations/claude-send.md` に、次の形で記録します。`purposes` は `advice`（発案・相談・批評の3役）・`review`（`reviewer`）・`image`（画像生成）から、承認された目的だけを書きます。
 
 ```markdown
 ---
@@ -44,7 +44,7 @@ recorded: 2026-10-24
 
 - 送る前に `node "<skill-dir>/scripts/consult.mjs" --approval --project <abs> --purpose <p>` で判定します。purposeは、相談の3役なら `advice`、`reviewer` なら `review` です。結果は常に `{"ok":true,"approved":true|false,"reason":"approved|missing|malformed|revoked|project_mismatch|purpose_missing","record":"...","purposes":[...]}` です。このhelperは記録を読むだけで、書きません。
 - `approved=true` なら、範囲内なので聞き直さずに送ります。
-- `approved=false` なら、送らずにユーザーへ1回だけ次の文面で確認します。「Claude（Anthropic）へ、`<project>` の `<送る情報の範囲>` を `<目的>` のために送ってよいですか。承認していただければ `docs/harness/authorizations/claude-send.md` に記録します。」承認されたら記録してから送ります。断られたら送らず、Codexだけで続けます。同じ範囲で何度も聞き直しません。
+- `approved=false` なら、送らずにユーザーへ1回だけ次の文面で確認します。「Claude（Anthropic）へ、`<project>` の `<送る情報の範囲>` を `<目的>` のために送ってよいですか。承認していただければ `docs/harness/authorizations/claude-send.md` に記録します。」`malformed` のときは、`message` にある問題の行も示します。承認されたら記録してから送ります。断られたら送らず、Codexだけで続けます。同じ範囲で何度も聞き直しません。
 - persistence OFFなら記録ファイルを作らず、会話の中で得た承認だけで、その会話の間だけ送ります。
 - 承認は、記録されたプロジェクトと目的の範囲だけに使います。別のプロジェクトや範囲外の情報には広げません。外部送信の承認と、ホストの実行権限は別のものです。
 - 秘密鍵・トークン・認証情報・無関係な個人情報は、どの役割でも渡しません。`reviewer` の対象リポジトリにそれらが含まれる疑いがあれば、使わずに理由を報告します。
