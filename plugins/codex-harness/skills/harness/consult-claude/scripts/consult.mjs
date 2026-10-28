@@ -169,14 +169,83 @@ function gitRead(repository, args, { limit, timeoutMs, message = 'git diff base.
 // The reviewer reads the working tree, so it must be exactly head with nothing uncommitted on top.
 const UNCLEAN_REPOSITORY = 'repository must be a clean checkout of head (no uncommitted or untracked changes, HEAD equal to head). クリーンなdetached worktreeを head で渡してください（git worktree add --detach <tmp> <head>）。';
 async function verifyCheckout(repository, head, timeoutMs) {
+  const ignored = await scanCheckout(repository, timeoutMs);
   const options = { limit: STAT_LIMIT, timeoutMs, message: UNCLEAN_REPOSITORY };
-  const status = await gitRead(repository, ['status', '--porcelain'], options);
-  if (status.truncated || status.text.trim()) invalid(UNCLEAN_REPOSITORY);
   const current = await gitRead(repository, ['rev-parse', '--verify', 'HEAD'], options);
   const wanted = await gitRead(repository, ['rev-parse', '--verify', '--quiet', `${head}^{commit}`], options);
   if (!current.text.trim() || current.text.trim() !== wanted.text.trim()) invalid(UNCLEAN_REPOSITORY);
+  refuseSecretPaths(ignored, SECRET_IGNORED);
 }
 
+// BEGIN shared secret-path check (keep identical across consult-codex, consult-claude)
+// Secret-looking files are never sent: neither as changes in base..head nor as ignored files in the
+// checkout the reviewer reads. Every path component is matched as a basename, case-insensitively.
+// Only path names are reported, never file contents.
+const SECRET_NAMES = [
+  { pattern: /^\.env$/i },
+  { pattern: /^\.env\..+$/i, except: /^\.env\.(example|sample|template)$/i },
+  { pattern: /\.(pem|key|p12|pfx|keystore|jks|secret)$/i },
+  { pattern: /^id_(rsa|dsa|ecdsa|ed25519)/i, except: /\.pub$/i },
+  { pattern: /^(\.npmrc|\.pypirc|\.netrc|\.git-credentials|auth\.json)$/i },
+  { pattern: /^credentials(\..+)?$/i },
+  { pattern: /^secrets\..+$/i },
+  { pattern: /^service-account.*\.json$/i },
+];
+const SECRET_PATHS_SHOWN = 5;
+const SECRET_CHANGES = ['秘密ファイルらしい変更が範囲に含まれるため送信しません', '除外するか、ユーザーに確認してください'];
+const SECRET_IGNORED = ['秘密ファイルらしい無視ファイルがレビュー用のcheckoutにあるため送信しません', '対象リポジトリだけの新しいworktreeを渡すか、ユーザーに確認してください'];
+export function secretLike(file) {
+  return file.split(/[\\/]/).some(name => SECRET_NAMES.some(({ pattern, except }) => pattern.test(name) && !except?.test(name)));
+}
+export function refuseSecretPaths(files, [lead, advice] = SECRET_CHANGES) {
+  const found = files.filter(secretLike);
+  if (!found.length) return;
+  const shown = found.slice(0, SECRET_PATHS_SHOWN).map(file => file.length > 200 ? file.slice(0, 200) + '...' : file).join(', ');
+  const more = found.length > SECRET_PATHS_SHOWN ? ` ほか${found.length - SECRET_PATHS_SHOWN}件` : '';
+  fail('secret_path', `${lead}: ${shown}${more}。${advice}`);
+}
+// Streams NUL-separated records from a read-only git command, so long lists are scanned without being kept.
+function gitRecords(repository, args, timeoutMs, onRecord) {
+  return new Promise(resolve => {
+    let child, timer, rest = '', done = false;
+    const finish = ok => { if (!done) { done = true; clearTimeout(timer); resolve(ok); } };
+    try {
+      child = spawn('git', ['-C', repository, '-c', 'core.fsmonitor=false', '--no-pager', ...args], {
+        shell: false, windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'],
+        env: { ...process.env, GIT_OPTIONAL_LOCKS: '0', GIT_TERMINAL_PROMPT: '0', GIT_PAGER: 'cat' },
+      });
+    } catch { resolve(false); return; }
+    timer = setTimeout(() => { child.kill('SIGKILL'); finish(false); }, timeoutMs);
+    child.stdout.setEncoding('utf8');
+    child.stdout.on('data', chunk => {
+      if (done) return;
+      const parts = (rest + chunk).split('\0'); rest = parts.pop();
+      for (const part of parts) if (part) onRecord(part);
+    });
+    child.on('error', () => finish(false));
+    child.on('close', code => { if (!done && rest) onRecord(rest); finish(code === 0); });
+  });
+}
+// The checkout may hold no uncommitted or untracked file, whatever status.showUntrackedFiles says.
+// Ignored files such as node_modules or dist are allowed; secret-looking ones are returned for refusal.
+async function scanCheckout(repository, timeoutMs) {
+  let unclean = false; const ignored = [];
+  const ok = await gitRecords(repository, ['status', '--porcelain', '-z', '--untracked-files=all', '--ignored'], timeoutMs, record => {
+    if (!record.startsWith('!! ')) unclean = true;
+    else if (secretLike(record.slice(3))) ignored.push(record.slice(3));
+  });
+  if (!ok || unclean) fail('invalid_input', UNCLEAN_REPOSITORY);
+  return ignored;
+}
+// Renames are split into delete+add so both names are checked; deleted paths are checked too,
+// because their old contents appear in the diff.
+async function refuseSecretChanges(repository, base, head, timeoutMs) {
+  const changed = [];
+  const ok = await gitRecords(repository, ['diff', '--name-only', '-z', '--no-renames', '--no-color', '--no-ext-diff', '--no-textconv', `${base}..${head}`], timeoutMs, file => { if (secretLike(file)) changed.push(file); });
+  if (!ok) fail('invalid_input', 'git diff base..head failed in repository; check the path and commit IDs.');
+  refuseSecretPaths(changed);
+}
+// END shared secret-path check
 async function collectDiff(repository, base, head, timeoutMs) {
   const range = `${base}..${head}`, common = ['diff', '--no-color', '--no-ext-diff', '--no-textconv'];
   const summary = await gitRead(repository, [...common, '--stat', range], { limit: STAT_LIMIT, timeoutMs });
@@ -259,6 +328,7 @@ export async function consult(value, { executable = 'claude', timeoutMs = 120000
       cwd = await realpath(input.repository).catch(() => invalid('repository does not exist.'));
       if (!(await stat(cwd)).isDirectory()) invalid('repository must be a directory.');
       await verifyCheckout(cwd, input.head, remaining());
+      await refuseSecretChanges(cwd, input.base, input.head, remaining());
     }
     const check = await diagnose(executable, scratch, remaining());
     if (checkOnly) return check;
@@ -410,7 +480,7 @@ async function main(args) {
       else if (key === '--project') project = value;
       else if (key === '--purpose') purpose = value;
       else options.timeoutMs = Number(value);
-    } else fail('invalid_options', 'Use --check, --approval --project <abs> --purpose advice|review|image,--input <file>, --model <name>, or --timeout-ms <100..300000>.');
+    } else fail('invalid_options', 'Use --check, --approval --project <abs> --purpose advice|review|image, --input <file>, --model <name>, or --timeout-ms <100..300000>.');
   }
   if (approval) {
     if (options.checkOnly || file || options.model || options.timeoutMs !== undefined) fail('invalid_options', '--approval accepts only --project and --purpose.');

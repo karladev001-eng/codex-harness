@@ -18,10 +18,14 @@ Claude Codeが親のとき、Codex（OpenAI）の組み込みツール `image_ge
 
 プロンプトと `references` の画像はOpenAIに送られます。承認はプロジェクトごとに、consult-codexと同じ `<project>/docs/harness/authorizations/codex-send.md` へ記録します。画像生成の目的（purpose）は `image` です。
 
-- 生成する前に毎回、`node "<skill-dir>/scripts/image.mjs" --approval --project <プロジェクトの絶対パス>` で判定します（`--purpose` を省くと `image` で判定します）。結果は常に終了コード0の `{"ok":true,"approved":true|false,"reason":"approved|missing|malformed|revoked|project_mismatch|purpose_missing","record":"<path>","purposes":[...]}` です。スクリプトは記録を読むだけで、書きません。
+- 生成する前に毎回、`node "<skill-dir>/scripts/image.mjs" --approval --project <プロジェクトの絶対パス>` で判定します。このhelperは `image` だけを判定します（`--purpose` は省くか `image` にし、他の値は `invalid_options` です）。結果は常に終了コード0の `{"ok":true,"approved":true|false,"reason":"approved|missing|malformed|revoked|project_mismatch|purpose_missing","record":"<path>","purposes":[...]}` です。スクリプトは記録を読むだけで、書きません。
 - `approved` なら、聞き直さずに生成します。
 - それ以外（`missing`・`malformed`・`revoked`・`project_mismatch`・`purpose_missing`）なら、生成せずに、次の文面でユーザーに1回だけ確認します。「Codex（OpenAI）へ、<送る情報の範囲>を、image（画像生成）のために送ってよいですか。この承認は <プロジェクトの絶対パス> のこの目的だけに使います。」`malformed` のときは、`message` にある問題の行も示します。
-- ユーザーが明示的に承認したら、親が記録してから生成します。記録がなければ次のテンプレートどおりに作ります。既存の記録があれば、その `purposes` に `image` を追記するだけにします（他の目的を足さず、他の項目も書き換えません）。承認されなければ生成せず、画像なしで進めます。
+- ユーザーが明示的に承認したら、`reason` に応じて次のとおり記録してから送ります。
+  - `purpose_missing` のときだけ、既存の記録の `purposes` に今回のpurposeだけを追記します。他の項目と他のpurposeは変えません。
+  - `missing` のときは、テンプレートどおりに新しく作ります。`purposes` には今回承認された範囲だけを書きます。
+  - `revoked`・`project_mismatch`・`malformed` のときは、黙って直しません。理由を伝えて新しく承認を求め、承認されたらfrontmatterをテンプレートどおりに書き直します（`status: approved`、正しい `project`、`purposes` は今回ユーザーが承認した範囲だけ、`recorded` は今日）。本文の承認根拠に新しい承認を追記し、古い記述は消しません。`revoked` はユーザーが撤回したものなので、再承認なしに戻しません。
+- 承認されなければ生成せず、画像なしで進めます。記録のテンプレートは次のとおりです。
 
 ```markdown
 ---

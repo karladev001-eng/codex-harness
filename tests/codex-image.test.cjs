@@ -258,7 +258,12 @@ test('--approval reads the shared send-approval record and always exits 0', t =>
   assert.equal(result.code, 0); assert.deepEqual(result.data, { ok: true, approved: false, reason: 'missing', record, purposes: [], message: 'No send approval record exists for this project.' });
   write(record, body());
   assert.deepEqual(approve().data, { ok: true, approved: true, reason: 'approved', record, purposes: ['advice', 'review', 'image'] });
-  assert.equal(approve('--purpose', 'advice').data.approved, true);
+  assert.equal(approve('--purpose', 'image').data.approved, true);
+  // Only the image purpose is answered here; advice and review belong to consult-codex.
+  for (const purpose of ['advice', 'review']) {
+    const other = approve('--purpose', purpose);
+    assert.equal(other.code, 1, purpose); assert.equal(other.data.error.code, 'invalid_options', purpose); assert.match(other.data.error.message, /--purpose must be image/);
+  }
   write(record, body({ purposes: '[advice]' }));
   result = approve(); assert.equal(result.code, 0); assert.equal(result.data.reason, 'purpose_missing'); assert.deepEqual(result.data.purposes, ['advice']);
   // Empty purposes are allowed and simply approve nothing; unknown keys are ignored.

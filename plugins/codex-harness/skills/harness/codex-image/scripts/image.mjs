@@ -402,13 +402,14 @@ async function main(args) {
       const key = args[i], value = args[++i];
       if (key === '--input') file = value; else if (key === '--model') options.model = value;
       else if (key === '--project') project = value; else if (key === '--purpose') purpose = value; else options.timeoutMs = Number(value);
-    } else fail('invalid_options', 'Use --check, --approval --project <abs> [--purpose <p>], --input <file>, --model <name>, or --timeout-ms <100..900000>.');
+    } else fail('invalid_options', 'Use --check, --approval --project <abs> [--purpose image], --input <file>, --model <name>, or --timeout-ms <100..900000>.');
   }
   if (approvalMode) {
     if (options.checkOnly || file || options.model || options.timeoutMs !== undefined) fail('invalid_options', '--approval accepts only --project and --purpose.');
     if (project === undefined) fail('invalid_options', '--approval requires --project <abs>.');
-    // Image generation is checked against the image purpose unless another one is named.
-    return checkApproval({ project, purpose: purpose ?? 'image' });
+    // This helper only generates images, so it only answers for the image purpose.
+    if (purpose !== undefined && purpose !== 'image') fail('invalid_options', '--purpose must be image for codex-image (use consult-codex for advice or review).');
+    return checkApproval({ project, purpose: 'image' });
   }
   if (project !== undefined || purpose !== undefined) fail('invalid_options', '--project and --purpose are only for --approval.');
   if (options.checkOnly && (file || options.model)) fail('invalid_options', '--check does not accept image input or model.');
