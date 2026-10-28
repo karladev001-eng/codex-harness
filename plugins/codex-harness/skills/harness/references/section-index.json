@@ -179,6 +179,91 @@
           "requires": []
         }
       }
+    },
+    "creative-loop": {
+      "path": "references/creative-loop.md",
+      "sha256": "5e6c937cec82f843687c38a9bb51607ed6b7ad7842bc6370cb9fe85d8727cc9e",
+      "common": [
+        "common"
+      ],
+      "sections": {
+        "common": {
+          "ranges": [
+            [
+              1,
+              6
+            ]
+          ],
+          "requires": []
+        },
+        "loop": {
+          "ranges": [
+            [
+              7,
+              13
+            ]
+          ],
+          "requires": []
+        },
+        "retrieval": {
+          "ranges": [
+            [
+              14,
+              19
+            ]
+          ],
+          "requires": []
+        },
+        "preferences-contract": {
+          "ranges": [
+            [
+              20,
+              29
+            ]
+          ],
+          "requires": []
+        },
+        "delegation": {
+          "ranges": [
+            [
+              30,
+              43
+            ]
+          ],
+          "requires": []
+        },
+        "keeper-cli": {
+          "ranges": [
+            [
+              44,
+              53
+            ]
+          ],
+          "requires": [
+            "preferences-contract"
+          ]
+        },
+        "history": {
+          "ranges": [
+            [
+              54,
+              57
+            ]
+          ],
+          "requires": []
+        },
+        "migrate-forget": {
+          "ranges": [
+            [
+              58,
+              62
+            ]
+          ],
+          "requires": [
+            "preferences-contract"
+          ]
+        }
+      }
     }
   }
 }

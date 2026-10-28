@@ -29,6 +29,11 @@ Knowledgeの隔離試験は[運用ガイドの検証範囲](docs/guides/knowledg
 - 平易化（第1段）: `SKILL.md`・`routing/preimplementation.md`・`routing/coordination.md` を電報体から平易な文に書き直した。規則の意味は正規表現テスト（`context-concision`）で維持を確認し、語尾だけが変わった3つの正規表現を合わせた。サイズはそれぞれ約+16%・+13%・+23%（SKILL.mdは上限の元の1/4未満を維持）。書き直し後の評価: 実装前の承認 1.0（2/2）対 0.0、委譲 1.0（1回、比較群0.2）、純相談 1.0 対 1.0。合計約$1.8。
   - 4ケースの再実行（ホスト別の書き分け後）: 実装前の承認 1.0 対 0.0、純相談 1.0 対 1.0、workerの境界 1.0 対 1.0。今回の評価は合計約$4.5。上限変更後の再実行は約$1.7。
 - ホスト固有の記述の書き分け: `roles.md`・`routing/coordination.md`・`routing/peer-consult.md` を役割キー（`deterministic` などとeffort）だけで書き、Codexのモデル名・`fork_turns` などは新しい `references/hosts/codex.md` に移した。外部相談の手順は、ホストに応じてconsult-claudeとconsult-codexのどちらを使うかを書くように直した。
+- 平易化（第2段）: 残りのreferences・consult-claude・制作指針の雛形を、3つの実装担当（sonnet/high、worktree隔離）に分けて並行で書き直し、統合した。サイズ増は最大+25.8%（routing/creative.md）、ほかは+6〜+25%。正規表現テストの語尾の吸収は約30か所。
+- Agent起動の検査hook: PreToolUseで、harnessがactiveなときの `harness:*` の起動にmodelかeffortがなければ拒否し、`HARNESS_WORKER` を渡すforkも拒否する。それ以外の起動、inactive、statusが読めない場合は素通し。毎回必要なClaude Codeの読み替えはSessionStartの文脈に移し、`hosts/claude-code.md`（6.8KB→約5KB）は委譲・外部相談・Codex固有の手順のときだけ該当節を読む形にした。作業ごとの必読量は約12KBから約6KBになった。
+- 節単位の読込: `creative-loop.md`（18KB）を節インデックスに追加した。通常の制作で読む `common`＋`loop` は4.4KB。
+- 2者レビュー（64e06c7..426247f）: Claude側の `harness:reviewer`（opus/high）とCodexの `reviewer` が独立にNEEDS_WORK。Codexは4件（読み替えファイルへの規則の追加、status失敗時の拒否、読み替えから消えた規則、見出しの変更）、Claude側は7件（上の3件と重なるほか、lessonsの個別read条件の弱まり、promptの文字列だけで無関係な起動を拒否、正規表現の緩み、文体）。重なりを統合して修正し（ad3f084）、2巡目で両者PASS。
+- 統合後の評価（各1回）: 実装前の承認 1.0 対 0.0、委譲 1.0 対 0.2（16ターン。以前は23〜28）、純相談 1.0 対 1.0、workerの境界 1.0 対 1.0。約$1.6。
 - 未確認: 実際の対話セッションでの `isolation: "worktree"`（評価環境では使えない）、Codex側から見た2者レビュー、画像生成の連携、Windows。
 
 ## 2026-10-11: 0.4.3のリリース候補検証
