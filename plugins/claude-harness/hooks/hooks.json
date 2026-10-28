@@ -1,10 +1,26 @@
 {
-  "description": "Resolve harness settings for Claude Code at session start",
+  "description": "Resolve harness settings at session start and check harness worker launches",
   "hooks": {
     "SessionStart": [
       {
         "hooks": [
-          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.cjs\"", "timeout": 30 }
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.cjs\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/agent-guard.cjs\"",
+            "timeout": 30
+          }
         ]
       }
     ]

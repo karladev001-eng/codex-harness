@@ -101,3 +101,21 @@ test('without a working claude CLI the files are kept and the manual commands ar
   assert.equal(update.data.status, 'unchanged');
   assert.equal(run(['install', '--host', 'mars', '--home', f.home]).code, 1);
 });
+
+test('agent guard denies harness worker launches without model and effort, or via fork, only while active', t => {
+  const f = fixture(t);
+  const guard = input => {
+    const result = spawnSync(process.execPath, [path.join(plugin, 'hooks/agent-guard.cjs')], { encoding: 'utf8', input: JSON.stringify({ tool_name: 'Agent', cwd: f.project, tool_input: input }),
+      env: { ...process.env, HOME: f.home, USERPROFILE: f.home, HARNESS_HOME: '', CODEX_HOME: '', CLAUDE_PLUGIN_ROOT: plugin, CLAUDE_PROJECT_DIR: f.project } });
+    assert.equal(result.status, 0, result.stderr);
+    return result.stdout ? JSON.parse(result.stdout).hookSpecificOutput : null;
+  };
+  const missing = guard({ subagent_type: 'harness:implementer', model: 'sonnet', prompt: 'HARNESS_WORKER' });
+  assert.equal(missing.permissionDecision, 'deny'); assert.match(missing.permissionDecisionReason, /missing effort[\s\S]*standard=sonnet\/medium/);
+  assert.equal(guard({ subagent_type: 'harness:implementer', model: 'sonnet', effort: 'medium', prompt: 'HARNESS_WORKER' }), null);
+  assert.match(guard({ subagent_type: 'fork', prompt: 'HARNESS_WORKER\n役割: 実装' }).permissionDecisionReason, /instead of fork/);
+  // Unrelated launches and an inactive harness are never touched.
+  assert.equal(guard({ subagent_type: 'Explore', prompt: 'find files' }), null);
+  write(path.join(f.project, '.harness.json'), { enabled: false });
+  assert.equal(guard({ subagent_type: 'harness:reviewer', prompt: 'HARNESS_WORKER' }), null);
+});
