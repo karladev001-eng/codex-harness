@@ -128,7 +128,7 @@
     },
     "roles": {
       "path": "references/roles.md",
-      "sha256": "4646cd8a8ea85f93f85b4f08a689e69a44e2b90cc4322f701018e60dd250b245",
+      "sha256": "18b0d63da958e8595baf62e96d9a68f9761bf96e96bcf7ba23e0aecfefa1cc7e",
       "common": [
         "common"
       ],

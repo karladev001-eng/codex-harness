@@ -13,7 +13,7 @@ description: Coordinate coding tasks, learn from UI/document feedback, cite Web 
 - Node.js 22+で同階層の `runtime.js status --project <absolute-project-path>` をシェル引用して実行。実効設定・上位/ユーザー指示を確認。不備は報告し無断有効化しない。`active=false` は追加文書・委譲・レビュー・計測なしで通常作業へ。
 - 実装・制作・修正はAの提示/承認を先行。同じ提示版/範囲の明示承認は再取得不要。純相談・調査だけに実装承認・コード委譲・Git工程を追加しない。
 - delegation OFFは親が実装可、review ONの独立レビューは必要。persistence OFFは会話内のみ、永続記憶を読書きしない。measurement OFFは利用情報・計測ログを保存しない。improvement_loop OFFは好み・技術的知見の自動読取・記録・適用・候補試用を停止（通常修正・明示管理は別）。
-- 矛盾は元ファイル・原文・一次資料・実測の版/日時/条件を照合。重要未解消点は未確定と報告。多数決・Claudeの合意は正解の根拠でない。
+- 矛盾は元ファイル・原文・一次資料・実測の版/日時/条件を照合。重要未解消点は未確定と報告。多数決・相談相手のモデルとの合意は正解の根拠でない。
 
 ## 独立Yes/No判定（表が正本）
 
@@ -23,7 +23,7 @@ description: Coordinate coding tasks, learn from UI/document feedback, cite Web 
 |---|---|---|
 | S | 設定の解釈・互換性・切替を確認する | [設定](references/routing/settings.md)：切替 |
 | A | 実装・制作・修正へ進む | [提示・承認](references/routing/preimplementation.md)：承認 |
-| C | 開かれた発案、重要判断、停滞、批評。明示Claude依頼も判定 | [Claude](references/routing/peer-consult.md)：条件・権限 |
+| C | 開かれた発案、重要判断、停滞、批評。別系統モデルへの明示依頼も判定 | [外部相談](references/routing/peer-consult.md)：条件・権限 |
 | W | Webを根拠に回答する | [出典](references/routing/web.md)：根拠 |
 | F | UI・文書等の制作・修正・フィードバックでloop ON、明示記憶管理、または制作を委譲する（自動委譲は要求しない） | [制作](references/routing/creative.md)：記憶・保存 |
 | D | コード変更、または明示的な大規模探索の委譲 | [調整](references/routing/coordination.md)：委譲・レビュー |
