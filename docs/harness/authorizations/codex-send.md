@@ -1,3 +1,11 @@
+---
+peer: codex
+project: /Users/kan/dev/harness
+purposes: [advice, review]
+status: approved
+recorded: 2026-10-28
+---
+
 # Codexへの送信事前承認
 
 - 記録日: 2026-10-28（Asia/Tokyo）。状態: 承認済み、ユーザーの撤回まで有効。

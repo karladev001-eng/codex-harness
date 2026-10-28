@@ -39,22 +39,139 @@ function nonempty(value) { return typeof value === 'string' && value.trim().leng
 function material(value) { return nonempty(value) || object(value) || Array.isArray(value); }
 const commit = value => typeof value === 'string' && /^[0-9a-f]{7,64}$/i.test(value);
 
+const fieldName = key => /^[\w.-]{1,64}$/.test(key) ? key : '(unprintable name)';
+function stringList(value, key) {
+  if (value === undefined) return;
+  if (!Array.isArray(value)) fail('invalid_input', `${key} must be an array of nonempty strings`);
+  value.forEach((item, index) => { if (!nonempty(item)) fail('invalid_input', `${key}[${index}] must be a nonempty string`); });
+}
+// Messages name the field and the expected type, never the supplied content.
 export function validateInput(value) {
   if (!object(value)) fail('invalid_input', 'Input must be a JSON object.');
   const allowed = new Set(['role', 'task', 'context', 'constraints', 'criteria', 'candidate', 'previous', 'followup', 'repository', 'base', 'head']);
-  if (Object.keys(value).some(key => !allowed.has(key))) fail('invalid_input', 'Input contains unsupported fields.');
-  if (!Object.hasOwn(ROLE_PROMPTS, value.role) || !nonempty(value.task)) fail('invalid_input', 'A supported role and a nonempty task are required.');
-  if (value.context !== undefined && typeof value.context !== 'string') fail('invalid_input', 'context must be a string.');
-  for (const key of ['constraints', 'criteria']) if (value[key] !== undefined && (!Array.isArray(value[key]) || !value[key].every(nonempty))) fail('invalid_input', 'constraints and criteria must be arrays of nonempty strings.');
+  const unknown = Object.keys(value).find(key => !allowed.has(key));
+  if (unknown !== undefined) fail('invalid_input', `unsupported field: ${fieldName(unknown)}`);
+  if (!Object.hasOwn(ROLE_PROMPTS, value.role)) fail('invalid_input', `role must be one of ${Object.keys(ROLE_PROMPTS).join(', ')}`);
+  if (!nonempty(value.task)) fail('invalid_input', 'task must be a nonempty string');
+  let context = value.context;
+  // Structured context is accepted and sent as its JSON text.
+  if (object(context) || Array.isArray(context)) context = JSON.stringify(context);
+  else if (context !== undefined && typeof context !== 'string') fail('invalid_input', 'context must be a string, an object or an array');
+  stringList(value.constraints, 'constraints'); stringList(value.criteria, 'criteria');
   const followup = value.followup ?? 0;
-  if (followup !== 0 && followup !== 1) fail('invalid_input', 'Only one explicit follow-up is supported.');
-  if (value.candidate !== undefined && !material(value.candidate)) fail('invalid_input', 'candidate must contain text, an object or an array.');
-  if (followup === 1 ? !material(value.previous) : value.previous !== undefined) fail('invalid_input', 'previous is required only for followup: 1.');
-  if (value.role === 'ideator' && followup === 0 && value.candidate !== undefined) fail('invalid_input', 'Do not send Claude candidates to the initial ideator consultation.');
+  if (followup !== 0 && followup !== 1) fail('invalid_input', 'followup must be 0 or 1 (only one explicit follow-up is supported)');
+  if (value.candidate !== undefined && !material(value.candidate)) fail('invalid_input', 'candidate must be a nonempty string, an object or an array');
+  if (followup === 1 && !material(value.previous)) fail('invalid_input', 'previous must be a nonempty string, an object or an array when followup is 1');
+  if (followup === 0 && value.previous !== undefined) fail('invalid_input', 'previous is allowed only with followup: 1');
+  if (value.role === 'ideator' && followup === 0 && value.candidate !== undefined) fail('invalid_input', 'candidate is not allowed in the initial ideator consultation (do not send Claude candidates)');
   const review = value.role === 'reviewer';
-  if (review !== (value.repository !== undefined) || review !== (value.base !== undefined) || review !== (value.head !== undefined)) fail('invalid_input', 'repository, base and head are required for reviewer and only for reviewer.');
-  if (review && (!path.isAbsolute(value.repository) || !commit(value.base) || !commit(value.head) || !value.criteria?.length)) fail('invalid_input', 'reviewer needs an absolute repository, commit IDs and numbered criteria.');
-  return { ...value, followup };
+  for (const key of ['repository', 'base', 'head']) {
+    if (review && value[key] === undefined) fail('invalid_input', `${key} is required for reviewer`);
+    if (!review && value[key] !== undefined) fail('invalid_input', `${key} is allowed only for reviewer`);
+  }
+  if (review) {
+    if (typeof value.repository !== 'string' || !path.isAbsolute(value.repository)) fail('invalid_input', 'repository must be an absolute path string');
+    for (const key of ['base', 'head']) if (!commit(value[key])) fail('invalid_input', `${key} must be a commit ID of 7-64 hexadecimal characters`);
+    if (!value.criteria?.length) fail('invalid_input', 'criteria must be a nonempty array of numbered acceptance criteria for reviewer');
+  }
+  const result = { ...value, followup };
+  if (context !== undefined) result.context = context;
+  return result;
+}
+
+// Codex's final message is parsed as-is, then without a code fence, then from the first { to the last }.
+export function parseAdvice(text) {
+  const attempts = [text];
+  const fenced = /^\s*```[\w-]*[ \t]*\r?\n([\s\S]*?)\r?\n?```\s*$/.exec(text);
+  if (fenced) attempts.push(fenced[1]);
+  const start = text.indexOf('{'), end = text.lastIndexOf('}');
+  if (start !== -1 && end > start) attempts.push(text.slice(start, end + 1));
+  for (const attempt of attempts) {
+    try { const value = JSON.parse(attempt); if (object(value)) return value; } catch {}
+  }
+  fail('invalid_advice', 'Codex advice was not a JSON object.');
+}
+const ADVICE_LISTS = ['points', 'risks', 'recommendations', 'questions'];
+const SEVERITIES = ['critical', 'high', 'medium', 'low'];
+const VERDICTS = ['PASS', 'NEEDS_WORK', 'BLOCKED'];
+// Advisory verdicts become none; missing lists become []. Messages name the field, never the raw advice.
+export function normalizeAdvice(value, role) {
+  if (!object(value)) fail('invalid_advice', 'Codex advice was not a JSON object.');
+  if (!nonempty(value.summary)) fail('invalid_advice', 'Codex advice summary must be a nonempty string.');
+  let verdict = 'none';
+  if (role === 'reviewer') {
+    if (!VERDICTS.includes(value.verdict)) fail('invalid_advice', `Codex reviewer verdict must be one of ${VERDICTS.join(', ')}.`);
+    verdict = value.verdict;
+  }
+  const advice = { summary: value.summary, verdict };
+  for (const key of ADVICE_LISTS) {
+    const list = value[key] ?? [];
+    if (!Array.isArray(list) || !list.every(item => typeof item === 'string')) fail('invalid_advice', `Codex advice ${key} must be an array of strings.`);
+    advice[key] = list;
+  }
+  const findings = value.findings ?? [];
+  if (!Array.isArray(findings)) fail('invalid_advice', 'Codex advice findings must be an array.');
+  advice.findings = findings.map((finding, index) => {
+    if (!object(finding) || !SEVERITIES.includes(finding.severity) || !['location', 'issue', 'evidence'].every(key => typeof finding[key] === 'string'))
+      fail('invalid_advice', `Codex advice findings[${index}] needs a severity (${SEVERITIES.join(', ')}) and string location, issue and evidence.`);
+    return { severity: finding.severity, location: finding.location, issue: finding.issue, evidence: finding.evidence };
+  });
+  return advice;
+}
+
+// Send approval is decided from the record's frontmatter only; this helper never writes a record.
+export const PURPOSES = ['advice', 'review', 'image'];
+export const ROLE_PURPOSE = { ideator: 'advice', consultant: 'advice', critic: 'advice', reviewer: 'review' };
+const unquote = value => value.length >= 2 && /^(["']).*\1$/.test(value) ? value.slice(1, -1) : value;
+function parseFrontmatter(text) {
+  const lines = text.replace(/^﻿/, '').split(/\r?\n/);
+  if (lines[0] !== '---') return { error: 'line 1: the record must start with a --- frontmatter line' };
+  const close = lines.indexOf('---', 1);
+  if (close === -1) return { error: 'line 1: the frontmatter has no closing --- line' };
+  const fields = {}; let last;
+  for (let i = 1; i < close; i++) {
+    const line = lines[i], number = i + 1;
+    if (!line.trim() || line.trimStart().startsWith('#')) continue;
+    const item = /^\s+-\s*(.*)$/.exec(line);
+    if (item) {
+      if (last !== 'purposes' || fields.purposes.inline) return { error: `line ${number}: a list item is allowed only under an empty purposes: line` };
+      fields.purposes.items.push({ value: unquote(item[1].trim()), line: number }); continue;
+    }
+    const match = /^([A-Za-z_][\w-]*):\s*(.*)$/.exec(line);
+    if (!match) return { error: `line ${number}: expected "key: value"` };
+    const [, key, raw] = match, value = raw.trim();
+    if (Object.hasOwn(fields, key)) return { error: `line ${number}: duplicate ${key}` };
+    last = key;
+    if (key !== 'purposes') { fields[key] = { value: unquote(value), line: number }; continue; }
+    if (value === '') fields.purposes = { items: [], line: number, inline: false };
+    else if (/^\[.*\]$/.test(value)) fields.purposes = { items: value.slice(1, -1).split(',').map(part => part.trim()).filter(Boolean).map(part => ({ value: unquote(part), line: number })), line: number, inline: true };
+    else return { error: `line ${number}: purposes must be a list such as [advice, review]` };
+  }
+  return { fields };
+}
+const canonical = file => realpath(file).catch(() => path.resolve(file));
+export async function checkApproval({ project, purpose, peer = 'codex' }) {
+  if (typeof project !== 'string' || !path.isAbsolute(project)) fail('invalid_options', '--project must be an absolute path.');
+  if (purpose !== undefined && !PURPOSES.includes(purpose)) fail('invalid_options', `--purpose must be one of ${PURPOSES.join(', ')}.`);
+  const record = path.join(project, 'docs/harness/authorizations', `${peer}-send.md`);
+  const result = (approved, reason, purposes, message) => ({ ok: true, approved, reason, record, purposes, ...(message ? { message } : {}) });
+  const info = await stat(record).catch(() => null);
+  if (!info) return result(false, 'missing', [], 'No send approval record exists for this project.');
+  if (!info.isFile() || info.size > 65536) return result(false, 'malformed', [], 'The approval record is not a regular file of at most 64 KiB.');
+  const parsed = parseFrontmatter(await readFile(record, 'utf8'));
+  if (parsed.error) return result(false, 'malformed', [], parsed.error);
+  const { fields } = parsed;
+  for (const key of ['peer', 'project', 'purposes', 'status', 'recorded']) if (!fields[key] || (key !== 'purposes' && !fields[key].value)) return result(false, 'malformed', [], `frontmatter: ${key} is required`);
+  if (fields.peer.value !== peer) return result(false, 'malformed', [], `line ${fields.peer.line}: peer must be ${peer}`);
+  if (!path.isAbsolute(fields.project.value)) return result(false, 'malformed', [], `line ${fields.project.line}: project must be an absolute path`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fields.recorded.value)) return result(false, 'malformed', [], `line ${fields.recorded.line}: recorded must be a YYYY-MM-DD date`);
+  const bad = fields.purposes.items.find(item => !PURPOSES.includes(item.value));
+  if (bad) return result(false, 'malformed', [], `line ${bad.line}: purposes may contain only ${PURPOSES.join(', ')}`);
+  const purposes = [...new Set(fields.purposes.items.map(item => item.value))];
+  if (fields.status.value !== 'approved') return result(false, 'revoked', purposes);
+  if (await canonical(fields.project.value) !== await canonical(project)) return result(false, 'project_mismatch', purposes);
+  if (purpose !== undefined && !purposes.includes(purpose)) return result(false, 'purpose_missing', purposes);
+  return result(true, 'approved', purposes);
 }
 
 // No user content is placed in argv, inherited stdio, error messages or logs.
@@ -139,30 +256,54 @@ export async function consult(value, { executable = 'codex', timeoutMs = 300000,
     if (!completed) fail('response_error', 'Codex CLI did not complete the consultation.');
     const info = await lstat(output).catch(() => fail('empty_response', 'Codex CLI returned no advice.'));
     if (!info.isFile() || info.size > 200000) fail('invalid_advice', 'Codex advice output was not a bounded regular file.');
-    const advice = parse(await readFile(output, 'utf8'), 'invalid_advice', 'Codex advice was not a JSON object.');
-    if (!object(advice) || !nonempty(advice.summary) || (input.role === 'reviewer') !== (advice.verdict !== 'none')) fail('invalid_advice', 'Codex advice must include a summary and a verdict only for reviewer.');
+    const advice = normalizeAdvice(parseAdvice(await readFile(output, 'utf8')), input.role);
     return { ok: true, peer: 'codex', role: input.role, followup: input.followup, commands, advice };
   } finally { await rm(scratch, { recursive: true, force: true }); }
 }
 
-async function readStdin(timeoutMs) {
+const STDIN_HINT = "Pass the consultation JSON with a heredoc (<<'EOF') or with --input <file>.";
+function readStdin(timeoutMs, firstByteMs) {
+  if (process.stdin.isTTY) return Promise.reject(new ConsultationError('input_unavailable', `stdin is a terminal, not consultation input. ${STDIN_HINT}`));
   return new Promise((resolve, reject) => {
-    const chunks = []; let size = 0;
-    const timer = setTimeout(() => reject(new ConsultationError('input_timeout', 'Consultation input was not completed within the time limit.')), timeoutMs);
-    process.stdin.on('data', chunk => { size += chunk.length; if (size > INPUT_LIMIT) { clearTimeout(timer); reject(new ConsultationError('input_limit', 'Consultation input exceeds 256 KiB.')); } else chunks.push(chunk); });
-    process.stdin.on('end', () => { clearTimeout(timer); resolve(Buffer.concat(chunks).toString('utf8')); });
-    process.stdin.on('error', () => { clearTimeout(timer); reject(new ConsultationError('input_unavailable', 'Input could not be read.')); });
+    const chunks = []; let size = 0, done = false, first, total;
+    const finish = (error, text) => {
+      if (done) return; done = true; clearTimeout(first); clearTimeout(total);
+      if (error) { process.stdin.destroy(); reject(error); } else resolve(text);
+    };
+    first = setTimeout(() => finish(new ConsultationError('input_timeout', `No consultation input arrived on stdin within ${firstByteMs} ms. ${STDIN_HINT}`)), firstByteMs);
+    total = setTimeout(() => finish(new ConsultationError('input_timeout', 'Consultation input was not completed within the time limit.')), timeoutMs);
+    process.stdin.on('data', chunk => {
+      clearTimeout(first); size += chunk.length;
+      if (size > INPUT_LIMIT) finish(new ConsultationError('input_limit', 'Consultation input exceeds 256 KiB.')); else chunks.push(chunk);
+    });
+    process.stdin.on('end', () => size === 0 ? finish(new ConsultationError('input_unavailable', `stdin was empty. ${STDIN_HINT}`)) : finish(null, Buffer.concat(chunks).toString('utf8')));
+    process.stdin.on('error', () => finish(new ConsultationError('input_unavailable', `Input could not be read. ${STDIN_HINT}`)));
   });
 }
+// Tests may shorten the 5 s wait for the first stdin byte; it is never lengthened.
+function firstByteMs() {
+  const value = Number(process.env.CONSULT_CODEX_STDIN_FIRST_BYTE_MS ?? 5000);
+  return Number.isInteger(value) && value >= 10 && value <= 5000 ? value : 5000;
+}
+const USAGE = 'Use --check, --approval --project <abs> [--purpose advice|review|image], --input <file>, --model <name>, or --timeout-ms <100..900000>.';
 async function main(args) {
-  const options = {}; let file;
+  const options = {}; let file, approval = false, project, purpose;
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--check') options.checkOnly = true;
-    else if (['--input', '--model', '--timeout-ms'].includes(args[i]) && i + 1 < args.length) {
+    else if (args[i] === '--approval') approval = true;
+    else if (['--input', '--model', '--timeout-ms', '--project', '--purpose'].includes(args[i]) && i + 1 < args.length) {
       const key = args[i], value = args[++i];
-      if (key === '--input') file = value; else if (key === '--model') options.model = value; else options.timeoutMs = Number(value);
-    } else fail('invalid_options', 'Use --check, --input <file>, --model <name>, or --timeout-ms <100..900000>.');
+      if (key === '--input') file = value; else if (key === '--model') options.model = value;
+      else if (key === '--project') project = value; else if (key === '--purpose') purpose = value;
+      else options.timeoutMs = Number(value);
+    } else fail('invalid_options', USAGE);
   }
+  if (approval) {
+    if (options.checkOnly || file !== undefined || options.model !== undefined || options.timeoutMs !== undefined) fail('invalid_options', '--approval accepts only --project and --purpose.');
+    if (project === undefined) fail('invalid_options', '--approval requires --project <abs>.');
+    return checkApproval({ project, purpose });
+  }
+  if (project !== undefined || purpose !== undefined) fail('invalid_options', '--project and --purpose are used only with --approval.');
   if (options.checkOnly && (file || options.model)) fail('invalid_options', '--check does not accept consultation input or model.');
   if (options.checkOnly) return consult(undefined, options);
   let text;
@@ -170,7 +311,7 @@ async function main(args) {
     const info = await stat(file).catch(() => fail('input_unavailable', 'Input file could not be read.'));
     if (!info.isFile() || info.size > INPUT_LIMIT) fail('input_limit', 'Input must be a regular file of at most 256 KiB.');
     text = await readFile(file, 'utf8');
-  } else text = await readStdin(30000);
+  } else text = await readStdin(30000, firstByteMs());
   return consult(parse(text, 'invalid_input', 'Input is not valid JSON.'), options);
 }
 

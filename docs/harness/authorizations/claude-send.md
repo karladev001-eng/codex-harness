@@ -1,3 +1,11 @@
+---
+peer: claude
+project: /Users/kan/dev/harness
+purposes: [advice]
+status: approved
+recorded: 2026-10-24
+---
+
 # Claudeへの送信事前承認
 
 - 記録日: 2026-10-24（Asia/Tokyo）。状態: 承認済み、ユーザーの撤回まで有効。
