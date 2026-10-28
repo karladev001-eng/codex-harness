@@ -95,10 +95,10 @@ test('coordination, model pinning and independent review retain all high-risk ga
 
 test('creative memory and compact preserve their separate permission and evidence boundaries', () => {
   expectRules(body('references/routing/creative.md'), [
-    ['start, feedback, completion and next work', /開始時[\s\S]*修正根拠[\s\S]*完了評価[\s\S]*次回に更新/],
-    ['freshness and persistence', /fresh確認失敗なら自動適用しない[\s\S]*persistence OFFは保存記憶を読まず/],
-    ['conditional single writer and explicit management exceptions', /保存根拠\/更新\/既知pending[\s\S]*無変更なら起動しない[\s\S]*明示管理はloop OFFでも可[\s\S]*delegation OFFは親が同じ契約[\s\S]*persistence OFFは起動・記憶読書き禁止[\s\S]*唯一のwriter/],
-    ['pure creative does not require coding delegation', /純制作にコード調整・実装委譲・worktree・コード統合は要求しない/],
+    ['start, feedback, completion and next work', /開始時[\s\S]*修正の根拠[\s\S]*完了時の評価[\s\S]*次回にその更新/],
+    ['freshness and persistence', /fresh確認に失敗したとき[\s\S]*自動適用しません[\s\S]*persistence OFFでは保存された記憶を読まず/],
+    ['conditional single writer and explicit management exceptions', /保存する根拠や更新、または既知のpending[\s\S]*変更がなければ起動しません[\s\S]*明示的な記憶管理は、loop OFFでも行えます[\s\S]*delegation OFFなら、親が同じ契約[\s\S]*persistence OFFでは、起動も記憶の読み書きも禁止[\s\S]*唯一のwriter/],
+    ['pure creative does not require coding delegation', /純制作には、コード調整・実装委譲・worktree・コード統合を要求しません/],
   ]);
   expectRules(body('references/early-compaction.md'), [
     ['no new implementation or permissions', /独自の背景監視・compact API・会話削除、勝手な設定変更を許可しない/],
@@ -157,7 +157,7 @@ test('ordinary coding reaches bounded lesson reuse and verified saving without r
   assert.match(lessons, /全project\/全文を注入しない[\s\S]*pending=false[\s\S]*scope/);
   assert.match(lessons, /根拠が無ければ[\s\S]*record-keeperを起動しない/);
   assert.match(lessons, /evaluation_sources[\s\S]*テストPASSをユーザーの肯定/);
-  assert.match(keeper, /未登録なら[\s\S]*preferences register[\s\S]*identity\/key[\s\S]*初回取得失敗を空の正本にしない/);
+  assert.match(keeper, /未登録なら[\s\S]*preferences register[\s\S]*identity\/key[\s\S]*初回の取得に失敗したものを、空の正本にはしません/);
   const selected = readSections(harness, 'commands', ['lessons']);
   assert.ok(selected.selected.includes('preferences'));
   const text = selected.chunks.map(c => c.text).join('');
