@@ -35,6 +35,12 @@ Knowledgeの隔離試験は[運用ガイドの検証範囲](docs/guides/knowledg
 - 2者レビュー（64e06c7..426247f）: Claude側の `harness:reviewer`（opus/high）とCodexの `reviewer` が独立にNEEDS_WORK。Codexは4件（読み替えファイルへの規則の追加、status失敗時の拒否、読み替えから消えた規則、見出しの変更）、Claude側は7件（上の3件と重なるほか、lessonsの個別read条件の弱まり、promptの文字列だけで無関係な起動を拒否、正規表現の緩み、文体）。重なりを統合して修正し（ad3f084）、2巡目で両者PASS。
 - 統合後の評価（各1回）: 実装前の承認 1.0 対 0.0、委譲 1.0 対 0.2（16ターン。以前は23〜28）、純相談 1.0 対 1.0、workerの境界 1.0 対 1.0。約$1.6。
 - 未確認: 実際の対話セッションでの `isolation: "worktree"`（評価環境では使えない）、Codex側から見た2者レビュー、画像生成の連携、Windows。
+- 型を省いた起動: この版のAgentでは `subagent_type` を省くとforkではなくgeneral-purposeになり、harnessのモデル検査を通らなかった。hookで、type空・forkはマーカーを含むだけで、他の非harness typeは先頭マーカーで拒否する（398b49e、のち2者レビューで調整）。
+- 画像生成 `codex-image`: Codexの `image_gen` はCLIのサブコマンドではなくモデルの組み込みツールなので、`codex exec`（隔離、画像生成だけ有効）で呼ぶ。実機1回目で、画像は `~/.codex/generated_images/<thread_id>/exec-<uuid>.png` に保存され、画像itemはJSONイベントに出ず、最後の応答がモデル混雑で `turn.failed` になっても画像は残ることを確認した。thread_id基準の特定と、画像があれば成功＋warningにする修正のあと、2回目は成功（1.09MB、warningなし）。試行の出力は削除した。
+- consultの両方向の統一と止まりにくさ: 過去のCodexセッションでconsult-claudeの失敗は `auth_unavailable` 10件、`invalid_advice` 5件、`input_timeout` 3件だった。consult-claudeに `reviewer` 役（差分はhelperが読み取り専用gitで取得、Read/Grep/Globのみ）を加え、`--json-schema` で返事の型を固定した（実機で `structured_output` を確認）。両helperで、コードフェンス等の救済、項目名入りの入力エラー、stdinのTTY即時失敗と5秒の初回バイト待ち、混雑の `peer_busy`、認証昇格は相談の再実行1回だけ、にした。
+- 送信承認の機械判定: 記録 `docs/harness/authorizations/<peer>-send.md` のfrontmatter（peer, project, purposes, status, recorded）を3つのhelperの同一ブロックが `--approval --purpose` で判定する（fail-closed、helperは書かない）。既存記録は範囲を広げずに移行した（codex: advice・review、claude: advice）。reviewerでは、範囲の変更パスとレビュー用checkoutの無視ファイルに秘密ファイルらしい名前があれば送らない（`secret_path`）。
+- 2者レビュー（398b49e..7992427）: 1巡目は両者NEEDS_WORK（thread_idなし時の予備探索で別セッションの画像を拾う、許可itemが広い、purposesの空要素、purpose省略でapproved、文書の不一致など計10件）。2巡目も両者NEEDS_WORK（差分経由の秘密ファイル送信、承認記録の更新手順、hookの判定の退行など）。ユーザーの承認で3巡目を行い、両者PASS。残る提案: 範囲で変更されていない追跡済みの秘密ファイルは止まらない（相手はcheckout全体を読める）、無視ディレクトリ内の入れ子リポジトリは調べられない。
+- モデル選択: この作業の実装担当6回はすべてopus/highで、うち2回はsonnetで足りた。原因は、SessionStartの文脈・読み替え・hookの文言が「役割キーのmodelとeffortをそのまま渡す」で、roles.mdの「modelは重要性、effortは品質で独立に選ぶ」と食い違っていたこと。文言を直した（f82cffc）。
 
 ## 2026-10-11: 0.4.3のリリース候補検証
 
