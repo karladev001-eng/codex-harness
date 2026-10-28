@@ -42,17 +42,17 @@ test('section IDs cover every current rule byte, preserve whole references and e
 test('command/role/block selections close dependencies, preserve guards and merge overlaps without duplicate bytes', () => {
   const status = readSections(harness, 'commands', ['status']);
   const text = status.chunks.map(c => c.text).join('');
-  for (const rule of ['シェル', '--home', '状態確認はファイルを作らない', 'inactive', 'statusは保存先のmetadataのみ']) assert.ok(text.includes(rule), rule);
+  for (const rule of ['シェル', '--home', /状態確認はファイルを作(?:らない|りません)/, 'inactive', /statusは保存先のmetadata(?:のみ|だけ)/]) assert.ok(rule instanceof RegExp ? rule.test(text) : text.includes(rule), String(rule));
   assert.ok(!text.includes('npm login'));
   assert.ok(!text.includes('remote_content/remote_sha'));
   const preferences = readSections(harness, 'commands', ['preferences']);
   const prefText = preferences.chunks.map(c => c.text).join('');
-  for (const rule of ['公開repositoryへの送信は拒否', '必ずreadのrevision', '古い版の自動mergeは行わない', 'persistence=false', 'measurementは独立']) assert.ok(prefText.includes(rule), rule);
+  for (const rule of ['公開repositoryへの送信は拒否', '必ずreadのrevision', /古い版の自動mergeは行(?:わない|いません)/, 'persistence=false', 'measurementは独立']) assert.ok(rule instanceof RegExp ? rule.test(prefText) : prefText.includes(rule), String(rule));
   const measure = readSections(harness, 'commands', ['measure']);
   for (const rule of ['overlap=false', '未取得はnull']) assert.ok(measure.chunks.some(c => c.text.includes(rule)));
   const parent = readSections(harness, 'roles', ['coordinator']);
-  for (const rule of ['pin', '候補一覧なし', '黙って代替せず', 'persistence=false']) assert.ok(parent.chunks.some(c => c.text.includes(rule)), rule);
-  for (const role of ['implementation', 'integration']) assert.ok(readSections(harness, 'roles', [role]).chunks.some(c => c.text.includes('子を起動しない')));
+  for (const rule of ['pin', /候補一覧(?:なし|がない)/, '黙って代替せず', 'persistence=false']) assert.ok(parent.chunks.some(c => rule instanceof RegExp ? rule.test(c.text) : c.text.includes(rule)), String(rule));
+  for (const role of ['implementation', 'integration']) assert.ok(readSections(harness, 'roles', [role]).chunks.some(c => /子を起動し(?:ない|ません)/.test(c.text)));
   const minimal = readSections(html, 'blocks', ['doc-code', 'doc-changes', 'doc-note']);
   assert.ok(minimal.bytes < Buffer.byteLength(read(path.join(html, 'references/blocks.md'))) / 2);
   for (const required of ['common', 'doc-plan', 'pack']) assert.ok(minimal.selected.includes(required));

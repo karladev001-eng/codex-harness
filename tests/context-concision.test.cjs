@@ -80,11 +80,11 @@ test('coordination, model pinning and independent review retain all high-risk ga
     ['model and quality independently chosen', /モデルは作業の性質、effortは必要品質で独立/],
     ['risk outweighs simple procedure and file count', /重要性\/リスクを手順の単純さより優先[\s\S]*ファイル数だけで昇格しない/],
     ['host source and pin override', /実際の子起動面の候補[\s\S]*公開Web一覧・名前の推測だけでは選ばない[\s\S]*fixed[\s\S]*pin優先[\s\S]*effortだけはpinでない/],
-    ['auto needs successor proof and fallback', /同じ役割\/系統の後継[\s\S]*役割昇格は自動更新でない[\s\S]*候補一覧なし[\s\S]*基準値[\s\S]*制約を報告/],
-    ['failure versus apparent catalog support', /黙って代替せず[\s\S]*権限\/起動成功の保証ではない[\s\S]*失敗は成功と記録せず/],
-    ['records and running children', /取得元[\s\S]*実model\+effort[\s\S]*persistence=false[\s\S]*稼働子は切替えず[\s\S]*メインのモデルは変更しない/],
+    ['auto needs successor proof and fallback', /同じ役割\/系統の後継[\s\S]*役割昇格は自動更新(?:でない|ではありません)[\s\S]*候補一覧(?:なし|がない)[\s\S]*基準値[\s\S]*制約を報告/],
+    ['failure versus apparent catalog support', /黙って代替せず[\s\S]*権限\/起動成功の保証では(?:ない|ありません)[\s\S]*失敗は成功と記録せず/],
+    ['records and running children', /取得元[\s\S]*実(?:際の)?model\+effort[\s\S]*persistence=false[\s\S]*稼働中の子は切り替えず[\s\S]*メインのモデルは変更し(?:ない|ません)/],
   ]);
-  for (const role of ['implementation', 'integration']) assert.match(readSections(harness, 'roles', [role]).chunks.map(c => c.text).join(''), /HARNESS_WORKER[\s\S]*子を起動しない/);
+  for (const role of ['implementation', 'integration']) assert.match(readSections(harness, 'roles', [role]).chunks.map(c => c.text).join(''), /HARNESS_WORKER[\s\S]*子を起動し(?:ない|ません)/);
   expectRules(body('references/reviewer.md'), [
     ['risk assessment precedes implementer evidence', /編集・子起動は禁止[\s\S]*実装者の検証主張を読む前に独立リスク表/],
     ['no retroactive approval', /先にあること[\s\S]*事後資料\/承認で代用しない/],

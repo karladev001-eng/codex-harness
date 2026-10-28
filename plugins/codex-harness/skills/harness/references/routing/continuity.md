@@ -1,9 +1,9 @@
 # 記録と再開
 
-状態は `planned → ready → implementing → reviewing → done`。review OFFは検証後done。`needs_work` は修正へ、`blocked` は理由を記す。状態/受入判断はエージェントの責務で、CLIだけでは完了を証明しない。
+状態は `planned → ready → implementing → reviewing → done` と進みます。review OFFの場合は、検証後にdoneとします。`needs_work` は修正へ回し、`blocked` は理由を記します。状態と受入の判断はエージェントの責務で、CLIだけでは完了を証明しません。
 
-コード修正では[技術的知見](../technical-lessons.md)、制作では[制作改善](../creative-loop.md)に従い、記録の有無を判断し、保存した場合は成否とpendingを完了記録へ短く残す。変更も既知pendingも無ければrecord-keeperを起動しない。会話全文を自動送信する手順ではない。
+コード修正では[技術的知見](../technical-lessons.md)に、制作では[制作改善](../creative-loop.md)に従い、記録の有無を判断します。保存した場合は、成否とpendingを完了記録に短く残します。変更も既知のpendingも無ければ、record-keeperを起動しません。会話全文を自動送信する手順ではありません。
 
-保存ONは[完了記録](../../assets/completion.md)をパケットに追記。長いログはホスト保存先へ。再開はタスクIDから現パケット・必要ADR・実コードだけを確認する。別PCはコード/文書をGit等で同期し、ローカルworktree/稼働担当の移動を前提にしない。activeな長期作業のフェーズ境界・大量読取前は[早期compact](../early-compaction.md)を読み引継ぎを更新する。正式な本体自動compactとagent実行機能を区別し、実行/使用量取得を保証しない。独自監視・API・会話削除は禁止。
+保存ONなら、[完了記録](../../assets/completion.md)をパケットに追記します。長いログはホストの保存先に置きます。再開するときは、タスクIDから、現在のパケット・必要なADR・実コードだけを確認します。別のPCではコードと文書をGitなどで同期し、ローカルのworktreeや稼働中の担当が移動することは前提にしません。activeな長期作業では、フェーズの境界と大量読取の前に[早期compact](../early-compaction.md)を読み、引継ぎを更新します。正式な本体の自動compactとagentの実行機能は区別し、実行や使用量の取得は保証しません。独自の監視・API・会話削除は禁止です。
 
-CLI操作（起動statusも含む）は[commands](../commands.md)、measurement ONは[計測](../measurement.md)を読む。役割手順は該当時のみ適用し、追加起動を自動化しない。Designer自動化・ブラウザ評価はv1自動工程外だが、UI実装前の視覚モックは必須。保存資料は必要時に指示で参照し、runtime/同期hookの全資料自動注入を前提にしない。
+CLI操作（起動時のstatusも含む）は[commands](../commands.md)、measurement ONのときは[計測](../measurement.md)を読みます。役割手順は該当するときだけ適用し、追加の起動は自動化しません。Designer自動化とブラウザ評価はv1の自動工程の対象外ですが、UI実装の前の視覚モックは必須です。保存資料は必要なときに指示で参照し、runtimeや同期hookによる全資料の自動注入は前提にしません。
