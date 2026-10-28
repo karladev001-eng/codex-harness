@@ -96,7 +96,7 @@ test('coordination, model pinning and independent review retain all high-risk ga
 test('creative memory and compact preserve their separate permission and evidence boundaries', () => {
   expectRules(body('references/routing/creative.md'), [
     ['start, feedback, completion and next work', /開始時[\s\S]*修正の根拠[\s\S]*完了時の評価[\s\S]*次回にその更新/],
-    ['freshness and persistence', /fresh確認に失敗したとき[\s\S]*自動適用しません[\s\S]*persistence OFFでは保存された記憶を読まず/],
+    ['freshness and persistence', /fresh確認に失敗したときは、自動適用しません[\s\S]*persistence OFFでは保存された記憶を読まず/],
     ['conditional single writer and explicit management exceptions', /保存する根拠や更新、または既知のpending[\s\S]*変更がなければ起動しません[\s\S]*明示的な記憶管理は、loop OFFでも行えます[\s\S]*delegation OFFなら、親が同じ契約[\s\S]*persistence OFFでは、起動も記憶の読み書きも禁止[\s\S]*唯一のwriter/],
     ['pure creative does not require coding delegation', /純制作には、コード調整・実装委譲・worktree・コード統合を要求しません/],
   ]);

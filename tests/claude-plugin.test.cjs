@@ -116,6 +116,11 @@ test('agent guard denies harness worker launches without model and effort, or vi
   assert.match(guard({ subagent_type: 'fork', prompt: 'HARNESS_WORKER\n役割: 実装' }).permissionDecisionReason, /instead of fork/);
   // Unrelated launches and an inactive harness are never touched.
   assert.equal(guard({ subagent_type: 'Explore', prompt: 'find files' }), null);
+  assert.equal(guard({ subagent_type: 'Explore', prompt: 'grep for HARNESS_WORKER usages' }), null);
+  assert.equal(guard({ subagent_type: 'fork', prompt: 'summarize this thread' }), null);
   write(path.join(f.project, '.harness.json'), { enabled: false });
+  assert.equal(guard({ subagent_type: 'harness:reviewer', prompt: 'HARNESS_WORKER' }), null);
+  // An unreadable configuration is reported by the session hook, not enforced here.
+  write(path.join(f.project, '.harness.json'), { unknown: true });
   assert.equal(guard({ subagent_type: 'harness:reviewer', prompt: 'HARNESS_WORKER' }), null);
 });

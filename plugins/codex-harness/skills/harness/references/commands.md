@@ -90,6 +90,6 @@ node "<runtime>" lessons forget --project <project> --id <id> --revision <read-t
 node "<runtime>" lessons sync --project <project> --id <id>
 ```
 
-必須項目は、schema_version=1、id、cause、remedy、verification/scope/sources（空でない文字列の配列）、タイムゾーン付きのrecorded_at、evaluation（unknown/accepted/rejected）です。確定した評価には、evaluation_sourcesも必須です。検索にはGitHub接続が必要で、limitは1–10、名前順で最大20ファイルを確認する文字検索です。必要な少数だけを取得し、検索ではok=true/freshness=fresh、個別readではpending=falseのものだけを自動適用します。local/cached/stale/pendingはfreshとして扱いません。lessonの訂正writeとforgetにも、`--offline true` / `--base-sha SHA|missing` を使えます。lessonで競合したときは、対象の現在のremoteを個別に確認し、曖昧なmergeは親へ戻します。
+必須項目は、schema_version=1、id、cause、remedy、verification/scope/sources（空でない文字列の配列）、タイムゾーン付きのrecorded_at、evaluation（unknown/accepted/rejected）です。確定した評価には、evaluation_sourcesも必須です。検索にはGitHub接続が必要で、limitは1–10、名前順で最大20ファイルを確認する文字検索です。必要な少数だけを取得し、ok=true/freshness=fresh、個別readならさらにpending=falseのものだけを自動適用します。local/cached/stale/pendingはfreshとして扱いません。lessonの訂正writeとforgetにも、`--offline true` / `--base-sha SHA|missing` を使えます。lessonで競合したときは、対象の現在のremoteを個別に確認し、曖昧なmergeは親へ戻します。
 
 GitHubのcommit metadataは、schema_version/project_key/operation_id/kind/record_kind/recorded_atです。kindはcreate/update/correction/forget/migrate/registerで、本文のjournalは別に保存しません。再送は同じoperation IDを使い、同じ内容なら重複したcommitを作りません。元のID・日付・unknownは保持し、移行を新規獲得や品質向上に換算しません。成長dashboard本体は対象外です。訂正と忘却は、現在の正本・cache・pending・検索には反映しますが、Git履歴の完全消去は別操作です。旧原本やGit履歴を通常に閲覧する場合でも、取り消した内容を勝手に復活させません。

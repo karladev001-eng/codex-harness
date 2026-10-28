@@ -21,13 +21,14 @@ function status(project) {
 let input = {};
 try { input = JSON.parse(fs.readFileSync(0, 'utf8') || '{}'); } catch { process.exit(0); }
 const tool = input.tool_input || {}, type = String(tool.subagent_type || '');
-const worker = type.startsWith('harness:') || String(tool.prompt || '').includes('HARNESS_WORKER');
-if (!worker) process.exit(0);
-const missing = type === 'fork' ? null : ['model', 'effort'].filter(key => !tool[key]);
-if (type !== 'fork' && missing.length === 0) process.exit(0);
+// Model and effort are checked only on harness agents; the prompt marker only identifies a worker sent through fork.
+const forkedWorker = type === 'fork' && String(tool.prompt || '').includes('HARNESS_WORKER');
+const missing = type.startsWith('harness:') ? ['model', 'effort'].filter(key => !tool[key]) : [];
+if (!forkedWorker && missing.length === 0) process.exit(0);
 
 const current = status(process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd());
-if (current && !current.active) process.exit(0);
-const table = current ? Object.entries(current.config.models).map(([role, m]) => `${role}=${m.model}/${m.reasoning_effort}`).join(', ') : 'see status --host claude';
-if (type === 'fork') deny(`Harness workers start without the parent history: use a harness:* subagent_type instead of fork. Role models: ${table}.`);
+// Only an active harness is enforced; an unreadable status is reported at session start instead.
+if (!current || !current.active) process.exit(0);
+const table = Object.entries(current.config.models).map(([role, m]) => `${role}=${m.model}/${m.reasoning_effort}`).join(', ');
+if (forkedWorker) deny(`Harness workers start without the parent history: use a harness:* subagent_type instead of fork. Role models: ${table}.`);
 deny(`Harness worker launch is missing ${missing.join(' and ')}. Pass them from the role key that fits the work (${table}); an explicit user choice or a pin overrides the table.`);
