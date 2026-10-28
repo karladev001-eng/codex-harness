@@ -121,6 +121,12 @@ test('agent guard denies harness worker launches without model and effort, or vi
     const denied = guard({ subagent_type, prompt: '\n  HARNESS_WORKER\n役割: 実装', model: 'sonnet', effort: 'medium' });
     assert.equal(denied?.permissionDecision, 'deny', JSON.stringify(subagent_type)); assert.match(denied.permissionDecisionReason, /another agent type/);
   }
+  // Fork and an omitted type refuse the marker anywhere in the prompt, as before.
+  assert.match(guard({ prompt: '役割: reviewer\nHARNESS_WORKER として動きます', model: 'sonnet', effort: 'medium' })?.permissionDecisionReason ?? '', /omitted type/);
+  assert.match(guard({ subagent_type: 'fork', prompt: '# HARNESS_WORKER\nrole' })?.permissionDecisionReason ?? '', /instead of fork/);
+  assert.equal(guard({ subagent_type: ' fork ', prompt: 'role\nHARNESS_WORKER' })?.permissionDecision, 'deny');
+  // Other types refuse only a prompt that starts with the marker.
+  assert.equal(guard({ subagent_type: 'general-purpose', prompt: '役割: reviewer\nHARNESS_WORKER として動きます' }), null);
   assert.equal(guard({ subagent_type: ' harness:implementer ', model: 'sonnet', effort: 'medium', prompt: 'HARNESS_WORKER' }), null);
   assert.equal(guard({ prompt: 'look up the build script' }), null);
   // Unrelated launches and an inactive harness are never touched.
