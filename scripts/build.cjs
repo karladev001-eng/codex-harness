@@ -81,7 +81,7 @@ const version = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf
 for (const name of ['.claude-plugin', 'agents', 'hooks', 'evals']) fs.cpSync(path.join(claudeSource, name), path.join(claudePlugin, name), { recursive: true });
 const claudeManifest = path.join(claudePlugin, '.claude-plugin/plugin.json');
 fs.writeFileSync(claudeManifest, JSON.stringify({ ...JSON.parse(fs.readFileSync(claudeManifest, 'utf8')), version }, null, 2) + '\n');
-fs.chmodSync(path.join(claudePlugin, 'hooks/session-start.cjs'), 0o755);
+for (const hook of ['session-start.cjs', 'agent-guard.cjs']) fs.chmodSync(path.join(claudePlugin, 'hooks', hook), 0o755);
 fs.cpSync(target, path.join(claudePlugin, 'skills/harness'), { recursive: true, filter: file => path.relative(target, file) !== 'consult-claude' });
 fs.cpSync(path.join(target, 'consult-codex'), path.join(claudePlugin, 'skills/consult-codex'), { recursive: true });
 // Default authoring skills are also exposed directly; the harness copy stays self-contained.
