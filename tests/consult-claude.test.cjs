@@ -302,17 +302,24 @@ test('silent non-TTY stdin fails fast with input_timeout and a TTY fails at once
 test('--approval reports every reason, matches the project by realpath and never calls Claude', posix, t => {
   const f = fixture(t), project = fs.mkdtempSync(path.join(os.tmpdir(), 'consult-claude-project-'));
   t.after(() => fs.rmSync(project, { recursive: true, force: true }));
-  const real = fs.realpathSync(project), dir = path.join(project, 'docs/harness/authorizations'), record = path.join(real, 'docs/harness/authorizations/claude-send.md');
+  const real = fs.realpathSync(project), dir = path.join(project, 'docs/harness/authorizations'), record = path.join(project, 'docs/harness/authorizations/claude-send.md');
   const link = path.join(f.base, 'project-link'); fs.symlinkSync(project, link);
   const write = text => { fs.mkdirSync(dir, { recursive: true }); fs.writeFileSync(path.join(dir, 'claude-send.md'), text); };
   const front = (fields = {}) => '---\n' + Object.entries({ peer: 'claude', project: real, purposes: '[advice, review]', status: 'approved', recorded: '2026-10-24', ...fields }).filter(([, v]) => v !== null).map(([k, v]) => `${k}: ${v}`).join('\n') + '\n---\n\n# 記録\n';
   const ask = (args, target = project) => { const result = run(f, { args: ['--approval', '--project', target, ...args], value: '' }); assert.equal(result.status, 0, result.stdout); assert.equal(result.data.ok, true); return result.data; };
-  assert.deepEqual(ask(['--purpose', 'advice']), { ok: true, approved: false, reason: 'missing', record, purposes: [] });
+  assert.deepEqual(ask(['--purpose', 'advice']), { ok: true, approved: false, reason: 'missing', record, purposes: [], message: 'No send approval record exists for this project.' });
   write('# 記録だけ\n'); let data = ask([]); assert.equal(data.reason, 'malformed'); assert.match(data.message, /line 1/);
   write(front({ purposes: 'advice' })); data = ask([]); assert.equal(data.reason, 'malformed'); assert.match(data.message, /line 4: purposes/);
   write(front({ purposes: '[advice, chat]' })); assert.equal(ask([]).reason, 'malformed');
   write(front({ peer: 'codex' })); data = ask([]); assert.equal(data.reason, 'malformed'); assert.match(data.message, /line 2: peer must be claude/);
-  write(front({ recorded: null })); data = ask([]); assert.equal(data.reason, 'malformed'); assert.match(data.message, /missing recorded/);
+  write(front({ recorded: null })); data = ask([]); assert.equal(data.reason, 'malformed'); assert.match(data.message, /recorded is required/);
+  write(front({ recorded: 'yesterday' })); data = ask([]); assert.equal(data.reason, 'malformed'); assert.match(data.message, /^line 6: recorded/);
+  // Unknown keys are ignored, empty purposes approve nothing, and block lists are accepted.
+  write(front({ note: 'kept by hand' })); assert.equal(ask(['--purpose', 'advice']).reason, 'approved');
+  write(front({ purposes: '[]' })); assert.deepEqual([ask(['--purpose', 'advice']).reason, ask([]).reason], ['purpose_missing', 'approved']);
+  write(front({ purposes: '\n  - review' })); assert.deepEqual(ask(['--purpose', 'review']).purposes, ['review']);
+  // revoked is decided before project_mismatch.
+  write(front({ status: 'revoked', project: path.join(real, 'other') })); assert.equal(ask(['--purpose', 'advice']).reason, 'revoked');
   write(front({ status: 'revoked' })); assert.deepEqual(ask(['--purpose', 'advice']), { ok: true, approved: false, reason: 'revoked', record, purposes: ['advice', 'review'] });
   write(front({ project: path.join(real, 'other') })); assert.equal(ask(['--purpose', 'advice']).reason, 'project_mismatch');
   write(front({ purposes: '[advice]' })); assert.deepEqual(ask(['--purpose', 'review']), { ok: true, approved: false, reason: 'purpose_missing', record, purposes: ['advice'] });

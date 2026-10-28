@@ -22,7 +22,6 @@ const ROLE_PROMPTS = {
   reviewer: 'Independently review the change between the supplied base and head commits against the numbered acceptance criteria. Build your own risk list before reading any implementer claims. The diff is included below; read surrounding code in the current repository with Read, Grep and Glob only, and report concrete findings with file:line locations and evidence. Never modify files, Git state or the network.',
 };
 const ROLES = Object.keys(ROLE_PROMPTS);
-const PURPOSES = ['advice', 'review', 'image'];
 const SEVERITIES = ['critical', 'high', 'medium', 'low'];
 const REVIEW_VERDICTS = ['PASS', 'NEEDS_WORK', 'BLOCKED'];
 const LISTS = ['points', 'risks', 'recommendations', 'questions'];
@@ -263,40 +262,62 @@ export async function consult(value, { executable = 'claude', timeoutMs = 120000
   } finally { await rm(scratch, { recursive: true, force: true }); }
 }
 
-// Send-approval record check shared with the other peers' helpers. Read-only.
-export async function checkApproval({ project, purpose, peer = 'claude' }) {
-  if (typeof project !== 'string' || !path.isAbsolute(project)) fail('invalid_options', '--approval needs --project <absolute path>.');
-  if (purpose !== undefined && !PURPOSES.includes(purpose)) fail('invalid_options', `--purpose must be one of ${PURPOSES.join(', ')}.`);
-  const target = await realpath(project).catch(() => path.resolve(project));
-  const record = path.join(target, 'docs', 'harness', 'authorizations', `${peer}-send.md`);
-  const answer = (approved, reason, purposes = [], message) => ({ ok: true, approved, reason, record, purposes, ...(message ? { message } : {}) });
-  let text;
-  try { text = await readFile(record, 'utf8'); } catch { return answer(false, 'missing'); }
-  const lines = text.split(/\r?\n/);
-  if (lines[0] !== '---') return answer(false, 'malformed', [], 'line 1: the record must start with a --- frontmatter line.');
-  const end = lines.indexOf('---', 1);
-  if (end === -1) return answer(false, 'malformed', [], 'frontmatter has no closing --- line.');
-  const fields = {};
-  for (let i = 1; i < end; i++) {
-    if (!lines[i].trim()) continue;
-    const match = /^([A-Za-z_][\w-]*):\s*(.*)$/.exec(lines[i]);
-    if (!match) return answer(false, 'malformed', [], `line ${i + 1}: expected "key: value".`);
-    if (Object.hasOwn(fields, match[1])) return answer(false, 'malformed', [], `line ${i + 1}: duplicate key ${match[1]}.`);
-    fields[match[1]] = { value: match[2].trim().replace(/^(["'])(.*)\1$/, '$2'), line: i + 1 };
+// BEGIN shared send-approval check (keep identical across consult-codex, consult-claude, codex-image)
+// Send approval is decided from the record's frontmatter only; this helper never writes a record.
+const APPROVAL_PEER = 'claude';
+export const PURPOSES = ['advice', 'review', 'image'];
+const unquote = value => value.length >= 2 && /^(["']).*\1$/.test(value) ? value.slice(1, -1) : value;
+function parseFrontmatter(text) {
+  const lines = text.replace(/^﻿/, '').split(/\r?\n/);
+  if (lines[0] !== '---') return { error: 'line 1: the record must start with a --- frontmatter line' };
+  const close = lines.indexOf('---', 1);
+  if (close === -1) return { error: 'line 1: the frontmatter has no closing --- line' };
+  const fields = {}; let last;
+  for (let i = 1; i < close; i++) {
+    const line = lines[i], number = i + 1;
+    if (!line.trim() || line.trimStart().startsWith('#')) continue;
+    const item = /^\s+-\s*(.*)$/.exec(line);
+    if (item) {
+      if (last !== 'purposes' || fields.purposes.inline) return { error: `line ${number}: a list item is allowed only under an empty purposes: line` };
+      fields.purposes.items.push({ value: unquote(item[1].trim()), line: number }); continue;
+    }
+    const match = /^([A-Za-z_][\w-]*):\s*(.*)$/.exec(line);
+    if (!match) return { error: `line ${number}: expected "key: value"` };
+    const [, key, raw] = match, value = raw.trim();
+    if (Object.hasOwn(fields, key)) return { error: `line ${number}: duplicate ${key}` };
+    last = key;
+    if (key !== 'purposes') { fields[key] = { value: unquote(value), line: number }; continue; }
+    if (value === '') fields.purposes = { items: [], line: number, inline: false };
+    else if (/^\[.*\]$/.test(value)) fields.purposes = { items: value.slice(1, -1).split(',').map(part => part.trim()).filter(Boolean).map(part => ({ value: unquote(part), line: number })), line: number, inline: true };
+    else return { error: `line ${number}: purposes must be a list such as [advice, review]` };
   }
-  for (const key of ['peer', 'project', 'purposes', 'status', 'recorded']) if (!fields[key]) return answer(false, 'malformed', [], `frontmatter (lines 1-${end + 1}) is missing ${key}.`);
-  if (fields.peer.value !== peer) return answer(false, 'malformed', [], `line ${fields.peer.line}: peer must be ${peer}.`);
-  const list = /^\[(.*)\]$/.exec(fields.purposes.value);
-  const purposes = list ? list[1].split(',').map(item => item.trim().replace(/^(["'])(.*)\1$/, '$2')).filter(Boolean) : [];
-  if (!list || !purposes.length || purposes.some(item => !PURPOSES.includes(item))) return answer(false, 'malformed', [], `line ${fields.purposes.line}: purposes must be a [list] of ${PURPOSES.join(', ')}.`);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(fields.recorded.value)) return answer(false, 'malformed', [], `line ${fields.recorded.line}: recorded must be YYYY-MM-DD.`);
-  if (!path.isAbsolute(fields.project.value)) return answer(false, 'malformed', [], `line ${fields.project.line}: project must be an absolute path.`);
-  if (fields.status.value !== 'approved') return answer(false, 'revoked', purposes);
-  const recorded = await realpath(fields.project.value).catch(() => path.resolve(fields.project.value));
-  if (recorded !== target) return answer(false, 'project_mismatch', purposes);
-  if (purpose !== undefined && !purposes.includes(purpose)) return answer(false, 'purpose_missing', purposes);
-  return answer(true, 'approved', purposes);
+  return { fields };
 }
+const canonical = file => realpath(file).catch(() => path.resolve(file));
+export async function checkApproval({ project, purpose, peer = APPROVAL_PEER }) {
+  if (typeof project !== 'string' || !path.isAbsolute(project)) fail('invalid_options', '--project must be an absolute path.');
+  if (purpose !== undefined && !PURPOSES.includes(purpose)) fail('invalid_options', `--purpose must be one of ${PURPOSES.join(', ')}.`);
+  const record = path.join(project, 'docs/harness/authorizations', `${peer}-send.md`);
+  const result = (approved, reason, purposes, message) => ({ ok: true, approved, reason, record, purposes, ...(message ? { message } : {}) });
+  const info = await stat(record).catch(() => null);
+  if (!info) return result(false, 'missing', [], 'No send approval record exists for this project.');
+  if (!info.isFile() || info.size > 65536) return result(false, 'malformed', [], 'The approval record is not a regular file of at most 64 KiB.');
+  const parsed = parseFrontmatter(await readFile(record, 'utf8'));
+  if (parsed.error) return result(false, 'malformed', [], parsed.error);
+  const { fields } = parsed;
+  for (const key of ['peer', 'project', 'purposes', 'status', 'recorded']) if (!fields[key] || (key !== 'purposes' && !fields[key].value)) return result(false, 'malformed', [], `frontmatter: ${key} is required`);
+  if (fields.peer.value !== peer) return result(false, 'malformed', [], `line ${fields.peer.line}: peer must be ${peer}`);
+  if (!path.isAbsolute(fields.project.value)) return result(false, 'malformed', [], `line ${fields.project.line}: project must be an absolute path`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fields.recorded.value)) return result(false, 'malformed', [], `line ${fields.recorded.line}: recorded must be a YYYY-MM-DD date`);
+  const bad = fields.purposes.items.find(item => !PURPOSES.includes(item.value));
+  if (bad) return result(false, 'malformed', [], `line ${bad.line}: purposes may contain only ${PURPOSES.join(', ')}`);
+  const purposes = [...new Set(fields.purposes.items.map(item => item.value))];
+  if (fields.status.value !== 'approved') return result(false, 'revoked', purposes);
+  if (await canonical(fields.project.value) !== await canonical(project)) return result(false, 'project_mismatch', purposes);
+  if (purpose !== undefined && !purposes.includes(purpose)) return result(false, 'purpose_missing', purposes);
+  return result(true, 'approved', purposes);
+}
+// END shared send-approval check
 
 async function readInput(file, timeoutMs) {
   if (file) {
@@ -354,6 +375,7 @@ async function main(args) {
   }
   if (approval) {
     if (options.checkOnly || file || options.model || options.timeoutMs !== undefined) fail('invalid_options', '--approval accepts only --project and --purpose.');
+    if (project === undefined) fail('invalid_options', '--approval requires --project <abs>.');
     return checkApproval({ project, purpose });
   }
   if (project !== undefined || purpose !== undefined) fail('invalid_options', '--project and --purpose are used only with --approval.');
