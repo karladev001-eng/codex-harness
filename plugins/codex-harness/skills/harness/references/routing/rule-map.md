@@ -8,7 +8,7 @@
 | 1.2 | [本文](settings.md) | Node22/runtime/status、引用、個人/プロジェクト・上位/ユーザー指示、不備報告/無断有効化禁止（共通境界） |
 | 1.3 | [本文](settings.md) | inactive終了、delegation/review/persistence/measurement/loopの個別OFF、auto/fixed基準値、旧全OFF互換、開始時再評価/変更保持 |
 | 2.1 | [本文](preimplementation.md) | activeの実装/制作/修正、UI/非コード、小変更、各機能OFF、提示先行、inactive/準備のみの除外 |
-| 2.2 | [本文](preimplementation.md) | 純発案/相談/批評はClaude判定、承認/コード委譲/Git不要、実装移行時適用 |
+| 2.2 | [本文](preimplementation.md) | 純発案/相談/批評は外部相談の判定、承認/コード委譲/Git不要、実装移行時適用 |
 | 2.3 | [本文](preimplementation.md) | 手順1–5: 仕様全項目、UIがある場合だけ視覚モック/状態/版/閲覧、準備とproduction区別、提示後本人承認/非承認例/再確認免除、未解決独立/必須判断/大規模概要/部分承認、意味変更と不変修正 |
 | 2.4 | [本文](preimplementation.md) | 末2段落: 既存正本/重複禁止、資料版/提示証拠/UI理由、承認独立欄/回答別欄、planned/pending/ready、既存schema、保存OFF、受領/レビュー/改訂/完了照合 |
 | 3.1 | [本文](peer-consult.md) | active親・delegation・停止指定、該当1役、全役一律禁止、inactive/OFF/worker自動禁止、明示依頼別扱い |

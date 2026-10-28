@@ -21,7 +21,13 @@ Knowledgeの隔離試験は[運用ガイドの検証範囲](docs/guides/knowledg
 | workerの境界（HARNESS_WORKERの実装担当） | 1.0（2/2、再委譲なし） | 1.0（2/2） | 0 |
 
   3回の実行で合計約$1.6。少ない試行回数なので傾向の確認であり、統計的な保証ではない。書込みツールを許可しない実行では、workerケースは両群ともツール不足でBLOCKEDとなり評価にならなかった。
-- 未確認: 実際の対話セッションでのAgent委譲（`harness:implementer` へのモデル指定、`isolation: "worktree"`）、Codex側から見た2者レビュー、画像生成の連携、Windows。
+- 委譲の評価（`delegate-implementation`、scaffoldでgitリポジトリを用意、`--scaffold`）: 承認済みの小さな変更で、親がAgentに何を渡すかをツール呼出しで採点した。
+  - 初回（2回）: 2回とも `harness:implementer` に委譲し、`HARNESS_WORKER` 付きのパケットを渡した。ただし1回は `model` を省略し、子がメインと同じモデルで動いた。対策として、SessionStartの文脈と `hosts/claude-code.md` に「起動のたびにmodelとeffortを渡す」を明記した。
+  - 対策後（2回）: 2回とも `model: "sonnet"`・`effort: "medium"` を渡し、`fork` は使わなかった（ツール採点4項目すべて合格、プラグインなしは委譲0回）。`isolation: "worktree"` も指定したが、評価環境ではworktreeとgitが使えず、2回とも理由を報告して親のcheckoutで作業させた。レビューは `harness:reviewer`（opus/high）でPASS。Codexとの2者レビューは送信承認がないため行わず、そう報告した。
+  - 最終報告のLLM採点は2回とも不合格だった。1回は担当モデル名を報告しなかったため、1回は25ターンの上限で作業途中に終わったため。モデルはツール採点で確認するので報告の条件から外し、上限を40ターンにした。この変更後のケースはまだ再実行していない。
+  - 4ケースの再実行（ホスト別の書き分け後）: 実装前の承認 1.0 対 0.0、純相談 1.0 対 1.0、workerの境界 1.0 対 1.0。今回の評価は合計約$4.5。
+- ホスト固有の記述の書き分け: `roles.md`・`routing/coordination.md`・`routing/peer-consult.md` を役割キー（`deterministic` などとeffort）だけで書き、Codexのモデル名・`fork_turns` などは新しい `references/hosts/codex.md` に移した。外部相談の手順は、ホストに応じてconsult-claudeとconsult-codexのどちらを使うかを書くように直した。
+- 未確認: 実際の対話セッションでの `isolation: "worktree"`（評価環境では使えない）、Codex側から見た2者レビュー、画像生成の連携、Windows。
 
 ## 2026-10-11: 0.4.3のリリース候補検証
 

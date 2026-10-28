@@ -21,7 +21,7 @@ flowchart TD
   A -->|Yes| A_READ["references/routing/preimplementation.md"]
   A_READ --> C
   A -->|No| C
-  C{"C: 開かれた発案、重要判断、停滞、批評。明示Claude依頼も判定"}
+  C{"C: 開かれた発案、重要判断、停滞、批評。別系統モデルへの明示依頼も判定"}
   C -->|Yes| C_READ["references/routing/peer-consult.md"]
   C_READ --> W
   C -->|No| W
@@ -50,7 +50,7 @@ flowchart TD
 |---|---|---|
 | S | 設定の解釈・互換性・切替を確認する | [設定](settings.md)：切替 |
 | A | 実装・制作・修正へ進む | [提示・承認](preimplementation.md)：承認 |
-| C | 開かれた発案、重要判断、停滞、批評。明示Claude依頼も判定 | [Claude](peer-consult.md)：条件・権限 |
+| C | 開かれた発案、重要判断、停滞、批評。別系統モデルへの明示依頼も判定 | [外部相談](peer-consult.md)：条件・権限 |
 | W | Webを根拠に回答する | [出典](web.md)：根拠 |
 | F | UI・文書等の制作・修正・フィードバックでloop ON、明示記憶管理、または制作を委譲する（自動委譲は要求しない） | [制作](creative.md)：記憶・保存 |
 | D | コード変更、または明示的な大規模探索の委譲 | [調整](coordination.md)：委譲・レビュー |

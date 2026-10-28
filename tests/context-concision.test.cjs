@@ -50,11 +50,11 @@ test('independent flags, consultation and source checks retain negative boundari
     ['learning OFF allows explicit memory but persistence controls access', /明示的な確認・訂正・忘却は別操作[\s\S]*persistence=true/],
   ]);
   expectRules(body('references/routing/peer-consult.md'), [
-    ['parent/delegation gate and explicit exception', /activeな親でdelegation ON[\s\S]*停止指定がなければ[\s\S]*該当1役[\s\S]*workerは自動起動しない[\s\S]*明示Claude依頼は別扱い/],
-    ['independent initial ideas and stalled attempts', /初回はCodex案を渡さず[\s\S]*2回修正[\s\S]*原因の見立てが更新できない/],
-    ['bounded external consultation', /同時実行枠[\s\S]*空きを待つ[\s\S]*ツールなしCLI[\s\S]*通常1回[\s\S]*追加質問1回まで[\s\S]*再帰委譲・無限再試行は禁止/],
+    ['parent/delegation gate and explicit exception', /activeな親でdelegation ON[\s\S]*停止指定がなければ[\s\S]*該当1役[\s\S]*workerは自動起動しない[\s\S]*明示依頼は別扱い/],
+    ['independent initial ideas and stalled attempts', /初回は親の案を渡さず[\s\S]*2回修正[\s\S]*原因の見立てが更新できない/],
+    ['bounded external consultation', /同時実行枠[\s\S]*空きを待ち[\s\S]*ツールなしCLI[\s\S]*通常1回[\s\S]*追加質問1回まで[\s\S]*再帰委譲・無限再試行は禁止/],
     ['advice is neither approval nor evidence', /回答を証拠・実行権限・ユーザー承認としない/],
-    ['return to primary information', /元ファイル\/原文\/公式一次資料\/実測の版・日時・条件へ戻る[\s\S]*重要矛盾[\s\S]*未確定[\s\S]*合意や追加相談で原情報確認を代替しない/],
+    ['return to primary information', /元ファイル\/原文\/公式一次資料\/実測の版・日時・条件へ戻る[\s\S]*重要矛盾[\s\S]*未確定[\s\S]*合意、追加相談で原情報の確認を代替しない/],
   ]);
   expectRules(body('references/routing/web.md'), [
     ['source links tied to claims and no invention', /主張の近く[\s\S]*絶対URL[\s\S]*検索結果ページ・内部ID・推測\/捏造URLは禁止/],

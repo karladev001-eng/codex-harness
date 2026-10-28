@@ -10,7 +10,7 @@ export const REQUIRED_SOURCE_FILES = [
   'consult-claude/SKILL.md', 'consult-claude/agents/openai.yaml', 'consult-claude/scripts/consult.mjs', 'consult-codex/SKILL.md', 'consult-codex/scripts/consult.mjs',
   'assets/adr.md', 'assets/completion.md', 'assets/creative-preferences.md', 'assets/defaults.json', 'assets/project-map.md', 'assets/task.md',
   'references/routing/settings.md', 'references/routing/preimplementation.md', 'references/routing/peer-consult.md', 'references/routing/web.md', 'references/routing/creative.md', 'references/routing/coordination.md', 'references/routing/continuity.md',
-  'references/routing/chart.md', 'references/routing/rule-map.md', 'references/early-compaction.md', 'references/hosts/claude-code.md',
+  'references/routing/chart.md', 'references/routing/rule-map.md', 'references/early-compaction.md', 'references/hosts/claude-code.md', 'references/hosts/codex.md',
   'references/commands.md', 'references/creative-loop.md', 'references/technical-lessons.md', 'references/measurement.md', 'references/parallel.md', 'references/reviewer.md', 'references/roles.md',
   'references/roles/paper-discovery.md', 'references/roles/source-verification.md', 'references/roles/web-review.md', 'references/roles/code-review.md', 'references/roles/record-keeper.md',
   'authoring-skills/create-harness/SKILL.md', 'authoring-skills/create-harness/assets/workflow.md',
