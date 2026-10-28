@@ -49,6 +49,34 @@ test('every helper exposes the shared check with the same decisions', async t =>
     const approved = await checkApproval({ project, purpose: 'advice' });
     assert.deepEqual(approved, { ok: true, approved: true, reason: 'approved', record: path.join(dir, `${peer}-send.md`), purposes: ['advice'] }, name);
     assert.equal((await checkApproval({ project, purpose: 'image' })).reason, 'purpose_missing', name);
-    await assert.rejects(checkApproval({ project: 'relative' }), error => error.code === 'invalid_options', name);
+    await assert.rejects(checkApproval({ project: 'relative', purpose: 'advice' }), error => error.code === 'invalid_options', name);
+    // There is no purpose-free approval: an omitted or unknown purpose is an option error.
+    for (const purpose of [undefined, '', 'chat']) await assert.rejects(checkApproval({ project, purpose }), error => error.code === 'invalid_options' && /--purpose is required/.test(error.message), `${name} ${purpose}`);
+  }
+});
+
+test('inline purposes reject empty items, and an empty list approves no purpose', async t => {
+  const base = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'send-approval-'));
+  t.after(() => fs.rmSync(base, { recursive: true, force: true }));
+  const project = fs.realpathSync(base), dir = path.join(project, 'docs/harness/authorizations');
+  fs.mkdirSync(dir, { recursive: true });
+  for (const [name, { file, peer }] of Object.entries(helpers)) {
+    const { checkApproval, PURPOSES } = await import(require('node:url').pathToFileURL(file).href);
+    const record = purposes => fs.writeFileSync(path.join(dir, `${peer}-send.md`), `---\npeer: ${peer}\nproject: ${project}\npurposes: ${purposes}\nstatus: approved\nrecorded: 2026-10-28\n---\n`);
+    for (const list of ['[advice,,review]', '[advice,]', '[,]', '[ , advice]']) {
+      record(list);
+      const result = await checkApproval({ project, purpose: 'advice' });
+      assert.deepEqual([result.approved, result.reason], [false, 'malformed'], `${name} ${list}`);
+      assert.match(result.message, /^line 4: purposes has an empty item/, `${name} ${list}`);
+    }
+    for (const list of ['[]', '[ ]']) {
+      record(list);
+      for (const purpose of PURPOSES) {
+        const result = await checkApproval({ project, purpose });
+        assert.deepEqual([result.approved, result.reason, result.purposes], [false, 'purpose_missing', []], `${name} ${list} ${purpose}`);
+      }
+    }
+    record('[advice, review]');
+    assert.equal((await checkApproval({ project, purpose: 'review' })).reason, 'approved', name);
   }
 });

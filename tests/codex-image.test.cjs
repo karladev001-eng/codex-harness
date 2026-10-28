@@ -8,12 +8,12 @@ const source = path.join(root, 'plugins/codex-harness/skills/harness/codex-image
 
 // The fake records argv, cwd, stdin and leaked env names, then answers as the Codex CLI would.
 // `exec` writes into $CODEX_HOME/generated_images/<thread_id>/ the way image_gen stores its output
-// (codex-cli 0.164.0). Mode `nothread` reports no usable thread_id, which exercises the fallback.
+// (codex-cli 0.164.0). Mode `nothread` reports no usable thread_id, so its image must not be taken.
 const FAKE = `#!/usr/bin/env node
 const fs = require('node:fs'), path = require('node:path'), crypto = require('node:crypto'); const args = process.argv.slice(2), mode = process.env.FAKE_MODE || 'ok';
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3, 4]), JPG = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 5, 6]);
 let input = ''; process.stdin.on('data', d => input += d).on('end', () => {
-  fs.appendFileSync(process.env.FAKE_LOG, JSON.stringify({ args, cwd: process.cwd(), entries: fs.readdirSync(process.cwd()), input, env: Object.keys(process.env).filter(k => /^(GH_|GITHUB_|AWS_|ANTHROPIC_|CLAUDE_)/.test(k)) }) + '\\n');
+  fs.appendFileSync(process.env.FAKE_LOG, JSON.stringify({ args, pid: process.pid, cwd: process.cwd(), entries: fs.readdirSync(process.cwd()), input, env: Object.keys(process.env).filter(k => /^(GH_|GITHUB_|AWS_|ANTHROPIC_|CLAUDE_)/.test(k)) }) + '\\n');
   if (args[0] === 'login') process.exit(mode === 'logged_out' ? 1 : 0);
   if (args[0] === 'features') { console.log('apps stable false'); console.log('image_generation stable ' + (mode === 'no_feature' ? 'false' : 'true')); process.exit(0); }
   const thread = crypto.randomUUID(), images = path.join(process.env.CODEX_HOME, 'generated_images');
@@ -31,18 +31,22 @@ let input = ''; process.stdin.on('data', d => input += d).on('end', () => {
     process.exit(1);
   }
   emit({ type: 'turn.started' });
+  // Stopped runs: the helper ends these on its time or output limit.
+  if (mode === 'hang_image' || mode === 'hang_none') { if (mode === 'hang_image') save('img.png', PNG); setInterval(() => {}, 1000); return; }
+  if (mode === 'flood_image') { save('img.png', PNG); process.stdout.write('x'.repeat(5 * 1024 * 1024)); setInterval(() => {}, 1000); return; }
   emit({ type: 'item.completed', item: { id: 'r', type: 'reasoning', text: 'thinking' } });
   if (mode === 'other_thread') { save('theirs.png', PNG, path.join(images, crypto.randomUUID())); }
   if (mode === 'exit_image') { save('img.png', PNG); process.exit(1); }
   if (mode === 'exit_none') process.exit(1);
   let saved;
-  if (mode === 'ok' || mode === 'tool' || mode === 'outside' || mode === 'nothread' || mode === 'failed_image') saved = save('img.png', PNG);
+  if (mode === 'ok' || mode === 'tool' || mode === 'view_image' || mode === 'image_edit' || mode === 'outside' || mode === 'nothread' || mode === 'failed_image') saved = save('img.png', PNG);
   if (mode === 'two') { save('a.png', PNG); save('b.png', PNG); }
   if (mode === 'jpeg') saved = save('img.png', JPG);
   if (mode === 'event') { save('decoy.png', PNG); saved = save('chosen.png', PNG); }
   if (mode === 'outside') { const elsewhere = path.join(process.env.FAKE_ELSEWHERE, 'outside.png'); fs.writeFileSync(elsewhere, PNG); saved = elsewhere; }
   emit({ type: 'item.completed', item: { id: 'i', type: 'image_generation', ...(mode === 'event' || mode === 'outside' ? { saved_path: saved } : {}) } });
   if (mode === 'tool') emit({ type: 'item.completed', item: { id: 'c', type: 'command_execution', command: 'ls' } });
+  if (mode === 'view_image' || mode === 'image_edit') emit({ type: 'item.completed', item: { id: 'v', type: mode, path: saved } });
   if (mode === 'failed' || mode === 'failed_image') { emit({ type: 'turn.failed', error: { message: 'raw secret detail' } }); process.exit(0); }
   emit({ type: 'item.completed', item: { id: 'm', type: 'agent_message', text: 'done' } });
   emit({ type: 'turn.completed', usage: {} });
@@ -152,6 +156,8 @@ test('forbidden tools, failed turns, missing images and missing login fail close
   const f = setup(t);
   const tool = image(f, request(f), 'tool');
   assert.equal(tool.code, 1); assert.equal(tool.data.error.code, 'tool_forbidden');
+  // Item types are matched exactly: names that merely contain "image" are other tools.
+  for (const mode of ['view_image', 'image_edit']) assert.equal(image(f, request(f), mode).data.error.code, 'tool_forbidden', mode);
   assert.equal(fs.existsSync(path.join(f.project, 'assets/harbor.png')), false);
   const failed = image(f, request(f), 'failed');
   assert.equal(failed.data.error.code, 'response_error'); assert.equal(JSON.stringify(failed.data).includes('raw secret'), false);
@@ -169,9 +175,11 @@ test('images are read only from generated_images/<thread_id>/ of this run', t =>
   const other = image(f, request(f, { out: path.join(f.project, 'other.png') }), 'other_thread');
   assert.equal(other.code, 1); assert.equal(other.data.error.code, 'empty_response');
   assert.equal(fs.existsSync(path.join(f.project, 'other.png')), false);
-  // Without a usable thread_id the before/after comparison over generated_images is the fallback.
-  const fallback = image(f, request(f, { out: path.join(f.project, 'fallback.png') }), 'nothread');
-  assert.equal(fallback.code, 0); assert.equal(fallback.data.sources.length, 1); assert.match(path.basename(path.dirname(fallback.data.sources[0])), /^id-/);
+  // Without a usable thread_id nothing is taken, even though a new image exists under generated_images.
+  const nothread = image(f, request(f, { out: path.join(f.project, 'nothread.png') }), 'nothread');
+  assert.equal(nothread.code, 1); assert.equal(nothread.data.error.code, 'empty_response'); assert.match(nothread.data.error.message, /thread_id/);
+  assert.equal(fs.existsSync(path.join(f.project, 'nothread.png')), false);
+  assert.ok(fs.readdirSync(path.join(f.codexHome, 'generated_images')).some(name => name.startsWith('id-')), 'the untaken image exists');
 });
 
 test('an image saved before a failed turn or an unsuccessful exit is returned with a warning', t => {
@@ -188,6 +196,21 @@ test('an image saved before a failed turn or an unsuccessful exit is returned wi
   const exited = image(f, request(f, { out: path.join(f.project, 'c.png') }), 'exit_image');
   assert.equal(exited.code, 0); assert.equal(exited.data.warning, 'Codex CLI exited unsuccessfully after the image was generated');
   assert.equal(image(f, request(f, { out: path.join(f.project, 'd.png') })).data.warning, undefined);
+});
+
+function alive(pid) { try { process.kill(pid, 0); return true; } catch (error) { return error.code !== 'ESRCH'; } }
+test('an image saved before the time or output limit is returned with a warning, and the CLI is stopped', { skip: process.platform === 'win32' }, t => {
+  const f = setup(t);
+  const timed = image(f, request(f), 'hang_image', '--timeout-ms', '2000');
+  assert.equal(timed.code, 0, JSON.stringify(timed.data)); assert.equal(timed.data.files.length, 1);
+  assert.equal(timed.data.warning, 'Codex CLI timed out after the image was generated');
+  const flooded = image(f, request(f, { out: path.join(f.project, 'b.png') }), 'flood_image');
+  assert.equal(flooded.code, 0, JSON.stringify(flooded.data)); assert.equal(flooded.data.warning, 'Codex CLI exceeded the output limit after the image was generated');
+  // Without an image the limit is still the failure.
+  const none = image(f, request(f, { out: path.join(f.project, 'c.png') }), 'hang_none', '--timeout-ms', '2000');
+  assert.equal(none.code, 1); assert.equal(none.data.error.code, 'timeout');
+  assert.equal(fs.existsSync(path.join(f.project, 'c.png')), false);
+  for (const call of f.calls().filter(call => call.args[0] === 'exec')) assert.equal(alive(call.pid), false, 'the stopped CLI is no longer running');
 });
 
 test('a busy model without an image is peer_busy; other failures keep their codes', t => {

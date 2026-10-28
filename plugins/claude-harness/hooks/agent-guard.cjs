@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // PreToolUse guard for Agent launches. Evals showed the coordinator sometimes omitted the
 // worker model, so the rules a hook can check mechanically are enforced here instead of
-// repeated in prose: harness workers need an explicit model and effort, and never fork.
+// repeated in prose: harness workers need an explicit model and effort, and run only as harness:* agents.
 // Anything else, and every launch while the harness is inactive, passes untouched.
 const fs = require('node:fs');
 const path = require('node:path');
@@ -20,16 +20,19 @@ function status(project) {
 
 let input = {};
 try { input = JSON.parse(fs.readFileSync(0, 'utf8') || '{}'); } catch { process.exit(0); }
-const tool = input.tool_input || {}, type = String(tool.subagent_type || '');
-// Model and effort are checked only on harness agents; the prompt marker only identifies a worker sent
-// through fork or with no type, which runs outside the harness agent definitions.
-const forkedWorker = (type === 'fork' || type === '') && String(tool.prompt || '').includes('HARNESS_WORKER');
-const missing = type.startsWith('harness:') ? ['model', 'effort'].filter(key => !tool[key]) : [];
-if (!forkedWorker && missing.length === 0) process.exit(0);
+const tool = input.tool_input || {}, type = String(tool.subagent_type || '').trim();
+// A worker packet starts with the HARNESS_WORKER marker. Such a prompt must go to a harness:* agent:
+// fork, an empty or blank type and any other agent type (general-purpose, Explore, ...) all run outside
+// the harness agent definitions. A prompt that merely mentions the marker later on is not a worker.
+// Model and effort are checked only on harness agents.
+const harnessType = type.startsWith('harness:');
+const strayWorker = !harnessType && String(tool.prompt || '').trimStart().startsWith('HARNESS_WORKER');
+const missing = harnessType ? ['model', 'effort'].filter(key => !tool[key]) : [];
+if (!strayWorker && missing.length === 0) process.exit(0);
 
 const current = status(process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd());
 // Only an active harness is enforced; an unreadable status is reported at session start instead.
 if (!current || !current.active) process.exit(0);
 const table = Object.entries(current.config.models).map(([role, m]) => `${role}=${m.model}/${m.reasoning_effort}`).join(', ');
-if (forkedWorker) deny(`Harness workers start without the parent history: use a harness:* subagent_type instead of fork or an omitted type. Role models: ${table}.`);
+if (strayWorker) deny(`Harness workers start without the parent history: use a harness:* subagent_type instead of fork, an omitted type or another agent type. Role models: ${table}.`);
 deny(`Harness worker launch is missing ${missing.join(' and ')}. Pass them from the role key that fits the work (${table}); an explicit user choice or a pin overrides the table.`);
