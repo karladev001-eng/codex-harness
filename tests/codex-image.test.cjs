@@ -7,28 +7,43 @@ const { fixture, write, root } = require('./helpers.cjs');
 const source = path.join(root, 'plugins/codex-harness/skills/harness/codex-image/scripts/image.mjs');
 
 // The fake records argv, cwd, stdin and leaked env names, then answers as the Codex CLI would.
-// `exec` writes into $CODEX_HOME/generated_images/<id>/ the way image_gen stores its output.
+// `exec` writes into $CODEX_HOME/generated_images/<thread_id>/ the way image_gen stores its output
+// (codex-cli 0.164.0). Mode `nothread` reports no usable thread_id, which exercises the fallback.
 const FAKE = `#!/usr/bin/env node
-const fs = require('node:fs'), path = require('node:path'); const args = process.argv.slice(2), mode = process.env.FAKE_MODE || 'ok';
+const fs = require('node:fs'), path = require('node:path'), crypto = require('node:crypto'); const args = process.argv.slice(2), mode = process.env.FAKE_MODE || 'ok';
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3, 4]), JPG = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 5, 6]);
 let input = ''; process.stdin.on('data', d => input += d).on('end', () => {
   fs.appendFileSync(process.env.FAKE_LOG, JSON.stringify({ args, cwd: process.cwd(), entries: fs.readdirSync(process.cwd()), input, env: Object.keys(process.env).filter(k => /^(GH_|GITHUB_|AWS_|ANTHROPIC_|CLAUDE_)/.test(k)) }) + '\\n');
   if (args[0] === 'login') process.exit(mode === 'logged_out' ? 1 : 0);
   if (args[0] === 'features') { console.log('apps stable false'); console.log('image_generation stable ' + (mode === 'no_feature' ? 'false' : 'true')); process.exit(0); }
-  const store = path.join(process.env.CODEX_HOME, 'generated_images', 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2));
-  const save = (name, data) => { fs.mkdirSync(store, { recursive: true }); fs.writeFileSync(path.join(store, name), data); return path.join(store, name); };
+  const thread = crypto.randomUUID(), images = path.join(process.env.CODEX_HOME, 'generated_images');
+  const store = path.join(images, mode === 'nothread' ? 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2) : thread);
+  const save = (name, data, directory = store) => { fs.mkdirSync(directory, { recursive: true }); fs.writeFileSync(path.join(directory, name), data); return path.join(directory, name); };
   const emit = value => console.log(JSON.stringify(value));
-  emit({ type: 'thread.started', thread_id: 't' }); emit({ type: 'turn.started' });
+  const capacity = 'Selected model is at capacity. Please try a different model.';
+  emit({ type: 'thread.started', thread_id: mode === 'nothread' ? 't' : thread });
+  // The real 0.164.0 stream: a nonfatal warning item, then a capacity error after the image was saved.
+  if (mode === 'real' || mode === 'busy') {
+    emit({ type: 'item.completed', item: { id: 'w', type: 'error', message: 'Under-development features enabled: image_generation.' } });
+    emit({ type: 'turn.started' });
+    if (mode === 'real') save('exec-' + crypto.randomUUID() + '.png', PNG);
+    emit({ type: 'error', message: capacity }); emit({ type: 'turn.failed', error: { message: capacity } });
+    process.exit(1);
+  }
+  emit({ type: 'turn.started' });
   emit({ type: 'item.completed', item: { id: 'r', type: 'reasoning', text: 'thinking' } });
+  if (mode === 'other_thread') { save('theirs.png', PNG, path.join(images, crypto.randomUUID())); }
+  if (mode === 'exit_image') { save('img.png', PNG); process.exit(1); }
+  if (mode === 'exit_none') process.exit(1);
   let saved;
-  if (mode === 'ok' || mode === 'tool' || mode === 'outside') saved = save('img.png', PNG);
+  if (mode === 'ok' || mode === 'tool' || mode === 'outside' || mode === 'nothread' || mode === 'failed_image') saved = save('img.png', PNG);
   if (mode === 'two') { save('a.png', PNG); save('b.png', PNG); }
   if (mode === 'jpeg') saved = save('img.png', JPG);
   if (mode === 'event') { save('decoy.png', PNG); saved = save('chosen.png', PNG); }
   if (mode === 'outside') { const elsewhere = path.join(process.env.FAKE_ELSEWHERE, 'outside.png'); fs.writeFileSync(elsewhere, PNG); saved = elsewhere; }
   emit({ type: 'item.completed', item: { id: 'i', type: 'image_generation', ...(mode === 'event' || mode === 'outside' ? { saved_path: saved } : {}) } });
   if (mode === 'tool') emit({ type: 'item.completed', item: { id: 'c', type: 'command_execution', command: 'ls' } });
-  if (mode === 'failed') { emit({ type: 'turn.failed', error: { message: 'raw secret detail' } }); process.exit(0); }
+  if (mode === 'failed' || mode === 'failed_image') { emit({ type: 'turn.failed', error: { message: 'raw secret detail' } }); process.exit(0); }
   emit({ type: 'item.completed', item: { id: 'm', type: 'agent_message', text: 'done' } });
   emit({ type: 'turn.completed', usage: {} });
 });
@@ -146,6 +161,45 @@ test('forbidden tools, failed turns, missing images and missing login fail close
   assert.equal(logged.data.error.code, 'auth_unavailable'); assert.match(logged.data.error.message, /! codex login/);
 });
 
+test('images are read only from generated_images/<thread_id>/ of this run', t => {
+  const f = setup(t), uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const own = image(f, request(f));
+  assert.equal(own.code, 0); assert.match(path.basename(path.dirname(own.data.sources[0])), uuid);
+  // Another Codex session's image in a different thread directory is never picked up.
+  const other = image(f, request(f, { out: path.join(f.project, 'other.png') }), 'other_thread');
+  assert.equal(other.code, 1); assert.equal(other.data.error.code, 'empty_response');
+  assert.equal(fs.existsSync(path.join(f.project, 'other.png')), false);
+  // Without a usable thread_id the before/after comparison over generated_images is the fallback.
+  const fallback = image(f, request(f, { out: path.join(f.project, 'fallback.png') }), 'nothread');
+  assert.equal(fallback.code, 0); assert.equal(fallback.data.sources.length, 1); assert.match(path.basename(path.dirname(fallback.data.sources[0])), /^id-/);
+});
+
+test('an image saved before a failed turn or an unsuccessful exit is returned with a warning', t => {
+  const f = setup(t);
+  // The event stream observed on codex-cli 0.164.0: warning item, capacity error, turn.failed, exit 1.
+  const real = image(f, request(f), 'real');
+  assert.equal(real.code, 0, JSON.stringify(real.data)); assert.equal(real.data.ok, true); assert.equal(real.data.files.length, 1);
+  assert.equal(real.data.warning, 'turn ended with an error after the image was generated');
+  assert.match(path.basename(real.data.sources[0]), /^exec-.*\.png$/);
+  assert.equal(JSON.stringify(real.data).includes('capacity'), false); assert.equal(real.stderr, '');
+  const failed = image(f, request(f, { out: path.join(f.project, 'b.png') }), 'failed_image');
+  assert.equal(failed.code, 0); assert.equal(failed.data.warning, 'turn ended with an error after the image was generated');
+  assert.equal(JSON.stringify(failed.data).includes('raw secret'), false);
+  const exited = image(f, request(f, { out: path.join(f.project, 'c.png') }), 'exit_image');
+  assert.equal(exited.code, 0); assert.equal(exited.data.warning, 'Codex CLI exited unsuccessfully after the image was generated');
+  assert.equal(image(f, request(f, { out: path.join(f.project, 'd.png') })).data.warning, undefined);
+});
+
+test('a busy model without an image is peer_busy; other failures keep their codes', t => {
+  const f = setup(t);
+  const busy = image(f, request(f), 'busy');
+  assert.equal(busy.code, 1); assert.equal(busy.data.error.code, 'peer_busy');
+  assert.match(busy.data.error.message, /混雑/); assert.match(busy.data.error.message, /--model/);
+  assert.equal(JSON.stringify(busy.data).includes('Selected model'), false); assert.equal(busy.stderr, '');
+  assert.equal(image(f, request(f), 'exit_none').data.error.code, 'cli_failed');
+  assert.equal(fs.existsSync(path.join(f.project, 'assets/harbor.png')), false);
+});
+
 test('--check confirms the CLI, the login and the image_generation feature', t => {
   const f = setup(t);
   assert.deepEqual(image(f, undefined, 'ok', '--check').data, { ok: true, cli: 'available', authenticated: true, image_generation: true });
@@ -178,22 +232,32 @@ test('--approval reads the shared send-approval record and always exits 0', t =>
     return `---\n${Object.entries(values).filter(([, v]) => v !== null).map(([k, v]) => `${k}: ${v}`).join('\n')}\n---\n\n# Codexへの送信事前承認\n`;
   };
   let result = approve();
-  assert.equal(result.code, 0); assert.deepEqual(result.data, { ok: true, approved: false, reason: 'missing', record, purposes: [] });
+  assert.equal(result.code, 0); assert.deepEqual(result.data, { ok: true, approved: false, reason: 'missing', record, purposes: [], message: 'No send approval record exists for this project.' });
   write(record, body());
   assert.deepEqual(approve().data, { ok: true, approved: true, reason: 'approved', record, purposes: ['advice', 'review', 'image'] });
   assert.equal(approve('--purpose', 'advice').data.approved, true);
   write(record, body({ purposes: '[advice]' }));
   result = approve(); assert.equal(result.code, 0); assert.equal(result.data.reason, 'purpose_missing'); assert.deepEqual(result.data.purposes, ['advice']);
+  // Empty purposes are allowed and simply approve nothing; unknown keys are ignored.
+  write(record, body({ purposes: '[]', note: 'kept by hand' }));
+  assert.deepEqual([approve().data.reason, approve().data.purposes], ['purpose_missing', []]);
+  write(record, body({ purposes: '\n  - image' }));
+  assert.equal(approve().data.reason, 'approved');
   write(record, body({ status: 'revoked' }));
+  assert.equal(approve().data.reason, 'revoked');
+  // revoked is decided before project_mismatch.
+  write(record, body({ status: 'revoked', project: f.base }));
   assert.equal(approve().data.reason, 'revoked');
   write(record, body({ project: f.base }));
   assert.equal(approve().data.reason, 'project_mismatch');
   write(record, body({ purposes: 'advice, image' }));
   result = approve(); assert.equal(result.data.reason, 'malformed'); assert.equal(result.data.approved, false); assert.match(result.data.message, /line 4/);
   write(record, body({ purposes: '[advice, painting]' }));
-  assert.match(approve().data.message, /line 4: unknown purpose "painting"/);
+  assert.match(approve().data.message, /^line 4: purposes may contain only advice, review, image/);
+  write(record, body({ peer: 'claude' }));
+  assert.match(approve().data.message, /^line 2: peer must be codex/);
   write(record, body({ recorded: null }));
-  assert.match(approve().data.message, /missing "recorded"/);
+  assert.match(approve().data.message, /recorded is required/);
   write(record, '# Codexへの送信事前承認\n\n- 状態: 承認済み\n');
   result = approve(); assert.equal(result.data.reason, 'malformed'); assert.match(result.data.message, /line 1/);
   // A symlinked project path resolves to the recorded real path.
@@ -201,6 +265,8 @@ test('--approval reads the shared send-approval record and always exits 0', t =>
   const alias = path.join(f.base, 'alias'); fs.symlinkSync(f.project, alias);
   result = image(f, undefined, 'ok', '--approval', '--project', alias);
   assert.equal(result.data.reason, 'approved');
-  assert.equal(image(f, undefined, 'ok', '--approval', '--project', 'relative').data.error.code, 'invalid_options');
+  for (const args of [['--approval', '--project', 'relative'], ['--approval'], ['--approval', '--project', f.project, '--purpose', 'chat']]) {
+    const failed = image(f, undefined, 'ok', ...args); assert.equal(failed.code, 1); assert.equal(failed.data.error.code, 'invalid_options');
+  }
   assert.equal(f.calls().length, 0);
 });
