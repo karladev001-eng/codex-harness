@@ -26,9 +26,9 @@
 | `advice`（発案・相談・批評） | `peer` | [consult-codex](../../consult-codex/SKILL.md) の `ideator` / `consultant` / `critic` |
 | `code_review`（独立レビュー） | `both` | `harness:reviewer` とconsult-codexの `reviewer` を並行し、親が統合（consult-codexの「2者レビュー」）。PASSが揃うまで完了にしません |
 | `html_mock`（仕様・UIモックのHTML） | `claude` | 自分で作る（`harness:codex-html-plan`） |
-| `image_generation`（画像生成） | `codex` | 未実装。Codexで生成するよう利用者に案内し、出力先を指定します |
+| `image_generation`（画像生成） | `codex` | `harness:codex-image` で、Codexの組み込み画像生成を `codex exec` 経由で使います。生成物はプロジェクト内の指定パスへ、既存ファイルを上書きせずにコピーします |
 
-- Codexへの送信には、プロジェクトごとの送信承認が必要です（consult-codexの「送信の承認」）。承認がない、`codex` CLIがない、ログインを確認できない場合は、そう報告して自分側だけで進めます。黙って省略も代替もしません。
+- Codexへ送る前に、各スキルの `--approval` で送信承認を判定します（consult-codexの「送信の承認」）。`approved` なら聞き直しません。それ以外なら、決まった文面で1回だけ確認します。承認が得られない、`codex` CLIがない、ログインを確認できない場合は、そう報告して自分側だけで進めます。黙って省略も代替もしません。
 - `off` の作業は自動で行いません。ユーザーが明示的に頼めば従います。
 - Claude Code上では `consult-claude` は使いません。Codexを使えずに独立案が必要なときは、親の案を渡さない新しいサブエージェント（`complex` のモデル）に出させ、「同じモデル系統の別インスタンスによる案」と明記します。
 
