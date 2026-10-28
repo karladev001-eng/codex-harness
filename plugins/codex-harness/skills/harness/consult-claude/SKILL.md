@@ -44,7 +44,11 @@ recorded: 2026-10-24
 
 - 送る前に `node "<skill-dir>/scripts/consult.mjs" --approval --project <abs> --purpose <p>` で判定します。purposeは、相談の3役なら `advice`、`reviewer` なら `review` です。`--purpose` は必須で、省くと `invalid_options` になります（目的を決めない承認はありません）。結果は常に `{"ok":true,"approved":true|false,"reason":"approved|missing|malformed|revoked|project_mismatch|purpose_missing","record":"...","purposes":[...]}` です。このhelperは記録を読むだけで、書きません。
 - `approved=true` なら、範囲内なので聞き直さずに送ります。
-- `approved=false` なら、送らずにユーザーへ1回だけ次の文面で確認します。「Claude（Anthropic）へ、`<project>` の `<送る情報の範囲>` を `<目的>` のために送ってよいですか。承認していただければ `docs/harness/authorizations/claude-send.md` に記録します。」`malformed` のときは、`message` にある問題の行も示します。承認されたら記録してから送ります。断られたら送らず、Codexだけで続けます。同じ範囲で何度も聞き直しません。
+- `approved=false` なら、送らずにユーザーへ1回だけ次の文面で確認します。「Claude（Anthropic）へ、`<project>` の `<送る情報の範囲>` を `<目的>` のために送ってよいですか。承認していただければ `docs/harness/authorizations/claude-send.md` に記録します。」`malformed` のときは、`message` にある問題の行も示します。断られたら送らず、Codexだけで続けます。同じ範囲で何度も聞き直しません。
+- ユーザーが明示的に承認したら、`reason` に応じて次のとおり記録してから送ります。
+  - `purpose_missing` のときだけ、既存の記録の `purposes` に今回のpurposeだけを追記します。他の項目と他のpurposeは変えません。
+  - `missing` のときは、テンプレートどおりに新しく作ります。`purposes` には今回承認された範囲だけを書きます。
+  - `revoked`・`project_mismatch`・`malformed` のときは、黙って直しません。理由を伝えて新しく承認を求め、承認されたらfrontmatterをテンプレートどおりに書き直します（`status: approved`、正しい `project`、`purposes` は今回ユーザーが承認した範囲だけ、`recorded` は今日）。本文の承認根拠に新しい承認を追記し、古い記述は消しません。`revoked` はユーザーが撤回したものなので、再承認なしに戻しません。
 - persistence OFFなら記録ファイルを作らず、会話の中で得た承認だけで、その会話の間だけ送ります。
 - 承認は、記録されたプロジェクトと目的の範囲だけに使います。別のプロジェクトや範囲外の情報には広げません。外部送信の承認と、ホストの実行権限は別のものです。
 - 秘密鍵・トークン・認証情報・無関係な個人情報は、どの役割でも渡しません。`reviewer` の対象リポジトリにそれらが含まれる疑いがあれば、使わずに理由を報告します。
@@ -63,7 +67,8 @@ recorded: 2026-10-24
 `collaboration.code_review` が `both` のとき、Codex側の独立レビュー（harnessのreviewer）とconsult-claudeの `reviewer` を並行して動かします。
 
 - 両方に同じ基点・結果commit・受入条件を渡します。互いの結果は渡しません。
-- `repository` には、結果commitをcheckoutしたクリーンなdetached worktreeを渡します（例：`git worktree add --detach <tmp> <head>`）。作業中のcheckoutを渡すと、未コミットの変更がレビュー対象と混ざります。helperはClaudeを呼ぶ前に、`git status --porcelain` が空であることと、`HEAD` が `head` と一致することを確かめ、違えば `invalid_input` で止まります。終わったらそのworktreeを削除します。
+- `repository` には、結果commitをcheckoutしたクリーンなdetached worktreeを渡します（例：`git worktree add --detach <tmp> <head>`）。作業中のcheckoutを渡すと、未コミットの変更がレビュー対象と混ざります。helperはClaudeを呼ぶ前に、`git status --porcelain --untracked-files=all` に変更も未追跡ファイルもないこと（`status.showUntrackedFiles` の設定に左右されません）と、`HEAD` が `head` と一致することを確かめ、違えば `invalid_input` で止まります。`.gitignore` で無視されたファイル（`node_modules`・`dist` など）は未追跡として拒否されず、止まるのは秘密ファイルらしい名前のものだけです。名前で判断できない機密は止められないので、作業中のcheckoutではなく、対象リポジトリだけの新しいworktreeを渡します。終わったらそのworktreeを削除します。
+- helperはClaudeを呼ぶ前に、`git diff --name-only base..head`（名前の変更は旧名と新名、削除も含む）と、checkoutにある無視ファイルの名前を調べます。パスのどこかの要素が秘密ファイルらしい名前なら、何も送らずに `secret_path` で止まります。名前は大文字小文字を区別せずに比べ、対象は `.env`・`.env.*`（`.env.example`・`.env.sample`・`.env.template` を除く）・`*.pem`・`*.key`・`*.p12`・`*.pfx`・`*.keystore`・`*.jks`・`id_rsa*`・`id_dsa*`・`id_ecdsa*`・`id_ed25519*`（`.pub` を除く）・`.npmrc`・`.pypirc`・`.netrc`・`credentials`・`credentials.*`・`secrets.*`・`*.secret`・`service-account*.json`・`.git-credentials`・`auth.json` です。messageにはパスを最大5件だけ示し、中身は出しません。そのファイルを範囲から除くか、ユーザーに確認します。
 - 親が指摘を突き合わせ、同じ問題の重複をまとめ、重大度を揃えます。片方だけの指摘も、実差分で確かめられれば採用します。
 - 判定はPASSが揃ったときだけPASSです。片方がNEEDS_WORK・BLOCKEDなら、根拠を確かめて直すか、却下の理由を記録します。
 - Claudeが使えないとき（承認がない、認証できない、失敗したなど）は、その旨を報告し、Codex側のレビューだけで進めます。黙って省略しません。
@@ -101,6 +106,8 @@ stdinが端末なら、すぐに `input_unavailable` で止まります。最初
 Claude CLIには `--json-schema` で同じ形を指定します。構造化出力の欄があればそれを使い、なければ回答の文字列を、そのまま・コードフェンスを除いて・最初の `{` から最後の `}` までの順に読み取ります。それでもJSONでなければ `invalid_advice` です。
 
 失敗：`{"ok":false,"error":{"code","message"}}` で非0終了です。Claudeの生の出力・stderr・認証の出力は表示しません。未導入、非対応CLI、認証を確かめられない、不正なJSON、`is_error`、空の回答、非0終了、時間・サイズの上限超過は、失敗として扱います。
+
+- `secret_path` は、`reviewer` の範囲の変更かcheckoutの無視ファイルに、秘密ファイルらしい名前があったときです（上の「2者レビュー」）。Claudeは呼ばれていません。
 
 - `peer_busy` は、Claudeの結果JSONが混雑を示すとき（`api_error_status` が429・529、またはoverloaded・レート制限の報告）です。CLIが非0で終了しても、結果JSONから判定します。時間を置くか、`--model` で別のモデルを指定してやり直します。
 

@@ -107,6 +107,53 @@ test('reviewer refuses a dirty checkout or one not at head before calling Codex'
   assert.equal(consult(f, { ...input, repository: worktree }).code, 0);
 });
 
+test('reviewer refuses a range that changes secret-looking files before calling Codex', t => {
+  const f = setup(t), start = init(f), SECRET_VALUE = 'SECRET_VALUE_7f3a';
+  const commitFiles = files => {
+    for (const [name, text] of Object.entries(files)) write(path.join(f.project, name), text);
+    git(f.project, 'add', '-A'); git(f.project, 'commit', '-qm', 'change'); return git(f.project, 'rev-parse', 'HEAD');
+  };
+  const input = (base, head) => ({ role: 'reviewer', task: 'review', repository: f.project, base, head, criteria: ['1. works'] });
+  let base = start;
+  for (const name of ['.env', 'config/prod.pem', 'id_ed25519']) {
+    const head = commitFiles({ [name]: SECRET_VALUE + '\n', file: 'next ' + name });
+    const result = consult(f, input(base, head));
+    assert.equal(result.code, 1, name); assert.equal(result.data.error.code, 'secret_path', name);
+    assert.equal(result.data.error.message, `秘密ファイルらしい変更が範囲に含まれるため送信しません: ${name}。除外するか、ユーザーに確認してください`);
+    assert.equal(JSON.stringify(result.data).includes(SECRET_VALUE), false);
+    base = head;
+  }
+  // The whole range is checked, and more than five matches are summarized.
+  const many = commitFiles({ 'a.key': 'k', 'b.key': 'k', 'c.key': 'k' });
+  const summary = consult(f, input(start, many)).data.error;
+  assert.equal(summary.code, 'secret_path'); assert.match(summary.message, /: \.env, a\.key, b\.key, c\.key, config\/prod\.pem ほか1件。/);
+  assert.equal(fs.existsSync(path.join(f.base, 'codex.log')), false, 'Codex is never called for a secret-looking range');
+  const unknown = consult(f, input('deadbeefdeadbeef', many)).data.error;
+  assert.equal(unknown.code, 'invalid_input'); assert.match(unknown.message, /git diff base\.\.head failed/);
+  const allowed = commitFiles({ '.env.example': 'KEY=\n', 'id_ed25519.pub': 'ssh-ed25519 AAAA\n' });
+  assert.equal(consult(f, input(many, allowed)).code, 0);
+});
+
+test('reviewer checkout scan ignores showUntrackedFiles and refuses only secret-looking ignored files', t => {
+  const f = setup(t), base = init(f);
+  write(path.join(f.project, '.gitignore'), '.env\ndist/\n'); git(f.project, 'add', '.gitignore'); git(f.project, 'commit', '-qm', 'ignore');
+  const input = { role: 'reviewer', task: 'review', repository: f.project, base, head: git(f.project, 'rev-parse', 'HEAD'), criteria: ['1. works'] };
+  git(f.project, 'config', 'status.showUntrackedFiles', 'no');
+  write(path.join(f.project, 'notes', 'untracked.txt'), 'new');
+  const untracked = consult(f, input);
+  assert.equal(untracked.data.error.code, 'invalid_input'); assert.match(untracked.data.error.message, /クリーンなdetached worktree/);
+  fs.rmSync(path.join(f.project, 'notes'), { recursive: true });
+  write(path.join(f.project, '.env'), 'SECRET_VALUE_7f3a');
+  const ignored = consult(f, input);
+  assert.equal(ignored.data.error.code, 'secret_path');
+  assert.equal(ignored.data.error.message, '秘密ファイルらしい無視ファイルがレビュー用のcheckoutにあるため送信しません: .env。対象リポジトリだけの新しいworktreeを渡すか、ユーザーに確認してください');
+  assert.equal(JSON.stringify(ignored.data).includes('SECRET_VALUE_7f3a'), false);
+  assert.equal(fs.existsSync(path.join(f.base, 'codex.log')), false, 'Codex is never called');
+  fs.rmSync(path.join(f.project, '.env'));
+  write(path.join(f.project, 'dist', 'bundle.js'), 'built');
+  assert.equal(consult(f, input).code, 0);
+});
+
 test('a busy model is peer_busy even on a nonzero exit; other failures keep their codes without raw text', t => {
   const f = setup(t), critic = { role: 'critic', task: 't' };
   for (const mode of ['busy', 'rate_limited']) {

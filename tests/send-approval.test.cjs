@@ -35,6 +35,19 @@ test('the three helpers carry an identical send-approval block apart from the de
   assert.match(blocks[0].text, /export async function checkApproval\(\{ project, purpose, peer = APPROVAL_PEER \}\)/);
 });
 
+test('the three skills describe the same approval record update steps', () => {
+  const steps = Object.keys(helpers).map(name => {
+    const lines = fs.readFileSync(path.join(skills, name, 'SKILL.md'), 'utf8').split('\n');
+    const start = lines.findIndex(line => line.includes('`purpose_missing` のときだけ'));
+    assert.ok(start > 0, `${name} has the purpose_missing step`);
+    assert.equal(lines.filter(line => line.includes('`purpose_missing` のときだけ')).length, 1, name);
+    return { name, text: lines.slice(start - 1, start + 3).join('\n') };
+  });
+  for (const { name, text } of steps.slice(1)) assert.equal(text, steps[0].text, `${name} matches consult-codex`);
+  for (const phrase of ['既存の記録の `purposes` に今回のpurposeだけを追記', '`missing` のときは、テンプレートどおりに新しく作ります', '黙って直しません', '`purposes` は今回ユーザーが承認した範囲だけ', '古い記述は消しません', '再承認なしに戻しません'])
+    assert.ok(steps[0].text.includes(phrase), phrase);
+});
+
 test('every helper exposes the shared check with the same decisions', async t => {
   const base = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'send-approval-'));
   t.after(() => fs.rmSync(base, { recursive: true, force: true }));

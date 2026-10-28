@@ -45,7 +45,11 @@ recorded: 2026-10-28
 - 送る前に毎回、`node "<skill-dir>/scripts/consult.mjs" --approval --project <プロジェクトの絶対パス> --purpose <purpose>` で判定します。purposeは、相談の3役なら `advice`、`reviewer` なら `review` です。`--purpose` は必須で、省くと `invalid_options` になります（目的を決めない承認はありません）。`--project` は、レビュー用の一時worktreeではなく、記録があるプロジェクトのルートです。結果は常に終了コード0の `{"ok":true,"approved":true|false,"reason":"...","record":"<path>","purposes":[...]}` です。
 - `approved` なら、聞き直さずに送ります。
 - それ以外（`missing`・`malformed`・`revoked`・`project_mismatch`・`purpose_missing`）なら、送らずに、次の文面でユーザーに1回だけ確認します。「Codex（OpenAI）へ、<送る情報の範囲>を、<purpose>（<用途>）のために送ってよいですか。この承認は <プロジェクトの絶対パス> のこの目的だけに使います。」`malformed` のときは、`message` にある問題の行も示します。
-- ユーザーが明示的に承認したら、親がテンプレートどおりに記録してから送ります（既存の記録があれば、`purposes` に追加します）。persistence OFFなら、会話内の承認だけで送り、ファイルは作りません。承認されなければ送らず、Claude側だけで進めます。
+- ユーザーが明示的に承認したら、`reason` に応じて次のとおり記録してから送ります。
+  - `purpose_missing` のときだけ、既存の記録の `purposes` に今回のpurposeだけを追記します。他の項目と他のpurposeは変えません。
+  - `missing` のときは、テンプレートどおりに新しく作ります。`purposes` には今回承認された範囲だけを書きます。
+  - `revoked`・`project_mismatch`・`malformed` のときは、黙って直しません。理由を伝えて新しく承認を求め、承認されたらfrontmatterをテンプレートどおりに書き直します（`status: approved`、正しい `project`、`purposes` は今回ユーザーが承認した範囲だけ、`recorded` は今日）。本文の承認根拠に新しい承認を追記し、古い記述は消しません。`revoked` はユーザーが撤回したものなので、再承認なしに戻しません。
+- persistence OFFなら、会話内の承認だけで送り、ファイルは作りません。承認されなければ送らず、Claude側だけで進めます。
 - 承認を、別のプロジェクトや記録にない目的に広げません。`status` を `approved` 以外にした記録は撤回として扱います。
 - 秘密鍵・トークン・認証情報・無関係な個人情報は、どの役割でも渡しません。`reviewer` の対象リポジトリにそれらが含まれる疑いがあれば、使わずに理由を報告します。
 
@@ -62,7 +66,9 @@ recorded: 2026-10-28
 `collaboration.code_review` が `both` のとき、Claude側の `harness:reviewer` とCodexの `reviewer` を並行して動かします。
 
 - 両方に同じ基点・結果commit・受入条件を渡します。互いの結果は渡しません。
-- `repository` には、結果commitをcheckoutしたクリーンなworktreeを渡します（例：`git worktree add --detach <tmp> <head>`）。作業中のcheckoutを渡すと、未コミットの変更がレビュー対象と混ざります。helperはCodexを呼ぶ前に、`git status --porcelain` が空であることと、`HEAD` が `head` と一致することを確かめ、違えば `invalid_input` で止まります。終わったらそのworktreeを削除します。
+- `repository` には、結果commitをcheckoutしたクリーンなworktreeを渡します（例：`git worktree add --detach <tmp> <head>`）。作業中のcheckoutを渡すと、未コミットの変更がレビュー対象と混ざります。helperはCodexを呼ぶ前に、`git status --porcelain --untracked-files=all` に変更も未追跡ファイルもないこと（`status.showUntrackedFiles` の設定に左右されません）と、`HEAD` が `head` と一致することを確かめ、違えば `invalid_input` で止まります。終わったらそのworktreeを削除します。
+- Codexは差分だけでなく、`repository` にある追跡ファイル全体（差分外のファイルも含む）を読めます。そのため、レビュー用worktreeには対象リポジトリ以外のものを置きません。`.gitignore` で無視されたファイル（`node_modules`・`dist` など）は未追跡として拒否されず、止まるのは秘密ファイルらしい名前のものだけです。名前で判断できない機密は止められないので、作業中のcheckoutではなく、対象リポジトリだけの新しいworktreeを渡します。
+- helperはCodexを呼ぶ前に、`git diff --name-only base..head`（名前の変更は旧名と新名、削除も含む）と、checkoutにある無視ファイルの名前を調べます。パスのどこかの要素が秘密ファイルらしい名前なら、何も送らずに `secret_path` で止まります。名前は大文字小文字を区別せずに比べ、対象は `.env`・`.env.*`（`.env.example`・`.env.sample`・`.env.template` を除く）・`*.pem`・`*.key`・`*.p12`・`*.pfx`・`*.keystore`・`*.jks`・`id_rsa*`・`id_dsa*`・`id_ecdsa*`・`id_ed25519*`（`.pub` を除く）・`.npmrc`・`.pypirc`・`.netrc`・`credentials`・`credentials.*`・`secrets.*`・`*.secret`・`service-account*.json`・`.git-credentials`・`auth.json` です。messageにはパスを最大5件だけ示し、中身は出しません。そのファイルを範囲から除くか、ユーザーに確認します。
 - 親が指摘を突き合わせ、同じ問題の重複をまとめ、重大度を揃えます。片方だけの指摘も、実差分で確認できれば採用します。
 - 判定はPASSが揃ったときだけPASSです。片方がNEEDS_WORK・BLOCKEDなら、根拠を確認して修正するか、却下の理由を記録します。
 - Codexが使えないときは、その旨を報告し、Claude側のレビューだけで進めます。黙って省略しません。
@@ -88,8 +94,9 @@ stdinが端末か空なら `input_unavailable`、最初の入力が5秒届かな
 
 Codexの最終メッセージは、そのまま、コードフェンスを外したもの、最初の `{` から最後の `}` まで、の順でJSONとして読みます。相談の3役の `verdict` は `none` に揃え、欠けた配列は `[]` で補います。`summary` が空のとき、`reviewer` の `verdict` が3値以外のときは `invalid_advice` です。
 
-失敗：`{"ok":false,"error":{"code","message"}}` で非0終了です。主なcode：`invalid_input`・`input_unavailable`・`input_timeout`・`input_limit`・`auth_unavailable`・`tool_forbidden`・`peer_busy`・`response_error`・`cli_failed`・`invalid_events`・`invalid_advice`・`empty_response`・`timeout`・`output_limit`。Codexの生の出力やstderrは表示しません。
+失敗：`{"ok":false,"error":{"code","message"}}` で非0終了です。主なcode：`invalid_input`・`secret_path`・`input_unavailable`・`input_timeout`・`input_limit`・`auth_unavailable`・`tool_forbidden`・`peer_busy`・`response_error`・`cli_failed`・`invalid_events`・`invalid_advice`・`empty_response`・`timeout`・`output_limit`。Codexの生の出力やstderrは表示しません。
 
+- `secret_path` は、`reviewer` の範囲の変更かcheckoutの無視ファイルに、秘密ファイルらしい名前があったときです（上の「2者レビュー」）。Codexは呼ばれていません。
 - `peer_busy` は、Codexのモデルが混雑している（容量不足・レート制限など）と報告されたときです。CLIが非0で終了しても、イベントから判定します。時間を置くか、`--model` で別のモデルを指定してやり直します。
 
 ## 隔離
