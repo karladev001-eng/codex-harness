@@ -34,13 +34,13 @@ if (status.error) {
   const models = Object.entries(c.models).map(([role, m]) => `${role}=${m.model}/${m.reasoning_effort}`).join(', ');
   const tasks = Object.entries(status.data.collaboration.tasks).map(([task, mode]) => `${task}=${mode}`).join(', ');
   emit([
-    `Harness is active for ${status.data.project} (${flags}; max_agents=${c.max_agents}; models ${models}).`,
+    `Harness is active for ${status.data.project} (${flags}; max_agents=${c.max_agents}; role models with starting effort ${models}).`,
     `For coding, UI/document creation or feedback, Web research, ideation, strategy consultation or proposal criticism: read ${path.join(skill, 'SKILL.md')}.`,
     'Claude Code reading of Codex wording: AGENTS.md means CLAUDE.md; workers are Agent subagent_type harness:implementer, harness:integrator, harness:reviewer or harness:researcher; Codex sandbox escalation does not exist, so follow the permission mode and do not retry a denied call.',
     `Before delegating, consulting the peer, or following a Codex-only step (early compaction, Knowledge descriptions), read only the matching section of ${path.join(skill, 'references', 'hosts', 'claude-code.md')}, which overrides those steps.`,
     `Collaboration (peer=${status.data.collaboration.peer}): ${tasks}. Peer work goes through the consult-codex skill and needs a recorded send approval per project.`,
     `When settings or scope change within a unit of work, re-run: node "${runtime}" status --project <absolute-project-path> --host claude.`,
-    'Every harness:* Agent launch passes model and effort from the role key above (worker agents inherit the main model otherwise, and the plugin denies such launches); never use fork for workers.',
+    'Every harness:* Agent launch passes an explicit model and effort (worker agents inherit the main model otherwise, and the plugin denies such launches); never use fork for workers. Pick the model from the role key that fits the task\'s nature and importance, not by habit, and pick effort for the quality required; the effort above is only a starting point. State both and a one-line reason in the packet.',
     'A delegated worker (prompt contains HARNESS_WORKER) performs only its assignment and never coordinates.',
   ].filter(Boolean).join('\n'));
 }

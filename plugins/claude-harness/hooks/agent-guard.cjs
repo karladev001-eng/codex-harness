@@ -36,4 +36,4 @@ const current = status(process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cw
 if (!current || !current.active) process.exit(0);
 const table = Object.entries(current.config.models).map(([role, m]) => `${role}=${m.model}/${m.reasoning_effort}`).join(', ');
 if (strayWorker) deny(`Harness workers start without the parent history: use a harness:* subagent_type instead of fork, an omitted type or another agent type. Role models: ${table}.`);
-deny(`Harness worker launch is missing ${missing.join(' and ')}. Pass them from the role key that fits the work (${table}); an explicit user choice or a pin overrides the table.`);
+deny(`Harness worker launch is missing ${missing.join(' and ')}. Pick the model from the role key that fits the task's nature and importance and the effort for the quality required (role models with starting effort: ${table}); an explicit user choice or a pin overrides the table.`);
