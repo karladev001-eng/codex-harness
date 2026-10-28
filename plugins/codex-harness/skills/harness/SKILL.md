@@ -5,19 +5,19 @@ description: Coordinate coding tasks, learn from UI/document feedback, cite Web 
 
 # Codex Harness
 
-仕様で引継ぎ、親が判断・調整、子が実装・検証する指示運用。強制スケジューラではない。
+仕様を通して作業を引き継ぎ、親が判断と調整を、子が実装と検証を受け持つための運用手順です。強制的なスケジューラではありません。
 
 ## 共通境界
 
-- `HARNESS_WORKER` は割当役割・パケットのみ実行。調整・再委譲しない。
-- Node.js 22+で同階層の `runtime.js status --project <absolute-project-path>` をシェル引用して実行。実効設定・上位/ユーザー指示を確認。不備は報告し無断有効化しない。`active=false` は追加文書・委譲・レビュー・計測なしで通常作業へ。
-- 実装・制作・修正はAの提示/承認を先行。同じ提示版/範囲の明示承認は再取得不要。純相談・調査だけに実装承認・コード委譲・Git工程を追加しない。
-- delegation OFFは親が実装可、review ONの独立レビューは必要。persistence OFFは会話内のみ、永続記憶を読書きしない。measurement OFFは利用情報・計測ログを保存しない。improvement_loop OFFは好み・技術的知見の自動読取・記録・適用・候補試用を停止（通常修正・明示管理は別）。
-- 矛盾は元ファイル・原文・一次資料・実測の版/日時/条件を照合。重要未解消点は未確定と報告。多数決・相談相手のモデルとの合意は正解の根拠でない。
+- `HARNESS_WORKER` で起動された子は、割り当てられた役割とパケットだけを実行します。調整せず、再委譲しない。
+- 最初に、Node.js 22+で同じ階層の `runtime.js status --project <absolute-project-path>` を（パスをシェル引用して）実行し、実効設定と上位・ユーザーの指示を確認します。不備は報告し、無断で有効化しません。`active=false` なら、追加文書・委譲・レビュー・計測なしで通常の作業に戻ります。
+- 実装・制作・修正の前に、判定Aの提示と承認を済ませます。同じ提示版・範囲への明示承認があれば取り直しません。純相談・調査だけに実装承認・コード委譲・Git工程を追加しない。
+- 機能ごとのOFF：delegation OFFは親が実装可、review ONの独立レビューは必要です。persistence OFFは会話内だけで扱い、永続記憶を読書きしない。measurement OFFは利用情報・計測ログを保存しない。improvement_loop OFFは、好みと技術的知見の自動読取・記録・適用・候補試用を止めます（通常の修正と明示的な記憶管理は別）。
+- 食い違いは、元ファイル・原文・一次資料・実測の版・日時・条件で照合します。重要な点が解消しなければ未確定と報告します。多数決や相談相手のモデルとの合意は、正しさの根拠になりません。
 
 ## 独立Yes/No判定（表が正本）
 
-全行を独立判定。Yesの本文/必要詳細を適用し、Noも次行へ。曖昧なら概要を確認し、不足を報告して省略しない。
+すべての行を独立に判定します。Yesの行は本文と必要な詳細を適用し、Noでも次の行へ進みます。判定に迷う行は概要を確認し、足りない点は報告して省略しません。
 
 | ID | Yesとなる条件 | 読む本文・次の判断 |
 |---|---|---|
@@ -29,6 +29,6 @@ description: Coordinate coding tasks, learn from UI/document feedback, cite Web 
 | D | コード変更、または明示的な大規模探索の委譲 | [調整](references/routing/coordination.md)：委譲・レビュー |
 | R | measurement ON、または仕様パケットの記録・再開・完了が必要（通常回答の終了だけは除外）、補助CLI操作（起動statusを含む）、長い作業の境界 | [継続](references/routing/continuity.md)：保存・計測・CLI |
 
-同じ版を保持中は再読不要。各作業単位で設定再評価。範囲/段階/設定/役割/版/指示の変更時は全行を再判定（相談→実装も）。実変更を保持し、compact等で本文を失えば再確認。永続既読cacheは禁止。
+同じ版を保持している間は再読不要です。作業単位ごとに設定を再評価し、範囲・段階・設定・役割・版・指示が変わったら全行を再判定します（相談から実装に移るときも同じ）。compactなどで本文を失えば再確認します。永続既読cacheは禁止です。
 
-任意helper: `read-sections.cjs <commands|roles> <ID...>`（`--list`）。receipt不要。不明・旧版・実行不能なら[commands](references/commands.md)/[roles](references/roles.md)の関連範囲、必要なら全文へ戻る。
+任意helper：`read-sections.cjs <commands|roles> <ID...>`（一覧は `--list`）で必要な節だけを読めます（receipt不要）。不明・旧版・実行不能なら、[commands](references/commands.md)・[roles](references/roles.md)の関連範囲、必要なら全文へ戻ります。
