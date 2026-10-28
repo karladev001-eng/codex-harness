@@ -22,7 +22,7 @@ harnessからの自動利用は、activeな親が `status` の `collaboration` �
 
 ## 送信の承認
 
-Claudeへ渡した内容はAnthropicに送られます。`reviewer` は差分をプロンプトに入れ、リポジトリも読むので、コードもそのまま送られます。承認はプロジェクトの `docs/harness/authorizations/claude-send.md` に、次の形で記録します。`purposes` は `advice`（発案・相談・批評の3役）・`review`（`reviewer`）・`image`（画像生成）から、承認された目的だけを書きます。
+Claudeへ渡した内容はAnthropicに送られます。`reviewer` は差分をプロンプトに入れ、リポジトリも読むので、コードもそのまま送られます。承認はプロジェクトの `docs/harness/authorizations/claude-send.md` に、次の形で記録します。`purposes` は `advice`（発案・相談・批評の3役）・`review`（`reviewer`）・`image`（画像生成）から、承認された目的だけを書きます。`[]` は何も承認しません。`[advice,,review]` のような空の要素は `malformed` です。
 
 ```markdown
 ---
@@ -42,7 +42,7 @@ recorded: 2026-10-24
 - 承認根拠: （ユーザーの発言と日付）
 ```
 
-- 送る前に `node "<skill-dir>/scripts/consult.mjs" --approval --project <abs> --purpose <p>` で判定します。purposeは、相談の3役なら `advice`、`reviewer` なら `review` です。結果は常に `{"ok":true,"approved":true|false,"reason":"approved|missing|malformed|revoked|project_mismatch|purpose_missing","record":"...","purposes":[...]}` です。このhelperは記録を読むだけで、書きません。
+- 送る前に `node "<skill-dir>/scripts/consult.mjs" --approval --project <abs> --purpose <p>` で判定します。purposeは、相談の3役なら `advice`、`reviewer` なら `review` です。`--purpose` は必須で、省くと `invalid_options` になります（目的を決めない承認はありません）。結果は常に `{"ok":true,"approved":true|false,"reason":"approved|missing|malformed|revoked|project_mismatch|purpose_missing","record":"...","purposes":[...]}` です。このhelperは記録を読むだけで、書きません。
 - `approved=true` なら、範囲内なので聞き直さずに送ります。
 - `approved=false` なら、送らずにユーザーへ1回だけ次の文面で確認します。「Claude（Anthropic）へ、`<project>` の `<送る情報の範囲>` を `<目的>` のために送ってよいですか。承認していただければ `docs/harness/authorizations/claude-send.md` に記録します。」`malformed` のときは、`message` にある問題の行も示します。承認されたら記録してから送ります。断られたら送らず、Codexだけで続けます。同じ範囲で何度も聞き直しません。
 - persistence OFFなら記録ファイルを作らず、会話の中で得た承認だけで、その会話の間だけ送ります。
@@ -63,7 +63,7 @@ recorded: 2026-10-24
 `collaboration.code_review` が `both` のとき、Codex側の独立レビュー（harnessのreviewer）とconsult-claudeの `reviewer` を並行して動かします。
 
 - 両方に同じ基点・結果commit・受入条件を渡します。互いの結果は渡しません。
-- `repository` には、結果commitをcheckoutしたクリーンなdetached worktreeを渡します（例：`git worktree add --detach <tmp> <head>`）。作業中のcheckoutを渡すと、未コミットの変更がレビュー対象と混ざります。終わったらそのworktreeを削除します。
+- `repository` には、結果commitをcheckoutしたクリーンなdetached worktreeを渡します（例：`git worktree add --detach <tmp> <head>`）。作業中のcheckoutを渡すと、未コミットの変更がレビュー対象と混ざります。helperはClaudeを呼ぶ前に、`git status --porcelain` が空であることと、`HEAD` が `head` と一致することを確かめ、違えば `invalid_input` で止まります。終わったらそのworktreeを削除します。
 - 親が指摘を突き合わせ、同じ問題の重複をまとめ、重大度を揃えます。片方だけの指摘も、実差分で確かめられれば採用します。
 - 判定はPASSが揃ったときだけPASSです。片方がNEEDS_WORK・BLOCKEDなら、根拠を確かめて直すか、却下の理由を記録します。
 - Claudeが使えないとき（承認がない、認証できない、失敗したなど）は、その旨を報告し、Codex側のレビューだけで進めます。黙って省略しません。
@@ -102,11 +102,13 @@ Claude CLIには `--json-schema` で同じ形を指定します。構造化出�
 
 失敗：`{"ok":false,"error":{"code","message"}}` で非0終了です。Claudeの生の出力・stderr・認証の出力は表示しません。未導入、非対応CLI、認証を確かめられない、不正なJSON、`is_error`、空の回答、非0終了、時間・サイズの上限超過は、失敗として扱います。
 
+- `peer_busy` は、Claudeの結果JSONが混雑を示すとき（`api_error_status` が429・529、またはoverloaded・レート制限の報告）です。CLIが非0で終了しても、結果JSONから判定します。時間を置くか、`--model` で別のモデルを指定してやり直します。
+
 ## 隔離
 
 - 実行には `--print --safe-mode --strict-mcp-config`、空のMCP設定、`--setting-sources ""`、hooks無効、`--permission-mode dontAsk`、`--permission-prompts none`、`--no-session-persistence`、`--disable-slash-commands`、`--output-format json`、`--json-schema` を使います。
 - 相談の3役は `--tools ""` でツールなし、空のtemp cwdで実行します。
-- `reviewer` は cwd=`repository`、`--tools "Read,Grep,Glob"` で実行します。Bash・編集・Web・MCPは使えません。差分はhelperが200KiBまでプロンプトに入れ、超えたら切り詰めたことを明記します。
+- `reviewer` は cwd=`repository`、`--tools "Read,Grep,Glob"` で実行します。Bash・編集・Web・MCPは使えません。認証情報・秘密鍵・`.env` などの秘密ファイルを読まないよう指示します。差分はhelperが200KiBまでプロンプトに入れ、超えたら切り詰めたことを明記します。
 - 時間の上限は既定120秒（`--timeout-ms` は100〜300000）、入力の上限は256KiB、Claudeのstdout+stderrの上限は1MiBです。stdinの読み取りにも時間とサイズの上限があります。タイムアウトしたら子プロセスを止め、tempディレクトリを削除します。
 - これはCLIの機能による制限で、OSのsandboxそのものではありません。CLI自体は既存の認証や管理ポリシーにアクセスします。プロジェクトへの書き込みは許しません。
 - `persistence=false` では、相談の入力・回答・記録を永続保存しません。保存ONでも、タスクに必要な採否と理由だけを既存の記録に残し、生の機密入力は保存しません。helper自身は相談ファイルやプロジェクトファイルを書きません（実行用の空のtemp cwdだけを作って消します）。

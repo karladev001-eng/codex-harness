@@ -43,6 +43,10 @@ process.stdin.on('end', () => {
     cp.spawn(process.execPath, ['-e', 'const fs = require("node:fs"); fs.writeFileSync(process.env.CONSULT_TEST_READY, JSON.stringify({ pid: process.pid, writeAt: Date.now() + 6500 })); setTimeout(() => fs.writeFileSync(process.env.CONSULT_TEST_MARKER, "leaked"), 6500)'], { stdio: 'inherit' });
     setInterval(() => {}, 1000); return;
   }
+  const overloaded = 'API Error: 529 {"type":"error","error":{"type":"overloaded_error","message":"Overloaded ${secret}"}}';
+  if (mode === 'busy-529') { console.log(JSON.stringify({ type: 'result', subtype: 'success', is_error: true, api_error_status: 529, result: overloaded })); process.exitCode = 1; return; }
+  if (mode === 'busy-429') { console.log(JSON.stringify({ type: 'result', subtype: 'success', is_error: true, api_error_status: 429, result: 'API Error: 429 ${secret}' })); return; }
+  if (mode === 'busy-text') { console.log(JSON.stringify({ type: 'result', is_error: true, result: overloaded })); process.exitCode = 1; return; }
   if (mode === 'is-error') { console.log(JSON.stringify({ type: 'result', is_error: true, result: '${secret}' })); return; }
   if (mode === 'empty') { console.log(JSON.stringify({ result: '' })); return; }
   if (mode === 'advice-json') { console.log(JSON.stringify({ result: 'plain text ${secret}' })); return; }
@@ -110,6 +114,16 @@ for (const [mode, code] of [['incompatible', 'incompatible_cli'], ['unauthentica
     for (const call of f.calls()) assert.equal(fs.existsSync(call.cwd), false);
   });
 }
+
+test('a busy or rate-limited Claude is peer_busy, even on a nonzero exit, without raw text', posix, t => {
+  const f = fixture(t);
+  for (const mode of ['busy-529', 'busy-429', 'busy-text']) {
+    const result = run(f, { mode, value: { ...input, context: secret } });
+    assert.equal(result.status, 1, mode); assert.equal(result.data.error.code, 'peer_busy', mode);
+    assert.equal(result.data.error.message, 'Claudeのモデルが混雑しています。時間を置くか --model で別モデルを指定してください。');
+    assert.equal(result.stdout.includes(secret), false); assert.equal(result.stdout.includes('Overloaded'), false); assert.equal(result.stderr, '');
+  }
+});
 
 test('missing CLI returns a sanitized failure', posix, t => {
   const f = fixture(t); fs.unlinkSync(f.cli); f.env.PATH = f.base;
@@ -230,6 +244,24 @@ test('reviewer reads the real diff into the prompt and runs in the repository wi
   const none = run(f, { mode: 'review-none', value: review(repo) }); assert.equal(none.data.error.code, 'invalid_advice'); assert.match(none.data.error.message, /PASS, NEEDS_WORK or BLOCKED/);
 });
 
+test('reviewer refuses a dirty checkout or one not at head before any Claude call', posix, t => {
+  const f = fixture(t), repo = repository(t), value = review(repo);
+  const refused = (bad, label) => {
+    const result = run(f, { value: bad });
+    assert.equal(result.status, 1, label); assert.equal(result.data.error.code, 'invalid_input', label);
+    assert.match(result.data.error.message, /クリーンなdetached worktreeを head で渡してください/, label);
+  };
+  refused({ ...value, head: repo.base }, 'HEAD differs from head');
+  fs.writeFileSync(path.join(repo.dir, 'a.txt'), 'uncommitted\n'); refused(value, 'modified file');
+  spawnSync('git', ['-C', repo.dir, 'checkout', '--', 'a.txt']);
+  fs.writeFileSync(path.join(repo.dir, 'new.txt'), 'untracked\n'); refused(value, 'untracked file');
+  fs.rmSync(path.join(repo.dir, 'new.txt'));
+  refused({ ...value, repository: f.base }, 'not a git repository');
+  assert.deepEqual(f.calls(), []);
+  const ok = run(f, { value }); assert.equal(ok.status, 0, ok.stdout);
+  assert.match(f.calls()[2].input, /Do not read credentials, private keys, \.env files or other secret files/);
+});
+
 test('reviewer diff is capped at 200 KiB and says so', posix, t => {
   const f = fixture(t), repo = repository(t, { big: true }), result = run(f, { value: review(repo) });
   assert.equal(result.status, 0, result.stdout);
@@ -292,6 +324,10 @@ test('silent non-TTY stdin fails fast with input_timeout and a TTY fails at once
   });
   assert.equal(result.code, 1); assert.equal(result.err, ''); assert.ok(Date.now() - started < 4000);
   const error = JSON.parse(result.out).error; assert.equal(error.code, 'input_timeout'); assert.match(error.message, /heredoc/); assert.match(error.message, /--input/);
+  // Out-of-range values (here below 10 ms) are ignored and the 5 s default applies.
+  const ignored = spawn(process.execPath, [source], { env: { ...f.env, CONSULT_CLAUDE_FIRST_BYTE_MS: '3' } });
+  const early = await new Promise(resolve => { const timer = setTimeout(() => resolve(false), 1000); ignored.on('close', () => { clearTimeout(timer); resolve(true); }); });
+  ignored.kill('SIGKILL'); assert.equal(early, false, 'a 3 ms first-byte wait must not be honoured');
   const empty = run(f, { value: '' }); assert.equal(empty.data.error.code, 'invalid_input');
   assert.deepEqual(f.calls(), []);
   const python = spawnSync('python3', ['-I', '-c', 'import pty,sys; pty.spawn(sys.argv[1:])', process.execPath, source], { input: '', env: f.env, encoding: 'utf8', timeout: 5000 });
@@ -308,15 +344,18 @@ test('--approval reports every reason, matches the project by realpath and never
   const front = (fields = {}) => '---\n' + Object.entries({ peer: 'claude', project: real, purposes: '[advice, review]', status: 'approved', recorded: '2026-10-24', ...fields }).filter(([, v]) => v !== null).map(([k, v]) => `${k}: ${v}`).join('\n') + '\n---\n\n# 記録\n';
   const ask = (args, target = project) => { const result = run(f, { args: ['--approval', '--project', target, ...args], value: '' }); assert.equal(result.status, 0, result.stdout); assert.equal(result.data.ok, true); return result.data; };
   assert.deepEqual(ask(['--purpose', 'advice']), { ok: true, approved: false, reason: 'missing', record, purposes: [], message: 'No send approval record exists for this project.' });
-  write('# 記録だけ\n'); let data = ask([]); assert.equal(data.reason, 'malformed'); assert.match(data.message, /line 1/);
-  write(front({ purposes: 'advice' })); data = ask([]); assert.equal(data.reason, 'malformed'); assert.match(data.message, /line 4: purposes/);
-  write(front({ purposes: '[advice, chat]' })); assert.equal(ask([]).reason, 'malformed');
-  write(front({ peer: 'codex' })); data = ask([]); assert.equal(data.reason, 'malformed'); assert.match(data.message, /line 2: peer must be claude/);
-  write(front({ recorded: null })); data = ask([]); assert.equal(data.reason, 'malformed'); assert.match(data.message, /recorded is required/);
-  write(front({ recorded: 'yesterday' })); data = ask([]); assert.equal(data.reason, 'malformed'); assert.match(data.message, /^line 6: recorded/);
+  const advice = ['--purpose', 'advice'];
+  write('# 記録だけ\n'); let data = ask(advice); assert.equal(data.reason, 'malformed'); assert.match(data.message, /line 1/);
+  write(front({ purposes: 'advice' })); data = ask(advice); assert.equal(data.reason, 'malformed'); assert.match(data.message, /line 4: purposes/);
+  write(front({ purposes: '[advice, chat]' })); assert.equal(ask(advice).reason, 'malformed');
+  for (const list of ['[advice,,review]', '[advice,]', '[,]']) { write(front({ purposes: list })); data = ask(advice); assert.equal(data.reason, 'malformed', list); assert.match(data.message, /^line 4: purposes has an empty item/, list); }
+  write(front({ peer: 'codex' })); data = ask(advice); assert.equal(data.reason, 'malformed'); assert.match(data.message, /line 2: peer must be claude/);
+  write(front({ recorded: null })); data = ask(advice); assert.equal(data.reason, 'malformed'); assert.match(data.message, /recorded is required/);
+  write(front({ recorded: 'yesterday' })); data = ask(advice); assert.equal(data.reason, 'malformed'); assert.match(data.message, /^line 6: recorded/);
   // Unknown keys are ignored, empty purposes approve nothing, and block lists are accepted.
   write(front({ note: 'kept by hand' })); assert.equal(ask(['--purpose', 'advice']).reason, 'approved');
-  write(front({ purposes: '[]' })); assert.deepEqual([ask(['--purpose', 'advice']).reason, ask([]).reason], ['purpose_missing', 'approved']);
+  write(front({ purposes: '[]' }));
+  for (const purpose of ['advice', 'review', 'image']) assert.deepEqual([ask(['--purpose', purpose]).reason, ask(['--purpose', purpose]).purposes], ['purpose_missing', []], purpose);
   write(front({ purposes: '\n  - review' })); assert.deepEqual(ask(['--purpose', 'review']).purposes, ['review']);
   // revoked is decided before project_mismatch.
   write(front({ status: 'revoked', project: path.join(real, 'other') })); assert.equal(ask(['--purpose', 'advice']).reason, 'revoked');
@@ -324,9 +363,9 @@ test('--approval reports every reason, matches the project by realpath and never
   write(front({ project: path.join(real, 'other') })); assert.equal(ask(['--purpose', 'advice']).reason, 'project_mismatch');
   write(front({ purposes: '[advice]' })); assert.deepEqual(ask(['--purpose', 'review']), { ok: true, approved: false, reason: 'purpose_missing', record, purposes: ['advice'] });
   write(front()); assert.deepEqual(ask(['--purpose', 'review']), { ok: true, approved: true, reason: 'approved', record, purposes: ['advice', 'review'] });
-  assert.equal(ask([], link).approved, true);
+  assert.equal(ask(advice, link).approved, true);
   write(front({ project: link })); assert.equal(ask(['--purpose', 'advice']).approved, true);
-  for (const args of [['--approval', '--project', 'relative'], ['--approval', '--project', project, '--purpose', 'chat'], ['--approval'], ['--approval', '--project', project, '--check'], ['--project', project]]) {
+  for (const args of [['--approval', '--project', 'relative'], ['--approval', '--project', project, '--purpose', 'chat'], ['--approval'], ['--approval', '--project', project], ['--approval', '--project', project, '--check'], ['--project', project]]) {
     const result = run(f, { args, value: '' }); assert.equal(result.status, 1); assert.equal(result.data.error.code, 'invalid_options');
   }
   assert.deepEqual(f.calls(), []);

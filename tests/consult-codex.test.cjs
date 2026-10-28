@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawn, spawnSync } = require('node:child_process');
-const { fixture, write, root, command } = require('./helpers.cjs');
+const { fixture, write, root, command, git, init } = require('./helpers.cjs');
 const source = path.join(root, 'plugins/codex-harness/skills/harness/consult-codex/scripts/consult.mjs');
 
 // The fake records argv and stdin, then answers as `codex login status` / `codex exec` would.
@@ -15,6 +15,11 @@ let input = ''; process.stdin.on('data', d => input += d).on('end', () => {
   const out = args[args.indexOf('--output-last-message') + 1], review = input.includes('"role":"reviewer"');
   const item = type => console.log(JSON.stringify({ type: 'item.completed', item: { type } }));
   item('reasoning');
+  const capacity = 'Selected model is at capacity. Please try a different model.';
+  if (mode === 'busy') { console.log(JSON.stringify({ type: 'error', message: capacity })); console.log(JSON.stringify({ type: 'turn.failed', error: { message: capacity } })); process.exit(1); }
+  if (mode === 'rate_limited') { console.log(JSON.stringify({ type: 'turn.failed', error: { message: 'Rate limit reached for requests' } })); return; }
+  if (mode === 'failed') { console.log(JSON.stringify({ type: 'turn.failed', error: { message: 'raw secret detail' } })); return; }
+  if (mode === 'exit_fail') { console.log('not json raw secret'); process.exit(1); }
   if (mode === 'tool') item('file_change');
   if (review) item('command_execution');
   if (mode !== 'incomplete') console.log(JSON.stringify({ type: 'turn.completed' }));
@@ -50,13 +55,20 @@ test('advisory roles run isolated with every tool disabled and no prompt in argv
   assert.notEqual(exec.cwd, f.project);
 });
 
+// A clean checkout whose HEAD is the reviewed head commit.
+function repository(f) {
+  const base = init(f);
+  write(path.join(f.project, 'file'), 'changed'); git(f.project, 'commit', '-qam', 'head');
+  return { base, head: git(f.project, 'rev-parse', 'HEAD') };
+}
 test('reviewer reads the given repository with a read-only shell and must return a verdict', t => {
-  const f = setup(t), input = { role: 'reviewer', task: 'review', repository: f.project, base: 'abc1234', head: 'def5678', criteria: ['1. works'] };
+  const f = setup(t), input = { role: 'reviewer', task: 'review', repository: f.project, ...repository(f), criteria: ['1. works'] };
   const result = consult(f, input);
   assert.equal(result.code, 0); assert.equal(result.data.advice.verdict, 'NEEDS_WORK'); assert.equal(result.data.commands, 1);
   const exec = f.calls()[1];
   assert.equal(exec.cwd, fs.realpathSync(f.project)); assert.ok(exec.args.includes('features.shell_tool=true'));
   assert.equal(exec.args[exec.args.indexOf('--sandbox') + 1], 'read-only');
+  assert.match(exec.input, /Do not read credentials, private keys, \.env files or other secret files/);
   assert.equal(consult(f, { ...input, base: undefined }).data.error.code, 'invalid_input');
   assert.equal(consult(f, { ...input, criteria: [] }).data.error.code, 'invalid_input');
   assert.equal(consult(f, { ...input, repository: 'relative' }).data.error.code, 'invalid_input');
@@ -67,13 +79,46 @@ test('forbidden tools, incomplete turns, reviewer verdicts and missing login fai
   const f = setup(t), critic = { role: 'critic', task: 't' };
   assert.equal(consult(f, critic, 'tool').data.error.code, 'tool_forbidden');
   assert.equal(consult(f, critic, 'incomplete').data.error.code, 'response_error');
-  const reviewer = { role: 'reviewer', task: 'review', repository: f.project, base: 'abc1234', head: 'def5678', criteria: ['1. works'] };
+  const reviewer = { role: 'reviewer', task: 'review', repository: f.project, ...repository(f), criteria: ['1. works'] };
   assert.equal(consult(f, reviewer, 'bad_verdict').data.error.code, 'invalid_advice');
   const out = consult(f, critic, 'logged_out');
   assert.equal(out.code, 1); assert.equal(out.data.error.code, 'auth_unavailable');
   assert.equal(consult(f, { role: 'ideator', task: 't', candidate: 'x' }).data.error.code, 'invalid_input');
   assert.equal(consult(f, { ...critic, extra: 1 }).data.error.code, 'invalid_input');
   assert.deepEqual(consult(f, null, 'ok', '--check').data, { ok: true, cli: 'available', authenticated: true });
+});
+
+test('reviewer refuses a dirty checkout or one not at head before calling Codex', t => {
+  const f = setup(t), commits = repository(f), input = { role: 'reviewer', task: 'review', repository: f.project, ...commits, criteria: ['1. works'] };
+  const refused = (value, label) => {
+    const result = consult(f, value);
+    assert.equal(result.code, 1, label); assert.equal(result.data.error.code, 'invalid_input', label);
+    assert.match(result.data.error.message, /クリーンなdetached worktreeを head で渡してください/, label);
+  };
+  refused({ ...input, head: commits.base }, 'HEAD differs from head');
+  write(path.join(f.project, 'file'), 'uncommitted'); refused(input, 'modified file');
+  git(f.project, 'checkout', '--', 'file');
+  write(path.join(f.project, 'untracked.txt'), 'new'); refused(input, 'untracked file');
+  fs.rmSync(path.join(f.project, 'untracked.txt'));
+  refused({ ...input, repository: f.base }, 'not a git repository');
+  assert.equal(fs.existsSync(path.join(f.base, 'codex.log')), false, 'Codex is never called');
+  // A clean detached worktree at head is accepted.
+  const worktree = path.join(f.base, 'review tree'); git(f.project, 'worktree', 'add', '-q', '--detach', worktree, commits.head);
+  assert.equal(consult(f, { ...input, repository: worktree }).code, 0);
+});
+
+test('a busy model is peer_busy even on a nonzero exit; other failures keep their codes without raw text', t => {
+  const f = setup(t), critic = { role: 'critic', task: 't' };
+  for (const mode of ['busy', 'rate_limited']) {
+    const busy = consult(f, critic, mode);
+    assert.equal(busy.code, 1, mode); assert.equal(busy.data.error.code, 'peer_busy', mode);
+    assert.equal(busy.data.error.message, 'Codexのモデルが混雑しています。時間を置くか --model で別モデルを指定してください。');
+    assert.equal(JSON.stringify(busy.data).includes('capacity'), false); assert.equal(JSON.stringify(busy.data).includes('Rate limit'), false);
+  }
+  const failed = consult(f, critic, 'failed');
+  assert.equal(failed.data.error.code, 'response_error'); assert.equal(JSON.stringify(failed.data).includes('raw secret'), false);
+  const exited = consult(f, critic, 'exit_fail');
+  assert.equal(exited.data.error.code, 'cli_failed'); assert.equal(JSON.stringify(exited.data).includes('raw secret'), false);
 });
 
 test('final messages are accepted as plain JSON, fenced JSON or JSON inside prose, and normalized', t => {
@@ -138,21 +183,22 @@ test('--approval decides send approval from the record frontmatter and always ex
   const reason = (...args) => { const result = approval(f.project, ...args); assert.equal(result.code, 0); assert.equal(result.data.ok, true); assert.equal(result.data.record, file); return result.data; };
   assert.deepEqual(reason('--purpose', 'advice'), { ok: true, approved: false, reason: 'missing', record: file, purposes: [], message: 'No send approval record exists for this project.' });
   record(f.project, null, '# 承認\n- 状態: 承認済み\n');
-  assert.match(reason().message, /^line 1:/);
+  assert.match(reason('--purpose', 'advice').message, /^line 1:/);
   record(f.project, front().replace('recorded: 2026-10-28', 'recorded: yesterday'));
-  const malformed = reason();
+  const malformed = reason('--purpose', 'advice');
   assert.equal(malformed.reason, 'malformed'); assert.equal(malformed.approved, false); assert.match(malformed.message, /^line 6: recorded/);
   record(f.project, front({ purposes: '[advice, chat]' }));
-  assert.match(reason().message, /^line 4: purposes may contain only advice, review, image/);
+  assert.match(reason('--purpose', 'advice').message, /^line 4: purposes may contain only advice, review, image/);
+  record(f.project, front({ purposes: '[advice,,review]' }));
+  assert.match(reason('--purpose', 'advice').message, /^line 4: purposes has an empty item/);
   record(f.project, front({ peer: 'claude' }));
-  assert.match(reason().message, /^line 2: peer must be codex/);
+  assert.match(reason('--purpose', 'advice').message, /^line 2: peer must be codex/);
   record(f.project, front({ status: 'revoked' }));
-  assert.deepEqual([reason('--purpose', 'advice').reason, reason().purposes], ['revoked', ['advice', 'review']]);
+  assert.deepEqual([reason('--purpose', 'advice').reason, reason('--purpose', 'review').purposes], ['revoked', ['advice', 'review']]);
   record(f.project, front({ project: path.join(f.base, 'other') }));
   assert.equal(reason('--purpose', 'advice').reason, 'project_mismatch');
   record(f.project, front());
   assert.deepEqual(reason('--purpose', 'review'), { ok: true, approved: true, reason: 'approved', record: file, purposes: ['advice', 'review'] });
-  assert.equal(reason().reason, 'approved');
   assert.deepEqual([reason('--purpose', 'image').reason, reason('--purpose', 'image').approved], ['purpose_missing', false]);
   // project paths are compared after realpath, and block lists are accepted.
   const link = path.join(f.base, 'link');
@@ -161,6 +207,11 @@ test('--approval decides send approval from the record frontmatter and always ex
   assert.equal(reason('--purpose', 'advice').reason, 'approved');
   assert.equal(approval('relative', '--purpose', 'advice').data.error.code, 'invalid_options');
   assert.equal(approval(f.project, '--purpose', 'chat').data.error.code, 'invalid_options');
+  // --purpose is required: there is no purpose-free approval, and [] approves no purpose.
+  const omitted = approval(f.project);
+  assert.equal(omitted.code, 1); assert.equal(omitted.data.error.code, 'invalid_options'); assert.match(omitted.data.error.message, /--purpose/);
+  record(f.project, front({ purposes: '[]' }));
+  for (const purpose of ['advice', 'review', 'image']) assert.deepEqual([reason('--purpose', purpose).reason, reason('--purpose', purpose).purposes], ['purpose_missing', []]);
 });
 
 test('the migrated harness approval records follow the shared frontmatter form', async t => {

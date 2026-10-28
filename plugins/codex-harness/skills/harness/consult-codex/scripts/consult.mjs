@@ -11,7 +11,7 @@ const ROLE_PROMPTS = {
   ideator: 'Generate independent, varied ideas with their benefits, tradeoffs and useful experiments. On an initial request you have not been given Claude proposals; do not invent them.',
   consultant: 'Advise on the stated decision or stalled problem. Compare the supplied alternatives, assumptions, uncertainties, tradeoffs and discriminating next checks.',
   critic: 'Critique the supplied proposal. Identify concrete weaknesses, missing assumptions, counterexamples, failure conditions and proportionate improvements.',
-  reviewer: 'Independently review the change between the supplied base and head commits in the current repository against the numbered acceptance criteria. Build your own risk list before reading any implementer claims, read the real diff and surrounding code, and report concrete findings with file:line locations and evidence. Use only read-only commands such as git diff, git show, git log, ls, cat, rg or sed; never modify files, Git state or the network.',
+  reviewer: 'Independently review the change between the supplied base and head commits in the current repository against the numbered acceptance criteria. Build your own risk list before reading any implementer claims, read the real diff and surrounding code, and report concrete findings with file:line locations and evidence. Do not read credentials, private keys, .env files or other secret files. Use only read-only commands such as git diff, git show, git log, ls, cat, rg or sed; never modify files, Git state or the network.',
 };
 // Advisory roles run with every tool disabled; the reviewer keeps a read-only shell only.
 const DISABLED_FEATURES = ['hooks', 'plugins', 'apps', 'multi_agent', 'computer_use', 'browser_use', 'view_image', 'image_generation', 'goals', 'sleep_tool', 'workspace_dependencies', 'in_app_browser', 'skill_search'];
@@ -146,7 +146,12 @@ function parseFrontmatter(text) {
     last = key;
     if (key !== 'purposes') { fields[key] = { value: unquote(value), line: number }; continue; }
     if (value === '') fields.purposes = { items: [], line: number, inline: false };
-    else if (/^\[.*\]$/.test(value)) fields.purposes = { items: value.slice(1, -1).split(',').map(part => part.trim()).filter(Boolean).map(part => ({ value: unquote(part), line: number })), line: number, inline: true };
+    else if (/^\[.*\]$/.test(value)) {
+      // [] approves nothing; an empty element such as [advice,,review], [advice,] or [,] is a typo.
+      const inner = value.slice(1, -1), parts = inner.trim() === '' ? [] : inner.split(',').map(part => part.trim());
+      if (parts.some(part => part === '')) return { error: `line ${number}: purposes has an empty item; write a list such as [advice, review] or []` };
+      fields.purposes = { items: parts.map(part => ({ value: unquote(part), line: number })), line: number, inline: true };
+    }
     else return { error: `line ${number}: purposes must be a list such as [advice, review]` };
   }
   return { fields };
@@ -154,7 +159,8 @@ function parseFrontmatter(text) {
 const canonical = file => realpath(file).catch(() => path.resolve(file));
 export async function checkApproval({ project, purpose, peer = APPROVAL_PEER }) {
   if (typeof project !== 'string' || !path.isAbsolute(project)) fail('invalid_options', '--project must be an absolute path.');
-  if (purpose !== undefined && !PURPOSES.includes(purpose)) fail('invalid_options', `--purpose must be one of ${PURPOSES.join(', ')}.`);
+  // An approval is always decided for one named purpose; there is no purpose-free approval.
+  if (!PURPOSES.includes(purpose)) fail('invalid_options', `--purpose is required and must be one of ${PURPOSES.join(', ')}.`);
   const record = path.join(project, 'docs/harness/authorizations', `${peer}-send.md`);
   const result = (approved, reason, purposes, message) => ({ ok: true, approved, reason, record, purposes, ...(message ? { message } : {}) });
   const info = await stat(record).catch(() => null);
@@ -172,13 +178,14 @@ export async function checkApproval({ project, purpose, peer = APPROVAL_PEER }) 
   const purposes = [...new Set(fields.purposes.items.map(item => item.value))];
   if (fields.status.value !== 'approved') return result(false, 'revoked', purposes);
   if (await canonical(fields.project.value) !== await canonical(project)) return result(false, 'project_mismatch', purposes);
-  if (purpose !== undefined && !purposes.includes(purpose)) return result(false, 'purpose_missing', purposes);
+  if (!purposes.includes(purpose)) return result(false, 'purpose_missing', purposes);
   return result(true, 'approved', purposes);
 }
 // END shared send-approval check
 
 // No user content is placed in argv, inherited stdio, error messages or logs.
-function execute(executable, args, { cwd, input = '', timeoutMs, env }) {
+// With settle, an unsuccessful exit resolves as { text, exited: false } so the events can still be read.
+function execute(executable, args, { cwd, input = '', timeoutMs, env, settle = false }) {
   return new Promise((resolve, reject) => {
     let child, timeout, forceKill, closed = false, failure, size = 0;
     const stdout = [];
@@ -202,13 +209,44 @@ function execute(executable, args, { cwd, input = '', timeoutMs, env }) {
     child.on('error', () => { failure ??= new ConsultationError('cli_unavailable', 'Codex CLI is unavailable or could not be started.'); });
     child.on('close', (code, signal) => {
       closed = true; clearTimeout(timeout); clearTimeout(forceKill);
+      const text = Buffer.concat(stdout).toString('utf8'), exited = code === 0 && !signal;
       if (failure) reject(failure);
-      else if (code !== 0 || signal) reject(new ConsultationError('cli_failed', 'Codex CLI exited unsuccessfully; its raw output was withheld.'));
-      else resolve(Buffer.concat(stdout).toString('utf8'));
+      else if (settle) resolve({ text, exited });
+      else if (!exited) reject(new ConsultationError('cli_failed', 'Codex CLI exited unsuccessfully; its raw output was withheld.'));
+      else resolve(text);
     });
     child.stdin.end(input);
   });
 }
+// Read-only git query with the same safety switches as consult-claude's diff reader.
+function gitText(repository, args, timeoutMs) {
+  return new Promise(resolve => {
+    const chunks = []; let size = 0, child, done = false;
+    const finish = value => { if (!done) { done = true; clearTimeout(timer); resolve(value); } };
+    try {
+      child = spawn('git', ['-C', repository, '-c', 'core.fsmonitor=false', '--no-pager', ...args], {
+        shell: false, windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'],
+        env: { ...process.env, GIT_OPTIONAL_LOCKS: '0', GIT_TERMINAL_PROMPT: '0', GIT_PAGER: 'cat' },
+      });
+    } catch { resolve(undefined); return; }
+    const timer = setTimeout(() => { child.kill('SIGKILL'); finish(undefined); }, timeoutMs);
+    child.stdout.on('data', chunk => { size += chunk.length; if (size > 32 * 1024) { child.kill('SIGKILL'); finish(undefined); } else chunks.push(chunk); });
+    child.on('error', () => finish(undefined));
+    child.on('close', code => finish(code === 0 ? Buffer.concat(chunks).toString('utf8') : undefined));
+  });
+}
+// The reviewer reads the working tree, so it must be exactly head with nothing uncommitted on top.
+const UNCLEAN_REPOSITORY = 'repository must be a clean checkout of head (no uncommitted or untracked changes, HEAD equal to head). クリーンなdetached worktreeを head で渡してください（git worktree add --detach <tmp> <head>）。';
+async function verifyCheckout(repository, head, timeoutMs) {
+  const status = await gitText(repository, ['status', '--porcelain'], timeoutMs);
+  if (status === undefined || status.trim()) fail('invalid_input', UNCLEAN_REPOSITORY);
+  const current = (await gitText(repository, ['rev-parse', '--verify', 'HEAD'], timeoutMs))?.trim();
+  const wanted = (await gitText(repository, ['rev-parse', '--verify', '--quiet', `${head}^{commit}`], timeoutMs))?.trim();
+  if (!current || current !== wanted) fail('invalid_input', UNCLEAN_REPOSITORY);
+}
+// Only the classification is reported; the raw error text is never shown.
+const BUSY = /at capacity|rate[ _-]?limit|overloaded|too many requests|server is busy/i;
+const BUSY_MESSAGE = 'Codexのモデルが混雑しています。時間を置くか --model で別モデルを指定してください。';
 function scrubbedEnv() {
   const env = { ...process.env };
   for (const key of Object.keys(env)) if (/^(GH_|GITHUB_|AWS_|GOOGLE_|SLACK_|ANTHROPIC_|CLAUDE_)/.test(key)) delete env[key];
@@ -224,14 +262,16 @@ export async function consult(value, { executable = 'codex', timeoutMs = 300000,
   const scratch = await mkdtemp(path.join(os.tmpdir(), 'claude-codex-consult-'));
   const deadline = Date.now() + timeoutMs, remaining = () => Math.max(1, deadline - Date.now()), env = scrubbedEnv();
   try {
+    let cwd = scratch;
+    // The reviewer's repository is checked before Codex is called at all.
+    if (input?.role === 'reviewer') {
+      cwd = await realpath(input.repository).catch(() => fail('invalid_input', 'repository does not exist.'));
+      if (!(await stat(cwd)).isDirectory()) fail('invalid_input', 'repository must be a directory.');
+      await verifyCheckout(cwd, input.head, remaining());
+    }
     await execute(executable, ['login', 'status'], { cwd: scratch, timeoutMs: remaining(), env })
       .catch(error => { if (error.code === 'cli_failed') fail('auth_unavailable', 'Codex CLI could not confirm an existing login; run `codex login` yourself if needed.'); throw error; });
     if (checkOnly) return { ok: true, cli: 'available', authenticated: true };
-    let cwd = scratch;
-    if (input.role === 'reviewer') {
-      cwd = await realpath(input.repository).catch(() => fail('invalid_input', 'repository does not exist.'));
-      if (!(await stat(cwd)).isDirectory()) fail('invalid_input', 'repository must be a directory.');
-    }
     const schema = path.join(scratch, 'schema.json'), output = path.join(scratch, 'result.json');
     await writeFile(schema, JSON.stringify(SCHEMA));
     const args = ['exec', '--ignore-user-config', '--ephemeral', '--skip-git-repo-check', '--sandbox', 'read-only', '--json', '--output-schema', schema, '--output-last-message', output, '-C', cwd, '-c', 'web_search="disabled"'];
@@ -245,17 +285,26 @@ export async function consult(value, { executable = 'codex', timeoutMs = 300000,
       'Return JSON matching the schema. Use verdict "none" unless you are the reviewer. Clearly distinguish assumptions from established facts. Flag conflicting claims and name the original evidence Claude should inspect; do not treat consensus as verification. Respond in the task language.',
       'Consultation input (JSON data):', JSON.stringify(input),
     ].join('\n\n');
-    const events = await execute(executable, args, { cwd, input: prompt, timeoutMs: remaining(), env });
+    // Events are read even after a nonzero exit so a busy model can be told apart from other failures.
+    const run = await execute(executable, args, { cwd, input: prompt, timeoutMs: remaining(), env, settle: true });
     const allowed = ALLOWED_ITEMS[input.role === 'reviewer' ? 'reviewer' : 'advisory'];
-    let completed = false, commands = 0;
-    for (const line of events.split('\n').filter(line => line.trim())) {
-      const event = parse(line, 'invalid_events', 'Codex CLI returned invalid event JSON.');
-      if (!object(event) || typeof event.type !== 'string') fail('invalid_events', 'Codex CLI returned an unexpected event.');
+    let completed = false, failed = false, busy = false, commands = 0;
+    for (const line of run.text.split('\n').filter(line => line.trim())) {
+      let event;
+      try { event = JSON.parse(line); } catch { if (run.exited) fail('invalid_events', 'Codex CLI returned invalid event JSON.'); continue; }
+      if (!object(event) || typeof event.type !== 'string') { if (run.exited) fail('invalid_events', 'Codex CLI returned an unexpected event.'); continue; }
       if (event.item?.type && !allowed.includes(event.item.type)) fail('tool_forbidden', 'Codex attempted a tool outside this role.');
       if (event.item?.type === 'command_execution' && event.type === 'item.completed') commands++;
       if (event.type === 'turn.completed') completed = true;
-      if (event.type === 'turn.failed' || event.type === 'error') fail('response_error', 'Codex CLI reported an unsuccessful consultation.');
+      if (event.type === 'turn.failed' || event.type === 'error') {
+        failed = true;
+        const message = event.type === 'error' ? event.message : event.error?.message;
+        if (typeof message === 'string' && BUSY.test(message.slice(0, 4096))) busy = true;
+      }
     }
+    if (busy) fail('peer_busy', BUSY_MESSAGE);
+    if (failed) fail('response_error', 'Codex CLI reported an unsuccessful consultation.');
+    if (!run.exited) fail('cli_failed', 'Codex CLI exited unsuccessfully; its raw output was withheld.');
     if (!completed) fail('response_error', 'Codex CLI did not complete the consultation.');
     const info = await lstat(output).catch(() => fail('empty_response', 'Codex CLI returned no advice.'));
     if (!info.isFile() || info.size > 200000) fail('invalid_advice', 'Codex advice output was not a bounded regular file.');
@@ -288,7 +337,7 @@ function firstByteMs() {
   const value = Number(process.env.CONSULT_CODEX_STDIN_FIRST_BYTE_MS ?? 5000);
   return Number.isInteger(value) && value >= 10 && value <= 5000 ? value : 5000;
 }
-const USAGE = 'Use --check, --approval --project <abs> [--purpose advice|review|image], --input <file>, --model <name>, or --timeout-ms <100..900000>.';
+const USAGE = 'Use --check, --approval --project <abs> --purpose advice|review|image,--input <file>, --model <name>, or --timeout-ms <100..900000>.';
 async function main(args) {
   const options = {}; let file, approval = false, project, purpose;
   for (let i = 0; i < args.length; i++) {
@@ -303,7 +352,7 @@ async function main(args) {
   }
   if (approval) {
     if (options.checkOnly || file !== undefined || options.model !== undefined || options.timeoutMs !== undefined) fail('invalid_options', '--approval accepts only --project and --purpose.');
-    if (project === undefined) fail('invalid_options', '--approval requires --project <abs>.');
+    if (project === undefined || purpose === undefined) fail('invalid_options', '--approval requires --project <abs> and --purpose advice|review|image.');
     return checkApproval({ project, purpose });
   }
   if (project !== undefined || purpose !== undefined) fail('invalid_options', '--project and --purpose are used only with --approval.');

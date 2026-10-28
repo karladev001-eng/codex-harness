@@ -15,10 +15,13 @@ const SIZES = ['auto', '1024x1024', '1536x1024', '1024x1536'];
 const MAX_REFERENCES = 4;
 // Same switches as consult-codex, except that image_generation stays on and is the only tool.
 const DISABLED_FEATURES = ['hooks', 'plugins', 'apps', 'multi_agent', 'computer_use', 'browser_use', 'view_image', 'goals', 'sleep_tool', 'workspace_dependencies', 'in_app_browser', 'skill_search'];
-// The single place that decides which event items are acceptable. An `error` item is a nonfatal
-// notice (codex-cli 0.164.0 sends one warning that the feature is unfinished). On 0.164.0 the image
-// generation itself emits no item in the JSON stream; any type containing "image" stays allowed.
-const ALLOWED_ITEMS = { exact: ['agent_message', 'reasoning', 'error'], pattern: /image/i };
+// The single place that decides which event items are acceptable, by exact type name only. An `error`
+// item is a nonfatal notice (codex-cli 0.164.0 sends one warning that the feature is unfinished).
+// On 0.164.0 the image generation itself emits no item in the JSON stream; the two image types are
+// the names a later CLI is expected to use. If a new type name appears, the run stops with
+// tool_forbidden; confirm it on a real CLI before adding it here.
+const IMAGE_ITEMS = ['image_generation', 'image_generation_call'];
+const ALLOWED_ITEMS = ['agent_message', 'reasoning', 'error', ...IMAGE_ITEMS];
 // Codex names the image directory after the thread: generated_images/<thread_id>/.
 const THREAD_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 // Only the classification is reported; the raw error text is never shown.
@@ -34,7 +37,7 @@ function object(value) { return value !== null && typeof value === 'object' && !
 function nonempty(value) { return typeof value === 'string' && value.trim().length > 0; }
 function within(parent, child) { const relative = path.relative(parent, child); return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative)); }
 function strictlyWithin(parent, child) { return child !== parent && within(parent, child); }
-export function itemAllowed(type) { return ALLOWED_ITEMS.exact.includes(type) || ALLOWED_ITEMS.pattern.test(type); }
+export function itemAllowed(type) { return ALLOWED_ITEMS.includes(type); }
 
 export function validateInput(value) {
   if (!object(value)) fail('invalid_input', 'Input must be a JSON object.');
@@ -93,7 +96,9 @@ async function prepare(input) {
 }
 
 // No user content is placed in argv, inherited stdio, error messages or logs.
-// With settle, an unsuccessful exit resolves as { text, exited: false } so the events can still be read.
+// With settle, an unsuccessful exit resolves as { text, exited: false } so the events can still be read,
+// and a run stopped for time or output resolves as { text, exited: false, stopped } once the child is gone.
+const SETTLED_STOPS = ['timeout', 'output_limit'];
 function execute(executable, args, { cwd, input = '', timeoutMs, env, settle = false }) {
   return new Promise((resolve, reject) => {
     let child, timeout, forceKill, closed = false, failure, size = 0;
@@ -117,9 +122,13 @@ function execute(executable, args, { cwd, input = '', timeoutMs, env, settle = f
     child.stdin.on('error', () => {});
     child.on('error', () => { failure ??= new ImageError('cli_unavailable', 'Codex CLI is unavailable or could not be started.'); });
     child.on('close', (code, signal) => {
-      closed = true; clearTimeout(timeout); clearTimeout(forceKill);
+      closed = true; clearTimeout(timeout);
+      // After a requested stop, force-stop any remaining members of the process group before returning.
+      if (failure && process.platform !== 'win32' && child.pid) { try { process.kill(-child.pid, 'SIGKILL'); } catch {} }
+      clearTimeout(forceKill);
       const text = Buffer.concat(stdout).toString('utf8'), exited = code === 0 && !signal;
-      if (failure) reject(failure);
+      if (failure && settle && SETTLED_STOPS.includes(failure.code)) resolve({ text, exited: false, stopped: failure });
+      else if (failure) reject(failure);
       else if (settle) resolve({ text, exited });
       else if (!exited) reject(new ImageError('cli_failed', 'Codex CLI exited unsuccessfully; its raw output was withheld.'));
       else resolve(text);
@@ -165,31 +174,28 @@ function collectStrings(value, out, depth = 0) {
   else if (Array.isArray(value)) for (const item of value) collectStrings(item, out, depth + 1);
   else if (object(value)) for (const item of Object.values(value)) collectStrings(item, out, depth + 1);
 }
-async function eventImages(strings, root, before, startedAt) {
+async function eventImages(strings, directory) {
   const result = [];
   for (const candidate of strings) {
     if (candidate.length > 4096 || !path.isAbsolute(candidate) || !IMAGE_EXTENSIONS.has(path.extname(candidate).toLowerCase())) continue;
     const info = await lstat(candidate).catch(() => null);
     if (!info?.isFile()) continue;
     const real = await realpath(candidate).catch(() => null);
-    if (!real || !strictlyWithin(root, real) || result.includes(real)) continue;
-    if (before.has(real) && info.mtimeMs < startedAt - 1000) continue;
+    if (!real || !strictlyWithin(directory, real) || result.includes(real)) continue;
     result.push(real);
   }
   return result;
 }
-// With a thread_id only generated_images/<thread_id>/ is read, so images from other Codex sessions
-// running at the same time are never picked up. Without one, new files anywhere under root are used.
-async function findSources(root, threadId, strings, before, startedAt) {
-  if (threadId !== undefined) {
-    const directory = path.join(root, threadId);
-    const info = await lstat(directory).catch(() => null);
-    if (!info?.isDirectory()) return [];
-    const reported = await eventImages(strings, directory, before, startedAt);
-    return reported.length ? reported : [...(await listImages(directory)).keys()].filter(file => !before.has(file)).sort();
-  }
-  const reported = await eventImages(strings, root, before, startedAt);
-  return reported.length ? reported : [...(await listImages(root)).keys()].filter(file => !before.has(file)).sort();
+// Only generated_images/<thread_id>/ of this run is read, so images from other Codex sessions running at
+// the same time are never picked up. The thread is new, so everything in it belongs to this run.
+// Without a usable thread_id nothing is taken: there is no search across the rest of generated_images.
+async function findSources(root, threadId, strings) {
+  if (threadId === undefined) return [];
+  const directory = path.join(root, threadId);
+  const info = await lstat(directory).catch(() => null);
+  if (!info?.isDirectory()) return [];
+  const reported = await eventImages(strings, directory);
+  return reported.length ? reported : [...(await listImages(directory)).keys()].sort();
 }
 function detectExtension(head, fallback) {
   if (head.length >= 8 && head.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return '.png';
@@ -239,8 +245,6 @@ export async function generate(value, { executable = 'codex', timeoutMs = 300000
       return { ok: true, cli: 'available', authenticated: true, image_generation: true };
     }
     const root = await imagesRoot(env);
-    // The snapshot drives the fallback used when no thread_id is reported.
-    const before = await listImages(root), startedAt = Date.now();
     // References come first so a variadic -i cannot swallow the trailing stdin marker.
     const args = ['exec'];
     for (const reference of prepared.references) args.push('-i', reference);
@@ -264,18 +268,22 @@ export async function generate(value, { executable = 'codex', timeoutMs = 300000
         if (typeof message === 'string' && BUSY.test(message.slice(0, 4096))) busy = true;
       }
       if (event.type === 'turn.completed') completed = true;
-      if (event.item && ALLOWED_ITEMS.pattern.test(event.item.type)) collectStrings(event.item, strings);
+      if (event.item && IMAGE_ITEMS.includes(event.item.type)) collectStrings(event.item, strings);
     }
-    const sources = await findSources(root, threadId, strings, before, startedAt);
+    const sources = await findSources(root, threadId, strings);
     // An image already on disk is the result, even if the turn or the CLI failed afterwards.
     if (!sources.length) {
       if (busy) fail('peer_busy', BUSY_MESSAGE);
+      if (run.stopped) throw run.stopped;
       if (failed) fail('response_error', 'Codex CLI reported an unsuccessful image generation.');
       if (!run.exited) fail('cli_failed', 'Codex CLI exited unsuccessfully; its raw output was withheld.');
       if (!completed) fail('response_error', 'Codex CLI did not complete the image generation.');
+      if (threadId === undefined) fail('empty_response', 'Codex CLI did not report a usable thread_id, so no image was taken (images from other Codex sessions are never picked up).');
       fail('empty_response', 'Codex did not produce a new image file.');
     }
-    const warning = failed ? 'turn ended with an error after the image was generated'
+    const warning = run.stopped?.code === 'timeout' ? 'Codex CLI timed out after the image was generated'
+      : run.stopped ? 'Codex CLI exceeded the output limit after the image was generated'
+      : failed ? 'turn ended with an error after the image was generated'
       : !run.exited ? 'Codex CLI exited unsuccessfully after the image was generated'
       : !completed ? 'turn did not complete after the image was generated' : undefined;
     const directory = await confinedDirectory(prepared.projectReal, path.dirname(input.out));
@@ -320,7 +328,12 @@ function parseFrontmatter(text) {
     last = key;
     if (key !== 'purposes') { fields[key] = { value: unquote(value), line: number }; continue; }
     if (value === '') fields.purposes = { items: [], line: number, inline: false };
-    else if (/^\[.*\]$/.test(value)) fields.purposes = { items: value.slice(1, -1).split(',').map(part => part.trim()).filter(Boolean).map(part => ({ value: unquote(part), line: number })), line: number, inline: true };
+    else if (/^\[.*\]$/.test(value)) {
+      // [] approves nothing; an empty element such as [advice,,review], [advice,] or [,] is a typo.
+      const inner = value.slice(1, -1), parts = inner.trim() === '' ? [] : inner.split(',').map(part => part.trim());
+      if (parts.some(part => part === '')) return { error: `line ${number}: purposes has an empty item; write a list such as [advice, review] or []` };
+      fields.purposes = { items: parts.map(part => ({ value: unquote(part), line: number })), line: number, inline: true };
+    }
     else return { error: `line ${number}: purposes must be a list such as [advice, review]` };
   }
   return { fields };
@@ -328,7 +341,8 @@ function parseFrontmatter(text) {
 const canonical = file => realpath(file).catch(() => path.resolve(file));
 export async function checkApproval({ project, purpose, peer = APPROVAL_PEER }) {
   if (typeof project !== 'string' || !path.isAbsolute(project)) fail('invalid_options', '--project must be an absolute path.');
-  if (purpose !== undefined && !PURPOSES.includes(purpose)) fail('invalid_options', `--purpose must be one of ${PURPOSES.join(', ')}.`);
+  // An approval is always decided for one named purpose; there is no purpose-free approval.
+  if (!PURPOSES.includes(purpose)) fail('invalid_options', `--purpose is required and must be one of ${PURPOSES.join(', ')}.`);
   const record = path.join(project, 'docs/harness/authorizations', `${peer}-send.md`);
   const result = (approved, reason, purposes, message) => ({ ok: true, approved, reason, record, purposes, ...(message ? { message } : {}) });
   const info = await stat(record).catch(() => null);
@@ -346,7 +360,7 @@ export async function checkApproval({ project, purpose, peer = APPROVAL_PEER }) 
   const purposes = [...new Set(fields.purposes.items.map(item => item.value))];
   if (fields.status.value !== 'approved') return result(false, 'revoked', purposes);
   if (await canonical(fields.project.value) !== await canonical(project)) return result(false, 'project_mismatch', purposes);
-  if (purpose !== undefined && !purposes.includes(purpose)) return result(false, 'purpose_missing', purposes);
+  if (!purposes.includes(purpose)) return result(false, 'purpose_missing', purposes);
   return result(true, 'approved', purposes);
 }
 // END shared send-approval check

@@ -19,7 +19,7 @@ const ROLE_PROMPTS = {
   ideator: 'Generate independent, varied ideas with their benefits, tradeoffs and useful experiments. On an initial request you have not been given Codex proposals; do not invent them.',
   consultant: 'Advise on the stated decision or stalled problem. Compare the supplied alternatives, assumptions, uncertainties, tradeoffs and discriminating next checks.',
   critic: 'Critique the supplied proposal. Identify concrete weaknesses, missing assumptions, counterexamples, failure conditions and proportionate improvements.',
-  reviewer: 'Independently review the change between the supplied base and head commits against the numbered acceptance criteria. Build your own risk list before reading any implementer claims. The diff is included below; read surrounding code in the current repository with Read, Grep and Glob only, and report concrete findings with file:line locations and evidence. Never modify files, Git state or the network.',
+  reviewer: 'Independently review the change between the supplied base and head commits against the numbered acceptance criteria. Build your own risk list before reading any implementer claims. The diff is included below; read surrounding code in the current repository with Read, Grep and Glob only, and report concrete findings with file:line locations and evidence. Do not read credentials, private keys, .env files or other secret files. Never modify files, Git state or the network.',
 };
 const ROLES = Object.keys(ROLE_PROMPTS);
 const SEVERITIES = ['critical', 'high', 'medium', 'low'];
@@ -90,7 +90,8 @@ export function validateInput(value) {
 }
 
 // No user content is placed in argv, inherited stdio, error messages or logs.
-async function execute(executable, args, { cwd, input = '', timeoutMs, outputLimit = OUTPUT_LIMIT }) {
+// With settle, an unsuccessful exit resolves as { text, exited: false } so the result JSON can still be read.
+async function execute(executable, args, { cwd, input = '', timeoutMs, outputLimit = OUTPUT_LIMIT, settle = false }) {
   return new Promise((resolve, reject) => {
     let child, timeout, forceKill, closed = false, failure, size = 0;
     const stdout = [], stderr = [];
@@ -129,19 +130,21 @@ async function execute(executable, args, { cwd, input = '', timeoutMs, outputLim
       // If termination was requested, force-stop remaining group members before cleanup.
       if (failure && process.platform !== 'win32' && child.pid) { try { process.kill(-child.pid, 'SIGKILL'); } catch {} }
       clearTimeout(forceKill);
+      const text = Buffer.concat(stdout).toString('utf8'), exited = code === 0 && !signal;
       if (failure) reject(failure);
-      else if (code !== 0 || signal) reject(new ConsultationError('cli_failed', 'Claude CLI exited unsuccessfully; its raw output was withheld.'));
-      else resolve(Buffer.concat(stdout).toString('utf8'));
+      else if (settle) resolve({ text, exited });
+      else if (!exited) reject(new ConsultationError('cli_failed', 'Claude CLI exited unsuccessfully; its raw output was withheld.'));
+      else resolve(text);
     });
     child.stdin.end(input);
   });
 }
 
 // Read-only git output, cut at `limit` bytes so a huge diff cannot exhaust memory.
-function gitRead(repository, args, { limit, timeoutMs }) {
+function gitRead(repository, args, { limit, timeoutMs, message = 'git diff base..head failed in repository; check the path and commit IDs.' }) {
   return new Promise((resolve, reject) => {
     const chunks = []; let size = 0, truncated = false, child;
-    const failed = () => reject(new ConsultationError('invalid_input', 'git diff base..head failed in repository; check the path and commit IDs.'));
+    const failed = () => reject(new ConsultationError('invalid_input', message));
     try {
       child = spawn('git', ['-C', repository, '-c', 'core.fsmonitor=false', '--no-pager', ...args], {
         shell: false, windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'],
@@ -163,6 +166,17 @@ function gitRead(repository, args, { limit, timeoutMs }) {
   });
 }
 
+// The reviewer reads the working tree, so it must be exactly head with nothing uncommitted on top.
+const UNCLEAN_REPOSITORY = 'repository must be a clean checkout of head (no uncommitted or untracked changes, HEAD equal to head). クリーンなdetached worktreeを head で渡してください（git worktree add --detach <tmp> <head>）。';
+async function verifyCheckout(repository, head, timeoutMs) {
+  const options = { limit: STAT_LIMIT, timeoutMs, message: UNCLEAN_REPOSITORY };
+  const status = await gitRead(repository, ['status', '--porcelain'], options);
+  if (status.truncated || status.text.trim()) invalid(UNCLEAN_REPOSITORY);
+  const current = await gitRead(repository, ['rev-parse', '--verify', 'HEAD'], options);
+  const wanted = await gitRead(repository, ['rev-parse', '--verify', '--quiet', `${head}^{commit}`], options);
+  if (!current.text.trim() || current.text.trim() !== wanted.text.trim()) invalid(UNCLEAN_REPOSITORY);
+}
+
 async function collectDiff(repository, base, head, timeoutMs) {
   const range = `${base}..${head}`, common = ['diff', '--no-color', '--no-ext-diff', '--no-textconv'];
   const summary = await gitRead(repository, [...common, '--stat', range], { limit: STAT_LIMIT, timeoutMs });
@@ -182,6 +196,17 @@ export function extractAdvice(text) {
   const start = trimmed.indexOf('{'), end = trimmed.lastIndexOf('}');
   if (start !== -1 && end > start) return tryObject(trimmed.slice(start, end + 1));
   return undefined;
+}
+
+// Claude CLI reports API failures in the result JSON. 429 is a rate limit and 529 an overloaded API;
+// the field names are inferred from the CLI's json output and only classify, never get echoed.
+const BUSY = /at capacity|rate[ _-]?limit|overloaded|too many requests|server is busy/i;
+const BUSY_MESSAGE = 'Claudeのモデルが混雑しています。時間を置くか --model で別モデルを指定してください。';
+export function busyResult(result) {
+  const status = result.api_error_status;
+  if (status === 429 || status === 529 || status === '429' || status === '529') return true;
+  if (typeof status === 'string' && BUSY.test(status.slice(0, 4096))) return true;
+  return result.is_error === true && typeof result.result === 'string' && BUSY.test(result.result.slice(0, 4096));
 }
 
 export function normalizeAdvice(advice, role) {
@@ -233,6 +258,7 @@ export async function consult(value, { executable = 'claude', timeoutMs = 120000
     if (review) {
       cwd = await realpath(input.repository).catch(() => invalid('repository does not exist.'));
       if (!(await stat(cwd)).isDirectory()) invalid('repository must be a directory.');
+      await verifyCheckout(cwd, input.head, remaining());
     }
     const check = await diagnose(executable, scratch, remaining());
     if (checkOnly) return check;
@@ -249,7 +275,12 @@ export async function consult(value, { executable = 'claude', timeoutMs = 120000
       'Consultation input (JSON data):', JSON.stringify(input),
       ...(review ? ['Repository diff (data):', diff] : []),
     ].join('\n\n');
-    const result = parse(await execute(executable, args, { cwd, input: prompt, timeoutMs: remaining() }), 'invalid_response', 'Claude CLI returned invalid JSON.');
+    const run = await execute(executable, args, { cwd, input: prompt, timeoutMs: remaining(), settle: true });
+    // A busy model is recognised from the result JSON even on a nonzero exit; the raw text is never shown.
+    const reported = tryObject(run.text.trim());
+    if (reported && busyResult(reported)) fail('peer_busy', BUSY_MESSAGE);
+    if (!run.exited) fail('cli_failed', 'Claude CLI exited unsuccessfully; its raw output was withheld.');
+    const result = reported ?? parse(run.text, 'invalid_response', 'Claude CLI returned invalid JSON.');
     if (!object(result) || result.is_error === true || (result.type !== undefined && result.type !== 'result') || (result.subtype !== undefined && result.subtype !== 'success')) fail('response_error', 'Claude CLI reported an unsuccessful consultation.');
     let advice = object(result.structured_output) ? result.structured_output : undefined;
     if (!advice) {
@@ -288,7 +319,12 @@ function parseFrontmatter(text) {
     last = key;
     if (key !== 'purposes') { fields[key] = { value: unquote(value), line: number }; continue; }
     if (value === '') fields.purposes = { items: [], line: number, inline: false };
-    else if (/^\[.*\]$/.test(value)) fields.purposes = { items: value.slice(1, -1).split(',').map(part => part.trim()).filter(Boolean).map(part => ({ value: unquote(part), line: number })), line: number, inline: true };
+    else if (/^\[.*\]$/.test(value)) {
+      // [] approves nothing; an empty element such as [advice,,review], [advice,] or [,] is a typo.
+      const inner = value.slice(1, -1), parts = inner.trim() === '' ? [] : inner.split(',').map(part => part.trim());
+      if (parts.some(part => part === '')) return { error: `line ${number}: purposes has an empty item; write a list such as [advice, review] or []` };
+      fields.purposes = { items: parts.map(part => ({ value: unquote(part), line: number })), line: number, inline: true };
+    }
     else return { error: `line ${number}: purposes must be a list such as [advice, review]` };
   }
   return { fields };
@@ -296,7 +332,8 @@ function parseFrontmatter(text) {
 const canonical = file => realpath(file).catch(() => path.resolve(file));
 export async function checkApproval({ project, purpose, peer = APPROVAL_PEER }) {
   if (typeof project !== 'string' || !path.isAbsolute(project)) fail('invalid_options', '--project must be an absolute path.');
-  if (purpose !== undefined && !PURPOSES.includes(purpose)) fail('invalid_options', `--purpose must be one of ${PURPOSES.join(', ')}.`);
+  // An approval is always decided for one named purpose; there is no purpose-free approval.
+  if (!PURPOSES.includes(purpose)) fail('invalid_options', `--purpose is required and must be one of ${PURPOSES.join(', ')}.`);
   const record = path.join(project, 'docs/harness/authorizations', `${peer}-send.md`);
   const result = (approved, reason, purposes, message) => ({ ok: true, approved, reason, record, purposes, ...(message ? { message } : {}) });
   const info = await stat(record).catch(() => null);
@@ -314,7 +351,7 @@ export async function checkApproval({ project, purpose, peer = APPROVAL_PEER }) 
   const purposes = [...new Set(fields.purposes.items.map(item => item.value))];
   if (fields.status.value !== 'approved') return result(false, 'revoked', purposes);
   if (await canonical(fields.project.value) !== await canonical(project)) return result(false, 'project_mismatch', purposes);
-  if (purpose !== undefined && !purposes.includes(purpose)) return result(false, 'purpose_missing', purposes);
+  if (!purposes.includes(purpose)) return result(false, 'purpose_missing', purposes);
   return result(true, 'approved', purposes);
 }
 // END shared send-approval check
@@ -343,7 +380,9 @@ async function readInput(file, timeoutMs) {
   }
   // An interactive terminal never reaches EOF on its own; fail at once instead of waiting.
   if (process.stdin.isTTY) fail('input_unavailable', `stdin is a terminal. ${INPUT_HINT}`);
-  const firstByteMs = Number(process.env.CONSULT_CLAUDE_FIRST_BYTE_MS) > 0 ? Number(process.env.CONSULT_CLAUDE_FIRST_BYTE_MS) : FIRST_BYTE_MS;
+  // Tests may shorten the 5 s wait for the first stdin byte (10-5000 ms); it is never lengthened.
+  const requested = Number(process.env.CONSULT_CLAUDE_FIRST_BYTE_MS ?? FIRST_BYTE_MS);
+  const firstByteMs = Number.isInteger(requested) && requested >= 10 && requested <= FIRST_BYTE_MS ? requested : FIRST_BYTE_MS;
   return new Promise((resolve, reject) => {
     const chunks = []; let size = 0;
     const finish = (error, data) => {
@@ -371,11 +410,11 @@ async function main(args) {
       else if (key === '--project') project = value;
       else if (key === '--purpose') purpose = value;
       else options.timeoutMs = Number(value);
-    } else fail('invalid_options', 'Use --check, --approval --project <abs> [--purpose advice|review|image], --input <file>, --model <name>, or --timeout-ms <100..300000>.');
+    } else fail('invalid_options', 'Use --check, --approval --project <abs> --purpose advice|review|image,--input <file>, --model <name>, or --timeout-ms <100..300000>.');
   }
   if (approval) {
     if (options.checkOnly || file || options.model || options.timeoutMs !== undefined) fail('invalid_options', '--approval accepts only --project and --purpose.');
-    if (project === undefined) fail('invalid_options', '--approval requires --project <abs>.');
+    if (project === undefined || purpose === undefined) fail('invalid_options', '--approval requires --project <abs> and --purpose advice|review|image.');
     return checkApproval({ project, purpose });
   }
   if (project !== undefined || purpose !== undefined) fail('invalid_options', '--project and --purpose are used only with --approval.');

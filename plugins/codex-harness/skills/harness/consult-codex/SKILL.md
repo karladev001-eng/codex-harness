@@ -22,7 +22,7 @@ harnessの自動利用は、activeな親が `status --host claude` の `collabor
 
 Codexへ渡した内容はOpenAIに送られます。`reviewer` はリポジトリを読むので、コードもそのまま送られます。
 
-承認はプロジェクトごとに、`<project>/docs/harness/authorizations/codex-send.md` へ次の形で記録します。`purposes` は `advice`（発案・相談・批評の3役）・`review`（`reviewer`）・`image`（画像生成）から、承認された目的だけを書きます。
+承認はプロジェクトごとに、`<project>/docs/harness/authorizations/codex-send.md` へ次の形で記録します。`purposes` は `advice`（発案・相談・批評の3役）・`review`（`reviewer`）・`image`（画像生成）から、承認された目的だけを書きます。`[]` は何も承認しません。`[advice,,review]` のような空の要素は `malformed` です。
 
 ```markdown
 ---
@@ -42,7 +42,7 @@ recorded: 2026-10-28
 - 承認根拠: （日付と、ユーザー本人の承認の発言）
 ```
 
-- 送る前に毎回、`node "<skill-dir>/scripts/consult.mjs" --approval --project <プロジェクトの絶対パス> --purpose <purpose>` で判定します。purposeは、相談の3役なら `advice`、`reviewer` なら `review` です。`--project` は、レビュー用の一時worktreeではなく、記録があるプロジェクトのルートです。結果は常に終了コード0の `{"ok":true,"approved":true|false,"reason":"...","record":"<path>","purposes":[...]}` です。
+- 送る前に毎回、`node "<skill-dir>/scripts/consult.mjs" --approval --project <プロジェクトの絶対パス> --purpose <purpose>` で判定します。purposeは、相談の3役なら `advice`、`reviewer` なら `review` です。`--purpose` は必須で、省くと `invalid_options` になります（目的を決めない承認はありません）。`--project` は、レビュー用の一時worktreeではなく、記録があるプロジェクトのルートです。結果は常に終了コード0の `{"ok":true,"approved":true|false,"reason":"...","record":"<path>","purposes":[...]}` です。
 - `approved` なら、聞き直さずに送ります。
 - それ以外（`missing`・`malformed`・`revoked`・`project_mismatch`・`purpose_missing`）なら、送らずに、次の文面でユーザーに1回だけ確認します。「Codex（OpenAI）へ、<送る情報の範囲>を、<purpose>（<用途>）のために送ってよいですか。この承認は <プロジェクトの絶対パス> のこの目的だけに使います。」`malformed` のときは、`message` にある問題の行も示します。
 - ユーザーが明示的に承認したら、親がテンプレートどおりに記録してから送ります（既存の記録があれば、`purposes` に追加します）。persistence OFFなら、会話内の承認だけで送り、ファイルは作りません。承認されなければ送らず、Claude側だけで進めます。
@@ -62,7 +62,7 @@ recorded: 2026-10-28
 `collaboration.code_review` が `both` のとき、Claude側の `harness:reviewer` とCodexの `reviewer` を並行して動かします。
 
 - 両方に同じ基点・結果commit・受入条件を渡します。互いの結果は渡しません。
-- `repository` には、結果commitをcheckoutしたクリーンなworktreeを渡します（例：`git worktree add --detach <tmp> <head>`）。作業中のcheckoutを渡すと、未コミットの変更がレビュー対象と混ざります。終わったらそのworktreeを削除します。
+- `repository` には、結果commitをcheckoutしたクリーンなworktreeを渡します（例：`git worktree add --detach <tmp> <head>`）。作業中のcheckoutを渡すと、未コミットの変更がレビュー対象と混ざります。helperはCodexを呼ぶ前に、`git status --porcelain` が空であることと、`HEAD` が `head` と一致することを確かめ、違えば `invalid_input` で止まります。終わったらそのworktreeを削除します。
 - 親が指摘を突き合わせ、同じ問題の重複をまとめ、重大度を揃えます。片方だけの指摘も、実差分で確認できれば採用します。
 - 判定はPASSが揃ったときだけPASSです。片方がNEEDS_WORK・BLOCKEDなら、根拠を確認して修正するか、却下の理由を記録します。
 - Codexが使えないときは、その旨を報告し、Claude側のレビューだけで進めます。黙って省略しません。
@@ -88,11 +88,13 @@ stdinが端末か空なら `input_unavailable`、最初の入力が5秒届かな
 
 Codexの最終メッセージは、そのまま、コードフェンスを外したもの、最初の `{` から最後の `}` まで、の順でJSONとして読みます。相談の3役の `verdict` は `none` に揃え、欠けた配列は `[]` で補います。`summary` が空のとき、`reviewer` の `verdict` が3値以外のときは `invalid_advice` です。
 
-失敗：`{"ok":false,"error":{"code","message"}}` で非0終了です。Codexの生の出力やstderrは表示しません。
+失敗：`{"ok":false,"error":{"code","message"}}` で非0終了です。主なcode：`invalid_input`・`input_unavailable`・`input_timeout`・`input_limit`・`auth_unavailable`・`tool_forbidden`・`peer_busy`・`response_error`・`cli_failed`・`invalid_events`・`invalid_advice`・`empty_response`・`timeout`・`output_limit`。Codexの生の出力やstderrは表示しません。
+
+- `peer_busy` は、Codexのモデルが混雑している（容量不足・レート制限など）と報告されたときです。CLIが非0で終了しても、イベントから判定します。時間を置くか、`--model` で別のモデルを指定してやり直します。
 
 ## 隔離
 
-- `codex exec --ignore-user-config --ephemeral --sandbox read-only` で実行し、Web検索・hooks・plugins・MCPアプリ・マルチエージェント・画像生成などを無効にします。相談の3役はシェルも無効です。`reviewer` だけが、read-only sandboxの中で読み取りコマンドを使えます。
+- `codex exec --ignore-user-config --ephemeral --sandbox read-only` で実行し、Web検索・hooks・plugins・MCPアプリ・マルチエージェント・画像生成などを無効にします。相談の3役はシェルも無効です。`reviewer` だけが、read-only sandboxの中で読み取りコマンドを使えます。`reviewer` には、認証情報・秘密鍵・`.env` などの秘密ファイルを読まないよう指示します。
 - 実行中に許可外のツール（ファイル変更・MCP・Web検索など）の痕跡があれば、結果を捨てて `tool_forbidden` で失敗します。
 - GitHub・クラウド・Anthropicの環境変数は子プロセスに渡しません。
 - 時間の上限は既定300秒（`--timeout-ms` は100〜900000）、入力の上限は256KiB、出力の上限は4MiBです。
