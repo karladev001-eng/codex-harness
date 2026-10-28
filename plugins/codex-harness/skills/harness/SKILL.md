@@ -31,4 +31,4 @@ description: Coordinate coding tasks, learn from UI/document feedback, cite Web 
 
 同じ版を保持している間は再読不要です。作業単位ごとに設定を再評価し、範囲・段階・設定・役割・版・指示が変わったら全行を再判定します（相談から実装に移るときも同じ）。compactなどで本文を失えば再確認します。永続既読cacheは禁止です。
 
-任意helper：`read-sections.cjs <commands|roles> <ID...>`（一覧は `--list`）で必要な節だけを読めます（receipt不要）。不明・旧版・実行不能なら、[commands](references/commands.md)・[roles](references/roles.md)の関連範囲、必要なら全文へ戻ります。
+任意helper：`read-sections.cjs <commands|roles|creative-loop> <ID...>`（一覧は `--list`）で必要な節だけを読めます（receipt不要）。不明・旧版・実行不能なら、[commands](references/commands.md)・[roles](references/roles.md)・[制作改善](references/creative-loop.md)の関連範囲、必要なら全文へ戻ります。

@@ -1,6 +1,6 @@
 # 制作フィードバックの改善ループ
 
-loop ONのUI・文書などの制作・修正・フィードバックでは、[制作改善ループ](../creative-loop.md)に従います。開始時に、現在の指示と適用範囲が合う指針を確認します。修正の根拠は観察として記録し、完了時の評価は区別して記録し、次回にその更新を反映します。GitHub接続時のautosave OFFまたはpreferences OFFなら、自動で読み取る・記録する・再送する前に止めます。未接続のlocalでは既存の手順を維持します。公開CLIには自動操作のフラグがないため、設定は自分で判定します。記憶の読み書きはruntimeの `preferences read/write/sync` を通します。GitHub設定済みでfresh確認に失敗したときは、自動適用しません。persistence OFFでは保存された記憶を読まず、会話内だけで扱います。明示的な好みの根拠はmeasurementとは独立で、persistenceに従います。
+loop ONのUI・文書などの制作・修正・フィードバックでは、[制作改善ループ](../creative-loop.md)に従います。通常の制作では `read-sections.cjs creative-loop loop` で必要な節だけを読み、資料参照・指針の更新・保存の委譲が要るときに `retrieval`・`preferences-contract`・`delegation` を足します（一覧は `--list creative-loop`）。開始時に、現在の指示と適用範囲が合う指針を確認します。修正の根拠は観察として記録し、完了時の評価は区別して記録し、次回にその更新を反映します。GitHub接続時のautosave OFFまたはpreferences OFFなら、自動で読み取る・記録する・再送する前に止めます。未接続のlocalでは既存の手順を維持します。公開CLIには自動操作のフラグがないため、設定は自分で判定します。記憶の読み書きはruntimeの `preferences read/write/sync` を通します。GitHub設定済みでfresh確認に失敗したときは、自動適用しません。persistence OFFでは保存された記憶を読まず、会話内だけで扱います。明示的な好みの根拠はmeasurementとは独立で、persistenceに従います。
 
 保存する根拠や更新、または既知のpendingの再同期があり、active・persistence・loop・delegationがすべてONなら、親は既定で[record-keeper](../roles/record-keeper.md)に保存を委譲します。変更がなければ起動しません。明示的な記憶管理は、loop OFFでも行えます。delegation OFFなら、親が同じ契約で担当します。persistence OFFでは、起動も記憶の読み書きも禁止です。起動と引継ぎ、唯一のwriter、失敗時の扱いは[詳細](../creative-loop.md#起動引継ぎ)を守ります。
 
