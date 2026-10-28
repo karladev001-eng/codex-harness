@@ -21,4 +21,4 @@
 
 ## 外部相談
 
-Codexが親のときの相手はClaudeで、[consult-claude](../../consult-claude/SKILL.md)を使います。ログイン確認で追加の実行権限が要るときの `sandbox_permissions: "require_escalated"` の使い方も、そちらに書いてあります。どの作業を相手に回すかは `status` の `collaboration` で決まります（[外部相談](../routing/peer-consult.md)）。
+Codexが親のときの相手はClaudeで、[consult-claude](../../consult-claude/SKILL.md)を使います。ログイン確認で追加の実行権限が要るときの `sandbox_permissions: "require_escalated"` の使い方も、そちらに書いてあります。どの作業を相手に回すかは `status` の `collaboration` で決まります（[外部相談](../routing/peer-consult.md)）。送る前に、consult-claudeの `--approval` で送信承認を判定します。`code_review` が `both` / `peer` なら、consult-claudeの `reviewer` 役を使い、Claude Codeが親のときと同じ2者レビューにします。
