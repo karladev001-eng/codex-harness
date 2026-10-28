@@ -39,7 +39,7 @@ if (status.error) {
     'Claude Code reading of Codex wording: AGENTS.md means CLAUDE.md; workers are Agent subagent_type harness:implementer, harness:integrator, harness:reviewer or harness:researcher; Codex sandbox escalation does not exist, so follow the permission mode and do not retry a denied call.',
     `Before delegating, consulting the peer, or following a Codex-only step (early compaction, Knowledge descriptions), read only the matching section of ${path.join(skill, 'references', 'hosts', 'claude-code.md')}, which overrides those steps.`,
     `Collaboration (peer=${status.data.collaboration.peer}): ${tasks}. Peer work goes through the consult-codex skill and needs a recorded send approval per project.`,
-    `Re-check with: node "${runtime}" status --project <absolute-project-path> --host claude.`,
+    `When settings or scope change within a unit of work, re-run: node "${runtime}" status --project <absolute-project-path> --host claude.`,
     'Every harness:* Agent launch passes model and effort from the role key above (worker agents inherit the main model otherwise, and the plugin denies such launches); never use fork for workers.',
     'A delegated worker (prompt contains HARNESS_WORKER) performs only its assignment and never coordinates.',
   ].filter(Boolean).join('\n'));
