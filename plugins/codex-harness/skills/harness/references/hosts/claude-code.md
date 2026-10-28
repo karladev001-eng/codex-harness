@@ -12,7 +12,7 @@
 | 調査・資料確認 | `harness:researcher` | 読み取りのみ |
 
 - **モデル**：`status.config.models[<役割キー>]` の `model`（`haiku` / `sonnet` / `opus`）をAgentの `model` に、`reasoning_effort` を `effort` に毎回渡します。省略すると子はメインと同じモデルで動くため、プラグインのhookが起動を拒否します。ユーザーの明示指定と設定のpinが優先です。指定したモデルが使えなければ、黙って代替せず報告します。
-- **履歴なし起動**：上の役割を指定した通常起動が、Codexの `fork_turns="none"` に当たります。`fork` は親の会話を引き継ぐので使いません。先頭が `HARNESS_WORKER` のプロンプトを `harness:*` 以外（`fork`・種類の省略・`general-purpose` など）へ送ると、hookが拒否します。
+- **履歴なし起動**：上の役割を指定した通常起動が、Codexの `fork_turns="none"` に当たります。`fork` は親の会話を引き継ぐので使いません。先頭が `HARNESS_WORKER` のプロンプトを `harness:*` 以外（`general-purpose` など）へ送るか、`HARNESS_WORKER` を含むプロンプトを `fork`・種類の省略で送ると、hookが拒否します。
 - **worktree**：パケットの基点が現在のHEADなら、Agentの `isolation: "worktree"` を使えます。別の基点が必要なら `runtime.js worktree create --id ID --base COMMIT` で作り、その絶対パスを渡して子に最初に `cd` させます。worktreeを使えなければ理由を報告し、[並列規則](../parallel.md)に従って進め方を決めます。
 - **渡す内容**：プロンプトの先頭に `HARNESS_WORKER` と役割を書き、パケット、役割参照の絶対パス、作業ディレクトリ、実効設定、必要な資料だけを渡します。子は親の会話を見られないので、受入条件・承認の範囲と根拠を省略しません。
 - **並列と完了待ち**：独立したreadyタスクは、1つのメッセージでAgentを複数呼んで並列にします（`max_agents` 以下）。子はバックグラウンドで動き、終わると通知が来ます。ポーリングや結果の推測はしません。子のエージェント定義はサブエージェントを起動できない前提で、子が再委譲を求めてきたら親が判断します。

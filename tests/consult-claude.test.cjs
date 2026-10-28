@@ -262,6 +262,58 @@ test('reviewer refuses a dirty checkout or one not at head before any Claude cal
   assert.match(f.calls()[2].input, /Do not read credentials, private keys, \.env files or other secret files/);
 });
 
+test('reviewer refuses a range that changes secret-looking files before any Claude call', posix, t => {
+  const f = fixture(t), repo = repository(t);
+  const git = (...args) => { const r = spawnSync('git', ['-C', repo.dir, '-c', 'user.name=t', '-c', 'user.email=t@example.test', '-c', 'commit.gpgsign=false', ...args], { encoding: 'utf8' }); assert.equal(r.status, 0, r.stderr); return r.stdout.trim(); };
+  const commitFiles = (files, remove = []) => {
+    for (const [name, text] of Object.entries(files)) { fs.mkdirSync(path.dirname(path.join(repo.dir, name)), { recursive: true }); fs.writeFileSync(path.join(repo.dir, name), text); }
+    for (const name of remove) git('rm', '-q', name);
+    git('add', '-A'); git('commit', '-qm', 'change'); return git('rev-parse', 'HEAD');
+  };
+  const SECRET_VALUE = 'SECRET_VALUE_7f3a';
+  for (const name of ['.env', 'config/prod.pem', 'id_ed25519']) {
+    const base = git('rev-parse', 'HEAD'), head = commitFiles({ [name]: SECRET_VALUE + '\n', 'a.txt': 'next ' + name + '\n' });
+    const result = run(f, { value: { ...review(repo), base, head } });
+    assert.equal(result.status, 1, name); assert.equal(result.data.error.code, 'secret_path', name);
+    assert.equal(result.data.error.message, `秘密ファイルらしい変更が範囲に含まれるため送信しません: ${name}。除外するか、ユーザーに確認してください`);
+    assert.equal(result.stdout.includes(SECRET_VALUE), false);
+  }
+  // A rename away from a secret name and a deletion are both caught.
+  let base = git('rev-parse', 'HEAD');
+  git('mv', '.env', 'env.txt'); git('commit', '-qm', 'rename');
+  let result = run(f, { value: { ...review(repo), base, head: git('rev-parse', 'HEAD') } });
+  assert.equal(result.data.error.code, 'secret_path'); assert.match(result.data.error.message, /: \.env。/);
+  base = git('rev-parse', 'HEAD');
+  result = run(f, { value: { ...review(repo), base, head: commitFiles({}, ['config/prod.pem']) } });
+  assert.equal(result.data.error.code, 'secret_path'); assert.match(result.data.error.message, /config\/prod\.pem/);
+  assert.deepEqual(f.calls(), [], 'Claude is never called for a secret-looking range');
+  base = git('rev-parse', 'HEAD');
+  const head = commitFiles({ '.env.example': 'KEY=\n', 'keys/id_ed25519.pub': 'ssh-ed25519 AAAA\n' });
+  const ok = run(f, { value: { ...review(repo), base, head } }); assert.equal(ok.status, 0, ok.stdout);
+  assert.match(f.calls()[2].input, /\.env\.example/);
+});
+
+test('reviewer checkout scan ignores showUntrackedFiles and refuses only secret-looking ignored files', posix, t => {
+  const f = fixture(t), repo = repository(t);
+  const git = (...args) => { const r = spawnSync('git', ['-C', repo.dir, '-c', 'user.name=t', '-c', 'user.email=t@example.test', '-c', 'commit.gpgsign=false', ...args], { encoding: 'utf8' }); assert.equal(r.status, 0, r.stderr); return r.stdout.trim(); };
+  fs.writeFileSync(path.join(repo.dir, '.gitignore'), '.env\ndist/\n'); git('add', '.gitignore'); git('commit', '-qm', 'ignore');
+  const value = { ...review(repo), head: git('rev-parse', 'HEAD') };
+  git('config', 'status.showUntrackedFiles', 'no');
+  fs.mkdirSync(path.join(repo.dir, 'notes')); fs.writeFileSync(path.join(repo.dir, 'notes/untracked.txt'), 'new\n');
+  const untracked = run(f, { value });
+  assert.equal(untracked.data.error.code, 'invalid_input'); assert.match(untracked.data.error.message, /クリーンなdetached worktree/);
+  fs.rmSync(path.join(repo.dir, 'notes'), { recursive: true });
+  fs.writeFileSync(path.join(repo.dir, '.env'), 'SECRET_VALUE_7f3a\n');
+  const ignored = run(f, { value });
+  assert.equal(ignored.data.error.code, 'secret_path');
+  assert.equal(ignored.data.error.message, '秘密ファイルらしい無視ファイルがレビュー用のcheckoutにあるため送信しません: .env。対象リポジトリだけの新しいworktreeを渡すか、ユーザーに確認してください');
+  assert.equal(ignored.stdout.includes('SECRET_VALUE_7f3a'), false);
+  assert.deepEqual(f.calls(), [], 'Claude is never called');
+  fs.rmSync(path.join(repo.dir, '.env'));
+  fs.mkdirSync(path.join(repo.dir, 'dist')); fs.writeFileSync(path.join(repo.dir, 'dist/bundle.js'), 'built\n');
+  const ok = run(f, { value }); assert.equal(ok.status, 0, ok.stdout);
+});
+
 test('reviewer diff is capped at 200 KiB and says so', posix, t => {
   const f = fixture(t), repo = repository(t, { big: true }), result = run(f, { value: review(repo) });
   assert.equal(result.status, 0, result.stdout);

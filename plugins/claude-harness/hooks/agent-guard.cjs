@@ -21,12 +21,13 @@ function status(project) {
 let input = {};
 try { input = JSON.parse(fs.readFileSync(0, 'utf8') || '{}'); } catch { process.exit(0); }
 const tool = input.tool_input || {}, type = String(tool.subagent_type || '').trim();
-// A worker packet starts with the HARNESS_WORKER marker. Such a prompt must go to a harness:* agent:
-// fork, an empty or blank type and any other agent type (general-purpose, Explore, ...) all run outside
-// the harness agent definitions. A prompt that merely mentions the marker later on is not a worker.
-// Model and effort are checked only on harness agents.
-const harnessType = type.startsWith('harness:');
-const strayWorker = !harnessType && String(tool.prompt || '').trimStart().startsWith('HARNESS_WORKER');
+// Worker packets must go to a harness:* agent. Fork and an empty or blank type inherit or default
+// outside the harness definitions, so any mention of the HARNESS_WORKER marker is refused there.
+// Other agent types (general-purpose, Explore, ...) are refused only when the prompt starts with the
+// marker, so a prompt that merely mentions it later on still passes. Model and effort are checked
+// only on harness agents.
+const harnessType = type.startsWith('harness:'), prompt = String(tool.prompt || '');
+const strayWorker = !harnessType && (type === '' || type === 'fork' ? prompt.includes('HARNESS_WORKER') : prompt.trimStart().startsWith('HARNESS_WORKER'));
 const missing = harnessType ? ['model', 'effort'].filter(key => !tool[key]) : [];
 if (!strayWorker && missing.length === 0) process.exit(0);
 
