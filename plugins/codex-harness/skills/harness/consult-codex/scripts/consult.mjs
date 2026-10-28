@@ -119,9 +119,11 @@ export function normalizeAdvice(value, role) {
   return advice;
 }
 
-// Send approval is decided from the record's frontmatter only; this helper never writes a record.
-export const PURPOSES = ['advice', 'review', 'image'];
 export const ROLE_PURPOSE = { ideator: 'advice', consultant: 'advice', critic: 'advice', reviewer: 'review' };
+// BEGIN shared send-approval check (keep identical across consult-codex, consult-claude, codex-image)
+// Send approval is decided from the record's frontmatter only; this helper never writes a record.
+const APPROVAL_PEER = 'codex';
+export const PURPOSES = ['advice', 'review', 'image'];
 const unquote = value => value.length >= 2 && /^(["']).*\1$/.test(value) ? value.slice(1, -1) : value;
 function parseFrontmatter(text) {
   const lines = text.replace(/^﻿/, '').split(/\r?\n/);
@@ -150,7 +152,7 @@ function parseFrontmatter(text) {
   return { fields };
 }
 const canonical = file => realpath(file).catch(() => path.resolve(file));
-export async function checkApproval({ project, purpose, peer = 'codex' }) {
+export async function checkApproval({ project, purpose, peer = APPROVAL_PEER }) {
   if (typeof project !== 'string' || !path.isAbsolute(project)) fail('invalid_options', '--project must be an absolute path.');
   if (purpose !== undefined && !PURPOSES.includes(purpose)) fail('invalid_options', `--purpose must be one of ${PURPOSES.join(', ')}.`);
   const record = path.join(project, 'docs/harness/authorizations', `${peer}-send.md`);
@@ -173,6 +175,7 @@ export async function checkApproval({ project, purpose, peer = 'codex' }) {
   if (purpose !== undefined && !purposes.includes(purpose)) return result(false, 'purpose_missing', purposes);
   return result(true, 'approved', purposes);
 }
+// END shared send-approval check
 
 // No user content is placed in argv, inherited stdio, error messages or logs.
 function execute(executable, args, { cwd, input = '', timeoutMs, env }) {
