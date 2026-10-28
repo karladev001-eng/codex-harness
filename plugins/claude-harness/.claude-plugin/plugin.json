@@ -1,6 +1,6 @@
 {
   "name": "harness",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "Specification-first coordination, isolated implementation, independent review and a shared improvement loop for Claude Code.",
   "author": { "name": "Local developer" },
   "keywords": ["harness", "review", "worktree", "specification"]

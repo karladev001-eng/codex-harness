@@ -24,7 +24,7 @@ node "<runtime>" measure record --project <project> --input <measurement.json>
 
 ## 配布と導入
 
-Node.js 22以上が必要です。0.4.3では、既定の5スキルと任意追加のcodex-slide-planを、同じ非公開npmパッケージに収録しています。registryから取得するには、指定版の配布が完了していることと、packageへのアクセス権が必要です。PCごとにnpm login（classic PATのread:packagesとpackageアクセス権）を済ませてから、次を実行します。tokenは対話入力だけで渡し、チャット/リポジトリ/引数へ貼りません。
+Node.js 22以上が必要です。0.5.0では、既定の5スキルと任意追加のcodex-slide-planを、同じ非公開npmパッケージに収録しています。registryから取得するには、指定版の配布が完了していることと、packageへのアクセス権が必要です。PCごとにnpm login（classic PATのread:packagesとpackageアクセス権）を済ませてから、次を実行します。tokenは対話入力だけで渡し、チャット/リポジトリ/引数へ貼りません。
 
 ```sh
 npm login --scope=@karladev001-eng --auth-type=legacy --registry=https://npm.pkg.github.com
@@ -37,15 +37,15 @@ npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@
 現在は、配布元で作成したコンパイル済みtarballを対象PCへコピーして使えます。新規導入と旧版の更新は同じ `install` 操作です。GitHub Releaseの公開は前提にしません。実行時にPython・TypeScriptコンパイラ・追加のnpm依存は要りません。
 
 ```sh
-npx --yes --package ./karladev001-eng-codex-harness-0.4.3.tgz codex-harness install
-npx --yes --package ./karladev001-eng-codex-harness-0.4.3.tgz codex-harness authoring install --project "/path/to/project"
+npx --yes --package ./karladev001-eng-codex-harness-0.5.0.tgz codex-harness install
+npx --yes --package ./karladev001-eng-codex-harness-0.5.0.tgz codex-harness authoring install --project "/path/to/project"
 ```
 
 更新後は、`status` の `config.models` で設定の基準値を確認します。`model_selection` はmode/resolution/pinned_roles/pinsを返し、autoは解決をhost-launch時に行い、catalog_checked=falseです。statusは読取のみでネットワークを使わず、動的なモデル選択の結果は返しません。個人設定・プロジェクト設定と制作の好みは保持されます。明示したモデル設定は新しい既定を隠すので、新しい既定を使いたい項目だけ、利用者が上書きを削除します。
 
 `install` は、個人用AGENTS.mdに、恒久的な導入先のruntime.jsを参照する入口を登録します。`uninstall` は、自分が所有する入口とスキルだけを解除します。旧Python版のschema-1 manifestも、ファイルと入口が未編集であれば、Pythonを実行せずに移行できます。
 
-`authoring install|uninstall --project PATH` は、既定の5スキル（4つのMarkdownスキルとcodex-html-plan）を `.agents/skills` に導入・更新・削除します。`--skill NAME` を繰り返すと対象を選べます。任意追加の `codex-slide-plan` は、0.4.3のパッケージCLIから `--skill codex-slide-plan` を明示して導入します。0.4.3に固定したnpm/tgzの手順は[単独導入](../../../../../authoring-skills/INSTALL.md#codex-slide-planを任意追加する)にあります。指定なしのinstall/update/uninstallは、独立導入済みのオプションを変更しません。本体の通常のinstall/updateも、オプションを配置しません。
+`authoring install|uninstall --project PATH` は、既定の5スキル（4つのMarkdownスキルとcodex-html-plan）を `.agents/skills` に導入・更新・削除します。`--skill NAME` を繰り返すと対象を選べます。任意追加の `codex-slide-plan` は、0.5.0のパッケージCLIから `--skill codex-slide-plan` を明示して導入します。0.5.0に固定したnpm/tgzの手順は[単独導入](../../../../../authoring-skills/INSTALL.md#codex-slide-planを任意追加する)にあります。指定なしのinstall/update/uninstallは、独立導入済みのオプションを変更しません。本体の通常のinstall/updateも、オプションを配置しません。
 
 `--skills-dir PARENT` で、個人用など別のスキル親ディレクトリを明示できます。所有manifestで確認できない既存フォルダや、編集済みのファイルは上書きしません。オーケストレーションの有効化やAGENTS.mdの変更は行いません。オプションの導入元は恒久本体のruntimeにないため、install/updateは対応版のnpm/tgzから実行します。明示的なuninstallは、所有記録だけで行えます。旧本体内にあったオプションのコピーを移行するときは、所有記録に沿った未編集チェックとバックアップを適用し、独立導入や制作資料には触れません。PPTX/POTXの構造読取りだけは、Python 3を追加で使います。
 
