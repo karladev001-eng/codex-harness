@@ -16,17 +16,18 @@ Claude Codeが親のとき、Codex（OpenAI）の組み込みツール `image_ge
 
 ## 送信の承認
 
-プロンプトと `references` の画像はOpenAIに送られます。
+プロンプトと `references` の画像はOpenAIに送られます。承認はプロジェクトごとに、consult-codexと同じ `<project>/docs/harness/authorizations/codex-send.md` へ記録します。画像生成の目的（purpose）は `image` です。
 
-- 初めてそのプロジェクトで使う前に、送信先・送る情報の範囲・目的（`image`）をユーザーに示して承認を得ます。
-- 承認の有無は `node "<skill-dir>/scripts/image.mjs" --approval --project <abs> [--purpose image]` で確かめます（`--purpose` を省くと `image` で判定します）。常に終了コード0で `{"ok":true,"approved":true|false,"reason":"approved|missing|malformed|revoked|project_mismatch|purpose_missing","record":"<path>","purposes":[...]}` を返します。`malformed` のときは、問題の行を示す `message` も付きます。`approved:false` なら生成しません。
-- 記録ファイルは `<project>/docs/harness/authorizations/codex-send.md` です。スクリプトはこのファイルを書きません。ユーザーが明示的に承認したあと、親が次のテンプレートどおりに書きます。
+- 生成する前に毎回、`node "<skill-dir>/scripts/image.mjs" --approval --project <プロジェクトの絶対パス>` で判定します（`--purpose` を省くと `image` で判定します）。結果は常に終了コード0の `{"ok":true,"approved":true|false,"reason":"approved|missing|malformed|revoked|project_mismatch|purpose_missing","record":"<path>","purposes":[...]}` です。スクリプトは記録を読むだけで、書きません。
+- `approved` なら、聞き直さずに生成します。
+- それ以外（`missing`・`malformed`・`revoked`・`project_mismatch`・`purpose_missing`）なら、生成せずに、次の文面でユーザーに1回だけ確認します。「Codex（OpenAI）へ、<送る情報の範囲>を、image（画像生成）のために送ってよいですか。この承認は <プロジェクトの絶対パス> のこの目的だけに使います。」`malformed` のときは、`message` にある問題の行も示します。
+- ユーザーが明示的に承認したら、親が記録してから生成します。記録がなければ次のテンプレートどおりに作ります。既存の記録があれば、その `purposes` に `image` を追記するだけにします（他の目的を足さず、他の項目も書き換えません）。承認されなければ生成せず、画像なしで進めます。
 
 ```markdown
 ---
 peer: codex
 project: /abs/path/to/project
-purposes: [advice, review, image]
+purposes: [image]
 status: approved
 recorded: 2026-10-28
 ---
@@ -40,12 +41,12 @@ recorded: 2026-10-28
 - 承認根拠: （日付と、ユーザー本人の承認の発言）
 ```
 
-  - `purposes` は `advice`（発案・相談・批評の3役）・`review`（`reviewer`）・`image`（画像生成）から、承認された目的だけを書きます。
-  - `status` が `approved` 以外なら撤回扱い（`revoked`）です。撤回はユーザーの指示で `status: revoked` に書き換えます。
-  - `project` はシンボリックリンクを解決したうえで比べます。別のプロジェクトの記録は使えません。
-  - frontmatterの5項目は必須です。未知の項目は無視し、同じ項目の重複は `malformed` です。
-- persistence OFFのときは会話内の承認だけで進め、ファイルは作りません。このとき `--approval` は `missing` を返しますが、会話内の承認があれば生成してかまいません。
-- 承認済みの範囲内なら、毎回は聞き直しません。別のプロジェクトや範囲外の情報には広げません。
+- `purposes` は `advice`（発案・相談・批評の3役）・`review`（`reviewer`）・`image`（画像生成）から、承認された目的だけを書きます。`[]` は何も承認しません。`[advice,,image]` のような空の要素は `malformed` です。
+- `status` が `approved` 以外なら撤回扱い（`revoked`）です。撤回はユーザーの指示で `status: revoked` に書き換えます。
+- `project` はシンボリックリンクを解決したうえで比べます。別のプロジェクトの記録は使えません。
+- frontmatterの5項目は必須です。未知の項目は無視し、同じ項目の重複は `malformed` です。
+- persistence OFFのときは会話内の承認だけで生成し、ファイルは作りません。このとき `--approval` は `missing` を返しますが、会話内の承認があれば生成してかまいません。
+- 承認を、別のプロジェクトや記録にない目的に広げません。
 - 秘密鍵・トークン・認証情報・無関係な個人情報は、プロンプトにも参照画像にも入れません。
 
 ## 進め方
@@ -85,17 +86,17 @@ recorded: 2026-10-28
 
 成功：`{"ok":true,"peer":"codex","files":[{"path":"...","bytes":N}],"sources":["<Codexが保存した元画像のパス>"]}`。
 
-- 画像が保存されたあとにターンがエラーで終わった、またはCLIが非0で終了したときも、画像があれば成功として返し、`"warning":"<短い理由>"`（例 `turn ended with an error after the image was generated`）を付けます。画像を確認してから使います。
+- 画像が保存されたあとにターンがエラーで終わった、CLIが非0で終了した、時間や出力の上限に達したときも、画像があれば成功として返し、`"warning":"<短い理由>"`（例 `turn ended with an error after the image was generated`・`Codex CLI timed out after the image was generated`）を付けます。上限に達したときもCLIは止めます。画像を確認してから使います。
 
-失敗：`{"ok":false,"error":{"code","message"}}` で非0終了です。主なcode：`invalid_input`・`path_outside_project`・`input_unavailable`・`input_timeout`・`auth_unavailable`・`feature_unavailable`・`tool_forbidden`・`peer_busy`・`response_error`・`cli_failed`・`empty_response`・`timeout`。Codexの生の出力やstderrは表示しません。
+失敗：`{"ok":false,"error":{"code","message"}}` で非0終了です。主なcode：`invalid_input`・`path_outside_project`・`input_unavailable`・`input_timeout`・`auth_unavailable`・`feature_unavailable`・`tool_forbidden`・`peer_busy`・`response_error`・`cli_failed`・`empty_response`・`timeout`・`output_limit`。Codexの生の出力やstderrは表示しません。
 
 - `peer_busy` は、画像ができないまま、Codexのモデルが混雑している（容量不足・レート制限など）と報告されたときです。時間を置くか、`--model` で別のモデルを指定してやり直します。
 
 ## 隔離
 
 - `codex exec --ignore-user-config --ephemeral --skip-git-repo-check --sandbox read-only` で、空の一時ディレクトリを作業場所にして実行します。Web検索・シェル・hooks・plugins・MCPアプリ・マルチエージェント・画像の読み取りなどを無効にし、画像生成だけを有効にします。
-- 実行中に画像生成以外のツール（コマンド実行・ファイル変更・MCP・Web検索など）の痕跡があれば、結果を捨てて `tool_forbidden` で失敗します。
-- 生成物は `$CODEX_HOME/generated_images/<thread_id>/`（未設定なら `~/.codex/generated_images/<thread_id>/`）からだけ取り出します。`<thread_id>` は今回の実行の `thread.started` イベントの値なので、同時に動く別のCodexセッションの画像は拾いません。thread_idが取れないときだけ、`generated_images` の中で実行前になかった画像を探します。シンボリックリンクはたどりません。保存先もシンボリックリンク経由で `project` の外に出ないよう、実体のパスで確かめます。
+- イベントの項目は型名の完全一致で許可します（`agent_message`・`reasoning`・`error`・`image_generation`・`image_generation_call`）。それ以外（コマンド実行・ファイル変更・MCP・Web検索・`view_image` など）の痕跡があれば、結果を捨てて `tool_forbidden` で失敗します。
+- 生成物は `$CODEX_HOME/generated_images/<thread_id>/`（未設定なら `~/.codex/generated_images/<thread_id>/`）からだけ取り出します。`<thread_id>` は今回の実行の `thread.started` イベントの値なので、同時に動く別のCodexセッションの画像は拾いません。thread_idが取れない・UUIDでないときは、`generated_images` のほかの場所を探さず、画像を採用しません（`empty_response`）。シンボリックリンクはたどりません。保存先もシンボリックリンク経由で `project` の外に出ないよう、実体のパスで確かめます。
 - GitHub・クラウド・Anthropicの環境変数は子プロセスに渡しません。
 - 時間の上限は既定300秒（`--timeout-ms` は100〜900000）、入力の上限は256KiBです。
 - これはCLIの機能による制限で、OSのsandboxそのものではありません。

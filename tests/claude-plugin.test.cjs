@@ -116,11 +116,18 @@ test('agent guard denies harness worker launches without model and effort, or vi
   assert.equal(guard({ subagent_type: 'harness:implementer', model: 'sonnet', effort: 'medium', prompt: 'HARNESS_WORKER' }), null);
   assert.match(guard({ subagent_type: 'fork', prompt: 'HARNESS_WORKER\n役割: 実装' }).permissionDecisionReason, /instead of fork/);
   assert.match(guard({ prompt: 'HARNESS_WORKER\n役割: 実装', model: 'sonnet', effort: 'medium' }).permissionDecisionReason, /omitted type/);
+  // A prompt that starts with the marker must go to a harness:* agent, whatever the other type is.
+  for (const subagent_type of ['general-purpose', '   ', 'Explore', ' fork ']) {
+    const denied = guard({ subagent_type, prompt: '\n  HARNESS_WORKER\n役割: 実装', model: 'sonnet', effort: 'medium' });
+    assert.equal(denied?.permissionDecision, 'deny', JSON.stringify(subagent_type)); assert.match(denied.permissionDecisionReason, /another agent type/);
+  }
+  assert.equal(guard({ subagent_type: ' harness:implementer ', model: 'sonnet', effort: 'medium', prompt: 'HARNESS_WORKER' }), null);
   assert.equal(guard({ prompt: 'look up the build script' }), null);
   // Unrelated launches and an inactive harness are never touched.
   assert.equal(guard({ subagent_type: 'Explore', prompt: 'find files' }), null);
   assert.equal(guard({ subagent_type: 'Explore', prompt: 'grep for HARNESS_WORKER usages' }), null);
   assert.equal(guard({ subagent_type: 'fork', prompt: 'summarize this thread' }), null);
+  assert.equal(guard({ subagent_type: 'general-purpose', prompt: 'explain what HARNESS_WORKER means' }), null);
   write(path.join(f.project, '.harness.json'), { enabled: false });
   assert.equal(guard({ subagent_type: 'harness:reviewer', prompt: 'HARNESS_WORKER' }), null);
   // An unreadable configuration is reported by the session hook, not enforced here.
