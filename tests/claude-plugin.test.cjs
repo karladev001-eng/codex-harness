@@ -43,6 +43,8 @@ test('session hook reports Claude models when active and stays silent when inact
   assert.equal(active.hookEventName, 'SessionStart');
   assert.match(active.additionalContext, /Harness is active/); assert.match(active.additionalContext, /standard=sonnet\/medium/);
   assert.ok(active.additionalContext.includes(path.join(plugin, 'skills/harness/references/hosts/claude-code.md')));
+  // Model follows the task's nature and importance; the table effort is only a starting point.
+  assert.match(active.additionalContext, /role key that fits the task's nature and importance[\s\S]*only a starting point[\s\S]*one-line reason in the packet/);
   write(path.join(f.project, '.harness.json'), { enabled: false });
   assert.equal(hook(f), null);
   write(path.join(f.project, '.harness.json'), { unknown: true });
