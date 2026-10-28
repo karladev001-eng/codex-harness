@@ -1,9 +1,9 @@
 # 制作フィードバックの改善ループ
 
-loop ONのUI・文書等の制作/修正/フィードバックは[制作改善ループ](../creative-loop.md)に従う。開始時に現指示と適用範囲の合う指針を確認し、修正根拠を観察、完了評価を区別して記録、次回に更新を反映する。GitHub接続時のautosave OFFまたはpreferences OFFなら自動読取・記録・再送前に止める。未接続localの既存手順は維持する。公開CLIに自動操作フラグはないため設定を自身で判定する。記憶はruntimeの `preferences read/write/sync` 経由。GitHub設定済みでfresh確認失敗なら自動適用しない。persistence OFFは保存記憶を読まず会話内のみ。明示的な好みの根拠はmeasurementと独立しpersistenceに従う。
+loop ONのUI・文書などの制作・修正・フィードバックでは、[制作改善ループ](../creative-loop.md)に従います。開始時に、現在の指示と適用範囲が合う指針を確認します。修正の根拠は観察として記録し、完了時の評価は区別して記録し、次回にその更新を反映します。GitHub接続時のautosave OFFまたはpreferences OFFなら、自動で読み取る・記録する・再送する前に止めます。未接続のlocalでは既存の手順を維持します。公開CLIには自動操作のフラグがないため、設定は自分で判定します。記憶の読み書きはruntimeの `preferences read/write/sync` を通します。GitHub設定済みでfresh確認に失敗したときは、自動適用しません。persistence OFFでは保存された記憶を読まず、会話内だけで扱います。明示的な好みの根拠はmeasurementとは独立で、persistenceに従います。
 
-保存根拠/更新/既知pendingの再同期がありactive/persistence/loop/delegation ONなら、親は既定で[record-keeper](../roles/record-keeper.md)へ保存を委譲する。無変更なら起動しない。明示管理はloop OFFでも可、delegation OFFは親が同じ契約で担当、persistence OFFは起動・記憶読書き禁止。起動/引継ぎ・唯一のwriter・失敗時は[詳細](../creative-loop.md#起動引継ぎ)を守る。
+保存する根拠や更新、または既知のpendingの再同期があり、active・persistence・loop・delegationがすべてONなら、親は既定で[record-keeper](../roles/record-keeper.md)に保存を委譲します。変更がなければ起動しません。明示的な記憶管理は、loop OFFでも行えます。delegation OFFなら、親が同じ契約で担当します。persistence OFFでは、起動も記憶の読み書きも禁止です。起動と引継ぎ、唯一のwriter、失敗時の扱いは[詳細](../creative-loop.md#起動引継ぎ)を守ります。
 
-保存資料が参考になる場合は[検索と取得](../knowledge-retrieval.md)で少数候補の必要箇所を読み、今回への適用を判断する。設定OFF・未設定・資料不足なら通常作業を続ける。制作委譲時は[モデル規則](../roles.md)に従い、非決定的制作はSol系、effortは必要品質で別に選ぶ。
+保存資料が参考になる場合は、[検索と取得](../knowledge-retrieval.md)に従って、少数の候補から必要な箇所だけを読み、今回への適用を判断します。設定がOFFまたは未設定のとき、資料が足りないときは、通常の作業を続けます。制作を委譲するときは[モデル規則](../roles.md)に従います。非決定的な制作にはSol系を使い、effortは必要な品質に応じて別に選びます。
 
-純制作にコード調整・実装委譲・worktree・コード統合は要求しない。コードを含む制作/修正はコード調整・独立レビューとloopを併用する。現ユーザー指示・権限・安全規則を優先する。
+純制作には、コード調整・実装委譲・worktree・コード統合を要求しません。コードを含む制作・修正では、コード調整と独立レビューにloopを併用します。現在のユーザー指示・権限・安全規則を優先します。
