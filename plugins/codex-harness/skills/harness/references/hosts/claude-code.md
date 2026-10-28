@@ -1,6 +1,6 @@
 # Claude Codeで動かすときの読み替え
 
-このハーネスの本文はCodexを前提に書かれた箇所があります。Claude Code（プラグイン `harness`）で動かすときは、このファイルの内容がCodex固有の手順より優先します。ここに書かれていない共通規則（承認、レビュー、出典、改善ループ、保存）はそのまま適用します。
+本文の共通規則は役割キーとeffortで書いていますが、`AGENTS.md`・早期compact・子の起動方法など、Codexを前提にした手順も残っています（Codexでの具体値は[Codex](codex.md)）。Claude Code（プラグイン `harness`）で動かすときは、このファイルの内容がCodex固有の手順より優先します。ここに書かれていない共通規則（承認、レビュー、出典、改善ループ、保存）はそのまま適用します。
 
 ## 起動と設定
 
@@ -20,7 +20,7 @@
 | 独立レビュー | `harness:reviewer` | 編集ツールなし |
 | 調査・資料確認 | `harness:researcher` | 読み取りのみ |
 
-- **モデル**：`status.config.models[<役割キー>]` の `model`（`haiku` / `sonnet` / `opus`）をAgentの `model` に、`reasoning_effort` を `effort` に渡します。ユーザーの明示指定と設定のpinが優先です。指定したモデルが使えなければ、黙って代替せず報告します。メインのモデルは変更しません。
+- **モデル**：`status.config.models[<役割キー>]` の `model`（`haiku` / `sonnet` / `opus`）をAgentの `model` に、`reasoning_effort` を `effort` に、毎回必ず渡します。省略すると子はメインと同じモデルで動き、役割ごとの選択が効きません。ユーザーの明示指定と設定のpinが優先です。指定したモデルが使えなければ、黙って代替せず報告します。メインのモデルは変更しません。
 - **履歴なし起動**：`subagent_type: "fork"` は親の会話を引き継ぐので、子には使いません。上の役割を指定した通常起動が、Codexの `fork_turns="none"` に当たります。
 - **worktree**：パケットの基点が現在のHEADなら、Agentの `isolation: "worktree"` を使えます。別の基点が必要なら `runtime.js worktree create --id ID --base COMMIT` で作り、その絶対パスをプロンプトで渡して、子に最初に `cd` させます。
 - **渡す内容**：プロンプトの先頭に `HARNESS_WORKER` と役割を書き、パケット、役割参照の絶対パス（このスキルの `references/...`）、作業ディレクトリ、実効設定、必要な資料だけを渡します。子は親の会話を見られないので、受入条件・承認の範囲と根拠を省略しません。

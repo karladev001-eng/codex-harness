@@ -38,6 +38,7 @@ if (status.error) {
     `For coding, UI/document creation or feedback, Web research, ideation, strategy consultation or proposal criticism: read ${path.join(skill, 'SKILL.md')} and then ${path.join(skill, 'references', 'hosts', 'claude-code.md')}, which overrides Codex-specific steps.`,
     `Collaboration (peer=${status.data.collaboration.peer}): ${tasks}. Peer work goes through the consult-codex skill and needs a recorded send approval per project.`,
     `Re-check with: node "${runtime}" status --project <absolute-project-path> --host claude.`,
+    'Every harness:* Agent launch passes model and effort from the role key above (worker agents inherit the main model otherwise); never use fork for workers.',
     'A delegated worker (prompt contains HARNESS_WORKER) performs only its assignment and never coordinates.',
   ].filter(Boolean).join('\n'));
 }
