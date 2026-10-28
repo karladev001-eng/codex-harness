@@ -42,6 +42,10 @@ Knowledgeの隔離試験は[運用ガイドの検証範囲](docs/guides/knowledg
 - 2者レビュー（398b49e..7992427）: 1巡目は両者NEEDS_WORK（thread_idなし時の予備探索で別セッションの画像を拾う、許可itemが広い、purposesの空要素、purpose省略でapproved、文書の不一致など計10件）。2巡目も両者NEEDS_WORK（差分経由の秘密ファイル送信、承認記録の更新手順、hookの判定の退行など）。ユーザーの承認で3巡目を行い、両者PASS。残る提案: 範囲で変更されていない追跡済みの秘密ファイルは止まらない（相手はcheckout全体を読める）、無視ディレクトリ内の入れ子リポジトリは調べられない。
 - モデル選択: この作業の実装担当6回はすべてopus/highで、うち2回はsonnetで足りた。原因は、SessionStartの文脈・読み替え・hookの文言が「役割キーのmodelとeffortをそのまま渡す」で、roles.mdの「modelは重要性、effortは品質で独立に選ぶ」と食い違っていたこと。文言を直した（f82cffc）。
 
+## 2026-10-28: 0.5.0のリリース候補（ローカル）
+
+package/package-lock/両pluginのmanifestと、現行の手順文書（README、導入ガイド、改善ループ、保守ガイド、authoring-skills、commands.md）の版を0.5.0へ揃えた。過去の検証記録とタスク記録は当時の版のまま残す。0.5.0の追加は、Claude Codeプラグイン（SessionStart文脈、Agent起動の検査hook、`consult-codex`、`codex-image`）、consultの両方向の統一と送信承認の機械判定、平易化と節単位の読込。macOS、Node.js 22、`npm test` 309件すべて成功、`check:docs` エラー0、`context-routing --check` OK。`npm pack --dry-run` は `karladev001-eng-codex-harness-0.5.0.tgz`（583ファイル、約1.4MiB）で、`codex-image`・`consult-claude`・Claude marketplaceの `agent-guard.cjs` と `skills/codex-image` を含む。GitHub Packagesへの送信・staging・実ホームでのregistry導入は未実施（別工程）。
+
 ## 2026-10-11: 0.4.3のリリース候補検証
 
 ソースのpackage/package-lock/pluginを0.4.3へ同期し、`private: true` / `UNLICENSED`を維持。実装は承認済みのcodex-slide-plan v6と任意導入の契約を使い、新機能は追加していません。以下の検証は一時home/projectと配布候補のtgzを対象にします。実registry送信・実ホーム導入・pushの成功記録は別工程です。

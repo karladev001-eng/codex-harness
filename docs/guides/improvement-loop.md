@@ -86,7 +86,7 @@ readは本文・版・blob SHA・確認日時・鮮度・未送信を返しま�
 今回の機能のnpm公開は別工程です。registryの@latestに含まれるとは限りません。検証済みの同じ `.tgz` を対象PCへコピーし、そのファイルから本体を導入/更新します。各PCでNode.js 22+とGitHub CLIを用意します。
 
 ```sh
-npx --yes --package "/path/to/karladev001-eng-codex-harness-0.4.3.tgz" codex-harness install
+npx --yes --package "/path/to/karladev001-eng-codex-harness-0.5.0.tgz" codex-harness install
 gh auth login --hostname github.com
 ```
 

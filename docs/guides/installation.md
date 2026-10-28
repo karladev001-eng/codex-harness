@@ -4,7 +4,7 @@ Node.js 22以上・npmとスキル対応のCodexを用意します。Gitはworkt
 
 ## GitHub Packagesの非公開npm配布
 
-0.4.3では既定5スキルと任意追加のcodex-slide-planを収録します。registryからの取得には指定版の配布完了と[package](https://github.com/users/karladev001-eng/packages/npm/package/codex-harness)へのアクセス権が必要です。Node.js 22以上とnpmを用意し、ホームなどpackage.jsonのないディレクトリから実行できます。利用PCでclone、npm ci、TypeScriptビルドは不要です。
+0.5.0では既定5スキルと任意追加のcodex-slide-planを収録します。registryからの取得には指定版の配布完了と[package](https://github.com/users/karladev001-eng/packages/npm/package/codex-harness)へのアクセス権が必要です。Node.js 22以上とnpmを用意し、ホームなどpackage.jsonのないディレクトリから実行できます。利用PCでclone、npm ci、TypeScriptビルドは不要です。
 
 ### GitHub Packagesの初回認証
 
@@ -26,10 +26,10 @@ npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@
 
 再実行が更新です。`latest`は配布者が指定する安定版で、`--prefer-online`はcacheがあってもregistryの情報を再確認します。取得したCLIが既存installの所有管理に従って恒久ディレクトリを更新します。取得時の自動install hookはありません。npm cache上のCLI取得と恒久コピーの更新は別の操作で、`npm update -g`を更新手順にしません。[npm execの仕様](https://docs.npmjs.com/cli/v11/commands/npm-exec/)も参照できます。
 
-版固定は `@latest` を `@0.4.3` など取得する版へ置換します。旧版への差し戻しも希望版のinstallで行います。確認は下の[確認](#確認)へ。
+版固定は `@latest` を `@0.5.0` など取得する版へ置換します。旧版への差し戻しも希望版のinstallで行います。確認は下の[確認](#確認)へ。
 
 ```sh
-npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@0.4.3 -- codex-harness install
+npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@0.5.0 -- codex-harness install
 npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@latest -- codex-harness uninstall
 ```
 
@@ -46,13 +46,13 @@ npm自体が取得エラーで終了した場合は導入CLIが実行されま�
 
 ## 受け取ったローカルtarballから導入
 
-配布元が作成した `karladev001-eng-codex-harness-0.4.3.tgz` をPCへコピーし、そのファイルを置いたディレクトリで実行します。受取側でcloneやTypeScriptコンパイルは不要です。取得可能な公開npm・GitHub Releaseは前提にしません。
+配布元が作成した `karladev001-eng-codex-harness-0.5.0.tgz` をPCへコピーし、そのファイルを置いたディレクトリで実行します。受取側でcloneやTypeScriptコンパイルは不要です。取得可能な公開npm・GitHub Releaseは前提にしません。
 
 macOS/Linux・Windows PowerShell共通：
 
 ```sh
-npx --yes --package ./karladev001-eng-codex-harness-0.4.3.tgz codex-harness doctor
-npx --yes --package ./karladev001-eng-codex-harness-0.4.3.tgz codex-harness install
+npx --yes --package ./karladev001-eng-codex-harness-0.5.0.tgz codex-harness doctor
+npx --yes --package ./karladev001-eng-codex-harness-0.5.0.tgz codex-harness install
 ```
 
 npmキャッシュ等が準備済みの環境では `npx --offline` も使えます。単にアーカイブをコピーしただけで、すべてのnpm環境でオフライン起動できると保証するものではありません。
@@ -82,9 +82,9 @@ CLIは配布物のmarketplaceを `~/.agents/claude-marketplaces/codex-harness` �
 
 | 含まれるもの | 内容 |
 | --- | --- |
-| スキル | `harness`（本体）と既定5スキル。`/harness:harness` などで呼べます |
+| スキル | `harness`（本体）と既定5スキルに加え、`consult-codex`（Codexへの相談・2者レビュー）と `codex-image`（Codexの組み込み画像生成）。`/harness:harness` などで呼べます |
 | エージェント | `implementer` / `integrator` / `reviewer` / `researcher`（`harness:` 接頭辞） |
-| hook | SessionStartで `status --host claude` を実行し、activeなら設定とモデルを文脈へ入れます |
+| hook | SessionStartで `status --host claude` を実行し、activeなら設定とモデルを文脈へ入れます。PreToolUseで、activeなときにmodel・effortのない `harness:*` 起動と、fork等で送られたworkerパケットを拒否します |
 
 Claude Code上でのモデルは設定の `hosts.claude.models`（既定：deterministic=haiku/low、standard=sonnet/medium、complex・review=opus/high）から選びます。プロジェクトの `.harness.json` に `{"hosts":{"claude":{"models":{"standard":{"model":"opus"}}}}}` のように書くと固定できます。Codex固有の手順の読み替えは[Claude Code向けの読み替え](../../plugins/codex-harness/skills/harness/references/hosts/claude-code.md)にあります。解除は `codex-harness uninstall --host claude` です。
 
@@ -104,7 +104,7 @@ Claude Code上でのモデルは設定の `hosts.claude.models`（既定：deter
 
 `--skills-dir PARENT` でスキルの親ディレクトリを明示できます。導入済みの場所を変える際は、先に所有記録に従って解除します。`--home PATH` は一時ホームでの検証用です。実ホームへ試験導入せず、保守者は[一時環境の手順](../maintainers/releasing.md)を使ってください。
 
-本体install/updateは既定5スキルの導入元を保持し、任意追加のcodex-slide-planを本体配下へ配置しません。[任意追加の導入手順](../../authoring-skills/INSTALL.md#codex-slide-planを任意追加する)では0.4.3のパッケージから明示選択します。既に独立導入したコピーを本体操作で変更しません。
+本体install/updateは既定5スキルの導入元を保持し、任意追加のcodex-slide-planを本体配下へ配置しません。[任意追加の導入手順](../../authoring-skills/INSTALL.md#codex-slide-planを任意追加する)では0.5.0のパッケージから明示選択します。既に独立導入したコピーを本体操作で変更しません。
 
 この経路は単体スキルの導入です。コンパイル済みプラグインもtarballの `dist/plugins/codex-harness/` に含まれますが、プラグイン一覧への登録をinstallが行うわけではありません。開発元の `plugins/` だけでは実行物が不足します。本体のプラグイン版と単体スキル版を重複して有効化しないでください。
 
@@ -141,7 +141,7 @@ node "$env:USERPROFILE\.agents\skills\codex-harness\runtime.js" doctor --project
 registry経路は上のnpm execを再実行します。checkout経路は新しいcheckoutをビルドし、tarball経路は更新版をコピーして同じ `install` を再実行します。未編集の所有ファイルと入口を更新し、同じ配布物なら `unchanged` を返します。個人/プロジェクトの設定と制作記憶は保持します。明示したモデル設定やOFF設定は更新後も優先されます。
 
 ```sh
-npx --yes --package ./karladev001-eng-codex-harness-0.4.3.tgz codex-harness uninstall
+npx --yes --package ./karladev001-eng-codex-harness-0.5.0.tgz codex-harness uninstall
 ```
 
 checkoutの場合は `node dist/skill/runtime.js uninstall`。所有するスキルと入口のみを解除し、個人設定、プロジェクト仕様・ADR、制作記憶は残します。
