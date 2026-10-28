@@ -271,8 +271,8 @@ test('the migrated harness approval records follow the shared frontmatter form',
     write(path.join(f.project, 'docs/harness/authorizations', name), text.replace('project: /Users/kan/dev/harness', `project: ${f.project}`));
   };
   relocate('codex-send.md'); relocate('claude-send.md');
-  for (const purpose of ['advice', 'review']) assert.equal((await checkApproval({ project: f.project, purpose })).reason, 'approved', purpose);
-  assert.equal((await checkApproval({ project: f.project, purpose: 'image' })).reason, 'purpose_missing');
+  // Image generation was approved as a standing purpose after the two trials (2026-10-28).
+  for (const purpose of ['advice', 'review', 'image']) assert.equal((await checkApproval({ project: f.project, purpose })).reason, 'approved', purpose);
   const claude = await checkApproval({ project: f.project, purpose: 'advice', peer: 'claude' });
   assert.deepEqual([claude.reason, claude.purposes], ['approved', ['advice']]);
   assert.equal((await checkApproval({ project: f.project, purpose: 'review', peer: 'claude' })).reason, 'purpose_missing');
