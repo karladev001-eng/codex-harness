@@ -1,6 +1,6 @@
 interface:
   display_name: "Consult Claude"
-  short_description: "Claudeに独立した案・重要な判断への助言・提案の批評を求め、Codexが統合する"
-  default_prompt: "$consult-claude で、この課題に必要な役割を選び、Claudeの助言と自案を比較して統合してください。"
+  short_description: "Claudeに独立した案・重要な判断への助言・提案の批評・読み取り専用のコードレビュー（reviewer）を求め、Codexが統合する"
+  default_prompt: "$consult-claude で、この課題に必要な役割（ideator・consultant・critic・reviewer）を選び、Claudeの結果と自案を比較して統合してください。"
 policy:
   allow_implicit_invocation: true
