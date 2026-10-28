@@ -114,6 +114,8 @@ test('agent guard denies harness worker launches without model and effort, or vi
   assert.equal(missing.permissionDecision, 'deny'); assert.match(missing.permissionDecisionReason, /missing effort[\s\S]*standard=sonnet\/medium/);
   assert.equal(guard({ subagent_type: 'harness:implementer', model: 'sonnet', effort: 'medium', prompt: 'HARNESS_WORKER' }), null);
   assert.match(guard({ subagent_type: 'fork', prompt: 'HARNESS_WORKER\n役割: 実装' }).permissionDecisionReason, /instead of fork/);
+  assert.match(guard({ prompt: 'HARNESS_WORKER\n役割: 実装', model: 'sonnet', effort: 'medium' }).permissionDecisionReason, /omitted type/);
+  assert.equal(guard({ prompt: 'look up the build script' }), null);
   // Unrelated launches and an inactive harness are never touched.
   assert.equal(guard({ subagent_type: 'Explore', prompt: 'find files' }), null);
   assert.equal(guard({ subagent_type: 'Explore', prompt: 'grep for HARNESS_WORKER usages' }), null);
