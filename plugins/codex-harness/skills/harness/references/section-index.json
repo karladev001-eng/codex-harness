@@ -3,7 +3,7 @@
   "documents": {
     "commands": {
       "path": "references/commands.md",
-      "sha256": "d702e10f493bddbbaf9e22ef10a7e771542b0fc032c8e0337a72aaddaa1061a0",
+      "sha256": "e91027a0d759f0524b2042b6218b9ff67f0dca7a4d82699571edfbe7d310e47f",
       "common": [
         "common"
       ],
@@ -87,8 +87,8 @@
               59
             ],
             [
-              77,
-              78
+              79,
+              80
             ]
           ],
           "requires": []
@@ -97,7 +97,7 @@
           "ranges": [
             [
               60,
-              76
+              78
             ]
           ],
           "requires": [
@@ -116,8 +116,8 @@
         "lessons": {
           "ranges": [
             [
-              79,
-              93
+              81,
+              95
             ]
           ],
           "requires": [
@@ -128,7 +128,7 @@
     },
     "roles": {
       "path": "references/roles.md",
-      "sha256": "18b0d63da958e8595baf62e96d9a68f9761bf96e96bcf7ba23e0aecfefa1cc7e",
+      "sha256": "ec6cddabcf87ddf356896a24d1ae1998ac87517c77fcd1f16af15a93f8e8e0d7",
       "common": [
         "common"
       ],
