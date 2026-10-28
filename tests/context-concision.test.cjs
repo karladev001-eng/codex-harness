@@ -60,7 +60,7 @@ test('independent flags, consultation and source checks retain negative boundari
     ['source links tied to claims and no invention', /主張の近く[\s\S]*絶対URL[\s\S]*検索結果ページ・内部ID・推測\/捏造URLは禁止/],
     ['primary source preference does not weaken direct-page obligation', /一次資料を優先し、主張を支える実際のページへ直接リンクする/],
     ['bibliography and actual reading scope', /未確認書誌は未確認[\s\S]*閲覧範囲[\s\S]*推測[\s\S]*未読の本文を読んだとしない/],
-    ['no extra records or coding for research', /この規則だけで記録ファイルを作らない[\s\S]*純Web調査[\s\S]*要求しない[\s\S]*大規模探索を明示委譲する場合のみ/],
+    ['no extra records or coding for research', /この規則だけで記録ファイルを作らない[\s\S]*純Web調査[\s\S]*要求しない[\s\S]*大規模探索を明示的に委譲する場合のみ/],
   ]);
 });
 
@@ -86,10 +86,10 @@ test('coordination, model pinning and independent review retain all high-risk ga
   ]);
   for (const role of ['implementation', 'integration']) assert.match(readSections(harness, 'roles', [role]).chunks.map(c => c.text).join(''), /HARNESS_WORKER[\s\S]*子を起動しない/);
   expectRules(body('references/reviewer.md'), [
-    ['risk assessment precedes implementer evidence', /編集・子起動は禁止[\s\S]*実装者の検証主張を読む前に独立リスク表/],
-    ['no retroactive approval', /先にあること[\s\S]*事後資料\/承認で代用しない/],
-    ['HTML and partial approval checks', /部分承認[\s\S]*planned\/承認pending→ready[\s\S]*HTML承認はpending/],
-    ['PASS and BLOCKED boundaries', /重大未解決・仕様未充足はPASS禁止[\s\S]*重大条件は理由付きBLOCKED[\s\S]*新版を確認[\s\S]*最大2巡/],
+    ['risk assessment precedes implementer evidence', /編集と子の起動は禁止[\s\S]*実装者の検証主張を読む前に独立リスク表/],
+    ['no retroactive approval', /先にあること[\s\S]*事後の資料・承認で代用しない/],
+    ['HTML and partial approval checks', /部分承認[\s\S]*planned・承認pendingからreadyへの移行[\s\S]*HTMLの承認欄がpending/],
+    ['PASS and BLOCKED boundaries', /重大な未解決事項や仕様の未充足があればPASSにしない[\s\S]*重大な条件は、理由を付けてBLOCKED[\s\S]*新版を確認[\s\S]*最大2巡/],
   ]);
 });
 
@@ -101,13 +101,13 @@ test('creative memory and compact preserve their separate permission and evidenc
     ['pure creative does not require coding delegation', /純制作にコード調整・実装委譲・worktree・コード統合は要求しない/],
   ]);
   expectRules(body('references/early-compaction.md'), [
-    ['no new implementation or permissions', /独自の背景監視・compact API・会話削除、勝手な設定変更を許可しない/],
-    ['correct denominator and heuristic threshold', /現在コンテキスト量\/現在有効なモデル上限[\s\S]*累計トークン・一般上限で代用しない[\s\S]*60%は運用目安[\s\S]*固定トークン設定が全モデルで60%[\s\S]*扱わない/],
-    ['no usage guessing or stopping live work', /不明なら推測しない[\s\S]*稼働処理・担当を無断停止しない/],
-    ['handoff before action and storage OFF', /仕様版・承認範囲\/根拠[\s\S]*担当ID[\s\S]*次の一手[\s\S]*保存OFF[\s\S]*永続記憶へ書かない/],
-    ['host automatic compact is separate from agent tool', /本体の正式な自動compactは別設定[\s\S]*agent用実行toolがないことから[\s\S]*自動機能もないと断定しない/],
-    ['manual once and no false success', /手動compactを一度だけ案内[\s\S]*イベントだけで自動実行と断定しない[\s\S]*失敗\/未実行を完了と記録しない/],
-    ['resumption and no repeat loop', /実状態を照合[\s\S]*承認失効でもない[\s\S]*実質的な情報増加がなければ[\s\S]*連続実行せず/],
+    ['no new implementation or permissions', /独自の背景監視・compact API・会話削除や、勝手な設定変更は許可しない/],
+    ['correct denominator and heuristic threshold', /現在コンテキスト量と現在有効なモデル上限[\s\S]*累計トークン、一般的な上限で代用しない[\s\S]*60%は運用上の目安[\s\S]*固定のトークン設定が、すべてのモデルで60%[\s\S]*扱わない/],
+    ['no usage guessing or stopping live work', /不明なら、推測しない[\s\S]*稼働中の処理や担当を無断で停止しない/],
+    ['handoff before action and storage OFF', /仕様版・承認範囲と根拠[\s\S]*担当ID[\s\S]*次の一手[\s\S]*保存OFF[\s\S]*永続記憶にも書かない/],
+    ['host automatic compact is separate from agent tool', /本体の正式な自動compactは、別の設定[\s\S]*agent用の実行toolがないことから[\s\S]*自動機能もないと断定しない/],
+    ['manual once and no false success', /手動compactを一度だけ案内[\s\S]*イベントだけで自動実行と断定しない[\s\S]*失敗や未実行を完了と記録しない/],
+    ['resumption and no repeat loop', /実際の状態を照合[\s\S]*承認の失効でもありません[\s\S]*実質的な情報の増加がなければ[\s\S]*連続して実行せず/],
   ]);
   assert.ok(!body('references/early-compaction.md').includes('285000'), 'user-specific fixed global setting is not a harness default');
 });
@@ -154,9 +154,9 @@ test('ordinary coding reaches bounded lesson reuse and verified saving without r
   const keeper = body('references/roles/record-keeper.md');
   assert.match(coordination, /開始時と完了時に\[技術的な修正[\s\S]*technical-lessons.md/);
   assert.match(coordination, /記録の有無と理由[\s\S]*pending[\s\S]*未送信を完了扱いしない/);
-  assert.match(lessons, /全project\/全文を注入しない[\s\S]*pending=false[\s\S]*scope/);
-  assert.match(lessons, /根拠が無ければ[\s\S]*record-keeperを起動しない/);
-  assert.match(lessons, /evaluation_sources[\s\S]*テストPASSをユーザーの肯定/);
+  assert.match(lessons, /全projectや全文を注入しない[\s\S]*pending=false[\s\S]*scope/);
+  assert.match(lessons, /根拠が無ければ[\s\S]*record-keeperを起動しません/);
+  assert.match(lessons, /evaluation_sources[\s\S]*テストPASSを、ユーザーの肯定/);
   assert.match(keeper, /未登録なら[\s\S]*preferences register[\s\S]*identity\/key[\s\S]*初回取得失敗を空の正本にしない/);
   const selected = readSections(harness, 'commands', ['lessons']);
   assert.ok(selected.selected.includes('preferences'));
