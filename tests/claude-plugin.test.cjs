@@ -7,6 +7,8 @@ const lib = require('../dist/skill/lib.js');
 const { fixture, write, command, run, root, tree } = require('./helpers.cjs');
 const marketplace = path.join(root, 'dist/claude-marketplace'), plugin = path.join(marketplace, 'plugins/harness');
 const version = lib.readJson(path.join(root, 'package.json')).version;
+// The fake CLI is a POSIX shebang script, which Windows cannot execute from PATH.
+const posix = { skip: process.platform === 'win32' };
 
 function fakeClaude(f, { fail } = {}) {
   const bin = path.join(f.base, 'bin'), log = path.join(f.base, 'claude.log');
@@ -63,7 +65,7 @@ test('status --host claude resolves the Claude model table and its own pins', t 
   assert.equal(command(f, 'status', '--host', 'cursor').code, 2);
 });
 
-test('install --host claude copies the marketplace, registers it, detects edits and uninstalls', t => {
+test('install --host claude copies the marketplace, registers it, detects edits and uninstalls', posix, t => {
   const f = fixture(t), claude = fakeClaude(f), target = path.join(f.home, '.agents/claude-marketplaces/codex-harness');
   const installed = run(['install', '--host', 'claude', '--home', f.home], { env: claude.env });
   assert.equal(installed.code, 0, installed.error); assert.equal(installed.data.status, 'installed'); assert.equal(installed.data.target, lib.canonical(target));
@@ -85,7 +87,7 @@ test('install --host claude copies the marketplace, registers it, detects edits 
   assert.equal(run(['uninstall', '--host', 'claude', '--home', f.home], { env: claude.env }).data.status, 'not_installed');
 });
 
-test('Claude-side install and session hook never migrate a legacy Codex store', t => {
+test('Claude-side install and session hook never migrate a legacy Codex store', posix, t => {
   const f = fixture(t), claude = fakeClaude(f), legacy = path.join(f.home, '.codex/harness');
   write(path.join(legacy, 'settings.json'), { max_agents: 7 });
   assert.equal(run(['install', '--host', 'claude', '--home', f.home], { env: claude.env }).code, 0);

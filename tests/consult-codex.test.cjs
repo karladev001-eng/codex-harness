@@ -5,6 +5,8 @@ const path = require('node:path');
 const { spawn, spawnSync } = require('node:child_process');
 const { fixture, write, root, command, git, init } = require('./helpers.cjs');
 const source = path.join(root, 'plugins/codex-harness/skills/harness/consult-codex/scripts/consult.mjs');
+// The fake CLI is a POSIX shebang script, which Windows cannot execute from PATH.
+const posix = { skip: process.platform === 'win32' };
 
 // The fake records argv and stdin, then answers as `codex login status` / `codex exec` would.
 const FAKE = `#!/usr/bin/env node
@@ -42,7 +44,7 @@ function consult(f, value, mode = 'ok', ...args) {
   return { code: result.status, data: JSON.parse(result.stdout) };
 }
 
-test('advisory roles run isolated with every tool disabled and no prompt in argv', t => {
+test('advisory roles run isolated with every tool disabled and no prompt in argv', posix, t => {
   const f = setup(t), result = consult(f, { role: 'critic', task: '秘密のタスク', candidate: '案' });
   assert.equal(result.code, 0); assert.deepEqual(result.data, { ok: true, peer: 'codex', role: 'critic', followup: 0, commands: 0, advice: { summary: '要約', verdict: 'none', points: ['p'], risks: [], recommendations: [], questions: [], findings: [] } });
   const [login, exec] = f.calls();
@@ -61,7 +63,7 @@ function repository(f) {
   write(path.join(f.project, 'file'), 'changed'); git(f.project, 'commit', '-qam', 'head');
   return { base, head: git(f.project, 'rev-parse', 'HEAD') };
 }
-test('reviewer reads the given repository with a read-only shell and must return a verdict', t => {
+test('reviewer reads the given repository with a read-only shell and must return a verdict', posix, t => {
   const f = setup(t), input = { role: 'reviewer', task: 'review', repository: f.project, ...repository(f), criteria: ['1. works'] };
   const result = consult(f, input);
   assert.equal(result.code, 0); assert.equal(result.data.advice.verdict, 'NEEDS_WORK'); assert.equal(result.data.commands, 1);
@@ -75,7 +77,7 @@ test('reviewer reads the given repository with a read-only shell and must return
   assert.equal(consult(f, { role: 'critic', task: 't', repository: f.project }).data.error.code, 'invalid_input');
 });
 
-test('forbidden tools, incomplete turns, reviewer verdicts and missing login fail closed', t => {
+test('forbidden tools, incomplete turns, reviewer verdicts and missing login fail closed', posix, t => {
   const f = setup(t), critic = { role: 'critic', task: 't' };
   assert.equal(consult(f, critic, 'tool').data.error.code, 'tool_forbidden');
   assert.equal(consult(f, critic, 'incomplete').data.error.code, 'response_error');
@@ -88,7 +90,7 @@ test('forbidden tools, incomplete turns, reviewer verdicts and missing login fai
   assert.deepEqual(consult(f, null, 'ok', '--check').data, { ok: true, cli: 'available', authenticated: true });
 });
 
-test('reviewer refuses a dirty checkout or one not at head before calling Codex', t => {
+test('reviewer refuses a dirty checkout or one not at head before calling Codex', posix, t => {
   const f = setup(t), commits = repository(f), input = { role: 'reviewer', task: 'review', repository: f.project, ...commits, criteria: ['1. works'] };
   const refused = (value, label) => {
     const result = consult(f, value);
@@ -107,7 +109,7 @@ test('reviewer refuses a dirty checkout or one not at head before calling Codex'
   assert.equal(consult(f, { ...input, repository: worktree }).code, 0);
 });
 
-test('reviewer refuses a range that changes secret-looking files before calling Codex', t => {
+test('reviewer refuses a range that changes secret-looking files before calling Codex', posix, t => {
   const f = setup(t), start = init(f), SECRET_VALUE = 'SECRET_VALUE_7f3a';
   const commitFiles = files => {
     for (const [name, text] of Object.entries(files)) write(path.join(f.project, name), text);
@@ -134,7 +136,7 @@ test('reviewer refuses a range that changes secret-looking files before calling 
   assert.equal(consult(f, input(many, allowed)).code, 0);
 });
 
-test('reviewer checkout scan ignores showUntrackedFiles and refuses only secret-looking ignored files', t => {
+test('reviewer checkout scan ignores showUntrackedFiles and refuses only secret-looking ignored files', posix, t => {
   const f = setup(t), base = init(f);
   write(path.join(f.project, '.gitignore'), '.env\ndist/\n'); git(f.project, 'add', '.gitignore'); git(f.project, 'commit', '-qm', 'ignore');
   const input = { role: 'reviewer', task: 'review', repository: f.project, base, head: git(f.project, 'rev-parse', 'HEAD'), criteria: ['1. works'] };
@@ -154,7 +156,7 @@ test('reviewer checkout scan ignores showUntrackedFiles and refuses only secret-
   assert.equal(consult(f, input).code, 0);
 });
 
-test('a busy model is peer_busy even on a nonzero exit; other failures keep their codes without raw text', t => {
+test('a busy model is peer_busy even on a nonzero exit; other failures keep their codes without raw text', posix, t => {
   const f = setup(t), critic = { role: 'critic', task: 't' };
   for (const mode of ['busy', 'rate_limited']) {
     const busy = consult(f, critic, mode);
@@ -168,7 +170,7 @@ test('a busy model is peer_busy even on a nonzero exit; other failures keep thei
   assert.equal(exited.data.error.code, 'cli_failed'); assert.equal(JSON.stringify(exited.data).includes('raw secret'), false);
 });
 
-test('final messages are accepted as plain JSON, fenced JSON or JSON inside prose, and normalized', t => {
+test('final messages are accepted as plain JSON, fenced JSON or JSON inside prose, and normalized', posix, t => {
   const f = setup(t), critic = { role: 'critic', task: 't' };
   const expected = { summary: '要約', verdict: 'none', points: ['p'], risks: [], recommendations: [], questions: [], findings: [] };
   for (const mode of ['fenced', 'prose']) assert.deepEqual(consult(f, critic, mode).data.advice, expected, mode);
@@ -182,7 +184,7 @@ test('final messages are accepted as plain JSON, fenced JSON or JSON inside pros
   assert.deepEqual(Object.keys(advisory.data), ['ok', 'peer', 'role', 'followup', 'commands', 'advice']);
 });
 
-test('input errors name the field and its expected type; structured context is sent as JSON text', t => {
+test('input errors name the field and its expected type; structured context is sent as JSON text', posix, t => {
   const f = setup(t);
   const error = value => consult(f, value).data.error;
   assert.deepEqual(error({ role: 'critic', task: 't', criteria: ['a', 'b', ''] }), { code: 'invalid_input', message: 'criteria[2] must be a nonempty string' });
