@@ -119,7 +119,11 @@ test('completed generating crash is promoted to pending and publishes without a 
 });
 test('different libraries editing the same hooks file serialize and preserve both hook registrations',async t=>{
   const f=await fixture(t),other=new Store(path.join(f.root,'other-state'));await atomic(path.join(other.root,'config.json'),{...f.config,library_id:crypto.randomUUID()});const file=path.join(f.root,'shared-hooks.json');await atomic(file,{hooks:{UserPromptSubmit:[{hooks:[{type:'command',command:'orca'}]}]}});
-  const results=await Promise.all([hooks(f.store,{action:'install',file}),hooks(other,{action:'install',file})]);assert.equal(results.filter(result=>result.installed).length,1);assert.equal(results.filter(result=>result.state==='busy').length,1);
+  // Hold the lock owner at its first hooks-file read until the contender returns; otherwise slow Windows I/O can serialize the calls.
+  const readFile=fs.readFile;let release;const gate=new Promise(resolve=>release=resolve);t.after(()=>{fs.readFile=readFile;});
+  fs.readFile=async(name,...rest)=>{if(name===file){fs.readFile=readFile;await gate;}return readFile(name,...rest);};
+  const pending=[hooks(f.store,{action:'install',file}),hooks(other,{action:'install',file})];Promise.race(pending).then(release,release);
+  const results=await Promise.all(pending);assert.equal(results.filter(result=>result.installed).length,1);assert.equal(results.filter(result=>result.state==='busy').length,1);
   await hooks(f.store,{action:'install',file});await hooks(other,{action:'install',file});const saved=await read(file);assert.equal(saved.hooks.UserPromptSubmit.length,3);assert.equal(saved.hooks.SessionStart.length,2);assert.equal(saved.hooks.UserPromptSubmit[0].hooks[0].command,'orca');
 });
 test('invalid remote analysis is failed rather than ungenerated, and full valid source data fits generator budget with visible scope',async t=>{
@@ -187,7 +191,7 @@ test('JPEG export uses new private cache files, rejects symlinks and keeps sourc
   const {exportImage}=require('../knowledge/retrieval.cjs');const f=await fetched(t),options={captureId:f.capture.operation_id,freshness:false},snapshotFile=path.join(f.store.root,'read/snapshot.json'),before=await fs.readFile(snapshotFile);
   const first=await exportImage(f.store,options),second=await exportImage(f.store,options);
   assert.equal(first.state,'image_exported');assert.equal(first.inspection_required,true);assert.notEqual(first.path,second.path);assert.ok(first.path.startsWith(path.join(await fs.realpath(f.store.root),'read/image-cache')+path.sep));
-  assert.deepEqual(await fs.readFile(first.path),Buffer.from('/9j/2Q==','base64'));assert.equal(first.blob_sha,gitBlobSha(Buffer.from('/9j/2Q==','base64')));assert.equal((await fs.stat(first.path)).mode&0o777,0o600);assert.deepEqual(await fs.readFile(snapshotFile),before);
+  assert.deepEqual(await fs.readFile(first.path),Buffer.from('/9j/2Q==','base64'));assert.equal(first.blob_sha,gitBlobSha(Buffer.from('/9j/2Q==','base64')));if(process.platform!=='win32')assert.equal((await fs.stat(first.path)).mode&0o777,0o600);assert.deepEqual(await fs.readFile(snapshotFile),before);
   const cache=path.join(f.store.root,'read/image-cache'),outside=path.join(f.root,'outside');await fs.mkdir(outside);await fs.rename(cache,cache+'.old');await fs.symlink(outside,cache);
   await assert.rejects(()=>exportImage(f.store,options),/UNSAFE_IMAGE_CACHE/);assert.deepEqual(await fs.readdir(outside),[]);await fs.unlink(cache);
   const saved=JSON.parse(before);saved.captures[0].image=null;await atomic(snapshotFile,saved);assert.equal((await exportImage(f.store,options)).state,'image_unavailable');
