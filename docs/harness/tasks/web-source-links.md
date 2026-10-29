@@ -2,9 +2,9 @@
 
 - 状態: done
 - 仕様版: 1
-- 作業ディレクトリ: ~/dev/harness
+- 作業ディレクトリ: <repo>
 - 基点: 82586eda58699e6d44e656689586e220befe41af + 既存未コミット内容を保持
-- snapshot: /var/folders/5n/58z5gr_d2hjgv6nrfz6r9gvh0000gn/T/harness-sources-before-j3obxaw_
+- snapshot: <tmp>/harness-sources-before-j3obxaw_
 - 目的: Web検索の回答で出典サイト・論文を表示する既定ルールを配布と実導入へ反映。
 - 実効設定: enabled/delegation/review/persistence/measurement/improvement_loop=true, model_selection=auto, pinsなし, max_agents=3。
 - 起動候補取得元: 本ホストspawn_agent説明。実装Sol6.1/medium（既存入口との整合判断）、レビューSol6.1/high（独立整合確認）、統合Luna/low（定型配布）。同系統の新しい後継候補は提示されていない。

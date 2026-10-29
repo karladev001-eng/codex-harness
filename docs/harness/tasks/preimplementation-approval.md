@@ -6,7 +6,7 @@
 - 仕様版: 1
 - 開始: 2026-10-08T05:37:05+00:00
 - 基点: 82586eda58699e6d44e656689586e220befe41af と依頼開始時の既存未コミット変更
-- snapshot: /var/folders/5n/58z5gr_d2hjgv6nrfz6r9gvh0000gn/T/harness-approval-4vims4v1
+- snapshot: <tmp>/harness-approval-4vims4v1
 - 実効設定: active/delegation/review/persistence/measurement/improvement_loop=true、max_agents=3、auto、pinなし。
 - 担当: 既存の実装担当Sol6.1/medium、独立レビュー担当Sol6.1/highを同一ルールの改訂として継続。ホストcollaborationツールの候補と対応effortは指定に一致。初回fork_turns=none。
 - 作業: 既存checkoutで直列、既存変更を保持、commit/stash/reset/pushなし。

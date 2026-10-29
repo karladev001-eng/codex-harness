@@ -21,6 +21,16 @@
 
 Web検索・調査だけの依頼にも導入済みの入口から[出典規則](../../plugins/codex-harness/skills/harness/references/routing/web.md#webを参照した回答の出典)を適用します。Webを根拠にした主張の近くに実際の根拠ページへの説明的なMarkdownリンクを付け、一次資料を優先します。論文は確認できたタイトル・著者・年とDOIまたは出版社・arXiv等への直接リンクを示し、必要な閲覧範囲と推測を明記します。検索自体や、純粋な検索へのコード委譲・Git工程は要求しません。inactiveでは通常の作業へ戻り、上位指示とユーザー指定を優先します。ホストの引用UIを変更する機能ではなく、回答時の指示です。
 
+## Claudeへの相談
+
+Claude連携の[consult-claude](../../plugins/codex-harness/skills/harness/consult-claude/SKILL.md)は本体に同梱されます。Claude CLIと既存ログインが必要です。activeかつdelegation ONの親が使用条件を判定し、`「Claudeにも独立した案を出してもらって」`、`「この設計をClaudeに批評してもらって」` と明示しても使えます。`「今回は外部相談を使わないで」` を優先します。本体install/updateでは同梱資材を更新し、plugin版では個別スキルとしても公開します。CLI診断は `node "<導入先>/consult-claude/scripts/consult.mjs" --check`、モデル指定は必要なときだけ行います。外部へ渡すのはCodexが選んだ必要な文脈だけで、Claudeにプロジェクトの読書きやツール実行をさせません。送信先ごとの事前承認は、プロジェクトの `docs/harness/authorizations/` に記録します。
+
+## 必要な手順だけ読む
+
+active時は[短い入口](../../plugins/codex-harness/skills/harness/SKILL.md)のYes/No表を各行独立に判定し、該当する本文から必要な詳細へ進みます。複合依頼では複数Yesです。純相談・Web調査には実装工程を追加せず、範囲や版が変わったら再判定し、要約で失った内容は再確認します。人向けの[チャート](../../plugins/codex-harness/skills/harness/references/routing/chart.md)と[旧規則の対応表](../../plugins/codex-harness/skills/harness/references/routing/rule-map.md)もあります。図は入口表から生成し、配布には参照本文をすべて同梱します。
+
+読込量の比較は `node scripts/context-routing.cjs --write`、生成物の一致確認は `node scripts/context-routing.cjs --check`。開発checkoutの `benchmarks/context-routing.md` とJSONには入口単体/依頼別の文書量、範囲・前提・SHA-256を残します。これは会話トークン・利用枠・速度の測定ではありません。実験成果物の読み方は[開発記録の案内](../maintainers/development-records.md)へ。
+
 ## 記録とPC間の引継ぎ
 
 `docs/harness/` にタスク仕様、主要ファイルへの案内、ADRを保存します。全フォルダへのREADME生成や、全会話のコピーは行いません。長い実行ログと計測値はPC内に保存します。

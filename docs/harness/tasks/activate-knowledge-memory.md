@@ -3,7 +3,7 @@
 - 日付: 2026-10-06 JST
 - 状態: done（実導入・好み保存・説明共有・毎時設定・独立確認PASS）
 - ユーザー依頼: 「そちらの記録もgithub のknowledge baseに保存されるようにして下さい。説明生成送信は承認します。」既存・今後の保存資料の本文/画像/メモ/タグを既存Codex/OpenAIログインで説明生成する、前回の確認への承認として扱う。
-- 作業先: ~/dev/harness。既存未commit成果を保持、commit/reset/stashなし。既存GitHub preferences/記録管理role/同期/生成コードは独立reviewと118testsを通過済み。今回は実導入・設定・データ記録・確認が中心。
+- 作業先: <repo>。既存未commit成果を保持、commit/reset/stashなし。既存GitHub preferences/記録管理role/同期/生成コードは独立reviewと118testsを通過済み。今回は実導入・設定・データ記録・確認が中心。
 - 実効設定: active/delegation/review/persistence/measurement/improvement_loop true、max_agents3、auto/pinなし。ホストcollaboration候補のSol6.1/mediumを記録/導入担当、Sol6.1/highを独立確認に採用。根拠の用途判断と認証/導入の慎重な扱いのため。履歴なし、親モデル変更なし。
 
 ## 受入条件

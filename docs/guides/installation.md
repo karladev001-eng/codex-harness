@@ -2,6 +2,12 @@
 
 Node.js 22以上・npmとスキル対応のCodexを用意します。Gitはworktreeでの隔離に使います。導入CLIはモデルやサブエージェントの利用権を付与しません。
 
+## 配布状況
+
+2026-10-10にGitHub Packagesへ非公開npm版0.4.2を配布しました。registryからの取得には、指定版の配布完了とpackageアクセス権が必要です。ソースcheckoutの `private: true`・`UNLICENSED` を維持し、配布用stagingだけにGitHub Packages向けmanifestを生成します（[リリース手順](../maintainers/releasing.md)）。非公開npm配布を行っており、一般公開・ライセンス変更は行っていません。
+
+`codex-slide-plan` は任意追加スキルです。本体install/updateと指定なしのauthoring操作では配置・更新・削除しません。0.5.0のnpmパッケージまたはtgzから `--skill codex-slide-plan` で単独導入します（[別PC向けの導入手順](../../authoring-skills/INSTALL.md#codex-slide-planを任意追加する)）。
+
 ## GitHub Packagesの非公開npm配布
 
 0.5.0では既定5スキルと任意追加のcodex-slide-planを収録します。registryからの取得には指定版の配布完了と[package](https://github.com/users/karladev001-eng/packages/npm/package/codex-harness)へのアクセス権が必要です。Node.js 22以上とnpmを用意し、ホームなどpackage.jsonのないディレクトリから実行できます。利用PCでclone、npm ci、TypeScriptビルドは不要です。
@@ -24,7 +30,7 @@ macOS/Linux・Windows PowerShell共通：
 npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@latest -- codex-harness install
 ```
 
-再実行が更新です。`latest`は配布者が指定する安定版で、`--prefer-online`はcacheがあってもregistryの情報を再確認します。取得したCLIが既存installの所有管理に従って恒久ディレクトリを更新します。取得時の自動install hookはありません。npm cache上のCLI取得と恒久コピーの更新は別の操作で、`npm update -g`を更新手順にしません。[npm execの仕様](https://docs.npmjs.com/cli/v11/commands/npm-exec/)も参照できます。
+再実行が更新です。同版は `unchanged`、未編集の旧版は更新し、既存の指示・設定・制作記憶を保持します。npm cacheを消した後も導入先runtimeを使えます。`latest`は配布者が指定する安定版で、`--prefer-online`はcacheがあってもregistryの情報を再確認します。取得したCLIが既存installの所有管理に従って恒久ディレクトリを更新します。取得時の自動install hookはありません。npm cache上のCLI取得と恒久コピーの更新は別の操作で、`npm update -g`を更新手順にしません。[npm execの仕様](https://docs.npmjs.com/cli/v11/commands/npm-exec/)も参照できます。
 
 版固定は `@latest` を `@0.5.0` など取得する版へ置換します。旧版への差し戻しも希望版のinstallで行います。確認は下の[確認](#確認)へ。
 
