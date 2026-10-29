@@ -36,6 +36,11 @@ function validCalendarDate(timestamp: string): boolean {
   return date.getUTCFullYear() === year && date.getUTCMonth() === month && date.getUTCDate() === day;
 }
 
+function hasEvaluationSources(lesson: Json): boolean {
+  const sources = lesson.evaluation_sources;
+  return Array.isArray(sources) && sources.length > 0 && sources.every(isText);
+}
+
 export function validateLesson(value: unknown): Json {
   if (!isObject(value) || value.schema_version !== 1) throw new Error('Lesson requires schema_version 1');
   taskId(value.id);
@@ -53,10 +58,7 @@ export function validateLesson(value: unknown): Json {
   if (!['unknown', 'accepted', 'rejected'].includes(value.evaluation)) {
     throw new Error('Lesson requires explicit evaluation, including unknown');
   }
-  const evaluationSources = value.evaluation_sources;
-  const sourcedEvaluation = Array.isArray(evaluationSources) && evaluationSources.length > 0
-    && evaluationSources.every(isText);
-  if (value.evaluation !== 'unknown' && !sourcedEvaluation) {
+  if (value.evaluation !== 'unknown' && !hasEvaluationSources(value)) {
     throw new Error('Evaluated lesson requires evaluation_sources');
   }
   if (Object.keys(value).some(key => !LESSON_FIELDS.includes(key))) throw new Error('Unknown lesson field');
