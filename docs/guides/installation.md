@@ -70,8 +70,8 @@ npmキャッシュ等が準備済みの環境では `npx --offline` も使えま
 開発者向けの経路です。ソースリポジトリはGitHubで閲覧できます（利用ライセンスは未付与）。cloneしてルートへ移動します。
 
 ```sh
-git clone https://github.com/karladev001-eng/harness.git
-cd harness
+git clone https://github.com/karladev001-eng/codex-harness.git
+cd codex-harness
 npm ci
 npm run build
 node dist/skill/runtime.js doctor --project .

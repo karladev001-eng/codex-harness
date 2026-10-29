@@ -69,8 +69,8 @@ flowchart LR
 Node.js 22以上・npm・Gitが必要です。
 
 ```sh
-git clone https://github.com/karladev001-eng/harness.git
-cd harness
+git clone https://github.com/karladev001-eng/codex-harness.git
+cd codex-harness
 npm ci
 npm test                          # ビルドして、node:testの自動テストを実行
 node dist/skill/runtime.js --help # ビルドしたCLI
