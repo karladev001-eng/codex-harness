@@ -167,9 +167,9 @@ Chrome拡張とRaycast検索は本体の必須依存ではなく、本体のinst
 
 ## 開発・出典・ライセンス
 
-開発は[CONTRIBUTING.md](CONTRIBUTING.md)、配布物は[リリース手順](docs/maintainers/releasing.md)、将来公開時の判断は[公開前の整理](docs/maintainers/publication.md)を参照してください。[SPEC.md](SPEC.md)は実装仕様、[ADR](docs/adr/0001-portable-skill-harness.md)とタスク記録は設計・開発の履歴です。
+開発は[CONTRIBUTING.md](CONTRIBUTING.md)、配布物は[リリース手順](docs/maintainers/releasing.md)、公開に関する判断は[公開に関する整理](docs/maintainers/publication.md)を参照してください。[SPEC.md](SPEC.md)は実装仕様、[ADR](docs/adr/0001-portable-skill-harness.md)とタスク記録は設計・開発の履歴です。
 
-全体への利用ライセンスは未付与です（非公開配布で、一般公開は行っていません）。`codex-html-plan`のApache-2.0由来部分など、個別の出典とライセンスは[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)に分けて示します。
+ソースリポジトリはGitHubで閲覧用に公開しています。全体への利用ライセンスは付与していません（`UNLICENSED`。閲覧できることは利用の許諾ではありません）。npmパッケージはGitHub Packagesでの非公開配布のままで、取得にはアクセス権が必要です。公開npmへのpublishとライセンス変更は行っていません。`codex-html-plan`のApache-2.0由来部分など、個別の出典とライセンスは[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)に分けて示します。
 
 ## English summary
 
@@ -180,5 +180,7 @@ Chrome拡張とRaycast検索は本体の必須依存ではなく、本体のinst
 - **Authoring skills** (`authoring-skills/`): six standalone skills for writing rules, roles and harness indexes, inspecting an existing harness, and producing spec mock-ups and slide plans.
 - **Knowledge base** (`knowledge/`): a Chrome extension and CLI that store pages in a private GitHub repository, with staged retrieval (candidates, then cards, then full text or images), plus an optional Raycast search.
 - **Run the tests:** `npm ci && npm test` (builds, then runs the `node:test` suite on temporary homes and disposable Git repositories), and `npm run check:docs` for the documentation link check.
+
+The source repository is published on GitHub for viewing only. No usage license is granted to the whole (`UNLICENSED`; individual licenses are listed in THIRD_PARTY_NOTICES.md). The npm package remains private on GitHub Packages and requires access rights; there is no public npm publish.
 
 User-facing documentation is in Japanese. Validation is recorded per date and environment in [VALIDATION.md](VALIDATION.md), with unverified items stated as such. Development records (task packets, ADRs, benchmarks) are explained in [docs/maintainers/development-records.md](docs/maintainers/development-records.md).
