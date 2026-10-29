@@ -37,7 +37,7 @@
 
 `docs/harness/authorizations/claude-send.md` と `codex-send.md` は、別のモデルへプロジェクトの情報を送ってよい範囲を、ユーザー本人の承認として記録したものです。先頭のfrontmatterは機械可読で、`peer`・`project`・`purposes`・`status`・`recorded` を持ちます。相談用のヘルパー（`plugins/codex-harness/skills/harness/consult-claude`・`consult-codex`・`codex-image`）は、それぞれ `--approval` モードでこの記録を判定します。記録がない・形式が不正・撤回済み・目的が許可されていない・`project` が実行場所と一致しない場合は、承認されていない（`approved: false`）と返します。判定は共通のテスト済みコードですが、送信の前にこれを呼ぶことは手順（`references/routing/peer-consult.md`）の指示で、ヘルパーの送信処理が自動で強制するものではありません。
 
-この `project` は、実在する絶対パスとの一致で判定されるため、**個人環境の絶対パスのまま残しています**（他の記録は `<repo>` などの置換語に直しています）。別のcheckoutで使うときは、自分のパスに書き換えた承認記録を、自分でユーザーとして作る必要があります。この記録は承認の根拠であり、他人に使い回せる許可ではありません。
+この `project` は、実在するパスとの一致で判定されます。先頭の `~/` はホームディレクトリとして解釈されるので、記録には `~/dev/codex-harness` のようにホームからのパスで書き、個人のユーザー名を含めません。別のcheckoutで使うときは、自分のパスに書き換えた承認記録を、自分でユーザーとして作る必要があります。この記録は承認の根拠であり、他人に使い回せる許可ではありません。
 
 ## ベンチマークの読み方
 
@@ -54,10 +54,11 @@
 
 ## 個人の絶対パスの扱い
 
-公開に先立ち、記録内の個人環境の絶対パスを `<repo>`（このリポジトリ）、`<tmp>`（一時ディレクトリ）、`~/`（ホーム）に置換しました。値が検査の対象になる次の箇所は、記録時のまま残しています。
+公開に先立ち、記録内の個人環境の絶対パスを `<repo>`（このリポジトリ）、`<tmp>`（一時ディレクトリ）、`~/`（ホーム）に置換しました。
 
-- `docs/harness/authorizations/*.md` の `project:` 行（上記のとおり、機械検査が絶対パス一致で判定する）。
-- `benchmarks/section-reading/measurements.json` と `source-inventory.json`。測定時のルートと、それらを含む入力のSHA-256を結び付けて記録しており、書き換えると整合性の連鎖が崩れる。
-- テストと検証記録の一部（`tests/consult-codex.test.cjs` の置換前の文字列、[VALIDATION](../../VALIDATION.md) の過去の検証コマンド）。
+- `docs/harness/authorizations/*.md` の `project:` 行は `~/` で書きます（上記のとおり、判定時にホームへ展開する）。
+- `benchmarks/section-reading/measurements.json` と `source-inventory.json` の `root` は `<repo>` に置換し、`measurements.json` の `sourceInventorySha256` を置換後の値に更新しました。元の生データ（`runs/`）は残っていないため、`section-reading-collect.cjs --check` による再照合はできません。
+
+`tests/personal-path.test.cjs` が、追跡中のテキストファイルに `/Users/<name>/`・`/home/<name>/`・`C:\Users\<name>` 形式のパスがないことを検査します（`npm test` とCIで実行）。
 
 開発の流れ全体は[CONTRIBUTING](../../CONTRIBUTING.md)、設計の経緯は上のADRを起点に読めます。

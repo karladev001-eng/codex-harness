@@ -249,7 +249,7 @@
     "readerAndIndexBytes": 0
   },
   "after": {
-    "root": "~/dev/harness",
+    "root": "<repo>",
     "scope": [
       "plugins/codex-harness/skills/harness",
       "authoring-skills/codex-html-plan"

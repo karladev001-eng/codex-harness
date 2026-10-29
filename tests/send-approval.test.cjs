@@ -93,3 +93,26 @@ test('inline purposes reject empty items, and an empty list approves no purpose'
     assert.equal((await checkApproval({ project, purpose: 'review' })).reason, 'approved', name);
   }
 });
+
+test('a project recorded with ~/ resolves under the home directory', async t => {
+  const base = fs.realpathSync(fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'send-approval-')));
+  const saved = { HOME: process.env.HOME, USERPROFILE: process.env.USERPROFILE };
+  t.after(() => { for (const [key, value] of Object.entries(saved)) if (value === undefined) delete process.env[key]; else process.env[key] = value; fs.rmSync(base, { recursive: true, force: true }); });
+  process.env.HOME = base; process.env.USERPROFILE = base;
+  const project = path.join(base, 'dev', 'project'), other = path.join(base, 'dev', 'other'), dir = path.join(project, 'docs/harness/authorizations');
+  fs.mkdirSync(dir, { recursive: true }); fs.mkdirSync(other, { recursive: true });
+  for (const [name, { file, peer }] of Object.entries(helpers)) {
+    const { checkApproval } = await import(require('node:url').pathToFileURL(file).href);
+    const record = value => fs.writeFileSync(path.join(dir, `${peer}-send.md`), `---\npeer: ${peer}\nproject: ${value}\npurposes: [advice]\nstatus: approved\nrecorded: 2026-10-29\n---\n`);
+    record('~/dev/project');
+    assert.equal((await checkApproval({ project, purpose: 'advice' })).reason, 'approved', name);
+    record('~/dev/other');
+    assert.equal((await checkApproval({ project, purpose: 'advice' })).reason, 'project_mismatch', name);
+    for (const value of ['~dev/project', 'dev/project']) {
+      record(value);
+      const result = await checkApproval({ project, purpose: 'advice' });
+      assert.equal(result.reason, 'malformed', `${name} ${value}`);
+      assert.match(result.message, /project must be an absolute path or start with ~\//, `${name} ${value}`);
+    }
+  }
+});

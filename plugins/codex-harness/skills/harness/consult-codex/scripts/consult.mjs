@@ -171,13 +171,15 @@ export async function checkApproval({ project, purpose, peer = APPROVAL_PEER }) 
   const { fields } = parsed;
   for (const key of ['peer', 'project', 'purposes', 'status', 'recorded']) if (!fields[key] || (key !== 'purposes' && !fields[key].value)) return result(false, 'malformed', [], `frontmatter: ${key} is required`);
   if (fields.peer.value !== peer) return result(false, 'malformed', [], `line ${fields.peer.line}: peer must be ${peer}`);
-  if (!path.isAbsolute(fields.project.value)) return result(false, 'malformed', [], `line ${fields.project.line}: project must be an absolute path`);
+  // A leading ~/ stands for the home directory, so shared records need not carry a personal path.
+  const recorded = fields.project.value.startsWith('~/') ? path.join(os.homedir(), fields.project.value.slice(2)) : fields.project.value;
+  if (!path.isAbsolute(recorded)) return result(false, 'malformed', [], `line ${fields.project.line}: project must be an absolute path or start with ~/`);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(fields.recorded.value)) return result(false, 'malformed', [], `line ${fields.recorded.line}: recorded must be a YYYY-MM-DD date`);
   const bad = fields.purposes.items.find(item => !PURPOSES.includes(item.value));
   if (bad) return result(false, 'malformed', [], `line ${bad.line}: purposes may contain only ${PURPOSES.join(', ')}`);
   const purposes = [...new Set(fields.purposes.items.map(item => item.value))];
   if (fields.status.value !== 'approved') return result(false, 'revoked', purposes);
-  if (await canonical(fields.project.value) !== await canonical(project)) return result(false, 'project_mismatch', purposes);
+  if (await canonical(recorded) !== await canonical(project)) return result(false, 'project_mismatch', purposes);
   if (!purposes.includes(purpose)) return result(false, 'purpose_missing', purposes);
   return result(true, 'approved', purposes);
 }

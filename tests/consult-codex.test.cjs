@@ -269,8 +269,8 @@ test('the migrated harness approval records follow the shared frontmatter form',
   assert.deepEqual(ROLE_PURPOSE, { ideator: 'advice', consultant: 'advice', critic: 'advice', reviewer: 'review' });
   const relocate = name => {
     const text = fs.readFileSync(path.join(records, name), 'utf8');
-    assert.match(text, /^---\npeer: \w+\nproject: ~\/dev\/harness\npurposes: \[[\w, ]+\]\nstatus: approved\nrecorded: \d{4}-\d{2}-\d{2}\n---\n\n# /);
-    write(path.join(f.project, 'docs/harness/authorizations', name), text.replace('project: ~/dev/harness', `project: ${f.project}`));
+    assert.match(text, /^---\npeer: \w+\nproject: ~\/dev\/codex-harness\npurposes: \[[\w, ]+\]\nstatus: approved\nrecorded: \d{4}-\d{2}-\d{2}\n---\n\n# /);
+    write(path.join(f.project, 'docs/harness/authorizations', name), text.replace('project: ~/dev/codex-harness', `project: ${f.project}`));
   };
   relocate('codex-send.md'); relocate('claude-send.md');
   // Image generation was approved as a standing purpose after the two trials (2026-10-28).

@@ -2,7 +2,7 @@
   "schema": 1,
   "scope": "Single-run independent coordinator document-selection rehearsals, not completed tasks or whole-conversation token measurements",
   "rawManifestSha256": "cf6cfdcc93d65d058f6f3ec9c937959af481f49e5f531811d2fba2599861b350",
-  "sourceInventorySha256": "290f891c29946a1b7c510a4cdf9c4cdb7bd729710bc4bad9bbf2378ee681c184",
+  "sourceInventorySha256": "93ba89cdf4e50bb134b51a00baed721a91c375307beda4ba28d8f512b11d70ed",
   "conditions": {
     "model": "gpt-6.1-sol",
     "effort": "high",
@@ -800,7 +800,7 @@
       "exclusionReason": null,
       "summary": {
         "schema": 1,
-        "root": "~/dev/harness",
+        "root": "<repo>",
         "label": "after",
         "scenario": "code",
         "model": "gpt-6.1-sol",
@@ -1153,7 +1153,7 @@
       "exclusionReason": null,
       "summary": {
         "schema": 1,
-        "root": "~/dev/harness",
+        "root": "<repo>",
         "label": "after",
         "scenario": "mixed",
         "model": "gpt-6.1-sol",
@@ -1554,7 +1554,7 @@
       "exclusionReason": null,
       "summary": {
         "schema": 1,
-        "root": "~/dev/harness",
+        "root": "<repo>",
         "label": "after-verified",
         "scenario": "code",
         "model": "gpt-6.1-sol",
@@ -1901,7 +1901,7 @@
       "exclusionReason": null,
       "summary": {
         "schema": 1,
-        "root": "~/dev/harness",
+        "root": "<repo>",
         "label": "after-verified",
         "scenario": "mixed",
         "model": "gpt-6.1-sol",
@@ -2302,7 +2302,7 @@
       "exclusionReason": null,
       "summary": {
         "schema": 1,
-        "root": "~/dev/harness",
+        "root": "<repo>",
         "label": "after-final",
         "scenario": "code",
         "model": "gpt-6.1-sol",
@@ -2682,7 +2682,7 @@
       "exclusionReason": null,
       "summary": {
         "schema": 1,
-        "root": "~/dev/harness",
+        "root": "<repo>",
         "label": "after-final",
         "scenario": "mixed",
         "model": "gpt-6.1-sol",
@@ -3110,7 +3110,7 @@
       "exclusionReason": "Aborted after four reads because the audit wrapper did not accept held receipts.",
       "summary": {
         "schema": 1,
-        "root": "~/dev/harness",
+        "root": "<repo>",
         "label": "after-final",
         "scenario": "code",
         "model": "gpt-6.1-sol",
@@ -3239,7 +3239,7 @@
       "exclusionReason": "Initialized only; reader never started.",
       "summary": {
         "schema": 1,
-        "root": "~/dev/harness",
+        "root": "<repo>",
         "label": "after-final",
         "scenario": "mixed",
         "model": "gpt-6.1-sol",
