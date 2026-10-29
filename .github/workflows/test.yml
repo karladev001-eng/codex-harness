@@ -21,3 +21,6 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm test
       - run: npm pack
+      - if: always() && runner.os == 'Windows'
+        continue-on-error: true
+        run: node tests/identity.test.cjs
