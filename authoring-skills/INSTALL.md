@@ -67,8 +67,8 @@ PPTX/POTXマスターの構造読取りだけはPython 3が必要です。元資
 開発者向けに、アクセス可能なリポジトリをcloneして移動します。対象は本体のcheckoutと別の、既存のプロジェクトの絶対パスです。
 
 ```sh
-git clone https://github.com/karladev001-eng/harness.git
-cd harness
+git clone https://github.com/karladev001-eng/codex-harness.git
+cd codex-harness
 npm ci
 npm run build
 node dist/skill/runtime.js authoring install --project "/path/to/project"

@@ -7,8 +7,8 @@
 Node.js 22以上・npm・Gitを用意し、リポジトリ（GitHubで閲覧用に公開。利用ライセンスは未付与）をcloneしてルートへ移動します。
 
 ```sh
-git clone https://github.com/karladev001-eng/harness.git
-cd harness
+git clone https://github.com/karladev001-eng/codex-harness.git
+cd codex-harness
 npm ci
 npm run build
 npm test
