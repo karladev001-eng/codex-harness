@@ -94,7 +94,8 @@ test('separate Git metadata inherits the main checkout settings in linked worktr
   git(f.project, 'config', 'user.name', 'Test'); git(f.project, 'config', 'user.email', 'test@example.invalid');
   write(path.join(f.project, 'file'), 'initial'); git(f.project, 'add', 'file'); git(f.project, 'commit', '-m', 'initial');
   write(path.join(f.project, '.harness.json'), { review: false, preferences: { repository: 'owner/kb', project_key: 'stable' } });
-  const linked = path.join(f.base, 'linked checkout\nwith newline'); git(f.project, 'worktree', 'add', '--detach', linked);
+  // Windows file names cannot contain a newline, so the checkout there uses a plain name.
+  const linked = path.join(f.base, process.platform === 'win32' ? 'linked checkout' : 'linked checkout\nwith newline'); git(f.project, 'worktree', 'add', '--detach', linked);
   assert.throws(() => lib.settings(linked, f.home), /Common project settings unresolved.*core.worktree/);
   const unresolved = command({ ...f, project: linked }, 'status'); assert.equal(unresolved.code, 2); assert.match(unresolved.error, /Common project settings unresolved/);
   git(f.project, 'config', 'core.worktree', f.project);
