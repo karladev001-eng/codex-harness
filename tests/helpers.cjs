@@ -6,7 +6,8 @@ const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '..');
 const cli = path.join(root, 'dist/skill/runtime.js');
 function fixture(t) {
-  const base = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'harness test ')));
+  // native realpath also expands Windows 8.3 names (RUNNER~1) like the product's canonical paths.
+  const base = fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(), 'harness test ')));
   t.after(() => fs.rmSync(base, { recursive: true, force: true }));
   const project = path.join(base, 'project with spaces 日本語'), home = path.join(base, 'user home');
   fs.mkdirSync(project);

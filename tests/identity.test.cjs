@@ -40,13 +40,14 @@ test('worktrees inherit common project policy and a local override wins', t => {
   write(path.join(other, '.harness.json'), { preferences: { project_key: 'override' }, review: true });
   assert.equal(lib.settings(other, f.home).preferences.project_key, 'override'); assert.equal(lib.settings(other, f.home).review, true);
 });
-test('non-Git registration persists portable key before registry, explicit identity survives later Git conversion', t => {
+test('non-Git registration persists portable key before registry, explicit identity survives later Git conversion', async t => {
   const f = fixture(t), config = automatic(), api = server(), args = { project: f.project, home: f.home };
   write(path.join(f.home, '.codex/harness/settings.json'), { preferences: config.preferences });
   assert.equal(preferences({ ...args, action: 'read' }, config, api.transport).error, 'identity_unresolved');
   const registered = preferences({ ...args, action: 'register' }, config, api.transport); assert.equal(registered.ok, true);
   const policy = JSON.parse(fs.readFileSync(path.join(f.project, '.harness.json'))); assert.equal(policy.preferences.project_key, registered.identity.project_key);
-  const moved = path.join(f.base, 'moved'); fs.cpSync(f.project, moved, { recursive: true });
+  // Node 22's native fs.cpSync path check aborts the process on Windows for this non-ASCII source path; fs.promises.cp does not use it.
+  const moved = path.join(f.base, 'moved'); await fs.promises.cp(f.project, moved, { recursive: true });
   const resolved = lib.settings(moved, f.home); resolved.preferences.repository = config.preferences.repository; resolved.preferences.autosave = true;
   assert.equal(preferences({ project: moved, home: f.home, action: 'register' }, resolved, api.transport).identity.project_key, registered.identity.project_key);
   // After Git conversion an explicit key is authoritative; conflicting identity is stopped, never assigned a new key.
@@ -94,7 +95,8 @@ test('separate Git metadata inherits the main checkout settings in linked worktr
   git(f.project, 'config', 'user.name', 'Test'); git(f.project, 'config', 'user.email', 'test@example.invalid');
   write(path.join(f.project, 'file'), 'initial'); git(f.project, 'add', 'file'); git(f.project, 'commit', '-m', 'initial');
   write(path.join(f.project, '.harness.json'), { review: false, preferences: { repository: 'owner/kb', project_key: 'stable' } });
-  const linked = path.join(f.base, 'linked checkout\nwith newline'); git(f.project, 'worktree', 'add', '--detach', linked);
+  // Windows file names cannot contain a newline, so the checkout there uses a plain name.
+  const linked = path.join(f.base, process.platform === 'win32' ? 'linked checkout' : 'linked checkout\nwith newline'); git(f.project, 'worktree', 'add', '--detach', linked);
   assert.throws(() => lib.settings(linked, f.home), /Common project settings unresolved.*core.worktree/);
   const unresolved = command({ ...f, project: linked }, 'status'); assert.equal(unresolved.code, 2); assert.match(unresolved.error, /Common project settings unresolved/);
   git(f.project, 'config', 'core.worktree', f.project);

@@ -135,7 +135,7 @@ test('actual npx tarball update refreshes an explicit optional skill and refuses
   const env = { ...require('./npm-fixture.cjs').npmEnvironment(f), npm_config_offline: 'true' };
   const npx = path.join(path.dirname(npm), 'npx-cli.js'); assert.ok(fs.existsSync(npx));
   const unpacked = path.join(f.base, 'npx package source'); fs.mkdirSync(unpacked);
-  const packed = spawnSync(npm, ['pack', '--ignore-scripts', '--offline', '--json', '--pack-destination', f.base], { encoding: 'utf8', cwd: root, env, timeout: 90000 });
+  const packed = spawnSync(process.execPath, [npm, 'pack', '--ignore-scripts', '--offline', '--json', '--pack-destination', f.base], { encoding: 'utf8', cwd: root, env, timeout: 90000 });
   assert.ifError(packed.error); assert.equal(packed.status, 0, packed.stderr);
   const filename = JSON.parse(packed.stdout)[0].filename;
   const extraction = spawnSync('tar', ['-xzf', path.join(f.base, filename), '-C', unpacked], { encoding: 'utf8' });
@@ -150,7 +150,7 @@ test('actual npx tarball update refreshes an explicit optional skill and refuses
     metadata.version = version; fs.writeFileSync(manifest, JSON.stringify(metadata, null, 2) + '\n');
     const skill = path.join(stage, 'authoring-skills/codex-slide-plan/SKILL.md');
     fs.appendFileSync(skill, `\n<!-- integration fixture ${marker} -->\n`);
-    const result = spawnSync(npm, ['pack', '--ignore-scripts', '--offline', '--json', '--pack-destination', f.base], { encoding: 'utf8', cwd: stage, env, timeout: 90000 });
+    const result = spawnSync(process.execPath, [npm, 'pack', '--ignore-scripts', '--offline', '--json', '--pack-destination', f.base], { encoding: 'utf8', cwd: stage, env, timeout: 90000 });
     assert.ifError(result.error); assert.equal(result.status, 0, result.stderr);
     return path.join(f.base, JSON.parse(result.stdout)[0].filename);
   }
