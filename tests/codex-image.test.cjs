@@ -5,6 +5,8 @@ const path = require('node:path');
 const { spawn, spawnSync } = require('node:child_process');
 const { fixture, write, root } = require('./helpers.cjs');
 const source = path.join(root, 'plugins/codex-harness/skills/harness/codex-image/scripts/image.mjs');
+// The fake CLI is a POSIX shebang script, which Windows cannot execute from PATH.
+const posix = { skip: process.platform === 'win32' };
 
 // The fake records argv, cwd, stdin and leaked env names, then answers as the Codex CLI would.
 // `exec` writes into $CODEX_HOME/generated_images/<thread_id>/ the way image_gen stores its output
@@ -65,7 +67,7 @@ function image(f, value, mode = 'ok', ...args) {
 }
 const request = (f, extra = {}) => ({ project: f.project, prompt: '秘密の港町の絵', out: path.join(f.project, 'assets/harbor.png'), ...extra });
 
-test('a generated image is copied into the project from an isolated, image-only Codex run', t => {
+test('a generated image is copied into the project from an isolated, image-only Codex run', posix, t => {
   const f = setup(t), result = image(f, request(f, { size: '1536x1024', transparent: true }));
   assert.equal(result.code, 0, JSON.stringify(result.data));
   const out = path.join(f.project, 'assets/harbor.png');
@@ -90,7 +92,7 @@ test('a generated image is copied into the project from an isolated, image-only 
   assert.deepEqual(login.env, []); assert.deepEqual(exec.env, []);
 });
 
-test('existing files are never overwritten and extra images get numbered names', t => {
+test('existing files are never overwritten and extra images get numbered names', posix, t => {
   const f = setup(t), out = path.join(f.project, 'assets/harbor.png');
   write(out, 'keep me');
   const first = image(f, request(f));
@@ -105,7 +107,7 @@ test('existing files are never overwritten and extra images get numbered names',
   assert.equal(jpeg.data.files[0].path, path.join(f.project, 'photo.jpg'));
 });
 
-test('paths reported in events are preferred only inside generated_images', t => {
+test('paths reported in events are preferred only inside generated_images', posix, t => {
   const f = setup(t);
   const chosen = image(f, request(f), 'event');
   assert.equal(chosen.code, 0); assert.equal(chosen.data.sources.length, 1); assert.equal(path.basename(chosen.data.sources[0]), 'chosen.png');
@@ -114,7 +116,7 @@ test('paths reported in events are preferred only inside generated_images', t =>
   assert.ok(outside.data.sources[0].startsWith(path.join(f.codexHome, 'generated_images') + path.sep));
 });
 
-test('outputs and references must stay inside the project, including through symlinks', t => {
+test('outputs and references must stay inside the project, including through symlinks', posix, t => {
   const f = setup(t);
   const outside = image(f, request(f, { out: path.join(f.base, 'escape.png') }));
   assert.equal(outside.code, 1); assert.equal(outside.data.error.code, 'invalid_input'); assert.match(outside.data.error.message, /out must be inside project/);
@@ -152,7 +154,7 @@ test('input validation names unknown fields and the expected types', t => {
   assert.equal(f.calls().length, 0);
 });
 
-test('forbidden tools, failed turns, missing images and missing login fail closed without raw output', t => {
+test('forbidden tools, failed turns, missing images and missing login fail closed without raw output', posix, t => {
   const f = setup(t);
   const tool = image(f, request(f), 'tool');
   assert.equal(tool.code, 1); assert.equal(tool.data.error.code, 'tool_forbidden');
@@ -167,7 +169,7 @@ test('forbidden tools, failed turns, missing images and missing login fail close
   assert.equal(logged.data.error.code, 'auth_unavailable'); assert.match(logged.data.error.message, /! codex login/);
 });
 
-test('images are read only from generated_images/<thread_id>/ of this run', t => {
+test('images are read only from generated_images/<thread_id>/ of this run', posix, t => {
   const f = setup(t), uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const own = image(f, request(f));
   assert.equal(own.code, 0); assert.match(path.basename(path.dirname(own.data.sources[0])), uuid);
@@ -182,7 +184,7 @@ test('images are read only from generated_images/<thread_id>/ of this run', t =>
   assert.ok(fs.readdirSync(path.join(f.codexHome, 'generated_images')).some(name => name.startsWith('id-')), 'the untaken image exists');
 });
 
-test('an image saved before a failed turn or an unsuccessful exit is returned with a warning', t => {
+test('an image saved before a failed turn or an unsuccessful exit is returned with a warning', posix, t => {
   const f = setup(t);
   // The event stream observed on codex-cli 0.164.0: warning item, capacity error, turn.failed, exit 1.
   const real = image(f, request(f), 'real');
@@ -213,7 +215,7 @@ test('an image saved before the time or output limit is returned with a warning,
   for (const call of f.calls().filter(call => call.args[0] === 'exec')) assert.equal(alive(call.pid), false, 'the stopped CLI is no longer running');
 });
 
-test('a busy model without an image is peer_busy; other failures keep their codes', t => {
+test('a busy model without an image is peer_busy; other failures keep their codes', posix, t => {
   const f = setup(t);
   const busy = image(f, request(f), 'busy');
   assert.equal(busy.code, 1); assert.equal(busy.data.error.code, 'peer_busy');
@@ -223,7 +225,7 @@ test('a busy model without an image is peer_busy; other failures keep their code
   assert.equal(fs.existsSync(path.join(f.project, 'assets/harbor.png')), false);
 });
 
-test('--check confirms the CLI, the login and the image_generation feature', t => {
+test('--check confirms the CLI, the login and the image_generation feature', posix, t => {
   const f = setup(t);
   assert.deepEqual(image(f, undefined, 'ok', '--check').data, { ok: true, cli: 'available', authenticated: true, image_generation: true });
   assert.deepEqual(f.calls().map(call => call.args), [['login', 'status'], ['features', 'list']]);
@@ -231,7 +233,7 @@ test('--check confirms the CLI, the login and the image_generation feature', t =
   assert.equal(image(f, undefined, 'logged_out', '--check').data.error.code, 'auth_unavailable');
 });
 
-test('stdin that never sends data times out quickly; empty stdin is refused with guidance', async t => {
+test('stdin that never sends data times out quickly; empty stdin is refused with guidance', posix, async t => {
   const f = setup(t), started = Date.now();
   const child = spawn(process.execPath, [source], { env: { ...f.env, CODEX_IMAGE_FIRST_BYTE_MS: '200' }, stdio: ['pipe', 'pipe', 'pipe'] });
   let stdout = '';
