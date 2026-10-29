@@ -4,7 +4,7 @@ Node.js 22以上・npmとスキル対応のCodexを用意します。Gitはworkt
 
 ## 配布状況
 
-2026-10-10にGitHub Packagesへ非公開npm版0.4.2を初めて配布し、2026-10-11に配布済みの最新版0.4.3を配布しました。registryからの取得には、指定版の配布完了とpackageアクセス権が必要です。ソースcheckoutの `private: true`・`UNLICENSED` を維持し、配布用stagingだけにGitHub Packages向けmanifestを生成します（[リリース手順](../maintainers/releasing.md)）。非公開npm配布を行っており、一般公開・ライセンス変更は行っていません。
+2026-10-10にGitHub Packagesへ非公開npm版0.4.2を初めて配布し、2026-10-11に配布済みの最新版0.4.3を配布しました。registryからの取得には、指定版の配布完了とpackageアクセス権が必要です。ソースcheckoutの `private: true`・`UNLICENSED` を維持し、配布用stagingだけにGitHub Packages向けmanifestを生成します（[リリース手順](../maintainers/releasing.md)）。ソースリポジトリはGitHubで閲覧用に公開していますが、利用ライセンスは付与していません（`UNLICENSED`）。npmパッケージは引き続きGitHub Packagesでの非公開配布で、公開npmへのpublishとライセンス変更は行っていません。
 
 0.5.0（Claude Codeプラグイン、`consult-codex`、`codex-image` を含む）は **ローカルのリリース候補** で、GitHub Packagesへは未送信です（[VALIDATION](../../VALIDATION.md)の2026-10-28の記録）。そのため、registryの `@latest` で取得できるのは配布済みの版です。0.5.0の内容、特にClaude Codeへの導入（`--host claude`）は、現状ではローカルtarballまたはcheckoutの経路で行います。registryへ送った後は、下のnpm exec経路でも同じ操作ができます。
 
@@ -67,7 +67,7 @@ npmキャッシュ等が準備済みの環境では `npx --offline` も使えま
 
 ## 手元のcheckoutから導入
 
-開発者向けの経路です。リポジトリへのアクセス権を用意し、cloneしてルートへ移動します。
+開発者向けの経路です。ソースリポジトリはGitHubで閲覧できます（利用ライセンスは未付与）。cloneしてルートへ移動します。
 
 ```sh
 git clone https://github.com/karladev001-eng/harness.git
