@@ -35,7 +35,7 @@
 
 ## 送信承認の記録
 
-`docs/harness/authorizations/claude-send.md` と `codex-send.md` は、別のモデルへプロジェクトの情報を送ってよい範囲を、ユーザー本人の承認として記録したものです。先頭のfrontmatterは機械可読で、`peer`・`project`・`purposes`・`status`・`recorded` を持ちます。相談用のヘルパー（`plugins/codex-harness/skills/harness/consult-claude` と `consult-codex`）は送信の前にこの記録を読み、記録がない・形式が不正・撤回済み・目的が許可されていない・`project` が実行場所と一致しない場合は送信しません。
+`docs/harness/authorizations/claude-send.md` と `codex-send.md` は、別のモデルへプロジェクトの情報を送ってよい範囲を、ユーザー本人の承認として記録したものです。先頭のfrontmatterは機械可読で、`peer`・`project`・`purposes`・`status`・`recorded` を持ちます。相談用のヘルパー（`plugins/codex-harness/skills/harness/consult-claude`・`consult-codex`・`codex-image`）は、それぞれ `--approval` モードでこの記録を判定します。記録がない・形式が不正・撤回済み・目的が許可されていない・`project` が実行場所と一致しない場合は、承認されていない（`approved: false`）と返します。判定は共通のテスト済みコードですが、送信の前にこれを呼ぶことは手順（`references/routing/peer-consult.md`）の指示で、ヘルパーの送信処理が自動で強制するものではありません。
 
 この `project` は、実在する絶対パスとの一致で判定されるため、**個人環境の絶対パスのまま残しています**（他の記録は `<repo>` などの置換語に直しています）。別のcheckoutで使うときは、自分のパスに書き換えた承認記録を、自分でユーザーとして作る必要があります。この記録は承認の根拠であり、他人に使い回せる許可ではありません。
 
@@ -47,7 +47,7 @@
 | --- | --- |
 | `benchmarks/context-routing.md` / `.json` | 入口文書とYes/No表による依頼別の読込量。`node scripts/context-routing.cjs --check` で再現確認（テストでも検査） |
 | `benchmarks/context-concision/` | 本文を短くする前後の同一ファイル集合のバイト数。ファイルごとのSHA-256つき |
-| `benchmarks/context-verification/` | 独立した読み手に運用文書を読ませた確認。`reading/materials` は固定した入力資料で、変更しない |
+| `benchmarks/context-verification/` | 独立した読み手に運用文書を読ませた確認。`reading/materials` は測定に使った固定の入力資料（運用文書の写し）で、`context-concision/source-bytes.json` のSHA-256とテストで照合する。絶対パスは含まない（書き換えない） |
 | `benchmarks/section-reading/` | 必要な節だけを読む補助の効果測定。コード修正では総量が増える結果（+17.99%）も、そのまま残している |
 
 最後の例のように、期待した効果が出なかった測定も結果として残しています。数値を引用するときは、それぞれの文書にある測定範囲と「主張しないこと」を併せて確認してください。
@@ -58,7 +58,6 @@
 
 - `docs/harness/authorizations/*.md` の `project:` 行（上記のとおり、機械検査が絶対パス一致で判定する）。
 - `benchmarks/section-reading/measurements.json` と `source-inventory.json`。測定時のルートと、それらを含む入力のSHA-256を結び付けて記録しており、書き換えると整合性の連鎖が崩れる。
-- `benchmarks/context-verification/reading/materials/`。固定した入力資料。
 - テストと検証記録の一部（`tests/consult-codex.test.cjs` の置換前の文字列、[VALIDATION](../../VALIDATION.md) の過去の検証コマンド）。
 
 開発の流れ全体は[CONTRIBUTING](../../CONTRIBUTING.md)、設計の経緯は上のADRを起点に読めます。
