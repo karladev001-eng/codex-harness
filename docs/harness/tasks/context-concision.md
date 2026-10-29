@@ -9,12 +9,12 @@
 - 受入2: 入口とコード/複合経路の同じ必要資料集合で本文bytesを比較。保存量と読込見積りを分離し、前回の実読込結果と混同しない。大規模な実行ベンチマークを繰り返さない。短い自然文の適用判断確認を行う。
 - 受入3: build/テスト/リンク/標準導入と既存の所有管理を保つ。原文の言い換えを許すためのテスト変更は、意味保持の証拠・別の独立点検と合わせる。旧測定raw/fixtureは改変しない。
 - 自動compactの適用範囲: 選択質問にユーザー本人が「このPCのCodex全体」と回答。以前合意した60%目安と現在記録の有効上限475000から、global default285000 tokens、scope totalを提示して反映。固定数のため全モデルで常に60%にはならない。
-- 変更先: /Users/kan/.codex/config.tomlのトップレベル2キーのみ。backup=/Users/kan/.codex/harness/backups/native-compact/20261024-212725-85335/config.toml。TOML再parse/値確認、0600維持。権限/認証/model等変更なし。Desktop現在チャットへの即時反映・自動発火は未観測。
+- 変更先: ~/.codex/config.tomlのトップレベル2キーのみ。backup=~/.codex/harness/backups/native-compact/20261024-212725-85335/config.toml。TOML再parse/値確認、0600維持。権限/認証/model等変更なし。Desktop現在チャットへの即時反映・自動発火は未観測。
 - 圧縮説明の訂正: 20:30 JSTの圧縮はユーザーの手動コマンド実行。ログのcompactedイベントだけで自動実行と判断した前回の説明を訂正。エージェントtool未提供でも本体の正式設定による自動圧縮は別に可能。
 - 対象外: 独自compact API/背景監視/会話削除/アプリ再起動/閾値まで文脈を埋める負荷試験/権限緩和/公開。
 - 実効設定: active、delegation/review/persistence/measurement/improvement_loop=true、max_agents3、auto pinなし。本文改訂gpt-6.1-sol/high、独立レビュー同。ホスト候補と対応effortから選択、履歴なし。設定反映は明確な作業のためgpt-6-luna/medium。
 - 未解決: 新しい実装必須判断なし。短文化率と意味保持、自動compact実効設定/発火の観測可否は検証対象。
-- 比較前copy: /private/tmp/harness-concision-before-8yeqipol。
+- 比較前copy: <tmp>/harness-concision-before-8yeqipol。
 
 
 ## 検証メモ
@@ -31,6 +31,6 @@
 - commands/blocks/reader APIは不変。root/routing/roles/reviewer/compact/HTML入口の重複と説明を簡潔化し、通常利用でreceipt操作を要求しない。旧ベンチマークのraw・fixture・数値は保持。
 - 独立レビュー初回でUIなしへのモック義務化の曖昧さ、根拠実ページへの直接リンク義務の弱化、割合丸めを検出し修正。最終review_concisionはPASS。少数自然文4例（外部AI opt-out/既存承認、delegation OFFと独立レビュー、loop OFFの明示操作、相談から未承認実装への移行）も原規則と照合した。
 - 通常環境の全体npm test210/210 PASS（40.45秒）。最終文言修正後のfocused18/18 PASS、build・source212文書983リンクerror0・旧collector10保存run・diff-check成功。単発手動圧縮時刻は共通指示から除き、一般的な判断根拠ルールと本タスクの訂正記録を保持。
-- 標準install反映済み、backup `/Users/kan/.codex/harness/backups/install-90uWME`。所有107ファイルはmanifest/dist/導入物で一致。導入67文書317リンクerror0。config/AGENTS/プロジェクト設定/個人Claudeは導入直前のhashと一致し、native285000/total維持。独立最終レビューも導入一致とnative値を確認しPASS。
+- 標準install反映済み、backup `~/.codex/harness/backups/install-90uWME`。所有107ファイルはmanifest/dist/導入物で一致。導入67文書317リンクerror0。config/AGENTS/プロジェクト設定/個人Claudeは導入直前のhashと一致し、native285000/total維持。独立最終レビューも導入一致とnative値を確認しPASS。
 - 自動compactの設定はPC全体の既定値として反映・構文/他値保持/別CLI実効読取を確認。現在Desktopチャットへの即時反映と自動発火は未確認。手動20:30イベントを自動実行の証拠にしない。
 - 新しい分割・ルータ・背景監視・compact APIは追加していない。元の未コミット変更を保持、commit/push/公開なし。利用枠前後値null、金額や会話全体tokenへの換算なし。

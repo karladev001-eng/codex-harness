@@ -23,12 +23,12 @@
 
 ## 作業領域・実効設定
 
-実装: /Users/kan/.codex/worktrees/project-skill-install/harness
-統合: /Users/kan/.codex/worktrees/project-skill-install-integration/harness
+実装: ~/.codex/worktrees/project-skill-install/harness
+統合: ~/.codex/worktrees/project-skill-install-integration/harness
 有効: enabled/delegation/review/persistence/measurement=true,max_agents=3。
 standard=gpt-5.6-terra/medium、review=gpt-5.6-sol/high。子は再委譲/調整手順の起動をしない。
-skill-creator: /Users/kan/.codex/skills/.system/skill-creator/SKILL.md
-役割: /Users/kan/.agents/skills/codex-harness/references/roles.md
+skill-creator: ~/.codex/skills/.system/skill-creator/SKILL.md
+役割: ~/.agents/skills/codex-harness/references/roles.md
 
 ## 進捗・完了
 
@@ -44,6 +44,6 @@ skill-creator: /Users/kan/.codex/skills/.system/skill-creator/SKILL.md
 - orphan: 未接続の担当定義1件と説明。empty: 指定scopeに構成なし。全fixtureファイルはhash一致、追加/削除なし。
 - 実プロジェクト: 明示した既存harness入口からメイン/実装/統合/レビュー/任意調査の5役割と手順を確認。runtime設定とtask記録とhost API観測を分離し、配布元ファイルをlive担当に数えない。
 - 統合: 5589da6e2cb613220f7da43ef5372bd06c6b7e43、3a861ce9cacbb954601dc373a3e89dbe6cdd516eをmainへfast-forwardし通常push成功。承認済みtreeとの一致を独立担当が確認。
-- 標準skill-installerのdownload方式でprivate GitHubの3a861ceから一時projectへ4スキルを導入。8ファイルはsource一致、keep.txt保持、.gitなし。試験先: /private/tmp/harness-install-four.2g5kYT/project。
-- 同じコミットから個人用 /Users/kan/.codex/skills/inspect-harness へ単独導入済み。sourceと完全一致、形式検証成功。既存3スキル・個人設定・AGENTSは無変更。
+- 標準skill-installerのdownload方式でprivate GitHubの3a861ceから一時projectへ4スキルを導入。8ファイルはsource一致、keep.txt保持、.gitなし。試験先: <tmp>/harness-install-four.2g5kYT/project。
+- 同じコミットから個人用 ~/.codex/skills/inspect-harness へ単独導入済み。sourceと完全一致、形式検証成功。既存3スキル・個人設定・AGENTSは無変更。
 - 実導入結果の文書反映: 11b743c70d34ff7f9dcca7d782fc5e419208682b。独立最終レビューPASS。Windows/Linux実機は未確認。

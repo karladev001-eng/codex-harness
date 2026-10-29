@@ -1,6 +1,6 @@
 {
   "reviewer": "reused independent worker; fresh execution cwd, not fresh Codex history",
-  "cwd": "/private/tmp/claude-session-independent-01tqw6ue",
+  "cwd": "<tmp>/claude-session-independent-01tqw6ue",
   "checkSequence": [
     {
       "permissions": "default",
@@ -30,12 +30,12 @@
     "realSuccessConfirmed": true
   },
   "copies": {
-    "/Users/kan/.agents/skills/codex-harness/consult-claude": {
+    "~/.agents/skills/codex-harness/consult-claude": {
       "SKILL.md": true,
       "agents/openai.yaml": true,
       "scripts/consult.mjs": true
     },
-    "/Users/kan/.codex/skills/consult-claude": {
+    "~/.codex/skills/consult-claude": {
       "SKILL.md": true,
       "agents/openai.yaml": true,
       "scripts/consult.mjs": true

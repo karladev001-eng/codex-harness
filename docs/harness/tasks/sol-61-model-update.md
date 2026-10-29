@@ -16,5 +16,5 @@
 - 指定4ファイルの現行モデルIDを更新。Luna/推論強度を保持。歴史的記録は変更しない。
 - build、差分チェック、生成版status確認PASS。gpt-6.1-sol/highの独立レビューPASS。standalone/plugin生成物との一致を確認。
 - 実導入を更新し、導入済みruntime statusでstandard/complex/review = gpt-6.1-sol、medium/high/high、deterministic = gpt-6-luna/lowを確認。
-- 旧版バックアップ: `/Users/kan/.codex/harness/backups/install-4u7jSi`。
+- 旧版バックアップ: `~/.codex/harness/backups/install-4u7jSi`。
 - 設定値置換のため新規テスト・全テスト反復なし。commit/pushなし。

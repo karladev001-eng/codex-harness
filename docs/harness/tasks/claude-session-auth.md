@@ -44,9 +44,9 @@
 
 - 受入条件1〜5: 充足。実装者と別担当によるsourceレビューと導入後レビューともPASS。独立実行した関連テスト26件も全成功。
 - 修正: `auth_unavailable`で打ち切る前に正式なホスト権限申請で同じ診断を一度だけ再実行し、確認成功後は実相談にも必要な実行権限を使うよう明記。helperの処理は診断文を統一しただけで、自動昇格・認証情報取得・自動再試行を追加していない。routingの案内も同手順へ接続。
-- 標準install: `/Users/kan/.agents/skills/codex-harness`を更新。バックアップ`/Users/kan/.codex/harness/backups/install-VvnRfN`。
-- 個人スキル: `/Users/kan/.codex/skills/consult-claude`を未編集確認後に同じ正本へ更新。バックアップ`/Users/kan/.codex/harness/backups/consult-session-auth-N3ArxQ`。両スキル各3ファイルの正本一致、所有manifest全107ファイルのhash一致を確認。
-- 実相談: 実装に参加していない担当が空の別cwd `/private/tmp/claude-session-independent-01tqw6ue` で導入済みスキルを読み実行。通常権限の診断は`auth_unavailable`、正式な`require_escalated`再診断1回は既存認証確認に成功。実相談も同じ必要権限で1回実行し、exit 0 / `ok=true, role=ideator, followup=0`で3役の説明案を取得。再相談なし、cwdは空のまま。
+- 標準install: `~/.agents/skills/codex-harness`を更新。バックアップ`~/.codex/harness/backups/install-VvnRfN`。
+- 個人スキル: `~/.codex/skills/consult-claude`を未編集確認後に同じ正本へ更新。バックアップ`~/.codex/harness/backups/consult-session-auth-N3ArxQ`。両スキル各3ファイルの正本一致、所有manifest全107ファイルのhash一致を確認。
+- 実相談: 実装に参加していない担当が空の別cwd `<tmp>/claude-session-independent-01tqw6ue` で導入済みスキルを読み実行。通常権限の診断は`auth_unavailable`、正式な`require_escalated`再診断1回は既存認証確認に成功。実相談も同じ必要権限で1回実行し、exit 0 / `ok=true, role=ideator, followup=0`で3役の説明案を取得。再相談なし、cwdは空のまま。
 - [機密を除いた実行証拠](claude-session-auth.evidence.json)。既存の独立担当の継続利用であり、履歴のない新規Codexチャット自体を作成・検証したという主張はしない。今後の全ホストや権限拒否時の成功は保証しない。
 - 検証: 導入済み67文書/318リンク・エラー0、配布文書212件/986リンク・エラー0。自動compactの設定値は285000/totalを確認し、今回変更していない。Gitのcommit/stash/resetなし、既存変更を保持。
 - 計測: 実装gpt-6.1-sol/high、独立レビューgpt-6.1-sol/high。タスク全体開始/終了時刻・所要・利用枠前後は未取得(null)。

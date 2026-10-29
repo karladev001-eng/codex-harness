@@ -129,7 +129,7 @@ GitHubの公開設定変更、push、PR作成、Release公開、npm publish、�
 - [既存構成ADR](../../adr/0001-portable-skill-harness.md)
 - [ナレッジベースADR](../../adr/0002-github-knowledge-base.md)・[改善記録ADR](../../adr/0003-github-improvement-records.md)・[Chrome保存ADR](../../adr/0004-chrome-knowledge-capture.md)・[検索と取得ADR](../../adr/0006-knowledge-retrieval.md): 設計の根拠。現行の実装状態は後続ADRとコードで確認する。
 
-macOS・zsh、実行ディレクトリ `/Users/kan/dev/harness`:
+macOS・zsh、実行ディレクトリ `<repo>`:
 
 ```sh
 open "docs/harness/tasks/repository-public-readiness.plan.html"

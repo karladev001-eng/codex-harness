@@ -22,8 +22,8 @@ Windows/Linuxでの利用条件を正確に説明し、cloneなしで任意の�
 ## 参照・実効設定
 
 公式: https://learn.chatgpt.com/docs/build-skills （project .agents/skillsを検出）
-/Users/kan/.codex/skills/.system/skill-installer/SKILL.md
-/Users/kan/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py
+~/.codex/skills/.system/skill-installer/SKILL.md
+~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py
 実効設定enabled/delegation/review/persistence/measurement=true,max_agents=3、standard=gpt-5.6-terra/medium、review=gpt-5.6-sol/high。子は再委譲しない。
 
 ## 検証・完了

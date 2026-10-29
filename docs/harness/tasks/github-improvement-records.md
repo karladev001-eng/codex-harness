@@ -4,7 +4,7 @@
 - 仕様版: 2
 - 日付: 2026-10-04
 - コード基点: 82586eda58699e6d44e656689586e220befe41af + 依頼時の既存未コミット変更
-- 作業先: /Users/kan/dev/harness。既存の改善ループ実装が未コミットのため、既存変更を保持して同一checkoutで直列実装・レビューする。自動commit/stash/resetはしない。
+- 作業先: <repo>。既存の改善ループ実装が未コミットのため、既存変更を保持して同一checkoutで直列実装・レビューする。自動commit/stash/resetはしない。
 - 差分確認用の依頼時コピー: /tmp/harness-github-preferences-baseline
 - 担当範囲: src、tests、関連スキル文書・既定設定、README、SPEC、VALIDATION、ADR、project-map
 - 依存: なし

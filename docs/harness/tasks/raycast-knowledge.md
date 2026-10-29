@@ -25,8 +25,8 @@ Raycastの「保存資料を検索」からGitHub knowledge baseの同期済み�
 
 ## 制約と参照
 
-- CLI: /Users/kan/.agents/skills/codex-harness/knowledge/cli.cjs
-- Node: /opt/homebrew/bin/node、state: /Users/kan/.codex/knowledge
+- CLI: ~/.agents/skills/codex-harness/knowledge/cli.cjs
+- Node: /opt/homebrew/bin/node、state: ~/.codex/knowledge
 - Raycast: /Applications/Raycast.app
 - 既存searchは空queryでrecent、limit最大50、freshnessを返す。本文を全量UIへ流さずcardを利用。
 - integrations配下に独立packageを置く。knowledge配下にnode_modulesを置くと既存buildの再帰コピーに混ざるため避ける。

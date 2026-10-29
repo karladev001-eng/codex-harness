@@ -84,7 +84,7 @@ Node22+、実行したnpm/OSを記録。Linuxの今回エラー（ホームにpa
 - [構成/配布のADR](../../adr/0001-portable-skill-harness.md)
 - [現在の導入](../../guides/installation.md)
 
-macOS/zsh、実行ディレクトリ `/Users/kan/dev/harness`:
+macOS/zsh、実行ディレクトリ `<repo>`:
 
 ```sh
 open "docs/harness/tasks/npm-distribution.plan.html"

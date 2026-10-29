@@ -23,8 +23,8 @@
 
 ## 制約と参照
 
-/Users/kan/.codex/skills/.system/skill-creator/SKILL.md
-/Users/kan/.agents/skills/codex-harness/references/roles.md
+~/.codex/skills/.system/skill-creator/SKILL.md
+~/.agents/skills/codex-harness/references/roles.md
 公式資料: https://developers.openai.com/plugins/build/skills
 今回の作業に適用される実効設定: enabled/delegation/review/persistence/measurement=true,max_agents=3。standard=gpt-5.6-terra/medium、review=gpt-5.6-sol/high。生成するスキルの要件にはこれらを持ち込まない。子は再委譲しない。
 
@@ -40,11 +40,11 @@
 ### 検証・レビュー（仕様版2）
 
 - 成果物: authoring-skills/配下の3つの独立スキル、必要なテンプレート、README。
-- 形式: 3 SKILLのquick_validate成功。検証用PyYAMLのみ/private/tmpに配置し、製品に依存追加なし。
+- 形式: 3 SKILLのquick_validate成功。検証用PyYAMLのみ<tmp>に配置し、製品に依存追加なし。
 - 既存回帰: unittest 22件成功。変更前24ファイルのハッシュ一致。
 - 独立レビュー: 初回NEEDS_WORK（単独利用、索引解決、パス基点、指定モデル保持）。修正1巡後PASS。レビュー担当gpt-5.6-sol/high、実装担当gpt-5.6-terra/medium。
 - 行動確認: 独自入口WORKGUIDEと保存先で規則作成/更新、調査担当の作成、単発記録で恒久定義を作らないこと、実装/独立レビュー/2回差し戻しの構成生成を確認。
 - 単独導入確認: create-harnessだけを一時領域へコピーし、AGENTS入口・索引・2担当・workflowを生成。reportsへの記録と再開を記述し、参照実在確認。
-- 一時検証成果: /private/tmp/create-harness-solo.sBDWES/project 。独自入口試験の場所は /tmp/harness-authoring-eval-root.txt に保存。一時成果は配布物ではない。
+- 一時検証成果: <tmp>/create-harness-solo.sBDWES/project 。独自入口試験の場所は /tmp/harness-authoring-eval-root.txt に保存。一時成果は配布物ではない。
 - 制約: 元ハーネス全体の再生成・実行品質や利用枠削減の比較までは未実施。スキルは文書作成手順であり実行エンジンではない。利用量・正確な所要秒は未取得。
-- 導入完了: /Users/kan/.codex/skills/{create-rulebooks,create-subagent,create-harness}。既存先不存在を再確認して配置。全7ファイルのソース/導入先一致、形式検証、リンク確認、既存テスト22件成功。独立担当の最終統合確認PASS。個人設定・既存harness・AGENTSへの変更なし。コミットIDなし（非Git）。
+- 導入完了: ~/.codex/skills/{create-rulebooks,create-subagent,create-harness}。既存先不存在を再確認して配置。全7ファイルのソース/導入先一致、形式検証、リンク確認、既存テスト22件成功。独立担当の最終統合確認PASS。個人設定・既存harness・AGENTSへの変更なし。コミットIDなし（非Git）。

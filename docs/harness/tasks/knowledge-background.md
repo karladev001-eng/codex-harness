@@ -2,7 +2,7 @@
 
 - 状態: done（コード独立PASS・現機LaunchAgent実行PASS）
 - 日付: 2026-10-07 Asia/Tokyo
-- 作業: /Users/kan/dev/harness。既存関連差分を保持する承認済み直列共有checkout。reset/stash/commitなし。
+- 作業: <repo>。既存関連差分を保持する承認済み直列共有checkout。reset/stash/commitなし。
 - 実効: active/delegation/review/persistence/measurement/improvement_loop=true、max_agents3、auto pinなし。
 - 実装: gpt-6.1-sol medium（失敗判定とバックグラウンド運用の設計）。レビュー: gpt-6.1-sol high。起動面catalog確認済み、各effort対応。子は履歴なし、再委譲なし。
 
@@ -33,10 +33,10 @@ knowledge/background.cjs等の独立runner、関連test、knowledgeREADME、laun
 
 - 実装担当 /root/knowledge_background_impl、独立レビュー /root/knowledge_background_review。変更 knowledge/background.cjs、tests/knowledge-background.test.cjs、knowledge/README.md。既存provider/CLI不変更。
 - background8件＋既存analysis20件=28/28 PASS、npm run build成功。独立レビューも28/28と祖先symlink/通知順序/plutilを確認。起動/保存失敗の通知漏れを親確認で修正し、最新start()を独立レビューPASS。
-- 通常install成功、backup=/Users/kan/.codex/harness/backups/install-r1Aioz。導入46ファイルはdist/manifestとhash一致。
+- 通常install成功、backup=~/.codex/harness/backups/install-r1Aioz。導入46ファイルはdist/manifestとhash一致。
 - ~/Library/LaunchAgents/com.codex-harness.knowledge-analysis.plistを新規exclusive作成。plutil -lint PASS。gui/501へbootstrap成功、kickstart -p成功（PID14049）。毎時3600秒、Background、RunAtLoad=false、stdio=/dev/null。既存plist/jobなしを登録前確認。
 - 現機起動2026-10-07 00:41:42〜00:41:45 JST。launchctl printはruns=1、last exit code=0、終了後not running。
-- 最新結果 /Users/kan/.codex/knowledge/background/last-run.json: state=skipped, reason=unchanged, generated=0,published=0,failed=0,pending=0,offline=false,notification=not_needed。snapshot2件、commit5282da24de5c490bb813671b44eef953ab0997eb、checked_at=2026-10-06T15:41:45.097Z。モデル生成不要のため、この現機試行で新規provider呼出なし。
+- 最新結果 ~/.codex/knowledge/background/last-run.json: state=skipped, reason=unchanged, generated=0,published=0,failed=0,pending=0,offline=false,notification=not_needed。snapshot2件、commit5282da24de5c490bb813671b44eef953ab0997eb、checked_at=2026-10-06T15:41:45.097Z。モデル生成不要のため、この現機試行で新規provider呼出なし。
 - automation-2はPAUSED確認。既存他chatは変更/削除しない。hooks.jsonとknowledge/config.jsonは作業前hashと同一。GitHubの正本変更なし。
 - 統合受入AC1–5 PASS。通知の画面上の表示・スリープ/再ログイン後の実動作・実際に未生成資料があるlaunchd回は未検証。コードと既存adapterが--ephemeralを指定し、定期実行の外側チャットを排除した。Windows登録は今回対象外。
 - 毎回一件のlast-runを置換し、ソース本文・rawモデルログを追加保存しない。Codex/OS共通診断ログやGitHub保存資料の完全消去を意味しない。

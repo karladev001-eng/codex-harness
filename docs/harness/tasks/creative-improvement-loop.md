@@ -3,7 +3,7 @@
 - 状態: done
 - 仕様版: 1
 - コード基点: 82586eda58699e6d44e656689586e220befe41af + 既存作業内容
-- 作業前スナップショット: `/private/tmp/harness-creative-before-3uscgbmo`
+- 作業前スナップショット: `<tmp>/harness-creative-before-3uscgbmo`
 - 担当範囲: harness SKILL/参照/雛形、src/install.ts、必要最小限のstatus情報、README/SPEC/VALIDATION、関連テスト
 - 依存: なし
 - 実装: gpt-6-sol / medium（記憶の運用契約と既存導線を整合させる設計判断）
@@ -36,8 +36,8 @@ UI・文書などの制作と修正を重ねることで、ユーザーの好み
 - 実装完了: 制作改善ループ参照・記憶雛形・SKILL/installer入口・README/SPEC/VALIDATION・配布テストを更新。実装担当による npm test 40/40 PASS、git diff --check PASS。独立レビュー中。
 - 独立レビュー1: npm test 40/40 PASS。条件2の雛形に状態・履歴などの不足を指摘、NEEDS_WORK。観察の状態/履歴を追加し、試用時の属性の参照契約を明示する修正を同じ担当に依頼。
 - 修正1・再レビュー: 観察の状態/履歴、試用対象の版と当時の条件、評価状態を追加。buildとリンク確認PASS。独立レビューは条件1–7 PASS、実ホーム導入は残作業。統合検証担当に配布物・入口・一時ホーム導入の整合性確認を委譲。
-- 統合確認PASS: 一時ホーム `/private/tmp/harness-creative-integration.5Ag72L/home` へ配布版を導入、参照/雛形の到達、active=true、再導入unchangedを確認。
-- 実ホーム導入済み: `/Users/kan/.agents/skills/codex-harness`。旧版バックアップ `/Users/kan/.codex/harness/backups/install-zipCfV`。所有manifest/全配布ファイル一致、入口の管理ブロック外の指示保持、設定保持、installed status active=trueを確認。
+- 統合確認PASS: 一時ホーム `<tmp>/harness-creative-integration.5Ag72L/home` へ配布版を導入、参照/雛形の到達、active=true、再導入unchangedを確認。
+- 実ホーム導入済み: `~/.agents/skills/codex-harness`。旧版バックアップ `~/.codex/harness/backups/install-zipCfV`。所有manifest/全配布ファイル一致、入口の管理ブロック外の指示保持、設定保持、installed status active=trueを確認。
 - 最終独立レビューPASS: 条件1–8充足、実導入版のSKILL/参照/雛形一致を再確認。実装後40件のテストPASS、契約修正後はbuild/リンク/差分チェックを実施。
 - 計測区間終点: 2026-10-01T16:00:10Z（実導入確認）。利用枠・正確なタスク費用は未取得。修正1巡。統合/導入後レビュー完了はこの時点以降。
 

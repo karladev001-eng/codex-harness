@@ -124,7 +124,7 @@ improvement/
 - [既存共有契約](../../guides/improvement-loop.md): 現在のCLI/記憶。
 - [定期ジョブ](knowledge-background.md): 既存LaunchAgentの導入記録。
 - 実装根拠: `src/preferences.ts:26–40,157–176`、`src/lib.ts:59–85,105`、`knowledge/reader.cjs:142–162`、`knowledge/background.cjs:91–103`。
-- HTMLを開く（macOS/zsh、cwd `/Users/kan/dev/harness`）: `open "docs/harness/tasks/knowledge-autosave.plan.html"`。
+- HTMLを開く（macOS/zsh、cwd `<repo>`）: `open "docs/harness/tasks/knowledge-autosave.plan.html"`。
 
 ## 2026-10-25 表示の修正
 
@@ -136,7 +136,7 @@ improvement/
 - 既存未commit差分を保持する仕様内で現在checkoutを直列使用。勝手なcommit/stash/resetなし。コード基点HEAD `4c8dcd36c9022dc408daae63ecfa002efb29bb30`。今回前baselineは別temp領域へ保存し既存変更と区別する。
 - 委譲: identity/記憶CLI、同期/通知、統合/記録手順の順に実装。独立レビューは実装者以外に委譲。認証・移行・競合・並行処理を含むためホスト候補Sol6.1/highを使用し、pinなし/対応effortを起動前確認。
 - 現時点で未完了: 全コード変更・統合テスト・独立レビュー・正規導入・3project移行・現機確認。Claude外部送信は前回の拒否を迂回せず追加しない。
-- 実装前baseline: `/private/tmp/knowledge-autosave-baseline-EyXFLD`。既存6資料等のremote treeはtree SHA `f73c0b862174552cfc7f7a23af8289296f0754d5` 固定で保存。3projectの旧本文も同所migration配下へ照合用に保存し、現機の原本は変更していない。
+- 実装前baseline: `<tmp>/knowledge-autosave-baseline-EyXFLD`。既存6資料等のremote treeはtree SHA `f73c0b862174552cfc7f7a23af8289296f0754d5` 固定で保存。3projectの旧本文も同所migration配下へ照合用に保存し、現機の原本は変更していない。
 - 移行前SHA-256: 別プロジェクトA `188a4d81c7715c25f984bd643fe694c320918a05c99fc916fc8e4604d3588ba7` (69208 bytes)、ゲーム `8af57ed97b4b62cd84b98dac29b869aa06403eeac85aff4ccd150951d11815fa` (43175 bytes)、別プロジェクトB `6cef488a969c2c736b4af7aff98d82a4dbeb40be66068f54f64b95fe5c820bd8` (7055 bytes)。いずれも移行前project設定なし。
 - S1–S3担当 `/root/autosave_records_impl`（Sol6.1/high、履歴なし、再委譲なし）が実装中。既存35件と新規identity5件は担当による中間PASS。独立レビュー・導入完了を意味しない。non-Gitを後からGit化した際の同一性も追加検証中。
 - S1–S3初回完了: build・関連77件PASS。独立担当 `/root/autosave_records_review`（Sol6.1/high、履歴なし）の1巡目はNEEDS_WORK。必須3件: autosave:falseでpending自動再送される/共有repositoryだけのOFF上書きが設定エラー、portable明示IDが未対応origin解析に阻害される、separate git-dirのworktreeが共通設定を失う。いずれもtempで再現、修正後に同担当が再レビューする。実home/GitHubデータ未変更。
@@ -150,18 +150,18 @@ improvement/
 - C完了: build・focused19・実tgz/npx/隔離導入2件PASS、docs218文書/1050リンク/errors0。履歴値/fixture/rawは不変。通常codingのD/Rとtechnical-lessons入口、recordkeeper初回register、他PC同tgz導入手順を整合。最終独立統合レビューはBレビュー担当が継続中。
 - 最終全体試験1回目（loopback許可環境）250件中249PASS。元の2件は解消。残1件はlibraryLockの正当な解放競合: lstat後read前にownerがunlink→nullをunsafeと扱う。独立reviewでP2確認、B1回目修正loopへ返却（readerと関連testのみ）。実データ移行/導入は全体試験・レビュー完了後。
 - B修正: 消失由来nullだけ再試行、不正/読取不能/symlink拒否維持。赤→緑・関連42件・競合/消失/安全拒否3件×20反復PASS。全体再試験252/252PASS（fail/skipped0）、最終独立統合レビューPASS。文書リンク218/1050/errors0、隔離npx配布2件も独立PASS。
-- 現機正規install完了: `/Users/kan/.agents/skills/codex-harness`、backup `/Users/kan/.codex/harness/backups/install-j5KeGD`。所有112ファイルはsource/dist/manifest一致、旧108から新module3/reference1を追加。個人settingsに既存非公開KB/main・autosave:trueを設定し、その他設定は保持。
-- 同版持ち運びtgz: `/Users/kan/dev/harness/releases/knowledge-autosave-dpwaf87g/karladev001-eng-codex-harness-0.4.3.tgz`（937102 bytes、SHA-256 `8074d5b96a8209a64d0fd87106b9909cb0593329bb3280ca36ccfa94e39d9aa4`）。npm公開/code pushなし。初回packはsandboxによる通常npm cache書込制限で失敗、隔離temp cacheで正常作成。既存npm cacheの所有者変更は行わない。
+- 現機正規install完了: `~/.agents/skills/codex-harness`、backup `~/.codex/harness/backups/install-j5KeGD`。所有112ファイルはsource/dist/manifest一致、旧108から新module3/reference1を追加。個人settingsに既存非公開KB/main・autosave:trueを設定し、その他設定は保持。
+- 同版持ち運びtgz: `<repo>/releases/knowledge-autosave-dpwaf87g/karladev001-eng-codex-harness-0.4.3.tgz`（937102 bytes、SHA-256 `8074d5b96a8209a64d0fd87106b9909cb0593329bb3280ca36ccfa94e39d9aa4`）。npm公開/code pushなし。初回packはsandboxによる通常npm cache書込制限で失敗、隔離temp cacheで正常作成。既存npm cacheの所有者変更は行わない。
 - 実データの唯一writer `/root/autosave_migration`（record-keeper、Sol6.1/high、履歴なし）へ、harness key登録保持、3project exact移行、今回検証した技術lesson3件（評価unknown）保存を委譲。親は同時writerにならない。実pull時間とLaunchAgent検証はその後の残工程。
 - harness register/fresh readは成功、key=harnessと既存blob `70b3a3deb5807c8838fe5382b63fffdb3977675c` 不変。3projectのmigrate実行はホスト自動承認審査が拒否。初回は設定全体の送信との誤認、read-only確認後に旧MDだけ/69208bytes/hash/既存非公開KB宛先を明記した再申請も「仕様書は直接のpayload/宛先承認の証拠にならない」と拒否。未実行であり移行完了とはしない。追加retry/迂回なし。
 - 親はユーザーへasync確認を提示: 3つの旧creative/preferences.mdの絶対path・byte数、保存先非公開karladev001-eng/harness-knowledge-base/main/improvement/projects/、元ファイル保持・設定全体送信なしを明示。返答が来るまでは移行依存操作を停止し、別payloadの技術lesson/既存job検証を進める。仕様v1本人承認を失効扱いするのではなく、ホスト審査の直接承認要求への対応。
 - 実機force pull: exit0/current/captures6、2.483秒、commit `878f7951a1c3be831c049a73e33c787d917f5cdd`、checked_at `2026-10-24T16:05:21.685Z`。新しい隔離fetchで成功。
 - 既存LaunchAgent `gui/501/com.codex-harness.knowledge-analysis` をkickstart。runs153→154、last exit0、終了後not running。schema2の実結果 `2026-10-24T16:06:22.562Z`→`16:06:25.176Z`、analysis unchanged/生成0・同期pending0/failed0・notification not_needed。追加job/chatなし。実画面上の通知表示と他PC実機は未検証。
 - 追加の直接確認へユーザー本人が「3件の本文のGitHub保存を許可する」と回答。質問には3つの絶対path/byte数と非公開GitHub宛先main/improvement/projects/、原本保持・設定全体送信なしを記載済み。受領後にrecord-keeperへ同payload/宛先の移行再開を指示。interrupt状態を確認したためfollowupで再開し、実行済を照合して二重移行を避けるよう指示。
-- 3project実移行完了: 全件exit0/oktrue/fresh/pendingfalse、旧本文bytes/SHA-256 exact一致・旧MD不変・retirementあり。別プロジェクトA key `git-8db4b1d6273ab24d75ed4d5f`、ゲーム `project-567d10d3-05dd-45c7-8659-7cf51f56ceb3`、別プロジェクトB `project-5425b77a-a67c-4ac4-8961-d33284d7348c`。各commit metadataはschema1/kind=migrate/operation_id/recorded_atを確認、sync-all pending0/failed0。本文無しevidence `/private/tmp/knowledge-autosave-migration-evidence.json`。
-- 親の独立remote tree照合: 元からあった62blob変更なし、capture6/analysis6維持。移行3ファイルのGit blob SHAも元バイトから独立計算した値と一致。evidence `/private/tmp/knowledge-autosave-preservation.json`。
-- 実remoteを使った別home/別path再利用: 空Git projectに同じSSH originを設定して別プロジェクトA記録、non-Git projectへportable `.harness.json` をコピーしてゲーム記録をfresh取得し、双方元SHA-256 exact一致/pendingfalse。`/private/tmp/knowledge-autosave-live-reuse.json`。実認証は本PCのghであり、物理的な別PC操作の検証ではない。
-- 技術lesson3件の書込は別payloadの直接承認不足としてホスト審査が拒否し未実行。迂回/pending経由送信なし。確認用の具体JSON `/Users/kan/dev/harness/docs/harness/previews/knowledge-autosave-lessons.json`（SHA-256 `3cd8403b567d6f29d774fae5147820bbc49446a64acc0fc8a2bfa9d20e36a45d`）を作成して表示し、3ID/本文/非公開KB main/harness lessons宛先を明記した別async質問を提示中。現時点の残確認はこの3件の送信許可。
+- 3project実移行完了: 全件exit0/oktrue/fresh/pendingfalse、旧本文bytes/SHA-256 exact一致・旧MD不変・retirementあり。別プロジェクトA key `git-8db4b1d6273ab24d75ed4d5f`、ゲーム `project-567d10d3-05dd-45c7-8659-7cf51f56ceb3`、別プロジェクトB `project-5425b77a-a67c-4ac4-8961-d33284d7348c`。各commit metadataはschema1/kind=migrate/operation_id/recorded_atを確認、sync-all pending0/failed0。本文無しevidence `<tmp>/knowledge-autosave-migration-evidence.json`。
+- 親の独立remote tree照合: 元からあった62blob変更なし、capture6/analysis6維持。移行3ファイルのGit blob SHAも元バイトから独立計算した値と一致。evidence `<tmp>/knowledge-autosave-preservation.json`。
+- 実remoteを使った別home/別path再利用: 空Git projectに同じSSH originを設定して別プロジェクトA記録、non-Git projectへportable `.harness.json` をコピーしてゲーム記録をfresh取得し、双方元SHA-256 exact一致/pendingfalse。`<tmp>/knowledge-autosave-live-reuse.json`。実認証は本PCのghであり、物理的な別PC操作の検証ではない。
+- 技術lesson3件の書込は別payloadの直接承認不足としてホスト審査が拒否し未実行。迂回/pending経由送信なし。確認用の具体JSON `<repo>/docs/harness/previews/knowledge-autosave-lessons.json`（SHA-256 `3cd8403b567d6f29d774fae5147820bbc49446a64acc0fc8a2bfa9d20e36a45d`）を作成して表示し、3ID/本文/非公開KB main/harness lessons宛先を明記した別async質問を提示中。現時点の残確認はこの3件の送信許可。
 
 ## 完了・現機結果（2026-10-25）
 
@@ -183,7 +183,7 @@ improvement/
 | failure-notification-episodes | `9118a6ae916d0f1528500af64457ed97ce168558` | `ced7765252435934ebeeb18b3ee2f399efd9e252` |
 | library-lock-release-race | `d5c19668550325da022ed6f8ad7d6c6cd2b3fc53` | `e1a502725f7c5b1d7462d6d6ca7f2f7a436eabd8` |
 
-各commitにschema_version1/project_key/operation_id/kind=create/record_kind=lesson/記録日時を確認。親も提示JSONの各lessonからGit blob SHAを独立計算してremoteと一致を確認し、元62blobは引き続き不変。evidence `/private/tmp/knowledge-autosave-final-verification.json`、更新後migration evidence SHA-256 `92d7a8b4b59e7ff1f30f5385d1c54f7b3618740812f85ac9b9f438086b434dfb`。一時入力を削除しwriter停止。未完了の必須作業なし。
+各commitにschema_version1/project_key/operation_id/kind=create/record_kind=lesson/記録日時を確認。親も提示JSONの各lessonからGit blob SHAを独立計算してremoteと一致を確認し、元62blobは引き続き不変。evidence `<tmp>/knowledge-autosave-final-verification.json`、更新後migration evidence SHA-256 `92d7a8b4b59e7ff1f30f5385d1c54f7b3618740812f85ac9b9f438086b434dfb`。一時入力を削除しwriter停止。未完了の必須作業なし。
 
 AC1–3/5/7–8は独立コード検証と実再利用/保存でPASS、AC4は3件のexact移行と元資料保全でPASS、AC6/9/11は独立障害注入・並行/強制終了検証でPASS、AC10/12は実pull時間・正規導入・毎時jobの正常終了と手順確認でPASS。全体252/252 PASSの後はコード変更なし。実機のない他PCとMac通知の実表示、長期の改善効果は未検証であり、履歴閲覧ダッシュボードは対象外。
 

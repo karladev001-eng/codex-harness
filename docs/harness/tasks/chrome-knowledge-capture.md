@@ -32,9 +32,9 @@ Windows PC / MacのChromeから閲覧資料を保存する拡張と、共通PC�
 - https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging （2026-10-04確認、framing/allowed_origins/OS登録）
 - https://developer.chrome.com/docs/extensions/reference/api/tabs （captureVisibleTab、activeTab）
 - https://docs.github.com/en/rest/git/refs （非force更新）
-- `/Users/kan/.agents/skills/codex-harness/references/roles.md`
-- `/Users/kan/.agents/skills/codex-harness/references/reviewer.md`
-- `/Users/kan/.agents/skills/codex-harness/references/roles/code-review.md`
+- `~/.agents/skills/codex-harness/references/roles.md`
+- `~/.agents/skills/codex-harness/references/reviewer.md`
+- `~/.agents/skills/codex-harness/references/roles/code-review.md`
 
 ## 進捗
 

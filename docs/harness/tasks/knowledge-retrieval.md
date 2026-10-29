@@ -4,7 +4,7 @@
 - 仕様版: 1
 - 開始: 2026-10-06T13:48:00+09:00（時刻は概数）
 - コード基点: 82586eda58699e6d44e656689586e220befe41af
-- 作業場所: /Users/kan/dev/harness。既存の関連未コミット実装を使うため、これまでの承認済み運用に沿い共有checkoutで直列実装・レビュー。既存差分のreset/stash/一括commitなし。
+- 作業場所: <repo>。既存の関連未コミット実装を使うため、これまでの承認済み運用に沿い共有checkoutで直列実装・レビュー。既存差分のreset/stash/一括commitなし。
 - 担当範囲: knowledge検索・原資料取得CLI、配布build、harness参照手順と関連docs/tests。
 - 依存: knowledge-sync-analysis、activate-knowledge-memory（完了）
 - 実効設定: active/delegation/review/persistence/measurement/improvement_loop=true、max_agents=3、auto、pinなし。
@@ -31,7 +31,7 @@
 - knowledge/README.md、knowledge/search.cjs、reader.cjs、analysis.cjs、cli.cjs
 - docs/adr/0002-github-knowledge-base.md、0005-knowledge-sync-analysis.md
 - plugins/codex-harness/skills/harness/SKILL.md と references/creative-loop.md
-- /Users/kan/.agents/skills/codex-harness/references/roles.md、reviewer.md、roles/code-review.md
+- ~/.agents/skills/codex-harness/references/roles.md、reviewer.md、roles/code-review.md
 
 ## 進捗
 
@@ -43,11 +43,11 @@
 - JPEGは一枚ずつ管理cache内の新規ファイルへ取り出し、任意出力先・symlink・上書きを拒否。CLIをskill/pluginへ同梱し、検索・取得・出所・設定OFF・改善記録の手順を接続。
 - 全体npm test: 122/122 PASS。その後のUnicode位置/不足の出力量修正は最終buildとknowledge-analysis 20/20で再確認。README履歴時制の補正後もbuild済み。
 - 独立レビュー: AC1–5 PASS。独立analysis20、install24、package1と追加境界再現PASS。packageをnode直接実行した一回はnpm_execpath前提で失敗し、正規npm環境でPASS。製品失敗と混同しない。
-- 通常installer: installed、target=/Users/kan/.agents/skills/codex-harness、backup=/Users/kan/.codex/harness/backups/install-g98L0S。
+- 通常installer: installed、target=~/.agents/skills/codex-harness、backup=~/.codex/harness/backups/install-g98L0S。
 - 導入済みCLIから検索成功: 「デザイン」→example.com、「Claude」→WorldFlowAI/everything-claude-code。GitHub snapshot commit=5282da24de5c490bb813671b44eef953ab0997eb、current確認2026-10-06T04:55:33.826Z。その直後の取得は同じ成功日時のthrottled（fetch省略）。
 - 本文部分取得: eb9ffae9-1abe-4d9f-8b90-2e68cda799adのcontent UTF-16 [2964,3564)、blob=833b0cbfbc4fd76cbaa5ae1102e342bf582008f7。一覧サイトの名称・制作クレジットが得られた。76389a21-3bdb-4541-9df7-3562a3154f50のcontent [13,613)、blob=eebc681b9490a5da1e6b0a68120644008466a169。README冒頭が得られた。
 - 画像exportと実view_image確認: example.com 145330 bytes（blob=d31a241ccc0caec658e76fdbbdd83fa33669ae32）、GitHub 203298 bytes（blob=5fc1f356f5fffebbfa618f5909a631ac14e8dda2）。前者は灰白色背景・青緑の縦バー・ぼかし・CoMinVi紹介、後者は暗色GitHubフォルダ一覧。未撮影部分や動作は確認していない。
-- export paths: /Users/kan/.codex/knowledge/read/image-cache/71d4b4ab-f8a9-4d9d-bc40-56026b76901a/screenshot.jpg、/Users/kan/.codex/knowledge/read/image-cache/1abb602e-5e2e-45ad-91b7-27634a6130d8/screenshot.jpg。
+- export paths: ~/.codex/knowledge/read/image-cache/71d4b4ab-f8a9-4d9d-bc40-56026b76901a/screenshot.jpg、~/.codex/knowledge/read/image-cache/1abb602e-5e2e-45ad-91b7-27634a6130d8/screenshot.jpg。
 - これらは取得機能の検証に使用。今回制作への好みの適用や新しいユーザー評価ではなく、preferencesへの新規保存はなし。
 - 未検証: Windows実機、ベクトル意味検索、長期の改善効果。新規commit/pushなし。既存差分は保持。
 - 独立最終判定: PASS AC1–6。レビュー担当も導入先コードから実KB2件を再検索・部分取得し、上記本文/画像blobとview_image画素を確認。必須指摘なし。

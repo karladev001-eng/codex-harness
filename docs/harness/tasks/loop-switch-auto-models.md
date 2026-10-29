@@ -6,7 +6,7 @@
 - 目的: 改善ループ専用ON/OFFと、ホストで利用候補として提示された後継モデルへの自動選択。
 - 実装: gpt-6.1-sol/medium。レビュー: gpt-6.1-sol/high。統合: gpt-6-luna/low。
 - 対象外: 常駐/定期ポーリング、認証トークン取得、別API課金、モデル名の捏造、モデルを試すだけの課金推論、メインモデル変更、公開/push。
-- 作業前スナップショット: `/private/tmp/harness-switches-before-qa9je4s0`（0.3.0配布物を含む）。
+- 作業前スナップショット: `<tmp>/harness-switches-before-qa9je4s0`（0.3.0配布物を含む）。
 - 計測開始記録: 2026-10-01T16:59:19Z（実装委譲後）。利用枠値は未取得。
 - 自動選択の任意選好質問に回答なしのため、予告どおり同系統の後継を選ぶautoを既定として進行。fixedに変更可能。
 
@@ -35,8 +35,8 @@ OpenAI Docs: https://learn.chatgpt.com/docs/app-server のmodel/listはモデル
 - 0.4.0: `dist/releases/karladev001-eng-codex-harness-0.4.0.tgz`
 - SHA256: `b77d10eeb0c01848d0055e6753be375c527de1b20ea08c93c5da0a8b7c2bd0f9`
 - 0.3.0 SHA256保持: `9122575ecf229f825abb52d387ca4482800fc6de38018068d5e300741cc23cfb`
-- 実導入: `/Users/kan/.agents/skills/codex-harness`、公式installer成功、旧版backup `/Users/kan/.codex/harness/backups/install-l6VN8p`。
-- 初回更新はmacOSの`.DS_Store`2ファイル追加のみで所有チェックが停止。本体は全一致を確認し、その2ファイルを`/Users/kan/.codex/harness/backups/macos-metadata-os3zav3i`へ保持退避して再実行。
+- 実導入: `~/.agents/skills/codex-harness`、公式installer成功、旧版backup `~/.codex/harness/backups/install-l6VN8p`。
+- 初回更新はmacOSの`.DS_Store`2ファイル追加のみで所有チェックが停止。本体は全一致を確認し、その2ファイルを`~/.codex/harness/backups/macos-metadata-os3zav3i`へ保持退避して再実行。
 - 実効設定: improvement_loop=true、model_selection=auto、pinned_roles=[]、resolution=host-launch、catalog_checked=false。
 - 更新前に取得した設定/ローカル記録のfingerprint（1ファイル）は更新後も一致。設定・保存済み記憶の保持を確認。
 - 子モデル取得元: 本ホストのspawn_agent説明。実装Sol 6.1/medium、レビューSol 6.1/high、統合Luna/low。実装判断・独立品質確認・定型配布検証に合わせ選択。

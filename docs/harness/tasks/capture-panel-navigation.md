@@ -23,7 +23,7 @@
 
 ## 参照・制約
 
-- Installed harness /Users/kan/.agents/skills/codex-harness/SKILL.md および roles/reviewer 手順。
+- Installed harness ~/.agents/skills/codex-harness/SKILL.md および roles/reviewer 手順。
 - Chrome拡張ID ahleaofjfichjdolmgkejbdfbbepgekn。
 - ユーザーの現在ページのメモは保存操作を新規生成して勝手に送信しない。今回まず不具合修正と取得復旧確認。
 - コード/運用上の不具合報告であり、新しい美的嗜好を記録しない。usage未取得null。
@@ -33,12 +33,12 @@
 - 親: 警告の発生箇所をworker authorizePanel/identity/updateSessionへ絞込。原因未確定。
 - ユーザー追加: Xでポストを保存後、引用ポストも保存しようと発生。提示URL `https://x.com/<user>/status/<id>` と `https://x.com/<user>/status/<id>`。
 - 親CUA: 後者の現存Chromeタブで閉じる→拡張アイコン再表示を実行し、「閲覧中のページ」、警告継続、保存disabled、メモ「UI参考」を確認。sender metadataの実値は未観測。
-- 対象拡張のChrome設定をID限定で読取: Defaultのunpacked path /Users/kan/dev/harness/knowledge/extension。ソース変更が次回拡張reloadで反映される。
+- 対象拡張のChrome設定をID限定で読取: Defaultのunpacked path <repo>/knowledge/extension。ソース変更が次回拡張reloadで反映される。
 - 実装: sender.urlの完全一致を同HTTP(S)origin＋browser document/frame/tab/runtime/token＋isolated live URL/timeOrigin/token確認へ変更。待機後retry/ackと取得終了後も再確認。再表示で失敗した取得を再実行し、同originの未送信draftを保持。自動保存なし。
 - 実装者: 旧sender URL条件、新旧sessionでのUI復旧・入力保持の3回帰が旧実装でFAILしたことを確認。追加境界含め関連41/41 PASS、npm run build PASS。worker.js/panel.js/tests/knowledge-panel.test.cjs/knowledge/README.mdのみ変更、capture.js不変。
 - 制約: Chrome拡張管理URLへのツール操作がbrowser security policyで拒否され、別UI等の迂回も禁止。設定ファイル変更等でreloadを迂回しない。独立レビュー完了後、ユーザーへ拡張reloadとXタブ再読み込みを依頼する。修正版の実Chrome適用・保存成功はまだ未確認。実KBへテスト保存なし。
-- 独立レビュー1: 同URLの別operation未読完了結果が、SPAで引き継いだ未送信draftを隠して次回openで消すP2を検出。独立再現 /private/tmp/capture-review-draft.cjs。bootstrapの過去結果復元をdraft無しの場合に限定し修正。sent/pending双方の入力保持と、draft無し従来復元/ACKを追加回帰で検証。関連43/43とbuild PASS。ユーザーの実メモは旧パネルに残しており未送信。
-- 再レビューで、保存待ちの旧operationが後から完了するstorage event経路にも下書きを隠す処理があることを検出（/private/tmp/capture-review-completion.cjs）。修正2へ戻す。引継ぎdraftを旧operationから分離し、ブロック解除と再取得は行いつつ、他操作の完了を下書きの保存成功と解釈しない。
+- 独立レビュー1: 同URLの別operation未読完了結果が、SPAで引き継いだ未送信draftを隠して次回openで消すP2を検出。独立再現 <tmp>/capture-review-draft.cjs。bootstrapの過去結果復元をdraft無しの場合に限定し修正。sent/pending双方の入力保持と、draft無し従来復元/ACKを追加回帰で検証。関連43/43とbuild PASS。ユーザーの実メモは旧パネルに残しており未送信。
+- 再レビューで、保存待ちの旧operationが後から完了するstorage event経路にも下書きを隠す処理があることを検出（<tmp>/capture-review-completion.cjs）。修正2へ戻す。引継ぎdraftを旧operationから分離し、ブロック解除と再取得は行いつつ、他操作の完了を下書きの保存成功と解釈しない。
 - 修正2: preservingDraftにより引継ぎ入力を旧pending/saving operationから分離。旧完了イベントはblocked解除と再取得に使い、own保存の完了/ACKのみ入力を保存済みにする。旧操作の明示retryでも下書きを保護。READMEは更新前にメモ・タグを控える案内へ訂正。
 - 最終独立レビューPASS。2つのP2再現scriptがPASS（completion scriptはfixtureへのemit配送1行のみ互換変更）。独立関連45/45 PASS・npm run build PASS。AC1–4およびAC5のコード/回帰/build/review部分は充足、実Chrome再読み込み後の取得/保存ボタン有効化は未確認。修正2巡、利用量null、commitなし。実データへ保存なし。
 - 次の操作: ユーザーがメモ・タグを控え、chrome://extensions で「資料を保存 — Knowledge Capture」を再読み込み、Xタブもリロードしてパネルを再表示する。browser security policyによる制限のためこちらから実行不可。反映後の確認が残ることを最終回答で明記。
