@@ -6,11 +6,13 @@ Node.js 22以上・npmとスキル対応のCodexを用意します。Gitはworkt
 
 2026-10-10にGitHub Packagesへ非公開npm版0.4.2を配布しました。registryからの取得には、指定版の配布完了とpackageアクセス権が必要です。ソースcheckoutの `private: true`・`UNLICENSED` を維持し、配布用stagingだけにGitHub Packages向けmanifestを生成します（[リリース手順](../maintainers/releasing.md)）。非公開npm配布を行っており、一般公開・ライセンス変更は行っていません。
 
+0.5.0（Claude Codeプラグイン、`consult-codex`、`codex-image` を含む）は **ローカルのリリース候補** で、GitHub Packagesへは未送信です（[VALIDATION](../../VALIDATION.md)の2026-10-28の記録）。そのため、registryの `@latest` で取得できるのは配布済みの版です。0.5.0の内容、特にClaude Codeへの導入（`--host claude`）は、現状ではローカルtarballまたはcheckoutの経路で行います。registryへ送った後は、下のnpm exec経路でも同じ操作ができます。
+
 `codex-slide-plan` は任意追加スキルです。本体install/updateと指定なしのauthoring操作では配置・更新・削除しません。0.5.0のnpmパッケージまたはtgzから `--skill codex-slide-plan` で単独導入します（[別PC向けの導入手順](../../authoring-skills/INSTALL.md#codex-slide-planを任意追加する)）。
 
 ## GitHub Packagesの非公開npm配布
 
-0.5.0では既定5スキルと任意追加のcodex-slide-planを収録します。registryからの取得には指定版の配布完了と[package](https://github.com/users/karladev001-eng/packages/npm/package/codex-harness)へのアクセス権が必要です。Node.js 22以上とnpmを用意し、ホームなどpackage.jsonのないディレクトリから実行できます。利用PCでclone、npm ci、TypeScriptビルドは不要です。
+0.5.0（ローカルのリリース候補）では既定5スキルと任意追加のcodex-slide-planを収録します。registryからの取得には指定版の配布完了と[package](https://github.com/users/karladev001-eng/packages/npm/package/codex-harness)へのアクセス権が必要です。Node.js 22以上とnpmを用意し、ホームなどpackage.jsonのないディレクトリから実行できます。利用PCでclone、npm ci、TypeScriptビルドは不要です。
 
 ### GitHub Packagesの初回認証
 
@@ -78,11 +80,16 @@ node dist/skill/runtime.js install
 
 ## Claude Codeに導入する
 
-同じパッケージから、Claude Codeプラグイン `harness` としても導入できます。上のnpm exec・tarball・checkoutのどの経路でも、`install` に `--host claude` を付けます。
+同じパッケージから、Claude Codeプラグイン `harness` としても導入できます。`install` に `--host claude` を付けます。プラグインを含む0.5.0はまだregistryへ送っていないため、現在使える経路は、受け取ったローカルtarballか手元のcheckoutです。
 
 ```sh
-npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@latest -- codex-harness install --host claude
+# ローカルtarballから
+npx --yes --package ./karladev001-eng-codex-harness-0.5.0.tgz codex-harness install --host claude
+# 手元のcheckoutから（npm ci && npm run build の後）
+node dist/skill/runtime.js install --host claude
 ```
+
+0.5.0をregistryへ送った後は、npm exec経路の `-- codex-harness install --host claude` も同様に使えます。
 
 CLIは配布物のmarketplaceを `~/.agents/claude-marketplaces/codex-harness` へコピーし、`claude plugin marketplace add` と `claude plugin install harness@codex-harness --scope user` を実行します。再実行が更新で、同じ配布物なら `unchanged` です。所有記録は `~/.claude/harness/install.json`（`CLAUDE_CONFIG_DIR` 指定時はその配下）です。`claude` CLIが見つからない・登録に失敗した場合は、ファイルを残したまま終了コード2で `run_manually` に実行すべきコマンドを返します。Codexの `AGENTS.md` には触れません。
 

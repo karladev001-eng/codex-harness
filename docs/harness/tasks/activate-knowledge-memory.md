@@ -27,7 +27,7 @@
 
 ## 実施結果
 
-- 正規build/install成功。初回は所有manifest外の`.DS_Store`2件で停止したが、スキル本文のSHAは全一致。metadataを`/tmp/harness-installer-metadata-qNEoc6`へ保持し再実行。正規backupは`~/.codex/harness/backups/install-Chw9xJ`。導入版/dist/manifest32files一致、record-keeper存在。ユーザー指示と既存設定を保持。
+- 正規build/install成功。初回は所有manifest外の`.DS_Store`2件で停止したが、スキル本文のSHAは全一致。metadataを`<tmp>/harness-installer-metadata-qNEoc6`へ保持し再実行。正規backupは`~/.codex/harness/backups/install-Chw9xJ`。導入版/dist/manifest32files一致、record-keeper存在。ユーザー指示と既存設定を保持。
 - `.harness.json`へ指定repo/main/project_key=harnessを設定。導入版statusはGitHub backendと`improvement/projects/harness/preferences.md`を返す。
 - 好み記録はread→版付きwrite→fresh read→no-op read成功（exit0/ok=true/freshness=fresh/pending=false）。blob `925b51357537336c767ee519c7bcb6d74da95497`、commit `d0884a1782ee232844df0313f492824b3a1f2c8f`。観察2/候補2/試用2、一般指針なし、ユーザー評価unknown/null。唯一writerはactivate_memory担当。
 - 2captureの本文/画像計4componentを既存Codexログイン、gpt-6.1-sol/mediumで実生成。全component tool_calls=0。原文とメモを区別、画像外や実装ファイル未取得の限界を記録。独立担当が保存JPEG実画素とimage説明を照合済み。
