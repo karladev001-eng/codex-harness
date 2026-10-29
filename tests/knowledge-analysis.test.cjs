@@ -191,6 +191,7 @@ test('JPEG export uses new private cache files, rejects symlinks and keeps sourc
   const {exportImage}=require('../knowledge/retrieval.cjs');const f=await fetched(t),options={captureId:f.capture.operation_id,freshness:false},snapshotFile=path.join(f.store.root,'read/snapshot.json'),before=await fs.readFile(snapshotFile);
   const first=await exportImage(f.store,options),second=await exportImage(f.store,options);
   assert.equal(first.state,'image_exported');assert.equal(first.inspection_required,true);assert.notEqual(first.path,second.path);assert.ok(first.path.startsWith(path.join(await fs.realpath(f.store.root),'read/image-cache')+path.sep));
+  // Windows does not report POSIX permission bits (it reports 0o666), so the mode check is skipped there.
   assert.deepEqual(await fs.readFile(first.path),Buffer.from('/9j/2Q==','base64'));assert.equal(first.blob_sha,gitBlobSha(Buffer.from('/9j/2Q==','base64')));if(process.platform!=='win32')assert.equal((await fs.stat(first.path)).mode&0o777,0o600);assert.deepEqual(await fs.readFile(snapshotFile),before);
   const cache=path.join(f.store.root,'read/image-cache'),outside=path.join(f.root,'outside');await fs.mkdir(outside);await fs.rename(cache,cache+'.old');await fs.symlink(outside,cache);
   await assert.rejects(()=>exportImage(f.store,options),/UNSAFE_IMAGE_CACHE/);assert.deepEqual(await fs.readdir(outside),[]);await fs.unlink(cache);

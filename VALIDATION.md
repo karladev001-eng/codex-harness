@@ -10,6 +10,8 @@ Knowledgeの隔離試験は[運用ガイドの検証範囲](docs/guides/knowledg
 
 - Windows CIの原因と修正: CRLFチェックアウト（`.gitattributes` の `eol=lf`）、テスト用一時パスの8.3短縮名（`realpathSync.native`）、Git for Windowsで `os.devNull` がGit設定に使えない問題（`knowledge/reader.cjs` は `/dev/null` を使用）、`npm-cli.js` の直接spawn、テスト用チェックアウト名の改行、非ASCIIパスへの `fs.cpSync` でidentityテストが落ちる問題（`fs.promises.cp` へ変更。原因は推定で未確認）。POSIX専用の偽CLIとmacOS LaunchAgentのテストはwin32でスキップ。
 - CIラウンドごとのWindows失敗数: 89 → 3 → 1 → 1（run 40835992726、40837580357、40839526400、40866203291）。ubuntu・macOSは全ラウンドでPASS。最終ラウンド（run 40868404880）はGitHub Actionsの課金・利用上限で開始されず、Windows全PASSは未確認。
+- 上記89件は修正前のベースcommit 74a134d の結果。最終修正（`fs.promises.cp`＝commit 3f20170、workflow復元＝dfecfe7）はWindows CIで一度も実行されていない。
+- 追記: 製品側の `fs.cpSync`（src/install.ts、src/claude.ts、src/lib.ts）も、非ASCIIのホームパスを持つWindowsユーザーでは同様の対処が必要になる可能性がある。未検証。
 - `src/*.ts` の可読性リファクタリング: 挙動は変えない。120桁超の行 219→0、JSON・transport境界の `any` を `unknown` へ。独立レビューで新旧ビルドを比較（純関数約5万ケース、install/rollback/migrationのファイル操作トレース、CLIのstdout/stderr/終了コード）し、差分なし。
 - README/docsを再構成。
 - 統合worktree（macOS）の結果: `npx tsc --noEmit` エラー0、`npm test` 309件中309件PASS（失敗0、スキップ0）、`npm run check:docs` errors 0（文書233・リンク1164）、`context-routing.cjs --check` 一致、`npm pack --dry-run` 587ファイル（1.5 MB）。
