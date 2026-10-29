@@ -9,11 +9,13 @@ Knowledgeの隔離試験は[運用ガイドの検証範囲](docs/guides/knowledg
 ## 2026-10-29: Windows CI移植性と可読性リファクタリング
 
 - Windows CIの原因と修正: CRLFチェックアウト（`.gitattributes` の `eol=lf`）、テスト用一時パスの8.3短縮名（`realpathSync.native`）、Git for Windowsで `os.devNull` がGit設定に使えない問題（`knowledge/reader.cjs` は `/dev/null` を使用）、`npm-cli.js` の直接spawn、テスト用チェックアウト名の改行、非ASCIIパスへの `fs.cpSync` でidentityテストが落ちる問題（`fs.promises.cp` へ変更。原因は推定で未確認）。POSIX専用の偽CLIとmacOS LaunchAgentのテストはwin32でスキップ。
-- CIラウンドごとのWindows失敗数: 89 → 3 → 1 → 1（run 40835992726、40837580357、40839526400、40866203291）。ubuntu・macOSは全ラウンドでPASS。最終ラウンド（run 40868404880）はGitHub Actionsの課金・利用上限で開始されず、Windows全PASSは未確認。
-- 上記89件は修正前のベースcommit 74a134d の結果。最終修正（`fs.promises.cp`＝commit 3f20170、workflow復元＝dfecfe7）はWindows CIでは一度も実行されていない（実Windows機では後述のとおり実行済み）。
-- Windows実機の確認: 別のWindows PC（Node.js 24.15.0、npm 11.12.1）で `git clone -b integrate/interview-readiness` した新規cloneに `npm ci && npm test` を実行し、309件中224件PASS、失敗0、スキップ85。85件はCIのWindowsジョブと同じスキップ数。落ちていたidentityテスト（Git管理外の登録）はPASSしたので、`fs.promises.cp` への変更はNode 24のWindowsで解消した。未確認: Windowsの Node 22、GitHub Actionsでの全PASS。
+- この節のcommit IDとrun IDは、履歴を書き換える前の非公開リポジトリのものです。公開リポジトリ `karladev001-eng/codex-harness` は作者情報などを書き換えた履歴なので、同じIDでは参照できません。
+- CIラウンドごとのWindows失敗数: 89 → 3 → 1 → 1（run 40835992726、40837580357、40839526400、40866203291）。ubuntu・macOSは全ラウンドでPASS。最終ラウンド（run 40868404880）はGitHub Actionsの課金・利用上限で開始されなかった。
+- 公開リポジトリでのCI: [run 40886261199](https://github.com/karladev001-eng/codex-harness/actions/runs/40886261199)（Node.js 22）で、ubuntu-latest・windows-latest・macos-latestの3ジョブすべてがPASS。これで、Windowsでの全PASSとWindows上のNode 22を確認した。
+- 上記89件は修正前のベースcommit 74a134d の結果。最終修正（`fs.promises.cp`＝commit 3f20170、workflow復元＝dfecfe7）は、非公開リポジトリのWindows CIでは実行されなかった。実Windows機（後述）と公開リポジトリのCI（上記）で実行済み。
+- Windows実機の確認: 別のWindows PC（Node.js 24.15.0、npm 11.12.1）で `git clone -b integrate/interview-readiness` した新規cloneに `npm ci && npm test` を実行し、309件中224件PASS、失敗0、スキップ85。85件はCIのWindowsジョブと同じスキップ数。落ちていたidentityテスト（Git管理外の登録）はPASSしたので、`fs.promises.cp` への変更はNode 24のWindowsで解消した。Node 22でも、上記の公開リポジトリのCIでPASSした。
 - 最初の試行（mainをcloneしてから `git checkout` でブランチへ切替）では10件が失敗した（ナレッジのポップアップ4件は「Cannot use import statement」、節読込6件は「Reference version differs」）。原因は、main（`.gitattributes` なし）とブランチで内容が同じファイルが、最初のcheckoutのCRLF改行のまま残ったこと。ブランチを直接cloneし直すと解消した。
-- 追記: 製品側の `fs.cpSync`（src/install.ts、src/claude.ts、src/lib.ts）も、非ASCIIのホームパスを持つWindowsユーザーでは同様の対処が必要になる可能性がある。未検証。
+- 追記: 製品側の `fs.cpSync`（src/install.ts、src/claude.ts、src/lib.ts）も、非ASCIIのホームパスを持つWindowsユーザーでは同様の対処が必要になる可能性がある。未検証。[Issue #1](https://github.com/karladev001-eng/codex-harness/issues/1)で追跡する。
 - `src/*.ts` の可読性リファクタリング: 挙動は変えない。120桁超の行 219→0、JSON・transport境界の `any` を `unknown` へ。独立レビューで新旧ビルドを比較（純関数約5万ケース、install/rollback/migrationのファイル操作トレース、CLIのstdout/stderr/終了コード）し、差分なし。
 - README/docsを再構成。
 - 統合worktree（macOS）の結果: `npx tsc --noEmit` エラー0、`npm test` 309件中309件PASS（失敗0、スキップ0）、`npm run check:docs` errors 0（文書233・リンク1164）、`context-routing.cjs --check` 一致、`npm pack --dry-run` 587ファイル（1.5 MB）。
