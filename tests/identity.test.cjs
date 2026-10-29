@@ -46,7 +46,8 @@ test('non-Git registration persists portable key before registry, explicit ident
   assert.equal(preferences({ ...args, action: 'read' }, config, api.transport).error, 'identity_unresolved');
   const registered = preferences({ ...args, action: 'register' }, config, api.transport); assert.equal(registered.ok, true);
   const policy = JSON.parse(fs.readFileSync(path.join(f.project, '.harness.json'))); assert.equal(policy.preferences.project_key, registered.identity.project_key);
-  // Node 22's native fs.cpSync path check aborts the process on Windows for this non-ASCII source path; fs.promises.cp does not use it.
+  // The Windows crash (0xC0000409) here is suspected to come from native fs.cpSync handling of non-ASCII paths (inferred from Node's source,
+  // not yet confirmed on Windows CI); fs.promises.cp avoids that path.
   const moved = path.join(f.base, 'moved'); await fs.promises.cp(f.project, moved, { recursive: true });
   const resolved = lib.settings(moved, f.home); resolved.preferences.repository = config.preferences.repository; resolved.preferences.autosave = true;
   assert.equal(preferences({ project: moved, home: f.home, action: 'register' }, resolved, api.transport).identity.project_key, registered.identity.project_key);

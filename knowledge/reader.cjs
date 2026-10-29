@@ -83,6 +83,7 @@ function gitClient(config, gitDir, options = {}) {
   const env = { ...process.env };
   for (const key of Object.keys(env)) if (key.startsWith('GIT_')) delete env[key];
   // Git for Windows rejects os.devNull (\\.\nul) as a config path but maps '/dev/null'.
+  // os.devNull is fine for core.hooksPath: Git only looks for hook files under it; it is rejected only as a config *file* path.
   Object.assign(env,{GIT_CONFIG_NOSYSTEM:'1',GIT_CONFIG_GLOBAL:'/dev/null',GIT_CONFIG_SYSTEM:'/dev/null',GIT_TERMINAL_PROMPT:'0',GIT_OPTIONAL_LOCKS:'0'});
   const fixed = ['-c','core.hooksPath='+os.devNull,'-c','protocol.file.allow=never','-c','protocol.ext.allow=never','-c','fetch.recurseSubmodules=false','-c','submodule.recurse=false','-c','gc.auto=0'];
   const invoke = (args, limits={}) => run(git,[...fixed,'--git-dir='+gitDir,...args],{env,...limits,timeout:remaining(options.deadline,limits.timeout||20000)});

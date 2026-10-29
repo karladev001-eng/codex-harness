@@ -233,6 +233,8 @@ test('--check confirms the CLI, the login and the image_generation feature', pos
   assert.equal(image(f, undefined, 'logged_out', '--check').data.error.code, 'auth_unavailable');
 });
 
+// Only the final --input success assertion needs the POSIX fake CLI. The stdin-failure cases are portable,
+// but they stay skipped together until they can be split and verified on Windows CI.
 test('stdin that never sends data times out quickly; empty stdin is refused with guidance', posix, async t => {
   const f = setup(t), started = Date.now();
   const child = spawn(process.execPath, [source], { env: { ...f.env, CODEX_IMAGE_FIRST_BYTE_MS: '200' }, stdio: ['pipe', 'pipe', 'pipe'] });
