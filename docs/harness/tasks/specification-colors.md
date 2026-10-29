@@ -33,7 +33,7 @@
 - [固定配色ルール](../../../authoring-skills/codex-html-plan/references/color-design.md)を作成入口SKILLから必読参照。配布のinstall/authoring/package必須列挙へ追加。
 - knowledge-autosaveとサンプルのplan.htmlを再pack、警告0。元HTMLはstyle以外が今回前baselineとbyte一致し、仕様v1/pending/回答identityを保持。独立再packもbyte一致。
 - html-plan11件、authoring/install43件、package2件、計56件PASS。最初のpackage直接実行2件はnpm_execpath前提で失敗したため、npm環境下で同じ2件を再実行してPASS。暗背景の定数テストというレビュー提案を実CSSのselector抽出とメモリ内mutation4例へ改め、独立再レビューPASS。
-- 本PCの本体同梱版と単独`~/.codex/skills/codex-html-plan`を正規installerで更新。メインは既存版に今回6ファイルだけ差分を加えたステージから導入し、他作業の未commit変更を混入させなかった。backup `/Users/kan/.codex/harness/backups/install-EeBbga`。本体108ファイル/単独18ファイルの所有manifest一致、CSS/ルール/SKILL/サンプルのソース一致を確認。bootstrap・個人設定は保持。
+- 本PCの本体同梱版と単独`~/.codex/skills/codex-html-plan`を正規installerで更新。メインは既存版に今回6ファイルだけ差分を加えたステージから導入し、他作業の未commit変更を混入させなかった。backup `~/.codex/harness/backups/install-EeBbga`。本体108ファイル/単独18ファイルの所有manifest一致、CSS/ルール/SKILL/サンプルのソース一致を確認。bootstrap・個人設定は保持。
 - 導入済みruntimeで現仕様を再packして元plan.htmlとbyte一致を確認。Codexのローカルファイル表示へ同じHTMLを再提示（open結果queued）。ブラウザ/画面操作での視覚確認は環境制限により未実施。
 - 継続指針は正規read→revision付きwrite→fresh readで既存GitHubへ保存。観察 `F-specification-colors-20261024`、指針 `G-specification-readable-fixed-palette`、ok=true/exit0/pending=false/freshness=fresh。revision `e03e604b825bafbb884080b5d2de85d1510f430656974cc023289a02d85eb225`。用途は仕様書、具体的hexは実装判断、修正後ユーザー評価unknown/nullを維持。
 - 元のknowledge-autosave機能の実装・移行は未着手/承認pendingのまま。利用枠/トークンは未取得(null)。

@@ -49,7 +49,7 @@
 - ソース: `authoring-skills/codex-html-plan/`。SKILL.md、agents/openai.yaml、必要なreferences、runtime、サンプルを配置。
 - 移植元を固定し、LICENSE・出典/コミット・変更したファイルの表示を同梱する。無関係な上流プラグインは取り込まない。
 - 既存のauthoringスキル配布・選択導入へ追加し、ハーネスの事前仕様手順から利用可能な本スキルを参照できるようにする。既存4スキルの互換性を保持する。
-- 個人用導入先: `/Users/kan/.codex/skills/codex-html-plan`。ハーネス経由の導入管理がこの指定先で可能か確認し、既存所有管理を壊さない方法で導入する。
+- 個人用導入先: `~/.codex/skills/codex-html-plan`。ハーネス経由の導入管理がこの指定先で可能か確認し、既存所有管理を壊さない方法で導入する。
 - 仕様正本は既存タスクパケットを使い、通常は同じタスクに `<id>.plan.html` を関連付ける。保存OFF時は正本を会話に残し、表示用ファイルを永続記憶へ保存しない。
 
 ## 受入条件
@@ -77,7 +77,7 @@
 - [blocks.md](https://github.com/anthropics/claude-plugins-community/blob/f60f0454df3045f724c43c6346ec80bdcc3472b2/html-plan/skills/html-plan/references/blocks.md): 部品の説明を確認。
 - [上流LICENSE](https://github.com/anthropics/claude-plugins-community/blob/f60f0454df3045f724c43c6346ec80bdcc3472b2/LICENSE): Apache 2.0。html-plan固有のLICENSE/NOTICEは取得したtreeにない。
 - [OpenAIのClaudeプラグイン移植案内](https://developers.openai.com/plugins/guides/submit-claude-plugin)、[スキル作成](https://developers.openai.com/plugins/build/skills): Codex側の構成・固有表現の置換を確認。
-- 上流参照用コピー: `/var/folders/5n/58z5gr_d2hjgv6nrfz6r9gvh0000gn/T/html-plan-upstream-6yaaou_a`。JS/packは関連部分を調査、未実行・未導入。実装承認後に変更対象を詳細確認する。
+- 上流参照用コピー: `<tmp>/html-plan-upstream-6yaaou_a`。JS/packは関連部分を調査、未実行・未導入。実装承認後に変更対象を詳細確認する。
 
 ## 実装承認と進捗
 
@@ -115,7 +115,7 @@
 - プロジェクト案内: [project-map](../project-map.md) — 既存の構成と確認方法。
 - この計画に対応するEXP/LOGは現時点で作成していない。実装・検証時に既存規約上必要な記録へ関連付ける。
 
-macOSのターミナルで、プロジェクトルート `/Users/kan/dev/harness` から実行する。
+macOSのターミナルで、プロジェクトルート `<repo>` から実行する。
 
 ```sh
 open "docs/harness/previews/codex-html-plan.html"
@@ -124,7 +124,7 @@ open "docs/harness/previews/codex-html-plan.html"
 別の作業ディレクトリから開く場合:
 
 ```sh
-open "/Users/kan/dev/harness/docs/harness/previews/codex-html-plan.html"
+open "<repo>/docs/harness/previews/codex-html-plan.html"
 ```
 
 これはローカルブラウザで表示するコマンドであり、実装や外部公開を開始しない。
@@ -142,10 +142,10 @@ open "/Users/kan/dev/harness/docs/harness/previews/codex-html-plan.html"
 - 本体: Sol6.1/high。上流runtime/CSS/packを移植し、日本語・承認文案分離・計画ID/版/範囲別保存・保存OFF・関連記録手順を追加。
 - 配布: Luna/medium。authoring/build/installへ5つ目として追加、ハーネス開始前手順・雛形・レビューへ接続。従来4つの選択導入も維持。
 - 公式quick_validate: 一時venvのPyYAMLでPASS。利用者のスキル実行にはPython不要。
-- 全体検証: npm test、157/157 PASS、fail/skip 0。ログ /private/tmp/codex-html-plan-full-test.log。
+- 全体検証: npm test、157/157 PASS、fail/skip 0。ログ <tmp>/codex-html-plan-full-test.log。
 - ブラウザ: 127.0.0.1:8767/task-board.plan.htmlで閉じた全体像、仕様展開、Enter展開、状態図から取得失敗モック表示、回答と承認文案の分離、文案選択後もpending、390pxで横はみ出しなしを確認。headでbody未生成の不具合とdark配色を修正し再確認。
 - 画面証拠: [完成サンプルの承認欄](../previews/codex-html-plan-sample.jpg)。試験選択はリロードで破棄、未選択に復帰。sampleの承認は架空のTASK-42に対するpendingであり、本スキル作成の承認記録とは独立。
-- 独立試用: Sol6.1/medium、履歴なし、別tempプロジェクトで通知設定画面の仕様を作成。既存TASK/ADR/EXP/LOG/索引への相互リンク、開くコマンド/cwd、2つの未解決質問、承認pendingと本実装停止を確認。pack警告0、リンク/ID/版/保存分離検証PASS。生成物 /var/folders/5n/58z5gr_d2hjgv6nrfz6r9gvh0000gn/T/codex-html-plan-forward-onc8njnz/docs/tasks/notifications.plan.html。
+- 独立試用: Sol6.1/medium、履歴なし、別tempプロジェクトで通知設定画面の仕様を作成。既存TASK/ADR/EXP/LOG/索引への相互リンク、開くコマンド/cwd、2つの未解決質問、承認pendingと本実装停止を確認。pack警告0、リンク/ID/版/保存分離検証PASS。生成物 <tmp>/codex-html-plan-forward-onc8njnz/docs/tasks/notifications.plan.html。
 - 独立最終レビュー: Sol6.1/high、履歴なしで実行中。ホスト候補/effortを起動直前に確認。実導入はレビュー後。
 
 ## 完了記録（2026-10-08）
@@ -155,8 +155,8 @@ open "/Users/kan/dev/harness/docs/harness/previews/codex-html-plan.html"
 - 主な変更: authoring-skills/codex-html-plan/、src/authoring.ts、src/install.ts、scripts/build.cjs、関連tests、ハーネスSKILL/task/reviewer、README/SPEC/authoring案内。
 - 受入条件1–8: 充足。先行全体npm test 157/157 PASS、レビュー修正後の新スキル/authoring/package 19/19 PASS（新スキル回帰9件を含む）、公式quick_validate PASS、ブラウザ表示/操作/390px確認、独立試用、実導入後pack PASS。
 - 独立レビュー: Sol6.1/high、1巡の修正後PASS。ESM祖先プロジェクトでのNode22互換性はawait importへ修正し、require-module無効環境で回帰確認。サンプル起動手順も移設可能に修正。
-- 実導入: /Users/kan/.agents/skills/codex-harness（同梱スキルと入口）および /Users/kan/.codex/skills/codex-html-plan（単独呼出し）。双方のファイル一覧/ハッシュと所有manifest一致を確認。実効設定activeを維持。
-- 導入バックアップ: /Users/kan/.codex/harness/backups/install-h6l4u2。無関係なknowledge/README.mdの差分は今回の実導入に含めず保持。
+- 実導入: ~/.agents/skills/codex-harness（同梱スキルと入口）および ~/.codex/skills/codex-html-plan（単独呼出し）。双方のファイル一覧/ハッシュと所有manifest一致を確認。実効設定activeを維持。
+- 導入バックアップ: ~/.codex/harness/backups/install-h6l4u2。無関係なknowledge/README.mdの差分は今回の実導入に含めず保持。
 - 制約: macOSの実ブラウザで確認。Windows/Linux実機とNode22実機は未検証（Node26でrequire-module無効の互換経路を確認）。保存済み制作指針は権限制約により未取得。成果物のユーザー評価は未取得。利用量・正確な所要時間は未取得/null。
 - 引継ぎ: なし。後続の実装依頼ではハーネスから参照し、単独では $codex-html-plan を使用可能。
 
@@ -166,7 +166,7 @@ open "/Users/kan/dev/harness/docs/harness/previews/codex-html-plan.html"
 - [完成サンプルHTML](../../../authoring-skills/codex-html-plan/examples/task-board.plan.html) — 架空のTASK-42/仕様v2。サンプル内は未承認を表示する。
 - [サンプルの正本と開き方](../../../authoring-skills/codex-html-plan/examples/records/TASK-42.md)
 
-macOS・zsh、実行ディレクトリ `/Users/kan/dev/harness`:
+macOS・zsh、実行ディレクトリ `<repo>`:
 
 ```sh
 open "authoring-skills/codex-html-plan/examples/task-board.plan.html"

@@ -73,7 +73,7 @@
 - 統合担当: gpt-6-luna/medium。実際のspawn_agent候補を再確認し、pinなし・同系統の後継指定なし。明確なビルド/所有管理下の反映/一致検証を担当し、履歴継承なしで起動。ソース変更はなし。
 - ビルド成功。既存distは `/tmp/harness-dist-backup-aVQL7i/dist` へ保存済み。生成物リンク検証179文書・836リンク・エラー0。
 - 導入manifestとの差分はSKILL.md、新規references/early-compaction.md、documentation内README/SPEC/workflowの5点のみ。その他の差分なし。
-- 既存installerで実導入成功。初回sandbox EPERM後、許可された昇格実行で完了。バックアップ `/Users/kan/.codex/harness/backups/install-XqU0ZE`。所有manifest改変や強制上書きによる回避なし。
+- 既存installerで実導入成功。初回sandbox EPERM後、許可された昇格実行で完了。バックアップ `~/.codex/harness/backups/install-XqU0ZE`。所有manifest改変や強制上書きによる回避なし。
 - 導入済み90ファイルとdist/skillのSHA256一致。導入済みリンク検証56文書・268リンク・エラー0。installer再実行unchanged、runtime status active=true。
 - 個人config.tomlとAGENTS.mdのSHA256は前後一致。コミット・push・公開・版上げなし。実compactは実行手段がなく未実施で、検証成功の範囲に含めない。
 - 最終独立統合レビューPASS。ソースと生成物はリンク再配置込みで一致、dist/skill・配布plugin・導入済みの全90ファイル一致、余剰なし。導入前との差分は今回の5文書だけでコード変更なし。受入条件1〜5完了。

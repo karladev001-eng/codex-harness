@@ -18,8 +18,8 @@ Replace Python implementation with TypeScript compiled before distribution into 
 
 ## Scope and delegation
 Implementation owns repository source/build/tests/docs except this coordinator packet. One implementer owns the coherent runtime/installer migration to avoid split API contracts. Reviewer is read-only and independent. Integration occurs in a separate worktree.
-Implementation worktree: /Users/kan/.codex/worktrees/project-skill-install/harness
-Integration worktree: /Users/kan/.codex/worktrees/project-skill-install-integration/harness
+Implementation worktree: ~/.codex/worktrees/project-skill-install/harness
+Integration worktree: ~/.codex/worktrees/project-skill-install-integration/harness
 Dependencies: implementation -> review -> integration -> final review -> delivery.
 
 ## Constraints

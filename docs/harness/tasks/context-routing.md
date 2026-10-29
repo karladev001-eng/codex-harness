@@ -4,7 +4,7 @@
 - 仕様版: 2
 - 承認対象範囲: 既存ルールを維持した読込分岐、対応するYes/Noチャート、文書読込量の比較、配布とローカル反映
 - コード基点: 4c8dcd36c9022dc408daae63ecfa002efb29bb30
-- 編集前の正本コピー: `/private/tmp/harness-reading-baseline-sF9Ova`
+- 編集前の正本コピー: `<tmp>/harness-reading-baseline-sF9Ova`
 - 依存: なし。既存Claude連携は導入済み。
 
 ## 目的と確定方針
@@ -69,7 +69,7 @@
 - 独立レビュー: review_routing / gpt-6.1-sol/high / PASS。原文照合で見つかったmeasurement ON、起動status→commands、loop OFFの制作委譲→rolesの到達漏れは修正済み。Web例のURLプレースホルダの相対化も修正。
 - 自然文評価: route_behavior / gpt-6.1-sol/high。最初の10例と修正後の6例を確認。発案、Web、原因調査、複合、設定OFF、途中変更、worker、既読/要約後、loop OFFの明示制作委譲で必要参照と境界を識別。評価担当は製品変更・外部相談・子起動を行っていない。
 - 全体検証: 通常環境の `npm test` は197/197成功、失敗0（37.21秒）。新規routing5件を含む。文書リンク検査209資料・992リンク、エラー0。生成物 `--check` と `git diff --check` 成功。
-- ローカル導入: 標準installで `/Users/kan/.agents/skills/codex-harness` を更新。バックアップ `/Users/kan/.codex/harness/backups/install-C8H1Vu`。所有manifestと実ファイル一致、入口は正本と完全一致、全7ルート参照あり。導入先66文書・320リンクの検査エラー0。設定値と個人Claudeスキルは維持。
+- ローカル導入: 標準installで `~/.agents/skills/codex-harness` を更新。バックアップ `~/.codex/harness/backups/install-C8H1Vu`。所有manifestと実ファイル一致、入口は正本と完全一致、全7ルート参照あり。導入先66文書・320リンクの検査エラー0。設定値と個人Claudeスキルは維持。
 - 保持: 編集前snapshotから欠落なし。今回以外の未コミット差分を保持。commit/stash/resetなし。成果は未コミット。
 
 ### 測定結果と限界
@@ -118,7 +118,7 @@
 - 受入4: 独立レビュー、必要なテスト、リンク/配布/導入確認を通し、既存の未コミット変更と所有管理を保持する。
 - 受入5: compact共通運用が自動実行を保証する機能ではない点と、ホスト自動圧縮の実行/失敗を観測できた範囲を、一次資料と現状を根拠に説明する。
 - 未解決事項: なし。削減量と実際の圧縮イベントの観測可否は検証対象。
-- 変更前コピー: `/private/tmp/harness-sections-before-d7dgz7zn`（manifest付き）。比較基準はv1完了時点とし、さらに前の20,625 bytes入口との比較で追加効果を膨らませない。
+- 変更前コピー: `<tmp>/harness-sections-before-d7dgz7zn`（manifest付き）。比較基準はv1完了時点とし、さらに前の20,625 bytes入口との比較で追加効果を膨らませない。
 - 実行: 関連未コミット変更を保持し同じcheckoutで直列編集、commit/stash/resetなし。親は仕様/記録、実装・評価・独立レビューを分担。実装/レビューはホスト候補のgpt-6.1-sol/high（依存保持の設計と厳密検証）。auto pinなし、基準値と候補一致、fork_turns=none。アカウント利用量前後はnull。
 
 
@@ -151,7 +151,7 @@
 - コード最終は本文70,439・metadata1,866・索引355 bytes、stderr205、失敗1回。初回重複0だったが、共通CLI追加確認で保持済み本文を再照合し、最終重複3,760 bytes。複合最終は本文95,212・metadata2,369・索引972、stderr0、失敗0、重複0。
 - 選択差: 最終コードはbeforeが新HTML作成直前まで延期したblocks構文や継続資料も読んだ。複合はcreative-loopを必要範囲1:43（10,699 bytes）まで読み、beforeの全文1:58（15,100）との差4,401 bytesが総削減5,336 bytesの大半を占める。helper導入だけの因果効果とは扱わない。
 - 親がreading_*9担当（中断1件含む）のtool履歴を確認。execはすべてaudit経由、30,000出力budget指定、truncationなし。各exec件数とraw events件数一致。生会話/rolloutはrepoに保存せず、運用文書の出力と監査metadataのみ保存する。
-- 最終導入: 標準installerで更新、backup `/Users/kan/.codex/harness/backups/install-tslZDN`。所有107ファイルはmanifestとdistに完全一致。config/AGENTS/プロジェクト設定/個人Claudeスキルは変更前hashと一致。statusのactive・全機能・auto/pinなしも保持。
+- 最終導入: 標準installerで更新、backup `~/.codex/harness/backups/install-tslZDN`。所有107ファイルはmanifestとdistに完全一致。config/AGENTS/プロジェクト設定/個人Claudeスキルは変更前hashと一致。statusのactive・全機能・auto/pinなしも保持。
 - 導入済みreaderでroles逐次取得は5,201+603+443=6,247 bytes、一括取得6,247と一致、保持済み同範囲は本文0 bytes。これは限定したhelper動作確認で、全工程削減の証明ではない。
 - 導入先リンク検査は67文書・322リンク・エラー0。最初のCLI呼出しはrepository全体を要求するmodeだったため不足エラーになり、正しいskillOnly modeで再確認した。リンク修正や所有manifest改変で回避していない。
 - 204全体テストPASS後はcoreを変更せず、最後の修正は2つのSKILL案内だけ。build・v1 --check・diff-check・sourceリンク212文書/998リンクerror0。統合レビューではcore/監査/規則保持PASSを確認済みで、最終集計報告の照合待ち。

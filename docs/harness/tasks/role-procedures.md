@@ -16,7 +16,7 @@ State: done. Specification revision: 1.
 対象: plugins/codex-harness/skills/harness のMarkdownと必要なREADME/SPEC説明。既存のベンチマークと個人設定は変更しない。今回は配布元の整備であり、個人用導入先の更新は含めない。
 
 基点: 82586eda58699e6d44e656689586e220befe41af。
-担当: role_procedures、Sol/medium（手順の構成判断が必要）。隔離作業場所: /Users/kan/.codex/worktrees/role-procedures/harness。
+担当: role_procedures、Sol/medium（手順の構成判断が必要）。隔離作業場所: ~/.codex/worktrees/role-procedures/harness。
 独立レビュー: Sol/highを予定。合格後、承認済み変更だけを現在のcheckoutへ取り込む。
 
 計測: 通常の文書整備。利用枠・トークンは未取得(null)。節約効果の検証は実施しない。

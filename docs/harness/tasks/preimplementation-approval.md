@@ -6,7 +6,7 @@
 - 仕様版: 1
 - 開始: 2026-10-08T05:37:05+00:00
 - 基点: 82586eda58699e6d44e656689586e220befe41af と依頼開始時の既存未コミット変更
-- snapshot: /var/folders/5n/58z5gr_d2hjgv6nrfz6r9gvh0000gn/T/harness-approval-4vims4v1
+- snapshot: <tmp>/harness-approval-4vims4v1
 - 実効設定: active/delegation/review/persistence/measurement/improvement_loop=true、max_agents=3、auto、pinなし。
 - 担当: 既存の実装担当Sol6.1/medium、独立レビュー担当Sol6.1/highを同一ルールの改訂として継続。ホストcollaborationツールの候補と対応effortは指定に一致。初回fork_turns=none。
 - 作業: 既存checkoutで直列、既存変更を保持、commit/stash/reset/pushなし。
@@ -42,7 +42,7 @@
 
 担当5文書を改訂。独立ソースレビューは受入1〜6と7の文書整合PASS、修正指摘なし、リンク40件とgit diff --check PASS。npm run build成功、source/standalone/pluginの3文書一致。隔離HOMEで標準install、全ファイル一致、再install unchanged、status activeを確認。
 
-実導入時に未所有のmacOSメタデータ .DS_Store、references/.DS_Store が検出され標準installerが停止。他の導入ファイルにはmanifestからの変更なし。2件を /Users/kan/.codex/harness/backups/macos-metadata-mmipzyb5 に保存退避し、snapshotとのbytes一致を検証。導入用stageからも同メタデータを除き、再install成功。旧版backup /Users/kan/.codex/harness/backups/install-vkbg1K。実導入先 /Users/kan/.agents/skills/codex-harness。
+実導入時に未所有のmacOSメタデータ .DS_Store、references/.DS_Store が検出され標準installerが停止。他の導入ファイルにはmanifestからの変更なし。2件を ~/.codex/harness/backups/macos-metadata-mmipzyb5 に保存退避し、snapshotとのbytes一致を検証。導入用stageからも同メタデータを除き、再install成功。旧版backup ~/.codex/harness/backups/install-vkbg1K。実導入先 ~/.agents/skills/codex-harness。
 
 親検証: sourceとliveの新3文書一致、stage/live全ファイル/所有manifest一致、snapshot保存の入口・設定・記録fingerprint全件維持、実runtime status active、git diff --check PASS。コード変更なしのため全テストスイートは未実行。承認条件は指示による運用で、runtimeの機械的実行阻止は追加していない。最終独立導入レビューPASS。
 

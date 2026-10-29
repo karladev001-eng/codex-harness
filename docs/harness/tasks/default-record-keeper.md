@@ -27,7 +27,7 @@
 
 - plugins/codex-harness/skills/harness/references/creative-loop.md
 - plugins/codex-harness/skills/harness/references/roles.md
-- /Users/kan/.agents/skills/codex-harness/authoring-skills/create-subagent/SKILL.md と assets/subagent.md
+- ~/.agents/skills/codex-harness/authoring-skills/create-subagent/SKILL.md と assets/subagent.md
 - docs/adr/0003-github-improvement-records.md
 
 ## 完了記録

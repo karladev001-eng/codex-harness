@@ -23,7 +23,7 @@
 
 - 保存原文/スケジュールの変更や実KBへのテストsaveなし。新しいUIフィードバックの記憶は専任record-keeperのみ書込。usage未取得null。
 - 実装: panel.jsのsent表示後800ms timer。open/new/manual close/destroyで予約・世代を無効化、operation/panel同一性も照合。auto closeはpanel内にfocusが残る場合だけ元focusへ戻し、ページ操作中は奪わない。pending/error/savingは閉じない。
-- baseline /private/tmp/capture-auto-close-baseline、今回差分 /private/tmp/capture-auto-close-review.diff。制御timer回帰追加、関連4suite78/78・build・diffチェックPASS。実Chromereload/実KBテスト送信なし。
+- baseline <tmp>/capture-auto-close-baseline、今回差分 <tmp>/capture-auto-close-review.diff。制御timer回帰追加、関連4suite78/78・build・diffチェックPASS。実Chromereload/実KBテスト送信なし。
 - 記録管理担当がF-capture-autoclose-20261007、C-capture-autoclose-20261007をGitHub記憶へ保存。ok=true,pending=false,freshness=fresh。Chrome拡張限定、今回の実装選択やユーザー評価を根拠として混同しない。
 - 独立レビュー指摘1: 既読ACKが別tabのqueue待ちになるとauto close後に次commandで新規editorを開けない競合を検出。既読ACKを表示のbusy処理から分離し、旧ACKの成功/失敗が新draftへ影響しないようversion/operationで保護。hold ACKと次acquire保留の制御timer回帰を追加。
 - 最終: 関連4suite80/80・build・diffチェックPASS。独立reviewerのpanel27/27および独立holdACK resolve/reject再現PASS、追加修正必須なし。AC1–4コード/自動検証/レビュー充足。実Chromeへ再読込後の実画面動作は未確認で、先のbrowser security policy制限を迂回しない。

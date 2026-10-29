@@ -17,7 +17,7 @@
 - 直近の定期結果は2026-10-24 23:16:08〜10 JST、offline=true、generated/published/failed/pending=0、notification=sent。モデル生成失敗ではなく、読取同期失敗を一般的な説明生成失敗通知として送っていた。
 - GitHub APIとGit ls-remoteは通常環境・最小環境とも正常。実pullの失敗段階をメモリ内で確認し、Git fetchの `shallow.lock: File exists` を特定。元ログは保存していない。
 - 対象: `~/.codex/knowledge/read/b3146f9fd21a4c78ad6f6fba6ccf0281.git/shallow.lock`、410 bytes、2026-10-18 00:10:40 JST。lsofで利用者なし、Gitプロセスなしを確認。既存libraryLock下でinode/size/owner/type/nlinkを再確認して退避。未知lockの自動削除は追加していない。
-- 退避先: `/Users/kan/.codex/knowledge/read/recovery/shallow.lock.20261018T001040.stale-1792852131738`。
+- 退避先: `~/.codex/knowledge/read/recovery/shallow.lock.20261018T001040.stale-1792852131738`。
 - 退避後のpullはcurrent、6件、head不変。
 - 既存LaunchAgentをkickstartして実環境確認。2026-10-24 23:29:08〜10 JST、state=skipped/reason=unchanged、generated=0/published=0/failed=0/pending=0、offline=false、notification=not_needed。launchctl runs=152、last exit code=0。毎時3600秒の既存設定を保持。
 

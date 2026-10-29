@@ -7,7 +7,7 @@
 - 実装: gpt-6.1-sol/medium（互換性と配布設計）。レビュー: gpt-6.1-sol/high。統合: gpt-6-luna/low。
 - 範囲: 初期設定/手順/配布版番号/導入ドキュメント/移行テスト/ローカルtgz。
 - 対象外: 外部公開、Git push、常駐自動更新、個人の好みの自動同期。
-- 作業前スナップショット: `/private/tmp/harness-release-before-3fn3jz9s`。
+- 作業前スナップショット: `<tmp>/harness-release-before-3fn3jz9s`。
 - 計測開始記録: 2026-10-01T16:38:10Z（実装委譲後）。利用枠値は未取得。
 
 ## 受入条件
@@ -27,7 +27,7 @@
 - 最終prepack/build後、`dist/releases/karladev001-eng-codex-harness-0.3.0.tgz` と `SHA256SUMS.txt` を生成。
 - SHA-256: `9122575ecf229f825abb52d387ca4482800fc6de38018068d5e300741cc23cfb`。
 - 統合担当による最終tgzの実npx/offline・一時HOME/cache導入: installed→statusで新しい既定→再install unchanged、PASS。
-- 実ローカル導入更新済み。バックアップ `/Users/kan/.codex/harness/backups/install-IOB7ln`。installed statusでLuna low/Sol6.1 medium-high-high、既存フラグ保持を確認。
+- 実ローカル導入更新済み。バックアップ `~/.codex/harness/backups/install-IOB7ln`。installed statusでLuna low/Sol6.1 medium-high-high、既存フラグ保持を確認。
 - 最終独立レビューPASS: source/tgz両配布形態/実導入のdefaults・SKILL・最終roles・改善ループ・雛形がバイト一致、checksum一致。
 - 条件1–6完了。変更は未コミットで既存作業保持。公開/外部pushなし。
 - 制約: 他OS/別物理PCでのライブ実行と長期嗜好改善は未検証。明示された個別モデル上書きは保持する。自動ダウンロード更新ではなく、新版tgzでinstallを再実行する更新方式。

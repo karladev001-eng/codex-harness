@@ -44,7 +44,7 @@
 
 - `reader.cjs` / `hooks.cjs` / `analysis.cjs` / `search.cjs` / `process.cjs`、CLI、README、ADR0005を実装。最終 `npm test` はbuild込み118/118 PASS（`/tmp/harness-knowledge-analysis-final-npm-test.log`）。独立reviewは関連16件を再実行してPASS、修正必須の指摘なし。修正2回で排他復旧とJSON escaping込み100KB予算を検証。
 - 実 `pull --force` は成功、2captureを専用参照領域へ同期。実 `pull --quiet --force` も正常終了しstdout/stderrとも空、healthはcurrent。`search --query デザイン` でexample.comの未生成カードを確認。
-- `/Users/kan/.codex/hooks.json` にSessionStart(startup/resume)とUserPromptSubmitを追加。`hooks --action status` は両方1登録。既存8イベントのORCA定義をbytes由来の構造比較で維持確認。`config.toml`のSHA256は変更前後 `eb79c36e084945608972af99ee6557d655aea1e5fea75ff2d7930faa5b142c69` で一致。trusted_hashは未変更。新しい定義の信頼確認をCodex CLIの `/hooks` で行う必要があるため、登録を自動発火確認済みとは扱わない。
+- `~/.codex/hooks.json` にSessionStart(startup/resume)とUserPromptSubmitを追加。`hooks --action status` は両方1登録。既存8イベントのORCA定義をbytes由来の構造比較で維持確認。`config.toml`のSHA256は変更前後 `eb79c36e084945608972af99ee6557d655aea1e5fea75ff2d7930faa5b142c69` で一致。trusted_hashは未変更。新しい定義の信頼確認をCodex CLIの `/hooks` で行う必要があるため、登録を自動発火確認済みとは扱わない。
 - 実資料への `analyze` は実行前にautomatic approval reviewが拒否。理由は「私的な保存本文・画像のCodex外部サービスへの送信について、具体的payload/送信先の明示承認が確認できない」。回避・別経路実行はしていない。既存/今後の保存資料を許可、今回2件だけ許可、保留の3選択肢でユーザーへ確認中。
 - 承認対象はexample.com（本文11,291bytes、画像145,330bytes、メモ『サンプルメモ』、タグ『デザイン』）とWorldFlowAI/everything-claude-code（本文12,871bytes、画像203,298bytes、メモ/タグなし）。送信先は既存ChatGPTログインのCodex/OpenAI。本文と画像は別の生成呼出になる。まだ実資料の生成・analysisのGitHub反映・毎時automation作成はしていない。
 
@@ -52,7 +52,7 @@
 
 2026-10-06追記: ユーザーが「説明生成送信は承認します」と明示。下記1–3を実行完了。2件の本文/画像を生成しGitHub共有、再同期後current・再生成0件、毎時heartbeat automation-2「保存資料の説明生成」を設定。詳細は[実運用記録](activate-knowledge-memory.md)。4のhook信頼確認は未確認のまま。
 
-1. 許可された範囲で `node knowledge/cli.cjs analyze --codex /opt/homebrew/bin/codex --model gpt-6.1-sol --limit 2 --state /Users/kan/.codex/knowledge` を再実行。短い結果、画像根拠、tool_calls=0を確認。
+1. 許可された範囲で `node knowledge/cli.cjs analyze --codex /opt/homebrew/bin/codex --model gpt-6.1-sol --limit 2 --state ~/.codex/knowledge` を再実行。短い結果、画像根拠、tool_calls=0を確認。
 2. `publish-analysis --limit 2` でanalysisだけを共有。元capture/receiptが不変であることをGitHub比較で確認し、再同期・検索・再生成0件を確認。
 3. 今後の保存資料の送信も許可された場合のみ、Codex automation toolで毎時heartbeatを登録。最大5capture/回、currentは再生成せず、busy/変更なしでは静か、失敗/要対応だけ通知する。未承認のまま自動送信を開始しない。
 4. ユーザーによるCodex hook信頼確認後に自動発火を確認する。Windowsはパス引用fixtureまでで実機未確認。意味検索のベクトル部分は今回の範囲外。

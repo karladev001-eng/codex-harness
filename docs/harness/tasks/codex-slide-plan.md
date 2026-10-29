@@ -155,8 +155,8 @@ V1の描画修正とV2の制作方針 → V3/V4の審査契約とUI → V5の修
 - release commit `4c8dcd36c9022dc408daae63ecfa002efb29bb30`。非公開origin/mainへの通常push成功、ls-remoteとローカルHEAD一致。force push・GitHub Release作成・一般公開なし。
 - `@karladev001-eng/codex-harness@0.4.3` を `https://npm.pkg.github.com` へ一度送信。npm成功後APIでprivate・repository紐付けを再確認し、npm latest=0.4.3。registry再取得のtgzと送信前の全bytes一致。
 - 配布物326files/882880bytes、SHA256 `4e3466e9ae1e3830ef4a12f80d546687c5cfac70874d9c4d277ca8ab8d8f4d19`。凍結済み同一tgzを検証・導入・配布に使用。source private:true/UNLICENSED維持。
-- 実ホームの本体 `/Users/kan/.agents/skills/codex-harness` を所有管理CLIで更新。バックアップ `/Users/kan/.codex/harness/backups/install-TZy8Ko`。89所有ファイルSHA一致・active/設定維持確認。
-- 任意スキル `/Users/kan/.agents/skills/codex-slide-plan` を明示追加し全51ファイルを配布物と照合。本体内に任意スキルは配置せず、既定5スキル維持。
+- 実ホームの本体 `~/.agents/skills/codex-harness` を所有管理CLIで更新。バックアップ `~/.codex/harness/backups/install-TZy8Ko`。89所有ファイルSHA一致・active/設定維持確認。
+- 任意スキル `~/.agents/skills/codex-slide-plan` を明示追加し全51ファイルを配布物と照合。本体内に任意スキルは配置せず、既定5スキル維持。
 - リリース検証: npm test170PASS、slide38PASS、176文書/830リンクerror0、独立artifactレビューPASS、同tgzの隔離導入/再導入/既定と任意の分離/解除/生成PASS。slide再実行はNode24.19/Python3.12（初回Node26/Python3.9の試験用stdin待機は停止し記録）。
 - 既存337ファイルhash保持。既存npmrc hash不変、token値の出力/commitなし。無関係な未コミットTASK/benchmarksはpush対象外。
 - 実HTML表示の既知未検証は継続。配布/導入成功とAC1–3の視覚審査を分ける。
@@ -167,7 +167,7 @@ V1の描画修正とV2の制作方針 → V3/V4の審査契約とUI → V5の修
 
 仕様v6提示時の確認（本実装前の履歴）: 仕様HTML packはエラー/警告0。モックJavaScript構文、3つのSVGのXMLと共通viewBox、ローカル参照の実在、UTF-8、diff whitespaceを確認。open_in_codexはqueuedを返した（実描画確認の証拠ではない）。本体コードは変更せず、HEADは21d98e9のまま。
 
-macOS/zsh、実行ディレクトリ `/Users/kan/dev/harness`:
+macOS/zsh、実行ディレクトリ `<repo>`:
 
 ```sh
 open "docs/harness/tasks/codex-slide-plan.plan.html"
@@ -284,7 +284,7 @@ v4の確認: 仕様HTMLのpackはエラー/警告0。新規HTMLのローカル�
 
 v3時点の検証: 仕様HTML packはエラー/警告0。モックのJavaScript構文確認PASS。新規HTMLのローカルリンク実在を確認。既存文書チェック185件/824リンク・0エラー（新規HTMLの画面評価を代替しない）。アプリのファイル表示でモックを提示する。実ブラウザ表示/操作は未検証。本スキル本体・配布物は変更していない。
 
-macOS/zsh、実行ディレクトリ `/Users/kan/dev/harness`:
+macOS/zsh、実行ディレクトリ `<repo>`:
 
 ```sh
 open "docs/harness/tasks/codex-slide-plan.plan.html"
@@ -473,7 +473,7 @@ P1の正本/ID/出典契約 → P2/P4のHTMLと保存 → P3の出典検査 → 
 - 仕様v2/P1–P6を提示した後、この版/範囲へのユーザー本人の明示承認を待つ。今回の作成希望・Q1の回答・v1への修正回答を実装承認にしない。
 - UIの全体像/ページとコメント/テンプレート/素材・出典を視覚モックで提示する。ブラウザのfile URLは先行作業で拒否されているため別方式で迂回せず、Codexファイル表示と絶対pathリンクで提示する。ブラウザでの狭幅/実操作検証は未実施として区別する。
 
-開くコマンド（macOS/zsh、実行ディレクトリ `/Users/kan/dev/harness`）:
+開くコマンド（macOS/zsh、実行ディレクトリ `<repo>`）:
 
 ```sh
 open "docs/harness/tasks/codex-slide-plan.plan.html"
@@ -525,15 +525,15 @@ open "docs/harness/previews/codex-slide-plan-v2.html"
 
 ### 実装分担
 
-- core: `/Users/kan/.codex/worktrees/slide-plan-core/harness`、Sol6.1/high（制作設計・UIと入出力の安全性を扱う）。P1–P5と独立スキルの動作検証、`authoring-skills/codex-slide-plan/` に限定。
-- distribution: `/Users/kan/.codex/worktrees/slide-plan-distribution/harness`、Luna/high（既存配布契約への決定的追加）。P6の本体/単独導入、必須収録、build、HELP、案内と隔離回帰検証。新スキル配下は変更しない。
+- core: `~/.codex/worktrees/slide-plan-core/harness`、Sol6.1/high（制作設計・UIと入出力の安全性を扱う）。P1–P5と独立スキルの動作検証、`authoring-skills/codex-slide-plan/` に限定。
+- distribution: `~/.codex/worktrees/slide-plan-distribution/harness`、Luna/high（既存配布契約への決定的追加）。P6の本体/単独導入、必須収録、build、HELP、案内と隔離回帰検証。新スキル配下は変更しない。
 - 両担当は履歴なしで起動し、仕様正本と提示/承認根拠を直接参照。別worktreeの独立パスで作業。共有契約はNode22の独立skill/scriptsと正本deck.json、必要ファイル一覧を先に固定。
 - preferences readはEPERM（個人領域のlock作成）で取得不能。旧cacheを適用せず、承認済みv2を基準とする。
 - core完了後に独立レビュー・初見試用、配布変更のレビュー後に統合担当の結合検証を実施する。
 
 - 独立レビュー担当はSol6.1/high・履歴なしで起動。実装者の試験主張を読む前に、仕様とデータ経路からリスク/受入チェックを準備する。
-- 最終統合用worktree: `/Users/kan/.codex/worktrees/slide-plan-integration/harness`（基点2b80338）。完了前の変更は調整元へ取り込まない。
-- 初見試用の入力を `/private/tmp/codex-slide-plan-forward-input/` に準備。架空の検索比較CSVと非技術者を含む聞き手向けbriefを使い、既存例の置換だけではない制作経路を後で検証する。
+- 最終統合用worktree: `~/.codex/worktrees/slide-plan-integration/harness`（基点2b80338）。完了前の変更は調整元へ取り込まない。
+- 初見試用の入力を `<tmp>/codex-slide-plan-forward-input/` に準備。架空の検索比較CSVと非技術者を含む聞き手向けbriefを使い、既存例の置換だけではない制作経路を後で検証する。
 
 - 分担の細分化: core担当からmaster解析/fixtureのみ独立させ、Sol6.1/highの専任へ委譲。`slide-plan-masters/harness`（基点2b80338）でinspect-master.py/make-fixtures.py、masters参照、master試験/fixtureに限定。coreと同じファイルを編集せず、共有theme/catalog契約に合わせて後で統合。最初の起動はホスト枠上限で失敗し、統合準備担当の完了後に正常起動。
 - 配布検査のPython同梱除外式に矛盾を独立レビューで発見。source/skill/pluginの意図した2ヘルパー×3配置だけを許可する修正を確認。最終commit8e04144、統合worktreeでは9b96d6d。全体tarball試験はcore/master統合後。
@@ -568,7 +568,7 @@ open "docs/harness/previews/codex-slide-plan-example/r1/A/output/slides.html"
 - `npm run check:docs`: 185文書・824リンク、エラー0。`node --test authoring-skills/codex-slide-plan/tests/*.test.mjs`: 20/20 PASS。
 - Pythonのyaml不足による専用quick_validate未実行に対し、Ruby標準YAMLでスキルfrontmatter/UIメタデータを解析し、必須項目を確認PASS。これを専用validator成功とは称さない。
 - 初見担当はraw brief/CSVとスキルだけから、5分・4ページのr1、依頼修正r2、最終通読によるr3を生成。各版に独自配置A/標準B。段落/表/要旨の修正依頼照合、旧版検出、数値/ID/原稿の反映、bundle全ファイルhashと参照を確認。原稿中の件数の意味が曖昧な箇所は制作側でr3へ修正。スキル自体の重大障害は観測せず。ページ順は用語→数値→判断の理由から維持。
-- 初見のsource行範囲の誤記はvalidatorが検出し、実在位置へ修正後build。最終r3を統合済み最新版でもvalidate/buildし、A/Bとも警告0。試用入力/成果物は一時領域 `/private/tmp/codex-slide-plan-forward-run/`、詳細はその `trial/report.md`。
+- 初見のsource行範囲の誤記はvalidatorが検出し、実在位置へ修正後build。最終r3を統合済み最新版でもvalidate/buildし、A/Bとも警告0。試用入力/成果物は一時領域 `<tmp>/codex-slide-plan-forward-run/`、詳細はその `trial/report.md`。
 - ブラウザの視覚/実操作、実際の聞き手評価、実リハーサルは未検証。試験担当の評価をユーザーの肯定評価にはせず、ユーザー評価unknownを維持。
 
 ### 最終整合レビュー

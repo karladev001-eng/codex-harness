@@ -9,7 +9,7 @@ recorded: 2026-10-28
 # Codexへの送信事前承認
 
 - 記録日: 2026-10-28（Asia/Tokyo）。状態: 承認済み、ユーザーの撤回まで有効。
-- 対象: `/Users/kan/dev/harness`。他プロジェクトは対象外。
+- 対象: このリポジトリ（frontmatterの `project` に記した絶対パスと一致する場所）。他プロジェクトは対象外。
 - 送信先: 既存ログインを使うCodex CLI（OpenAI）。
 - 許可情報: このharnessプロジェクトの仕様・構成・手順・設計案・差分・ソースコード（consult-codexの `reviewer` はリポジトリを読み取り専用で参照する）。
 - 目的: consult-codexの実機確認（相談1回・reviewer 1回）と、以後の発案・相談・批評・2者レビュー。必要最小限の情報だけを送る。

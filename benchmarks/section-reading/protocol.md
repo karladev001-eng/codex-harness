@@ -4,7 +4,7 @@
 
 ## 条件の固定
 
-- before: `/private/tmp/harness-sections-before-d7dgz7zn`、after: `/Users/kan/dev/harness`。どちらも同じ `code.md` / `mixed.md` の内容を渡す。最初の4件、receipt対応後のafter 2件、案内修正後のafter 2件を、それぞれ履歴を共有しない新規reader（`fork_turns=none`）で実行した。
+- before: `<tmp>/harness-sections-before-d7dgz7zn`、after: `<repo>`。どちらも同じ `code.md` / `mixed.md` の内容を渡す。最初の4件、receipt対応後のafter 2件、案内修正後のafter 2件を、それぞれ履歴を共有しない新規reader（`fork_turns=none`）で実行した。
 - 完走8件を同一model/effort（`gpt-6.1-sol/high`）で起動し、実際の起動値をrun manifestへ記録した。各fixtureの前後で同一の実効設定を渡す。初回既読資料は0、各run間の記憶・読込結果の共有なし。初回codeは依頼要約と共通指示で開始し、fixture原文全文も追加messageで共通に渡した。条件は同じinstruction・依頼原文・設定であり、開始message全体の唯一の文字列一致を保証する設計ではない。
 - active/delegation/review/persistence/measurement/improvement_loop=true、max_agents=3、model_selection=auto、model pinなし。外部AI相談OFF等はfixtureに記載したユーザーの上書きを適用する。
 - readerには最初にSKILL.mdを読むことだけを指定する。全文・任意行・任意headingの読取と索引を前後とも同じ条件で許可する。必要節の既定リストや模範解答を与えない。
@@ -15,7 +15,7 @@
 coordinatorがinitを実行する。run先は新規ディレクトリ（親は既存）を指定する。
 
 ```sh
-node scripts/section-reading-audit.cjs init --root /private/tmp/harness-sections-before-d7dgz7zn --run /private/tmp/section-code-before --label before --scenario code --model MODEL --effort EFFORT
+node scripts/section-reading-audit.cjs init --root <tmp>/harness-sections-before-d7dgz7zn --run <tmp>/section-code-before --label before --scenario code --model MODEL --effort EFFORT
 ```
 
 readerにはfixture全文と以下を渡し、ROOT/RUN/AUDITをそのrunの値に置き換える。before/afterの他方の内容・測定値・期待削減率は知らせない。
@@ -54,7 +54,7 @@ node AUDIT reader --run RUN --tool html-plan -- TOPIC SECTION...
 ## 収集と解釈
 
 ```sh
-node scripts/section-reading-audit.cjs summary --run /private/tmp/section-code-before
+node scripts/section-reading-audit.cjs summary --run <tmp>/section-code-before
 node scripts/section-reading-audit.cjs summary --run benchmarks/section-reading/runs/final-after-code
 node scripts/section-reading-collect.cjs --check
 ```

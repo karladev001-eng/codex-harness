@@ -78,10 +78,10 @@ Codexが目的、制約、評価軸、必要な文脈だけを構造化してCLI
 - テスト: 通常環境の `npm test` は192/192成功、失敗0（35.20秒）。新規22件を含み、実npm/npx・使い捨てloopback registry・恒久インストール・既存設定保持を検証。文書リンク182文書/845リンク、エラー0。`git diff --check`成功。
 - レビュー修正: 非timeoutのmock応答分類テストに並列負荷の猶予を確保。子孫停止テストは子孫自身のready/PID・起動後の生存・timeout後の停止・予定時刻後の副作用不在を確認。製品の時間上限は変更なし。HTMLのscopeも仕様2へ一致。修正/再レビュー1巡。
 - 実環境: 既存ログインのread-only確認と、機密なしのideator相談1回でJSON回答取得に成功。認証・モデル設定は変更していない。
-- ローカル導入: 標準installで `/Users/kan/.agents/skills/codex-harness` と管理bootstrapを更新。バックアップ `/Users/kan/.codex/harness/backups/install-o8g7ff`。個人スキル `/Users/kan/.codex/skills/consult-claude` を新規配置。
+- ローカル導入: 標準installで `~/.agents/skills/codex-harness` と管理bootstrapを更新。バックアップ `~/.codex/harness/backups/install-o8g7ff`。個人スキル `~/.codex/skills/consult-claude` を新規配置。
 - 導入確認: 個人スキルの `--check` は `ok=true, cli=compatible, authenticated=true`。個人/同梱スキルの内容が正本と一致し、harnessの所有manifestと実ファイルも一致。新bootstrapのアイデア・方針相談・批評入口を確認。
 - 配色: 今回の仕様HTMLだけをライト固定し、非ターミナルのShadow DOMへ白背景/濃い文字の対を明示。計算上のコントラストは本文15.32、カード16.30、補足6.13。pack警告0。実ブラウザの表示確認はfile: URLポリシーのため未実施で、視覚確認済みとは扱わない。
-- 保持: 既存未コミット変更は編集前コピー `/private/tmp/claude-consultation-baseline/` と比較して保持。commit/stash/resetなし。対象外4ファイルの既存差分も一致。変更は未コミットのまま。
+- 保持: 既存未コミット変更は編集前コピー `<tmp>/claude-consultation-baseline/` と比較して保持。commit/stash/resetなし。対象外4ファイルの既存差分も一致。変更は未コミットのまま。
 - 制約: 自動相談はharnessの指示による判断であり、runtimeによる強制スケジューラではない。CLIや認証が利用できない場合は制約を明示し、相談したと偽らない。スキル公式validatorはPyYAML未導入で起動できず、標準Ruby YAMLによる構造検証で補完。
 - 計測: run=claude-consultation、実装gpt-6.1-sol/high、独立レビューgpt-6.1-sol/high。開始/終了時刻・タスク全体所要・アカウント利用枠前後は未取得(null)。利用枠削減等は評価しない。
 
