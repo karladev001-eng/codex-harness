@@ -83,6 +83,7 @@ export function createTask(args: Json, config: Json): Json {
     const existing = packets(args.project);
     if (Object.hasOwn(existing, key)) throw new Error('Task already exists: ' + key);
     validateGraph({ ...existing, [key]: packet });
+    // One 'docs/harness/tasks' segment, not TASKS_DIRECTORY: on Windows the joined path string would differ.
     saveNew(safePath(args.project, 'docs/harness/tasks', key + '.json'), packet);
   }
   return packet;
@@ -410,6 +411,7 @@ export function execute(args: Json): Json {
     if (args.action === 'create') return createTask(args, config);
     if (!config.persistence) return { skipped: 'persistence disabled; use inline packet' };
     if (args.action === 'show') {
+      // Same single segment as createTask; readJson's error message includes this path.
       return readJson(safePath(args.project, 'docs/harness/tasks', taskId(args.id) + '.json')) as Json;
     }
     const items = packets(args.project);

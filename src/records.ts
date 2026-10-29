@@ -51,7 +51,6 @@ export const github: Transport = (method, endpoint, body) => {
   }
 };
 
-/** Opens `file` with `flags`, fsyncs it and closes it again. */
 function fsyncPath(file: string, flags: string): void {
   const fd = fs.openSync(file, flags);
   try {

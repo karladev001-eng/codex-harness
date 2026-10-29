@@ -128,7 +128,9 @@ export function authoring(args: Json, source?: string): Json {
   const installed: PlannedSkill[] = [];
   const next = structuredClone(state);
   try {
-    for (const item of planned) if (item.files) copySkill(item.source, staged(item));
+    for (const item of planned) {
+      if (item.files) copySkill(item.source, staged(item));
+    }
     for (const item of planned) {
       if (exists(item.target)) {
         fs.renameSync(item.target, displaced(item));
