@@ -12,7 +12,7 @@ const {analyze,publish,CodexProvider,inputs,analysisState,validateAnalysis}=requ
 const {hooks,hookCommand}=require('../knowledge/hooks.cjs');
 const {search}=require('../knowledge/search.cjs');
 function input(url='https://example.com/a') {return {schema_version:1,operation_id:crypto.randomUUID(),captured_at:'2026-10-05T00:00:00.000Z',source:{url,title:'Design sample',kind:'page',details:{},limitations:['表示範囲のみ']},content:{text:'A bright blue card design with rounded corners',headings:[],selection:''},note:'私の好きなカード',tags:['design'],screenshot:'data:image/jpeg;base64,/9j/2Q=='};}
-function git(cwd,args) {const r=spawnSync('git',args,{cwd,encoding:'utf8',env:{...process.env,GIT_CONFIG_GLOBAL:os.devNull,GIT_CONFIG_NOSYSTEM:'1'}});if(r.status!==0)throw Error('fixture git failed: '+r.stderr);return r.stdout.trim();}
+function git(cwd,args) {const r=spawnSync('git',args,{cwd,encoding:'utf8',env:{...process.env,GIT_CONFIG_GLOBAL:'/dev/null',GIT_CONFIG_NOSYSTEM:'1'}});if(r.status!==0)throw Error('fixture git failed: '+r.stderr);return r.stdout.trim();}
 async function fixture(t) {
   const root=await fs.mkdtemp(path.join(os.tmpdir(),'knowledge-reader-test-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));
   const store=new Store(path.join(root,'state')),config={schema_version:1,repo:'me/knowledge',branch:'main',library_id:crypto.randomUUID(),gh_path:process.execPath,extension_id:'a'.repeat(32)};

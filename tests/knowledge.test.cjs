@@ -90,7 +90,7 @@ test('native subprocess writes framing only and validates origin; generated abso
   const denied = spawnSync(process.execPath, [cli, 'native', `chrome-extension://${'b'.repeat(32)}/`], { input: frame({ action: 'status' }), env: { ...process.env, KNOWLEDGE_HOME: root }, timeout: 5000 }); assert.equal(denied.status, 1); assert.equal(denied.stdout.length, 0);
   const windows = await register(store, { extension, output: path.join(root, 'win'), platform: 'win32' }); assert.match(await fs.readFile(windows.launcher, 'utf8'), /@echo off/);
 });
-test('gh transport uses explicit hostname and JSON stdin, strips server errors', async t => {
+test('gh transport uses explicit hostname and JSON stdin, strips server errors', { skip: process.platform === 'win32' }, async t => {
   const { root } = await fixture(t); const fake = path.join(root, 'fake-gh'); await fs.writeFile(fake, '#!/usr/bin/env node\nlet b="";process.stdin.on("data",x=>b+=x);process.stdin.on("end",()=>process.stdout.write(JSON.stringify({args:process.argv.slice(2),body:JSON.parse(b)})));', { mode: 0o700 });
   const result = await new Gh(fake).api('repos/me/knowledge/git/refs/heads/main', 'PATCH', { sha: 'abc', force: false }); assert.deepEqual(result.body, { sha: 'abc', force: false }); assert.ok(result.args.includes('github.com')); assert.ok(result.args.includes('--input'));
 });
