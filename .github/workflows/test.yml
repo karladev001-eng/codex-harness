@@ -23,4 +23,8 @@ jobs:
       - run: npm pack
       - if: always() && runner.os == 'Windows'
         continue-on-error: true
-        run: node tests/identity.test.cjs
+        shell: bash
+        run: |
+          for n in 'origin identity' 'read-only unresolved' 'worktrees inherit' 'non-Git registration' 'registry CAS' 'portable explicit' 'separate Git metadata'; do
+            node --test --test-reporter=tap --test-name-pattern="$n" tests/identity.test.cjs > diag.txt 2>&1; echo "== $n => $?"; grep -E "^not ok|^  error:|^    [A-Za-z]" diag.txt | head -8
+          done
