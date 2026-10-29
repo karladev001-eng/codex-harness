@@ -4,7 +4,7 @@ State: done. Specification revision: 1. Owner: root coordinator.
 
 Goal: compare a small website, primary-source web research, and a small Python module under baseline versus the installed harness.
 
-Scope: benchmarks/2026-09-28 and /private/tmp/harness-ab-20260928 only. Do not change product code or existing uncommitted model-selection.md.
+Scope: benchmarks/2026-09-28 and <tmp>/harness-ab-20260928 only. Do not change product code or existing uncommitted model-selection.md.
 
 Acceptance:
 1. Both conditions receive identical task prompts and start with empty artifact directories, no inherited conversation.

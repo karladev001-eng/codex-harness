@@ -19,6 +19,17 @@ TypeScriptと型定義は開発依存のみです。ビルドはdistを再生成
 
 Raycastは独立した依存と検証を持ちます。[専用README](integrations/raycast-knowledge/README.md)に従います。root `npm test`だけでRaycast実機の登録や検索を確認したことにはしません。
 
+## どこから読むか
+
+| 知りたいこと | 読む場所 |
+| --- | --- |
+| 全体の構成と設計上の見どころ | [README](README.md)の「構成」「設計上の見どころ」 |
+| CLIの振る舞い | `src/runtime.ts`（入口とコマンド）、`src/lib.ts`（設定・パス処理）、`src/install.ts`（所有管理付きの導入） |
+| エージェントが読む手順 | `plugins/codex-harness/skills/harness/SKILL.md` と `references/routing/` |
+| Claude Code固有の部分 | `plugins/claude-harness/`（エージェント定義、hook、eval）と `references/hosts/` |
+| テスト | `tests/*.test.cjs`。機能ごとにファイルが分かれ、`scripts/test.cjs` がまとめて実行 |
+| 過去の判断と作業記録 | [開発記録の案内](docs/maintainers/development-records.md) |
+
 ## 検証の原則
 
 テストは一時ホームと使い捨てGitリポジトリを使い、実個人設定を変更しません。Knowledgeのremoteはfake transportを使い、外部へテスト資料を書き込みません。OS・別PC・モデル起動・Chrome/Raycast実機の確認は自動試験と分けて[VALIDATION](VALIDATION.md)へ記録します。未検証の項目を成功と扱いません。

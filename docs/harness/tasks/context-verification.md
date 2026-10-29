@@ -8,7 +8,7 @@
 - 権限: 実検証の一時推論と既存認証読取は上記明示依頼の範囲。保護領域/ネットワークが必要なら通常の自動承認審査を使い、拒否時に別経路で迂回しない。
 - 実効harness: active、delegation/review/persistence/measurement/improvement_loop=true、max_agents3、auto pinなし。読込/独立評価はhost候補gpt-6.1-sol/high、履歴継承なし。native probeも同モデル/高精度（認証・プロトコル・状態検証）、probe内短い生成のeffortはlow。
 - ソースdirty保持、commit/stash/resetなし。既存rawと過去測定は改変しない。文書量の差と自動圧縮の正しさは別判定。既存手動20:30イベントを自動証拠にしない。
-- 読込materialsと事前固定run順: /private/tmp/harness-reading-check-c07d4gt1/comparison.json。
+- 読込materialsと事前固定run順: <tmp>/harness-reading-check-c07d4gt1/comparison.json。
 - 正式根拠: https://learn.chatgpt.com/docs/app-server 、https://learn.chatgpt.com/docs/config-file/config-reference 。
 
 

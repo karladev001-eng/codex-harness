@@ -14,7 +14,7 @@
 - 対象外: 独自compact API/背景監視/会話削除/アプリ再起動/閾値まで文脈を埋める負荷試験/権限緩和/公開。
 - 実効設定: active、delegation/review/persistence/measurement/improvement_loop=true、max_agents3、auto pinなし。本文改訂gpt-6.1-sol/high、独立レビュー同。ホスト候補と対応effortから選択、履歴なし。設定反映は明確な作業のためgpt-6-luna/medium。
 - 未解決: 新しい実装必須判断なし。短文化率と意味保持、自動compact実効設定/発火の観測可否は検証対象。
-- 比較前copy: /private/tmp/harness-concision-before-8yeqipol。
+- 比較前copy: <tmp>/harness-concision-before-8yeqipol。
 
 
 ## 検証メモ

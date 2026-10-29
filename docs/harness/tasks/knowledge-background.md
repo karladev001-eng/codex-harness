@@ -2,7 +2,7 @@
 
 - 状態: done（コード独立PASS・現機LaunchAgent実行PASS）
 - 日付: 2026-10-07 Asia/Tokyo
-- 作業: ~/dev/harness。既存関連差分を保持する承認済み直列共有checkout。reset/stash/commitなし。
+- 作業: <repo>。既存関連差分を保持する承認済み直列共有checkout。reset/stash/commitなし。
 - 実効: active/delegation/review/persistence/measurement/improvement_loop=true、max_agents3、auto pinなし。
 - 実装: gpt-6.1-sol medium（失敗判定とバックグラウンド運用の設計）。レビュー: gpt-6.1-sol high。起動面catalog確認済み、各effort対応。子は履歴なし、再委譲なし。
 

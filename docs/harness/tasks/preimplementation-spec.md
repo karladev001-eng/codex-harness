@@ -6,7 +6,7 @@
 - 仕様版: 1
 - 開始: 2026-10-07T06:03:07+00:00
 - コード基点: 82586eda58699e6d44e656689586e220befe41af + 依頼開始時の未コミット変更
-- 依頼開始時コピー: /var/folders/5n/58z5gr_d2hjgv6nrfz6r9gvh0000gn/T/harness-preimplementation-qw59s6k7
+- 依頼開始時コピー: <tmp>/harness-preimplementation-qw59s6k7
 - 作業方式: 既存変更を保持し現在のcheckoutで直列作業。commit/stash/resetなし。
 - 実効設定: active/delegation/review/persistence/measurement/improvement_loop=true、max_agents=3、model_selection=auto、pinなし。
 - 子のモデル: 実装 gpt-6.1-sol/medium（規則の適用境界と文書整合）、レビュー gpt-6.1-sol/high（独立評価）。候補取得元は本セッションの collaboration.spawn_agent のモデル・effort一覧。設定基準と一致、同系統の新後継は提示なし。fork_turns=none。

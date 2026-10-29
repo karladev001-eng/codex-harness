@@ -4,7 +4,7 @@
 
 | 目的 | 読む資料 |
 | --- | --- |
-| 何ができるかを知る | [README](../README.md) |
+| 何ができるか、どう作られているかを知る | [README](../README.md)（構成図、設計上の見どころ、English summary） |
 | 本体を導入・更新・解除する | [導入](guides/installation.md) |
 | スキルを選び、個別に導入する | [5スキル一覧](../authoring-skills/README.md)・[単独導入](../authoring-skills/INSTALL.md) |
 | 設定を変える | [設定](guides/configuration.md) |
@@ -24,6 +24,7 @@
 ## 開発・保守をする
 
 - [CONTRIBUTING](../CONTRIBUTING.md)：開発環境、検証、変更提案
+- [開発記録の案内](maintainers/development-records.md)：タスクパケット、ADR、ベンチマーク、送信承認の読み方
 - [非公開npm配布の準備とローカル配布物の作成](maintainers/releasing.md)
 - [公開前に残る判断](maintainers/publication.md)
 - [出典と個別ライセンス](../THIRD_PARTY_NOTICES.md)
@@ -34,4 +35,4 @@
 
 source checkoutの `docs/harness/project-map.md`（配布物には含めない開発履歴の入口）、[ADR 0001](adr/0001-portable-skill-harness.md)、[ナレッジADR 0002](adr/0002-github-knowledge-base.md)、[改善記録ADR 0003](adr/0003-github-improvement-records.md)、[Chrome保存ADR 0004](adr/0004-chrome-knowledge-capture.md)、[同期・生成ADR 0005](adr/0005-knowledge-sync-analysis.md)、[検索・取得ADR 0006](adr/0006-knowledge-retrieval.md)は設計の経緯を残します。初期ADRの将来計画を、その後実装された機能の現在の状態と混同しないでください。
 
-`docs/harness/tasks/` は各作業時点の仕様・承認・結果、`benchmarks/` は実験成果物です。全会話を自動保存する機能ではなく、これらの履歴はローカル配布物の利用手順とは分けます。旧Python版の結果は[履歴文書](history/validation-python-v1.md)にあります。
+`docs/harness/tasks/` は各作業時点の仕様・承認・結果、`benchmarks/` は実験成果物です（読み方は[開発記録の案内](maintainers/development-records.md)）。全会話を自動保存する機能ではなく、これらの履歴はローカル配布物の利用手順とは分けます。旧Python版の結果は[履歴文書](history/validation-python-v1.md)にあります。

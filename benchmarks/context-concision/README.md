@@ -10,7 +10,7 @@
 
 数値はUTF-8の全文source bytes。双方に同一パス集合を使い、変更していないblocks・commands・役割詳細・assets等も分母へ含める。通常の読者が実際に読んだ量、モデルtoken、速度、品質の実測ではない。入口の2KB目標より規則の条件・義務・例外の保持を優先した。
 
-[ファイル集合・前後サイズ・SHA-256](source-bytes.json)に各資料を列挙する。beforeは `/private/tmp/harness-concision-before-8yeqipol` の作業前copy、afterは2026-10-24時点の改訂後snapshotで、既存 `benchmarks/context-verification/reading/materials/B/<同path>` と全hashが一致する。`tests/context-concision.test.cjs` はこの歴史snapshotのhash/合計を再確認する。現在の追加機能による文書改訂のbytesや削減率を保証する値ではない。現行の意味境界とsection hash/全行被覆は別に検証する。前後の集合は既存 `scripts/context-routing.cjs` のsimple-code/mixedの入口・Yes本文・必要詳細から重複を除いたもの。計測方式/集合を変えて削減率を増やさない。
+[ファイル集合・前後サイズ・SHA-256](source-bytes.json)に各資料を列挙する。beforeは `<tmp>/harness-concision-before-8yeqipol` の作業前copy、afterは2026-10-24時点の改訂後snapshotで、既存 `benchmarks/context-verification/reading/materials/B/<同path>` と全hashが一致する。`tests/context-concision.test.cjs` はこの歴史snapshotのhash/合計を再確認する。現在の追加機能による文書改訂のbytesや削減率を保証する値ではない。現行の意味境界とsection hash/全行被覆は別に検証する。前後の集合は既存 `scripts/context-routing.cjs` のsimple-code/mixedの入口・Yes本文・必要詳細から重複を除いたもの。計測方式/集合を変えて削減率を増やさない。
 
 旧規則の意味対応は `plugins/codex-harness/skills/harness/references/routing/rule-map.md`。原文そのままの保証から、現行本文の意味境界・全行被覆/依存/例外検証と独立レビューへ移行する。完全一致の歴史fixtureおよび `benchmarks/context-routing.*` / `benchmarks/section-reading/` のraw・数値は変更していない。既存collectorの `--check` は10件の保存run・raw hash・event chain・summary・fixture hashを確認し、readerを再実行しない。
 

@@ -4,7 +4,7 @@
 - 仕様版: 1
 - 開始: 2026-10-06T13:48:00+09:00（時刻は概数）
 - コード基点: 82586eda58699e6d44e656689586e220befe41af
-- 作業場所: ~/dev/harness。既存の関連未コミット実装を使うため、これまでの承認済み運用に沿い共有checkoutで直列実装・レビュー。既存差分のreset/stash/一括commitなし。
+- 作業場所: <repo>。既存の関連未コミット実装を使うため、これまでの承認済み運用に沿い共有checkoutで直列実装・レビュー。既存差分のreset/stash/一括commitなし。
 - 担当範囲: knowledge検索・原資料取得CLI、配布build、harness参照手順と関連docs/tests。
 - 依存: knowledge-sync-analysis、activate-knowledge-memory（完了）
 - 実効設定: active/delegation/review/persistence/measurement/improvement_loop=true、max_agents=3、auto、pinなし。

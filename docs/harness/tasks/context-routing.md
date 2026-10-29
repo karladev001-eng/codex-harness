@@ -4,7 +4,7 @@
 - 仕様版: 2
 - 承認対象範囲: 既存ルールを維持した読込分岐、対応するYes/Noチャート、文書読込量の比較、配布とローカル反映
 - コード基点: 4c8dcd36c9022dc408daae63ecfa002efb29bb30
-- 編集前の正本コピー: `/private/tmp/harness-reading-baseline-sF9Ova`
+- 編集前の正本コピー: `<tmp>/harness-reading-baseline-sF9Ova`
 - 依存: なし。既存Claude連携は導入済み。
 
 ## 目的と確定方針
@@ -118,7 +118,7 @@
 - 受入4: 独立レビュー、必要なテスト、リンク/配布/導入確認を通し、既存の未コミット変更と所有管理を保持する。
 - 受入5: compact共通運用が自動実行を保証する機能ではない点と、ホスト自動圧縮の実行/失敗を観測できた範囲を、一次資料と現状を根拠に説明する。
 - 未解決事項: なし。削減量と実際の圧縮イベントの観測可否は検証対象。
-- 変更前コピー: `/private/tmp/harness-sections-before-d7dgz7zn`（manifest付き）。比較基準はv1完了時点とし、さらに前の20,625 bytes入口との比較で追加効果を膨らませない。
+- 変更前コピー: `<tmp>/harness-sections-before-d7dgz7zn`（manifest付き）。比較基準はv1完了時点とし、さらに前の20,625 bytes入口との比較で追加効果を膨らませない。
 - 実行: 関連未コミット変更を保持し同じcheckoutで直列編集、commit/stash/resetなし。親は仕様/記録、実装・評価・独立レビューを分担。実装/レビューはホスト候補のgpt-6.1-sol/high（依存保持の設計と厳密検証）。auto pinなし、基準値と候補一致、fork_turns=none。アカウント利用量前後はnull。
 
 

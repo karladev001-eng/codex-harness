@@ -7,7 +7,7 @@
 - 実装: gpt-6.1-sol/medium（互換性と配布設計）。レビュー: gpt-6.1-sol/high。統合: gpt-6-luna/low。
 - 範囲: 初期設定/手順/配布版番号/導入ドキュメント/移行テスト/ローカルtgz。
 - 対象外: 外部公開、Git push、常駐自動更新、個人の好みの自動同期。
-- 作業前スナップショット: `/private/tmp/harness-release-before-3fn3jz9s`。
+- 作業前スナップショット: `<tmp>/harness-release-before-3fn3jz9s`。
 - 計測開始記録: 2026-10-01T16:38:10Z（実装委譲後）。利用枠値は未取得。
 
 ## 受入条件

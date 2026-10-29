@@ -77,7 +77,7 @@
 - [blocks.md](https://github.com/anthropics/claude-plugins-community/blob/f60f0454df3045f724c43c6346ec80bdcc3472b2/html-plan/skills/html-plan/references/blocks.md): 部品の説明を確認。
 - [上流LICENSE](https://github.com/anthropics/claude-plugins-community/blob/f60f0454df3045f724c43c6346ec80bdcc3472b2/LICENSE): Apache 2.0。html-plan固有のLICENSE/NOTICEは取得したtreeにない。
 - [OpenAIのClaudeプラグイン移植案内](https://developers.openai.com/plugins/guides/submit-claude-plugin)、[スキル作成](https://developers.openai.com/plugins/build/skills): Codex側の構成・固有表現の置換を確認。
-- 上流参照用コピー: `/var/folders/5n/58z5gr_d2hjgv6nrfz6r9gvh0000gn/T/html-plan-upstream-6yaaou_a`。JS/packは関連部分を調査、未実行・未導入。実装承認後に変更対象を詳細確認する。
+- 上流参照用コピー: `<tmp>/html-plan-upstream-6yaaou_a`。JS/packは関連部分を調査、未実行・未導入。実装承認後に変更対象を詳細確認する。
 
 ## 実装承認と進捗
 
@@ -115,7 +115,7 @@
 - プロジェクト案内: [project-map](../project-map.md) — 既存の構成と確認方法。
 - この計画に対応するEXP/LOGは現時点で作成していない。実装・検証時に既存規約上必要な記録へ関連付ける。
 
-macOSのターミナルで、プロジェクトルート `~/dev/harness` から実行する。
+macOSのターミナルで、プロジェクトルート `<repo>` から実行する。
 
 ```sh
 open "docs/harness/previews/codex-html-plan.html"
@@ -124,7 +124,7 @@ open "docs/harness/previews/codex-html-plan.html"
 別の作業ディレクトリから開く場合:
 
 ```sh
-open "~/dev/harness/docs/harness/previews/codex-html-plan.html"
+open "<repo>/docs/harness/previews/codex-html-plan.html"
 ```
 
 これはローカルブラウザで表示するコマンドであり、実装や外部公開を開始しない。
@@ -142,10 +142,10 @@ open "~/dev/harness/docs/harness/previews/codex-html-plan.html"
 - 本体: Sol6.1/high。上流runtime/CSS/packを移植し、日本語・承認文案分離・計画ID/版/範囲別保存・保存OFF・関連記録手順を追加。
 - 配布: Luna/medium。authoring/build/installへ5つ目として追加、ハーネス開始前手順・雛形・レビューへ接続。従来4つの選択導入も維持。
 - 公式quick_validate: 一時venvのPyYAMLでPASS。利用者のスキル実行にはPython不要。
-- 全体検証: npm test、157/157 PASS、fail/skip 0。ログ /private/tmp/codex-html-plan-full-test.log。
+- 全体検証: npm test、157/157 PASS、fail/skip 0。ログ <tmp>/codex-html-plan-full-test.log。
 - ブラウザ: 127.0.0.1:8767/task-board.plan.htmlで閉じた全体像、仕様展開、Enter展開、状態図から取得失敗モック表示、回答と承認文案の分離、文案選択後もpending、390pxで横はみ出しなしを確認。headでbody未生成の不具合とdark配色を修正し再確認。
 - 画面証拠: [完成サンプルの承認欄](../previews/codex-html-plan-sample.jpg)。試験選択はリロードで破棄、未選択に復帰。sampleの承認は架空のTASK-42に対するpendingであり、本スキル作成の承認記録とは独立。
-- 独立試用: Sol6.1/medium、履歴なし、別tempプロジェクトで通知設定画面の仕様を作成。既存TASK/ADR/EXP/LOG/索引への相互リンク、開くコマンド/cwd、2つの未解決質問、承認pendingと本実装停止を確認。pack警告0、リンク/ID/版/保存分離検証PASS。生成物 /var/folders/5n/58z5gr_d2hjgv6nrfz6r9gvh0000gn/T/codex-html-plan-forward-onc8njnz/docs/tasks/notifications.plan.html。
+- 独立試用: Sol6.1/medium、履歴なし、別tempプロジェクトで通知設定画面の仕様を作成。既存TASK/ADR/EXP/LOG/索引への相互リンク、開くコマンド/cwd、2つの未解決質問、承認pendingと本実装停止を確認。pack警告0、リンク/ID/版/保存分離検証PASS。生成物 <tmp>/codex-html-plan-forward-onc8njnz/docs/tasks/notifications.plan.html。
 - 独立最終レビュー: Sol6.1/high、履歴なしで実行中。ホスト候補/effortを起動直前に確認。実導入はレビュー後。
 
 ## 完了記録（2026-10-08）
@@ -166,7 +166,7 @@ open "~/dev/harness/docs/harness/previews/codex-html-plan.html"
 - [完成サンプルHTML](../../../authoring-skills/codex-html-plan/examples/task-board.plan.html) — 架空のTASK-42/仕様v2。サンプル内は未承認を表示する。
 - [サンプルの正本と開き方](../../../authoring-skills/codex-html-plan/examples/records/TASK-42.md)
 
-macOS・zsh、実行ディレクトリ `~/dev/harness`:
+macOS・zsh、実行ディレクトリ `<repo>`:
 
 ```sh
 open "authoring-skills/codex-html-plan/examples/task-board.plan.html"
