@@ -57,7 +57,7 @@ npx --yes --package https://github.com/karladev001-eng/codex-harness/releases/do
 
 1. `setup --home <tmp>` が一時ホームでCodex導入とClaude導入（偽claude CLI）を行い、各手順の結果を返す。再実行で両方 `unchanged`。
 2. html-plan未導入の偽CLIに対し marketplace add と install を呼ぶ。導入済みを示す偽CLIでは呼ばず `unchanged`。`--html-plan false` では呼ばない。
-3. `--knowledge-repo` で settings.json に preferences を追記し、既存の他キーを保持する。同値の再実行は `unchanged`、別値が既にあれば変更せず失敗を報告する。`--knowledge-repo` 省略時は settings.json に触れない。
+3. `--knowledge-repo` で settings.json に preferences を追記し、既存の他キーを保持する。同値の再実行は `unchanged`、別値が既にあれば変更せず失敗を報告する。`--knowledge-repo` 省略時は knowledge 手順が settings.json に触れない（Codex導入に含まれる既存の旧保存先移行が旧settings.jsonを共有保存先へコピーする場合は除く。v1.1で明確化）。
 4. gh未ログイン（偽gh）で `ok=false`・終了コード2・`run_manually` に `gh auth login` を含む。ghを使ったログインは試みない。
 5. claude CLIがないとき、`--host all` はclaude系をskippedにして成功、`--host claude` は失敗。
 6. 不正なknowledge-repoは何も書かず終了コード1。
@@ -86,3 +86,7 @@ npx --yes --package https://github.com/karladev001-eng/codex-harness/releases/do
 ## 進捗・完了
 
 - 2026-11-18: パケット作成。
+- 実装: `harness:implementer`（sonnet / high。仕様は明確だが利用者の設定と導入処理を扱うため）。85c0390 → 8577cb6 → 05330a4。
+- レビュー1巡目（85c0390）: `harness:reviewer`（opus / high）NEEDS_WORK、Codex reviewer NEEDS_WORK。空の `--knowledge-repo`、登録失敗後の再実行などを修正。
+- レビュー2巡目（8577cb6）: 両者NEEDS_WORK。無効プラグインの再有効化、更新失敗後の再実行、検出の頑健性、リリース手順などを修正。
+- レビュー3巡目（05330a4）: Claude側PASS、Codex NEEDS_WORK（中以下5件）。ユーザーが追加の1巡を承認（「その方針で進めてください」）。受入条件3の文言を実際の移行動作に合わせてv1.1として明確化（意味の範囲は提案内）。
