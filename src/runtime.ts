@@ -10,6 +10,7 @@ import {
 } from './lib';
 import { install, uninstall } from './install';
 import { installClaude, uninstallClaude } from './claude';
+import { setup } from './setup';
 import { authoring } from './authoring';
 import { lessons } from './lessons';
 import { preferences, preferenceLocation } from './preferences';
@@ -218,6 +219,8 @@ const HELP = [
   '  status|doctor [--project PATH] [--home PATH] [--host codex|claude]',
   '  install [--home PATH] [--skills-dir PARENT] [--host codex|claude]',
   '  uninstall [--home PATH] [--host codex|claude]',
+  '  setup [--home PATH] [--host codex|claude|all] [--knowledge-repo OWNER/REPO] [--knowledge-branch BRANCH]',
+  '    [--html-plan true|false]',
   '  data where|migrate [--home PATH]',
   '  task create --id ID --goal TEXT --acceptance TEXT --scope PATH [--base HEAD]',
   '    [--depends-on ID] [--non-goal TEXT] [--constraint TEXT] [--reference TEXT] [--spec-revision 1]',
@@ -237,6 +240,8 @@ const HELP = [
   'Runtime task/worktree/measure/preferences commands accept --project and --home.',
   'Repeat --acceptance, --scope, --depends-on, --non-goal, --constraint, --reference, --skill.',
   'Settings: improvement_loop (boolean, default true), model_selection (auto|fixed, default auto).',
+  'setup installs for each host (default all), installs the upstream html-plan plugin for Claude Code, and with',
+  '--knowledge-repo records it in personal settings (branch default main) and checks `gh auth status`; rerun to update.',
   'Shared data lives in $HARNESS_HOME or ~/.agents/harness; data migrate copies a pre-0.5 ~/.codex/harness store.',
   'Status is read-only; auto models are resolved by the agent from the live host launch catalog.',
   'Authoring defaults to five skills in PROJECT/.agents/skills; it never activates orchestration.',
@@ -261,6 +266,7 @@ const COMMANDS: Record<string, CommandSpec> = {
   'doctor': { options: [...COMMON, 'host'] },
   'install': { options: ['home', 'skills-dir', 'host'] },
   'uninstall': { options: ['home', 'host'] },
+  'setup': { options: ['home', 'host', 'knowledge-repo', 'knowledge-branch', 'html-plan'] },
   'data where': { options: ['home'] },
   'data migrate': { options: ['home'] },
   'task create': {
@@ -378,6 +384,7 @@ export function execute(args: Json): Json {
   if (args.command === 'install') {
     return args.host === 'claude' ? installClaude(args) : { ...install(args), data: migrateData(args.home) };
   }
+  if (args.command === 'setup') return setup(args, () => doctor(canonical('.')));
   if (args.command === 'data') {
     return args.action === 'migrate' ? migrateData(args.home) : { data_home: dataHome(args.home) };
   }
@@ -438,7 +445,7 @@ export function main(argv = process.argv.slice(2)): number {
     return result.ok === false ? 2 : 0;
   } catch (error) {
     console.error('harness: ' + (error as Error).message);
-    return ['install', 'uninstall', 'authoring'].includes(argv[0]) ? 1 : 2;
+    return ['install', 'uninstall', 'authoring', 'setup'].includes(argv[0]) ? 1 : 2;
   }
 }
 

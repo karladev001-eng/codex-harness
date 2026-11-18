@@ -2,15 +2,47 @@
 
 Node.js 22以上・npmとスキル対応のCodexを用意します。Gitはworktreeでの隔離に使います。導入CLIはモデルやサブエージェントの利用権を付与しません。
 
+## 1コマンドで導入する（`setup`）
+
+新しいPCでは、GitHub Releaseに添付した配布tgzのURLを `npx` へ直接渡して `setup` を実行するのが最短です。ソースリポジトリは公開なので、Releaseのtgz取得にnpm認証やPATは要りません。CodexまたはClaude Codeの本体は先に導入してログインしておきます（`setup` は本体の導入やログインを代行しません）。
+
+```sh
+npx --yes --package https://github.com/karladev001-eng/codex-harness/releases/download/v0.5.0/karladev001-eng-codex-harness-0.5.0.tgz \
+  codex-harness setup --knowledge-repo karladev001-eng/harness-knowledge-base
+```
+
+PowerShellでは行継続の `\` を外して1行で実行します。このURLはRelease v0.5.0の作成後に有効です。作成前や取得できない環境では、後述のローカルtarball・checkoutの経路で同じ `setup` を実行できます（tgzのパスを置き換えるだけです）。
+
+`setup [--home PATH] [--host codex|claude|all] [--knowledge-repo OWNER/REPO] [--knowledge-branch BRANCH] [--html-plan true|false]`
+
+| 手順 | 内容 |
+| --- | --- |
+| `codex`（`--host` が `codex`・`all`） | `install` と同じCodex導入（旧 `~/.codex/harness` の設定・記憶の共有ストアへの移行を含む） |
+| `claude`（`claude`・`all`） | `install --host claude` と同じClaude Code導入。ファイルが最新でも `claude plugin list --json` にuser scopeの `harness@codex-harness` がなければ、前回の登録失敗とみなして登録をやり直す（`install --host claude` も、登録の成否を所有記録 `registered` に残し、失敗していれば再実行で同じ登録・更新を繰り返す）。`plugin list` を読めないときは推測で導入せず、手で実行するコマンドを返して失敗する。あっても版が配布物と違えば、前回の更新失敗とみなして `claude plugin marketplace update codex-harness` と `claude plugin update harness@codex-harness --scope user` を実行（`updated`）。無効にした項目（`enabled: false`）は触らず、`claude plugin enable harness@codex-harness --scope user` を案内する |
+| `html-plan`（Claude Code対象で既定true） | 上流の `html-plan@claude-community` を導入。`claude plugin list --json`（標準出力のみを解釈）にuser scopeの同じidの項目があれば、有効・無効にかかわらず導入済みとして `unchanged`。`claude plugin install` は無効にした項目を再び有効にしてしまうため、無効の項目は触らず `claude plugin enable html-plan@claude-community --scope user` を案内します。`--json` が失敗する・JSONとして読めないときだけ、通常の `claude plugin list` の文字列一致で代用します。marketplace登録済みなら登録を飛ばす。`--html-plan false` で行わない |
+| `knowledge`（`--knowledge-repo` 指定時のみ） | 個人設定 `~/.agents/harness/settings.json`（`HARNESS_HOME`）の `preferences.repository`・`branch`（既定 `main`）・`autosave=true` を追記。他の項目は保持し、同じ値なら `unchanged`。既に `autosave: false` なら `true` に変わります。`--host claude` だけで、旧 `~/.codex/harness` の設定しかない（共有先が未作成の）ときは、移行されないまま旧パスの `settings.json` に書きます |
+| `gh`（`--knowledge-repo` 指定時のみ） | `gh auth status --hostname github.com` の確認だけ。未ログインなら `gh auth login --hostname github.com` を `run_manually` に返す |
+| `doctor` | `doctor` 相当の環境確認 |
+
+既定は `--host all`、`--html-plan true`、`--knowledge-branch main` です。再実行が更新で、導入済みの手順は `unchanged` になります。Codex導入が失敗してもClaude Code導入は試すなど、独立した手順は1つの失敗で止まりません。出力は手順ごとの `{name, ok, status, ...}` を並べたJSONで、1つでも失敗すると終了コード2で `run_manually` に手で実行するコマンドを返します。
+
+- `claude` CLIがないとき、`--host all` はClaude Code側（`claude`・`html-plan`）を `skipped` にして成功とし、`--host claude` は失敗として返します。
+- 個人設定に別のrepository/branchが既にあるときは上書きせず `conflict` として失敗を報告します。tokenは書きません。
+- `--knowledge-repo` が `OWNER/REPO` の形でない、または `--host`・`--html-plan` の値が不正なときは、何も変更せず終了コード1です。`--knowledge-repo` を省略すると `setup` 自身は個人設定を書きません。ただしCodex向け（`--host codex`・`all`）では既存の `install` と同じ旧データの移行が走るため、旧 `~/.codex/harness/settings.json` があれば共有先へコピーされます。`--knowledge-branch` は `--knowledge-repo` と一緒にだけ指定でき、単独指定は何も変更せず終了コード1です。空の `--knowledge-repo` も不正です。設定ファイルは検証してから一時ファイル経由で置き換え、直前に内容が変わっていれば書かずに `conflict` を返しますが、直前の確認から置換までの間の変更は防げません。同じ個人設定を編集する複数の `setup` の同時実行には対応していません。個人設定が既存の読み込みと同じ検査（`max_agents` の範囲など）に通らないときは、書かずに失敗します。
+
+以降の「Claude Codeに導入する」にあるHTML仕様書用プラグインと、記憶共有の設定（[設定](configuration.md)）は、`setup` が行う手順に含まれます。個別に導入・設定したい場合だけ下の手順を使います。
+
 ## 配布状況
 
 2026-10-10にGitHub Packagesへ非公開npm版0.4.2を初めて配布し、2026-10-11に配布済みの最新版0.4.3を配布しました。registryからの取得には、指定版の配布完了とpackageアクセス権が必要です。ソースcheckoutの `private: true`・`UNLICENSED` を維持し、配布用stagingだけにGitHub Packages向けmanifestを生成します（[リリース手順](../maintainers/releasing.md)）。ソースリポジトリはGitHubで閲覧用に公開していますが、利用ライセンスは付与していません（`UNLICENSED`）。npmパッケージは引き続きGitHub Packagesでの非公開配布で、公開npmへのpublishとライセンス変更は行っていません。
 
-0.5.0（Claude Codeプラグイン、`consult-codex`、`codex-image` を含む）は **ローカルのリリース候補** で、GitHub Packagesへは未送信です（[VALIDATION](../../VALIDATION.md)の2026-10-28の記録）。そのため、registryの `@latest` で取得できるのは配布済みの版です。0.5.0の内容、特にClaude Codeへの導入（`--host claude`）は、現状ではローカルtarballまたはcheckoutの経路で行います。registryへ送った後は、下のnpm exec経路でも同じ操作ができます。
+0.5.0（Claude Codeプラグイン、`consult-codex`、`codex-image` を含む）は **ローカルのリリース候補** で、GitHub Packagesへは未送信です（[VALIDATION](../../VALIDATION.md)の2026-10-28の記録）。そのため、registryの `@latest` で取得できるのは配布済みの版です。0.5.0の内容、特にClaude Codeへの導入（`--host claude`）は、GitHub Releaseに添付したtgz（上の `setup`。Release作成後に取得できます）、ローカルtarball、checkoutのいずれかで行います。registryへの送信は行っておらず、その経路は補足です。配布するtgzには `setup` を含めます。`setup` を含める前に作ったtgzと、そのSHA-256は現在の候補には当てはまりません（[VALIDATION](../../VALIDATION.md)）。
 
 `codex-slide-plan` は任意追加スキルです。本体install/updateと指定なしのauthoring操作では配置・更新・削除しません。0.5.0のnpmパッケージまたはtgzから `--skill codex-slide-plan` で単独導入します（[別PC向けの導入手順](../../authoring-skills/INSTALL.md#codex-slide-planを任意追加する)）。
 
-## GitHub Packagesの非公開npm配布
+## 補足：GitHub Packagesの非公開npm配布
+
+この経路は補足です。新しいPCでは上の `setup`（Release tgz）を使います。npm認証とpackageアクセス権が必要で、配布済みの版は0.4.3までです。
 
 0.5.0（ローカルのリリース候補）では既定5スキルと任意追加のcodex-slide-planを収録します。registryからの取得には指定版の配布完了と[package](https://github.com/users/karladev001-eng/packages/npm/package/codex-harness)へのアクセス権が必要です。Node.js 22以上とnpmを用意し、ホームなどpackage.jsonのないディレクトリから実行できます。利用PCでclone、npm ci、TypeScriptビルドは不要です。
 
@@ -54,7 +86,7 @@ npm自体が取得エラーで終了した場合は導入CLIが実行されま�
 
 ## 受け取ったローカルtarballから導入
 
-配布元が作成した `karladev001-eng-codex-harness-0.5.0.tgz` をPCへコピーし、そのファイルを置いたディレクトリで実行します。受取側でcloneやTypeScriptコンパイルは不要です。取得可能な公開npm・GitHub Releaseは前提にしません。
+配布元が作成した `karladev001-eng-codex-harness-0.5.0.tgz` をPCへコピーし、そのファイルを置いたディレクトリで実行します。受取側でcloneやTypeScriptコンパイルは不要です。取得可能な公開npm・GitHub Releaseは前提にしません。`codex-harness doctor` と `install` の代わりに、同じ形で `setup` も実行できます（例：`npx --yes --package ./karladev001-eng-codex-harness-0.5.0.tgz codex-harness setup --host codex`）。
 
 macOS/Linux・Windows PowerShell共通：
 
@@ -101,7 +133,7 @@ CLIは配布物のmarketplaceを `~/.agents/claude-marketplaces/codex-harness` �
 
 Claude Code上でのモデルは設定の `hosts.claude.models`（既定：deterministic=haiku/low、standard=sonnet/medium、complex・review=opus/high）から選びます。プロジェクトの `.harness.json` に `{"hosts":{"claude":{"models":{"standard":{"model":"opus"}}}}}` のように書くと固定できます。Codex固有の手順の読み替えは[Claude Code向けの読み替え](../../plugins/codex-harness/skills/harness/references/hosts/claude-code.md)にあります。解除は `codex-harness uninstall --host claude` です。
 
-Claude CodeでのHTML仕様書は、上流の `html-plan` プラグインを使います。この導入には含まれないので、別に導入します（未導入なら同梱の `harness:codex-html-plan` を使います）。日本語・正本・実装承認の扱いはハーネスの規則に従います（[読み替え](../../plugins/codex-harness/skills/harness/references/hosts/claude-code.md#html仕様書)）。
+Claude CodeでのHTML仕様書は、上流の `html-plan` プラグインを使います。この `install --host claude` には含まれません。`setup` は導入まで行うので、`install` を直接使う場合だけ次のコマンドで別に導入します（未導入なら同梱の `harness:codex-html-plan` を使います）。日本語・正本・実装承認の扱いはハーネスの規則に従います（[読み替え](../../plugins/codex-harness/skills/harness/references/hosts/claude-code.md#html仕様書)）。
 
 ```sh
 claude plugin marketplace add anthropics/claude-plugins-community

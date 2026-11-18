@@ -84,13 +84,16 @@ npm run check:docs                # 文書リンクの検査
 
 ## 導入して使う
 
-GitHub Packagesへの非公開配布で、取得にはpackageアクセス権と認証が必要です。配布済みの最新版は0.4.3（2026-10-11。最初の配布は2026-10-10の0.4.2）です。Claude Codeプラグインを含む0.5.0は、ローカルのリリース候補でregistryへは未送信です。認証、版固定、更新、解除、PowerShell、競合時の対応は[導入ガイド](docs/guides/installation.md)にあります。認証済みなら、ホームなどpackage.jsonのない場所で次を実行すると、配布済みの版を導入できます。初回導入と更新は同じコマンドです。
+新しいPCでは、GitHub Releaseに添付した配布tgzのURLを `npx` へ渡し、`setup` を1回実行します。ソースリポジトリは公開なので、Releaseのtgz取得にnpm認証やPATは要りません。Node.js 22以上・npmと、CodexまたはClaude Codeの本体（ログイン済み）を先に用意します。
 
 ```sh
-npm exec --yes --prefer-online --registry=https://npm.pkg.github.com --package=@karladev001-eng/codex-harness@latest -- codex-harness install
+npx --yes --package https://github.com/karladev001-eng/codex-harness/releases/download/v0.5.0/karladev001-eng-codex-harness-0.5.0.tgz \
+  codex-harness setup --knowledge-repo karladev001-eng/harness-knowledge-base
 ```
 
-Claude Code向けは、現状ではローカルtarballまたはcheckoutから `install --host claude` で導入します（[Claude Codeに導入する](docs/guides/installation.md#claude-codeに導入する)）。導入後は新しいチャットで、対象プロジェクトを開いて依頼します。
+`setup` は、Codex導入、Claude Code導入、Claude Code用の上流 `html-plan` プラグイン導入、`--knowledge-repo` で指定した記憶共有設定の追記、`gh` のログイン確認、最後の状態確認を1回で行います。再実行が更新です。`claude` CLIがなければClaude Code側の手順はスキップし、失敗した手順は手で実行するコマンドを返します。`gh auth login` やCLIへのログインは代行しません。`--host codex|claude|all`・`--html-plan false`・`--knowledge-repo` の省略などの指定、詳しい動作、取得できない場合は[導入ガイド](docs/guides/installation.md)にあります。上のURLはRelease v0.5.0の作成後に有効になります（作成前は[導入ガイド](docs/guides/installation.md#配布状況)の他の経路を使います）。
+
+補足として、GitHub Packagesの非公開npm配布（0.4.3まで配布済み。npm認証が必要）と、tarball・checkoutからの導入もあります。認証、版固定、更新、解除、PowerShell、競合時の対応は[導入ガイド](docs/guides/installation.md)にまとめています。導入後は新しいチャットで、対象プロジェクトを開いて依頼します。
 
 > この機能を追加したいです。まず仕様と受入条件を説明してください。画面変更があるのでモックも提示してください。
 
@@ -121,7 +124,7 @@ Chrome拡張とRaycast検索は本体の必須依存ではなく、本体のinst
 
 | パス | 内容 |
 | --- | --- |
-| `src/` | TypeScript実装のCLI（`runtime.ts` が入口、`lib.ts` が設定と安全なパス処理、`install.ts` と `claude.ts` が導入、`preferences.ts`・`lessons.ts`・`identity.ts`・`records.ts` が制作記憶と技術的知見の保存・GitHub同期） |
+| `src/` | TypeScript実装のCLI（`runtime.ts` が入口、`lib.ts` が設定と安全なパス処理、`install.ts` と `claude.ts` が導入、`setup.ts` が1コマンドの導入、`preferences.ts`・`lessons.ts`・`identity.ts`・`records.ts` が制作記憶と技術的知見の保存・GitHub同期） |
 | `plugins/codex-harness/` | スキル本体（SKILL.md、routing・hosts等の手順書、相談スキル、assets） |
 | `plugins/claude-harness/` | Claude Code用のエージェント定義、hook、eval |
 | `authoring-skills/` | 独立して導入できる6スキル |
