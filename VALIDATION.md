@@ -8,7 +8,7 @@ Knowledgeの隔離試験は[運用ガイドの検証範囲](docs/guides/knowledg
 
 ## 2026-11-18: 0.5.0候補に `setup` コマンドを追加
 
-0.5.0の候補（版は0.5.0のまま。未配布）に、Codex導入・Claude Code導入・上流 `html-plan` 導入・記憶共有設定の追記・`gh` ログイン確認・状態確認を1回で行う `setup` を追加した。実装は `src/setup.ts`、試験は `tests/setup.test.cjs`。外部CLIは一時ホームと偽の `claude`・`gh`（PATH上のPOSIXスクリプト）で確認し、実ホーム、実際のGitHub認証、`gh auth login`、GitHub Release・GitHub Packagesへの操作は行っていない。macOS、Node.js 22以上で `npm test` 327件すべて成功、`check:docs` エラー0。
+0.5.0の候補（版は0.5.0のまま。未配布）に、Codex導入・Claude Code導入・上流 `html-plan` 導入・記憶共有設定の追記・`gh` ログイン確認・状態確認を1回で行う `setup` を追加した。実装は `src/setup.ts`、試験は `tests/setup.test.cjs`。外部CLIは一時ホームと偽の `claude`・`gh`（PATH上のPOSIXスクリプト）で確認し、実ホーム、実際のGitHub認証、`gh auth login`、GitHub Release・GitHub Packagesへの操作は行っていない。macOS、Node.js 22以上で `npm test` 329件すべて成功、`check:docs` エラー0。導入済みの判定は、実機のClaude Code 2.1.319で読み取りのみ確認した `claude plugin list --json`（`id`・`scope`・`enabled` を持つ配列）の形に合わせ、偽CLIも同じ形にした。
 この変更で配布物の内容が変わったため、`setup` を含める前に作ったtgzと、そのSHA-256やその検証結果は、この候補には当てはまらない。Releaseに添付するtgzは作り直し、SHA-256を新しく記録する（[リリース手順](docs/maintainers/releasing.md#github-releaseへtgzを添付する)）。GitHub Releaseは未作成で、tgzのURLからの `npx ... setup` は実機で未確認。実際の `claude plugin list` の出力形式に対するhtml-plan導入済みの判定も、偽CLIでの確認にとどまる。
 
 ## 2026-10-29: Windows CI移植性と可読性リファクタリング

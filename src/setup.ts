@@ -6,11 +6,11 @@ import path from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 import { spawnSync } from 'node:child_process';
 import {
-  DEFAULTS, dataHome, exists, invalidPreferenceTarget, isObject, Json, mergeSettings, migrateData, readJson,
-  rejectSymlink,
+  DEFAULTS, REPOSITORY_PATTERN, dataHome, exists, invalidPreferenceTarget, isObject, Json, mergeSettings,
+  migrateData, rejectSymlink,
 } from './lib';
 import { install } from './install';
-import { cli, installClaude } from './claude';
+import { cli, installClaude, MARKETPLACE, PLUGIN } from './claude';
 
 export interface SetupArgs {
   home?: string;
@@ -43,6 +43,9 @@ function attempt(name: string, work: () => Json): Json {
 
 const skipped = (name: string, reason: string): Json => ({ name, ok: true, status: 'skipped', reason });
 
+const invalidBranch = (branch: string): boolean =>
+  invalidPreferenceTarget({ repository: 'owner/repo', branch, project_key: '' });
+
 /** Checked before any step runs, so invalid input changes nothing. */
 function validate(args: SetupArgs): { host: string; htmlPlan: boolean; repository?: string; branch: string } {
   const host = args.host ?? 'all';
@@ -50,14 +53,15 @@ function validate(args: SetupArgs): { host: string; htmlPlan: boolean; repositor
   if (!['true', 'false'].includes(args.html_plan ?? 'true')) throw new Error('--html-plan must be true or false');
   const repository = args.knowledge_repo;
   const branch = args.knowledge_branch ?? 'main';
-  if (repository !== undefined) {
-    const target = (repo: string, name: string) => ({ repository: repo, branch: name, project_key: '' });
-    if (invalidPreferenceTarget(target(repository, 'main'))) {
-      throw new Error('--knowledge-repo must look like OWNER/REPO');
-    }
-    if (invalidPreferenceTarget(target(repository, branch))) {
-      throw new Error('--knowledge-branch must be a branch name without spaces or control characters');
-    }
+  // invalidPreferenceTarget accepts an empty repository, so the pattern is checked directly.
+  if (repository !== undefined && !REPOSITORY_PATTERN.test(repository)) {
+    throw new Error('--knowledge-repo must look like OWNER/REPO');
+  }
+  if (invalidBranch(branch)) {
+    throw new Error('--knowledge-branch must be a branch name without spaces or control characters');
+  }
+  if (repository === undefined && args.knowledge_branch !== undefined) {
+    throw new Error('--knowledge-branch requires --knowledge-repo');
   }
   return { host, htmlPlan: (args.html_plan ?? 'true') === 'true', repository, branch };
 }
@@ -67,12 +71,30 @@ function codexStep(home?: string): Json {
   return { ...install({ home }), data: migrateData(home) };
 }
 
-function htmlPlanStep(home?: string): Json {
-  const installed = cli(['plugin', 'list'], home, FULL_OUTPUT);
-  if (installed.ok && lists(installed.output, HTML_PLAN)) return { status: 'unchanged' };
+/**
+ * Whether `plugin list --json` shows `id` installed at user scope and enabled. The text match is only a
+ * fallback for output that cannot be parsed as JSON; it cannot see scope or enabled state.
+ */
+function pluginInstalled(output: string, id: string): boolean {
+  let entries: unknown = null;
+  try {
+    entries = JSON.parse(output);
+  } catch { /* not JSON */ }
+  if (!Array.isArray(entries)) return lists(output, id);
+  return entries.some(entry => isObject(entry) && entry.id === id && entry.scope === 'user' && entry.enabled !== false);
+}
+
+interface MarketplaceRef { name: string; add: string[] }
+
+/** Installs `plugin` at user scope unless already there; adds its marketplace first when it is not registered. */
+function ensurePlugin(home: string | undefined, plugin: string, marketplace: MarketplaceRef): Json {
+  const installed = cli(['plugin', 'list', '--json'], home, FULL_OUTPUT);
+  if (installed.ok && pluginInstalled(installed.output, plugin)) return { status: 'unchanged' };
   const known = cli(['plugin', 'marketplace', 'list'], home, FULL_OUTPUT);
-  const steps = [['plugin', 'install', HTML_PLAN, '--scope', 'user']];
-  if (!(known.ok && lists(known.output, COMMUNITY))) steps.unshift(['plugin', 'marketplace', 'add', COMMUNITY_SOURCE]);
+  const steps = [['plugin', 'install', plugin, '--scope', 'user']];
+  if (!(known.ok && lists(known.output, marketplace.name))) {
+    steps.unshift(['plugin', 'marketplace', 'add', ...marketplace.add]);
+  }
   const commands = steps.map(step => ['claude', ...step].join(' '));
   const results = [];
   for (const step of steps) {
@@ -83,15 +105,40 @@ function htmlPlanStep(home?: string): Json {
   return { status: 'installed', commands };
 }
 
-/** Writes through a temporary file in the same directory so a crash never leaves partial settings. */
-function writeSettings(file: string, data: Json): void {
+const htmlPlanStep = (home?: string): Json =>
+  ensurePlugin(home, HTML_PLAN, { name: COMMUNITY, add: [COMMUNITY_SOURCE] });
+
+function claudeStep(home?: string): Json {
+  const result = installClaude({ home });
+  const manual = result.registration?.run_manually;
+  if (manual) return { ...result, run_manually: manual };
+  if (result.status !== 'unchanged') return result;
+  // installClaude reports `unchanged` without registering, so a run whose registration failed would look healthy.
+  const repaired = ensurePlugin(home, PLUGIN, { name: MARKETPLACE, add: [result.target, '--scope', 'user'] });
+  if (repaired.status === 'unchanged') return result;
+  return { ...result, ...repaired, status: repaired.status === 'installed' ? 'registered' : repaired.status };
+}
+
+/**
+ * Writes through a temporary file in the same directory so a crash never leaves partial settings. The file is
+ * created with its final mode (0o600 when new). `snapshot` is the content the new data was derived from: just
+ * before the rename the destination is read again and, if it changed, nothing is written and false is returned.
+ * This narrows the race with another writer but does not eliminate it.
+ */
+export function writeSettings(file: string, data: Json, snapshot: Buffer | null): boolean {
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  const mode = exists(file) ? fs.statSync(file).mode & 0o777 : null;
+  const mode = snapshot ? fs.statSync(file).mode & 0o777 : 0o600;
   const temporary = `${file}.${process.pid}.${Date.now()}.tmp`;
   try {
-    fs.writeFileSync(temporary, JSON.stringify(data, null, 2) + '\n', { encoding: 'utf8', flag: 'wx' });
-    if (mode !== null) fs.chmodSync(temporary, mode);
+    fs.writeFileSync(temporary, JSON.stringify(data, null, 2) + '\n', { encoding: 'utf8', flag: 'wx', mode });
+    const current = exists(file) ? fs.readFileSync(file) : null;
+    const changed = snapshot ? !current?.equals(snapshot) : current !== null;
+    if (changed) {
+      fs.rmSync(temporary, { force: true });
+      return false;
+    }
     fs.renameSync(temporary, file);
+    return true;
   } catch (error) {
     fs.rmSync(temporary, { force: true });
     throw error;
@@ -102,8 +149,8 @@ function writeSettings(file: string, data: Json): void {
 function knowledgeStep(home: string | undefined, repository: string, branch: string): Json {
   const file = path.join(dataHome(home), 'settings.json');
   rejectSymlink(file, 'Personal settings');
-  const current = exists(file) ? readJson(file) : {};
-  if (!isObject(current)) throw new Error('Personal settings must be a JSON object: ' + file);
+  const snapshot = exists(file) ? fs.readFileSync(file) : null;
+  const current = snapshot ? parseSettings(snapshot, file) : {};
   if (current.preferences !== undefined && !isObject(current.preferences)) {
     throw new Error('Personal settings "preferences" must be an object: ' + file);
   }
@@ -124,8 +171,27 @@ function knowledgeStep(home: string | undefined, repository: string, branch: str
   if (isDeepStrictEqual(current, next)) return { status: 'unchanged', file };
   // Refuse to write a file the harness itself would reject when it reads its settings.
   mergeSettings(structuredClone(DEFAULTS), next);
-  writeSettings(file, next);
+  if (!writeSettings(file, next, snapshot)) {
+    return {
+      ok: false,
+      status: 'conflict',
+      file,
+      error: 'Personal settings changed while setup was running; nothing was written',
+      run_manually: ['Rerun setup'],
+    };
+  }
   return { status: current.preferences === undefined ? 'configured' : 'updated', file, repository, branch };
+}
+
+function parseSettings(bytes: Buffer, file: string): Json {
+  let value: unknown;
+  try {
+    value = JSON.parse(bytes.toString('utf8'));
+  } catch (error) {
+    throw new Error(`Cannot read JSON ${file}: ${error}`);
+  }
+  if (!isObject(value)) throw new Error('Personal settings must be a JSON object: ' + file);
+  return value;
 }
 
 /** Only checks the login; logging in is left to the user, and no token is read or written. */
@@ -149,7 +215,7 @@ export function setup(args: SetupArgs, doctor: () => Json): Json {
     const available = cli(['--version'], args.home).ok;
     const missing = 'claude CLI not found; install Claude Code, then rerun setup';
     if (available) {
-      steps.push(attempt('claude', () => installClaude({ home: args.home })));
+      steps.push(attempt('claude', () => claudeStep(args.home)));
     } else if (host === 'all') {
       steps.push(skipped('claude', missing));
     } else {
@@ -159,7 +225,8 @@ export function setup(args: SetupArgs, doctor: () => Json): Json {
         ok: false,
         status: 'failed',
         reason: missing,
-        run_manually: ['Install Claude Code (https://claude.com/claude-code)', 'codex-harness setup --host claude'],
+        // `codex-harness` may not be on PATH when setup was started through npx, so no command line is suggested.
+        run_manually: ['Install Claude Code (https://claude.com/claude-code)', 'Rerun the same setup command'],
       });
     }
     if (!htmlPlan) steps.push(skipped('html-plan', '--html-plan false'));

@@ -4,21 +4,28 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const lib = require('../dist/skill/lib.js');
+const { writeSettings } = require('../dist/skill/setup.js');
 const { fixture, write, run, cli } = require('./helpers.cjs');
 // The fake CLIs are POSIX shebang scripts, which Windows cannot execute from PATH.
 const posix = { skip: process.platform === 'win32' };
 const community = 'anthropics/claude-plugins-community';
 const login = 'gh auth login --hostname github.com';
 
-// `plugin list` / `plugin marketplace list` print the files in state/, and every call is logged.
+// `plugin list --json` and `plugin marketplace list` print the files in state/, and every call is logged.
+// A file named failadd in state/ makes `plugin marketplace add` fail. The JSON shape mirrors the real
+// `claude plugin list --json`: an array of { id, version, scope, enabled, ... }.
+const entry = (id, extra = {}) => ({ id, version: '1.0.0', scope: 'user', enabled: true, installPath: '/x', ...extra });
+const listing = (...entries) => JSON.stringify(entries, null, 2);
 function fakeClaude(f, { failInstall } = {}) {
   const bin = path.join(f.base, 'bin'), log = path.join(f.base, 'claude.log'), state = path.join(f.base, 'state');
   fs.mkdirSync(state, { recursive: true });
-  const show = name => `if [ -f "${path.join(state, name)}" ]; then while IFS= read -r line; do echo "$line"; done < "${path.join(state, name)}"; fi`;
+  const show = name => `if [ -f "${path.join(state, name)}" ]; then while IFS= read -r line || [ -n "$line" ]; do echo "$line"; done < "${path.join(state, name)}"; fi`;
   write(path.join(bin, 'claude'), `#!/bin/sh
 echo "$CLAUDE_CONFIG_DIR|$*" >> "${log}"
 case "$*" in
+  "plugin list --json") ${show('plugins.json')};;
   "plugin list") ${show('plugins')};;
+  "plugin marketplace add"*) if [ -f "${path.join(state, 'failadd')}" ]; then exit 3; fi;;
   "plugin marketplace list") ${show('marketplaces')};;
   "plugin install html-plan@claude-community"*) ${failInstall ? 'exit 3' : ':'};;
 esac
@@ -56,7 +63,7 @@ test('setup installs Codex and Claude Code into a temporary home and a rerun rep
   assert.equal(step(first, 'doctor').ok, true);
   // Nothing was asked for the knowledge repository, so the personal settings are not created.
   assert.equal(fs.existsSync(shared(f)), false);
-  claude.state('plugins', 'harness@codex-harness\nhtml-plan@claude-community\n');
+  claude.state('plugins.json', listing(entry('harness@codex-harness'), entry('html-plan@claude-community')));
   const again = setup(f);
   assert.equal(again.code, 0, again.error);
   assert.deepEqual(['codex', 'claude', 'html-plan'].map(name => step(again, name).status), ['unchanged', 'unchanged', 'unchanged']);
@@ -66,26 +73,34 @@ test('setup registers html-plan only when it is missing and skips the marketplac
   const f = fixture(t), claude = fakeClaude(f);
   const installed = setup(f, '--host', 'claude');
   assert.equal(installed.code, 0, installed.error); assert.equal(step(installed, 'html-plan').status, 'installed');
-  assert.deepEqual(claude.calls().slice(-4), ['plugin list', 'plugin marketplace list', `plugin marketplace add ${community}`, 'plugin install html-plan@claude-community --scope user']);
+  assert.deepEqual(claude.calls().slice(-4), ['plugin list --json', 'plugin marketplace list', `plugin marketplace add ${community}`, 'plugin install html-plan@claude-community --scope user']);
 
   const second = fixture(t), known = fakeClaude(second);
   known.state('marketplaces', 'codex-harness\nclaude-community\n');
   assert.equal(setup(second, '--host', 'claude').code, 0);
-  assert.deepEqual(known.calls().slice(-3), ['plugin list', 'plugin marketplace list', 'plugin install html-plan@claude-community --scope user']);
+  assert.deepEqual(known.calls().slice(-3), ['plugin list --json', 'plugin marketplace list', 'plugin install html-plan@claude-community --scope user']);
 
-  // A similarly named plugin or marketplace is not a match.
+  // A similarly named plugin, another marketplace, another scope or a disabled entry is not a match.
   const near = fixture(t), lookalike = fakeClaude(near);
-  lookalike.state('plugins', 'my-html-plan@claude-community\nhtml-plan@other\n');
+  lookalike.state('plugins.json', listing(entry('my-html-plan@claude-community'), entry('html-plan@other'),
+    entry('html-plan@claude-community', { scope: 'project' }), entry('html-plan@claude-community', { scope: 'local' }),
+    entry('html-plan@claude-community', { enabled: false })));
   lookalike.state('marketplaces', 'claude-plugins-community\n');
   assert.equal(setup(near, '--host', 'claude').code, 0);
   assert.deepEqual(lookalike.calls().slice(-2), [`plugin marketplace add ${community}`, 'plugin install html-plan@claude-community --scope user']);
 
-  // The entry is found even when earlier output is longer than the default output limit.
+  // The user-scope entry is found among long output, and nothing is installed.
   const present = fixture(t), listed = fakeClaude(present);
-  listed.state('plugins', 'first\n' + 'x'.repeat(5000) + '\n  html-plan@claude-community  Version: 1\n' + 'y'.repeat(5000) + '\n');
+  listed.state('plugins.json', listing(entry('a@b', { installPath: 'x'.repeat(5000) }), entry('html-plan@claude-community'), entry('c@d', { installPath: 'y'.repeat(5000) })));
   const result = setup(present, '--host', 'claude');
   assert.equal(step(result, 'html-plan').status, 'unchanged');
   assert.equal(listed.calls().some(call => call.startsWith('plugin install html-plan')), false);
+
+  // Only when the output is not JSON does the plain-text match apply.
+  const text = fixture(t), plain = fakeClaude(text);
+  plain.state('plugins.json', 'first\n' + 'x'.repeat(5000) + '\n  html-plan@claude-community  Version: 1\n');
+  assert.equal(step(setup(text, '--host', 'claude'), 'html-plan').status, 'unchanged');
+  assert.equal(plain.calls().some(call => call.startsWith('plugin install html-plan')), false);
 });
 
 test('setup --html-plan false never calls the html-plan commands', posix, t => {
@@ -215,20 +230,75 @@ test('without the claude CLI, --host all skips the Claude steps and --host claud
   const only = fixture(t);
   const failed = setup(only, '--host', 'claude');
   assert.equal(failed.code, 2); assert.equal(failed.data.ok, false);
-  assert.equal(step(failed, 'claude').status, 'failed'); assert.ok(failed.data.run_manually.includes('codex-harness setup --host claude'));
+  assert.equal(step(failed, 'claude').status, 'failed'); assert.ok(failed.data.run_manually.includes('Rerun the same setup command')); assert.equal(failed.data.run_manually.some(line => /codex-harness setup/.test(line)), false);
   // No half-installed marketplace is left behind to hide the registration on the next run.
   assert.equal(fs.existsSync(path.join(only.home, '.agents')), false);
 });
 
 test('invalid arguments change nothing and exit with code 1', t => {
   const f = fixture(t);
-  for (const args of [['--knowledge-repo', 'not-a-repo'], ['--knowledge-repo', 'a/b/c'], ['--knowledge-repo', 'bad owner/repo'], ['--knowledge-repo', '/repo'],
+  for (const args of [['--knowledge-repo', 'not-a-repo'], ['--knowledge-repo', 'a/b/c'], ['--knowledge-repo', 'bad owner/repo'], ['--knowledge-repo', '/repo'], ['--knowledge-repo='], ['--knowledge-repo', ''], ['--knowledge-branch', 'dev'], ['--knowledge-branch', ''], ['--knowledge-branch', 'has space'],
     ['--knowledge-repo', 'owner/repo', '--knowledge-branch', 'has space'], ['--host', 'mars'], ['--html-plan', 'maybe']]) {
     const result = setup(f, ...args);
     assert.equal(result.code, 1, args.join(' ')); assert.match(result.error, /^harness: /);
     assert.equal(fs.existsSync(f.home), false, args.join(' '));
   }
   assert.equal(setup(f, '--unknown', 'x').code, 1);
+});
+
+test('a failed Claude registration is reported with its commands and a rerun retries it', posix, t => {
+  const f = fixture(t), claude = fakeClaude(f), target = lib.canonical(path.join(f.home, '.agents/claude-marketplaces/codex-harness'));
+  claude.state('failadd', '');
+  const failed = setup(f, '--host', 'claude', '--html-plan', 'false');
+  assert.equal(failed.code, 2); assert.equal(step(failed, 'claude').ok, false);
+  const commands = [`claude plugin marketplace add ${target} --scope user`, 'claude plugin install harness@codex-harness --scope user'];
+  assert.deepEqual(step(failed, 'claude').run_manually, commands); assert.deepEqual(failed.data.run_manually, commands);
+
+  // The files are already staged, so installClaude alone would now say unchanged; setup registers anyway.
+  fs.rmSync(path.join(f.base, 'state/failadd'));
+  const retried = setup(f, '--host', 'claude', '--html-plan', 'false');
+  assert.equal(retried.code, 0, retried.error); assert.equal(step(retried, 'claude').status, 'registered');
+  assert.deepEqual(claude.calls().slice(-4), ['plugin list --json', 'plugin marketplace list', `plugin marketplace add ${target} --scope user`, 'plugin install harness@codex-harness --scope user']);
+
+  // Once the plugin is listed at user scope, nothing is installed again.
+  claude.state('plugins.json', listing(entry('harness@codex-harness')));
+  const before = claude.calls().length;
+  assert.equal(step(setup(f, '--host', 'claude', '--html-plan', 'false'), 'claude').status, 'unchanged');
+  assert.deepEqual(claude.calls().slice(before), ['--version', 'plugin list --json']);
+
+  // A project-scope or disabled entry does not count, and a registered marketplace is not added again.
+  claude.state('plugins.json', listing(entry('harness@codex-harness', { scope: 'project' }), entry('harness@codex-harness', { enabled: false })));
+  claude.state('marketplaces', 'codex-harness\n');
+  const mark = claude.calls().length;
+  assert.equal(step(setup(f, '--host', 'claude', '--html-plan', 'false'), 'claude').status, 'registered');
+  assert.deepEqual(claude.calls().slice(mark).slice(-1), ['plugin install harness@codex-harness --scope user']);
+  assert.equal(claude.calls().slice(mark).some(call => call.startsWith('plugin marketplace add')), false);
+
+  // If the retry fails again, the step fails with the commands.
+  const g = fixture(t), again = fakeClaude(g);
+  assert.equal(setup(g, '--host', 'claude', '--html-plan', 'false').code, 0);
+  again.state('failadd', '');
+  const still = setup(g, '--host', 'claude', '--html-plan', 'false');
+  assert.equal(still.code, 2); assert.equal(step(still, 'claude').status, 'failed'); assert.ok(step(still, 'claude').run_manually.length > 0);
+});
+
+test('settings are written through a temporary file with the final mode and refuse a changed destination', posix, t => {
+  const f = fixture(t), file = path.join(f.base, 'harness/settings.json');
+  assert.equal(writeSettings(file, { a: 1 }, null), true);
+  assert.equal(fs.statSync(file).mode & 0o777, 0o600); assert.equal(fs.readFileSync(file, 'utf8'), '{\n  "a": 1\n}\n');
+  fs.chmodSync(file, 0o640);
+  const snapshot = fs.readFileSync(file);
+  assert.equal(writeSettings(file, { a: 2 }, snapshot), true);
+  assert.equal(fs.statSync(file).mode & 0o777, 0o640); assert.deepEqual(JSON.parse(fs.readFileSync(file, 'utf8')), { a: 2 });
+  // The destination changed after the snapshot: nothing is written and no temporary file is left.
+  const stale = fs.readFileSync(file);
+  fs.writeFileSync(file, '{"a":3}');
+  assert.equal(writeSettings(file, { a: 4 }, stale), false);
+  assert.equal(fs.readFileSync(file, 'utf8'), '{"a":3}');
+  // A file that appeared after a "missing" snapshot is also kept.
+  assert.equal(writeSettings(file, { a: 5 }, null), false);
+  assert.equal(fs.readFileSync(file, 'utf8'), '{"a":3}');
+  assert.deepEqual(fs.readdirSync(path.dirname(file)), ['settings.json']);
 });
 
 test('--help lists the setup command and its options', t => {

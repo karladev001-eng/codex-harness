@@ -94,8 +94,8 @@ authoringは `authoring install --project "$task_project" --skill inspect-harnes
 作成前に確認する事項：
 
 - `package.json` の版と、作成するタグ `v<version>`（例：`v0.5.0`）が一致し、そのタグのReleaseがまだ存在しない（`gh release view v0.5.0` が見つからない）。
-- Releaseの元にするcommitがpush済みで、`npm test` と `npm run check:docs` がそのcommitで通っている。追跡ファイルに個人のパスやtokenがない。
-- tgzは、そのcommitのcheckoutで `npm pack` したもの。`tar -tzf` で一覧を確認し、`dist/skill/setup.js` が入っている。
+- Releaseの元にするcommit（完全なSHA。`git rev-parse HEAD`）がpush済みで、作業ツリーに未コミットの変更がなく、`npm test` と `npm run check:docs` がそのcommitで通っている。追跡ファイルに個人のパスやtokenがない。
+- tgzは、そのcommitそのものをcheckoutして `npm pack` したもの（packした時点の `git rev-parse HEAD` が、Releaseの元にするSHAと一致する）。`tar -tzf` で一覧を確認し、`dist/skill/setup.js` が入っている。
 - 一時ホームで、tgzからの `setup --home <一時ディレクトリ> --host codex --html-plan false` が成功し、再実行が `unchanged` になる。実ホームの `~/.claude` などへ試験導入しない。
 - `gh auth status` が対象リポジトリへ書けるアカウントでログイン済み。ログインや権限の変更は利用者自身が行う。
 - Release本文にtoken・個人情報・未公開の情報を入れていない。
@@ -106,12 +106,14 @@ authoringは `authoring install --project "$task_project" --skill inspect-harnes
 mkdir -p "/tmp/codex-harness-release"
 npm pack --pack-destination "/tmp/codex-harness-release"
 shasum -a 256 "/tmp/codex-harness-release/karladev001-eng-codex-harness-0.5.0.tgz"
+commit="$(git rev-parse HEAD)"   # packしたcommitそのもの。短縮形やブランチ名は使わない
 gh release create v0.5.0 "/tmp/codex-harness-release/karladev001-eng-codex-harness-0.5.0.tgz" \
+  --target "$commit" \
   --title "v0.5.0" \
   --notes "Codex Harness 0.5.0. Install with: npx --yes --package <this tgz URL> codex-harness setup"
 ```
 
-PowerShellでは `Get-FileHash -Algorithm SHA256 <tgz>` でSHA-256を求め、行継続の `\` を外して1行で実行します。`gh release create` は添付するtgzを検証済みの同じファイルにします。作成後に再packしたものは別の配布物で、SHA-256も変わります。
+PowerShellでは `Get-FileHash -Algorithm SHA256 <tgz>` でSHA-256を求め、行継続の `\` を外して1行で実行します。`gh release create` は添付するtgzを検証済みの同じファイルにし、`--target` でタグを作るcommitをpackしたcommitに固定します（既にタグをpushしてある場合は `--target` の代わりに `--verify-tag` を使い、そのタグが同じcommitを指すことを `git rev-parse v0.5.0^{commit}` で確認します）。作成後に再packしたものは別の配布物で、SHA-256も変わります。
 
 `npm pack` で作ったtgzのSHA-256は、Releaseを作る前に[VALIDATION](../../VALIDATION.md)へ日付つきで記録します（Release本文にも書けます）。作成後に、添付したtgzをダウンロードし直してSHA-256が記録と一致すること、次のURLで取得できることを確認します。
 

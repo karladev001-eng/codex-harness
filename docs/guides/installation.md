@@ -18,9 +18,9 @@ PowerShellでは行継続の `\` を外して1行で実行します。このURL�
 | 手順 | 内容 |
 | --- | --- |
 | `codex`（`--host` が `codex`・`all`） | `install` と同じCodex導入（旧 `~/.codex/harness` の設定・記憶の共有ストアへの移行を含む） |
-| `claude`（`claude`・`all`） | `install --host claude` と同じClaude Code導入 |
-| `html-plan`（Claude Code対象で既定true） | 上流の `html-plan@claude-community` を導入。導入済みなら `unchanged`、marketplace登録済みなら登録を飛ばす。`--html-plan false` で行わない |
-| `knowledge`（`--knowledge-repo` 指定時のみ） | 個人設定 `~/.agents/harness/settings.json`（`HARNESS_HOME`）の `preferences.repository`・`branch`（既定 `main`）・`autosave=true` を追記。他の項目は保持し、同じ値なら `unchanged` |
+| `claude`（`claude`・`all`） | `install --host claude` と同じClaude Code導入。ファイルが最新でも `claude plugin list --json` にuser scopeの `harness@codex-harness` がなければ、前回の登録失敗とみなして登録をやり直す |
+| `html-plan`（Claude Code対象で既定true） | 上流の `html-plan@claude-community` を導入。`claude plugin list --json` にuser scopeで有効な項目があれば導入済みとして `unchanged`（JSONとして読めない出力のときだけ文字列一致で代用）、marketplace登録済みなら登録を飛ばす。`--html-plan false` で行わない |
+| `knowledge`（`--knowledge-repo` 指定時のみ） | 個人設定 `~/.agents/harness/settings.json`（`HARNESS_HOME`）の `preferences.repository`・`branch`（既定 `main`）・`autosave=true` を追記。他の項目は保持し、同じ値なら `unchanged`。既に `autosave: false` なら `true` に変わります。`--host claude` だけで、旧 `~/.codex/harness` の設定しかない（共有先が未作成の）ときは、移行されないまま旧パスの `settings.json` に書きます |
 | `gh`（`--knowledge-repo` 指定時のみ） | `gh auth status --hostname github.com` の確認だけ。未ログインなら `gh auth login --hostname github.com` を `run_manually` に返す |
 | `doctor` | `doctor` 相当の環境確認 |
 
@@ -28,7 +28,7 @@ PowerShellでは行継続の `\` を外して1行で実行します。このURL�
 
 - `claude` CLIがないとき、`--host all` はClaude Code側（`claude`・`html-plan`）を `skipped` にして成功とし、`--host claude` は失敗として返します。
 - 個人設定に別のrepository/branchが既にあるときは上書きせず `conflict` として失敗を報告します。tokenは書きません。
-- `--knowledge-repo` が `OWNER/REPO` の形でない、または `--host`・`--html-plan` の値が不正なときは、何も変更せず終了コード1です。`--knowledge-repo` を省略すると個人設定には触れません。
+- `--knowledge-repo` が `OWNER/REPO` の形でない、または `--host`・`--html-plan` の値が不正なときは、何も変更せず終了コード1です。`--knowledge-repo` を省略すると `setup` 自身は個人設定を書きません。ただしCodex向け（`--host codex`・`all`）では既存の `install` と同じ旧データの移行が走るため、旧 `~/.codex/harness/settings.json` があれば共有先へコピーされます。`--knowledge-branch` は `--knowledge-repo` と一緒にだけ指定でき、単独指定は何も変更せず終了コード1です。空の `--knowledge-repo` も不正です。
 
 以降の「Claude Codeに導入する」にあるHTML仕様書用プラグインと、記憶共有の設定（[設定](configuration.md)）は、`setup` が行う手順に含まれます。個別に導入・設定したい場合だけ下の手順を使います。
 

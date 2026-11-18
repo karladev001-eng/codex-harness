@@ -14,7 +14,7 @@ export const DEFAULTS: Json = JSON.parse(fs.readFileSync(path.join(sourceRoot, '
 
 const REASONING_EFFORTS = ['none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max', 'ultra'];
 const COLLABORATION_MODES = ['codex', 'claude', 'both', 'host', 'peer', 'off'];
-const REPOSITORY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9-]*\/[A-Za-z0-9_.-]+$/;
+export const REPOSITORY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9-]*\/[A-Za-z0-9_.-]+$/;
 const PROJECT_KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
 const TASK_ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/;
 const CONTROL_OR_SPACE = /[\x00-\x20\x7f]/;
