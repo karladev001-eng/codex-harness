@@ -101,6 +101,13 @@ CLIは配布物のmarketplaceを `~/.agents/claude-marketplaces/codex-harness` �
 
 Claude Code上でのモデルは設定の `hosts.claude.models`（既定：deterministic=haiku/low、standard=sonnet/medium、complex・review=opus/high）から選びます。プロジェクトの `.harness.json` に `{"hosts":{"claude":{"models":{"standard":{"model":"opus"}}}}}` のように書くと固定できます。Codex固有の手順の読み替えは[Claude Code向けの読み替え](../../plugins/codex-harness/skills/harness/references/hosts/claude-code.md)にあります。解除は `codex-harness uninstall --host claude` です。
 
+Claude CodeでのHTML仕様書は、上流の `html-plan` プラグインを使います。この導入には含まれないので、別に導入します（未導入なら同梱の `harness:codex-html-plan` を使います）。日本語・正本・実装承認の扱いはハーネスの規則に従います（[読み替え](../../plugins/codex-harness/skills/harness/references/hosts/claude-code.md#html仕様書)）。
+
+```sh
+claude plugin marketplace add anthropics/claude-plugins-community
+claude plugin install html-plan@claude-community
+```
+
 設定・制作記憶・技術的知見はCodexと共有します（[設定](configuration.md)）。CodexとClaude Codeの両方に導入して構いません。
 
 ## 導入先と変更

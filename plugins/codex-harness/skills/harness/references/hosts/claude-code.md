@@ -25,12 +25,23 @@
 |---|---|---|
 | `advice`（発案・相談・批評） | `peer` | [consult-codex](../../consult-codex/SKILL.md) の `ideator` / `consultant` / `critic` |
 | `code_review`（独立レビュー） | `both` | `harness:reviewer` とconsult-codexの `reviewer` を並行し、親が統合（consult-codexの「2者レビュー」）。PASSが揃うまで完了にしません |
-| `html_mock`（仕様・UIモックのHTML） | `claude` | 自分で作る（`harness:codex-html-plan`） |
+| `html_mock`（仕様・UIモックのHTML） | `claude` | 自分で作る（下の「HTML仕様書」） |
 | `image_generation`（画像生成） | `codex` | `harness:codex-image` で、Codexの組み込み画像生成を `codex exec` 経由で使います。生成物はプロジェクト内の指定パスへ、既存ファイルを上書きせずにコピーします |
 
 - Codexへ送る前に、各スキルの `--approval` で送信承認を判定します（consult-codexの「送信の承認」）。`approved` なら聞き直しません。それ以外なら、決まった文面で1回だけ確認します。承認が得られない、`codex` CLIがない、ログインを確認できない場合は、そう報告して自分側だけで進めます。黙って省略も代替もしません。
 - `off` の作業は自動で行いません。ユーザーが明示的に頼めば従います。
 - Claude Code上では `consult-claude` は使いません。Codexを使えずに独立案が必要なときは、親の案を渡さない新しいサブエージェント（`complex` のモデル）に出させ、「同じモデル系統の別インスタンスによる案」と明記します。
+
+## HTML仕様書
+
+Codexの `codex-html-plan` に当たるのは、Claude Codeでは上流の `html-plan:html-plan`（`html-plan@claude-community`）です。導入されていれば、木構造・展示・decision・pack・Respondの手順はそのスキルに従います。導入されていなければ `harness:codex-html-plan` を使い、`claude plugin install html-plan@claude-community` で導入できると伝えます。
+
+`html-plan:html-plan` を使うときも、ハーネスの次の規則が上流の記述より優先します。
+
+- **言語**：日本語が既定で、ユーザーが指定した言語を優先します。STEの規則とpackのSTE警告は英語のページだけに当てはめます。日本語のページでは、短く検証可能な主張と1主張1展示の規則を守ります。
+- **正本**：既存のTASK/仕様（`docs/harness/tasks/<id>.md` など）を正本とし、なければ保存規則に沿って作ります。計画ID・版・対象内外・受入条件・未解決事項・承認範囲を正本に書き、HTMLは同じ計画ID・版で作ります。
+- **承認**：Respondの回答・既定値・閲覧・沈黙は、仕様へのフィードバックであって実装承認ではありません。提示した版と範囲について本人がチャットで明示的に承認し、それを正本に記録するまで、本実装・他担当の着手を始めません（`codex-html-plan` の「正本と承認」と同じ契約です）。
+- **提示**：packした単一HTMLの絶対パスを渡します。Artifactとして公開するのは、ユーザーが求めたときだけです。
 
 ## その他の読み替え
 
@@ -38,5 +49,5 @@
 - **早期compact**：Codexの設定ファイルを編集する手順は適用しません。compactはホストが管理します。compact後に本文が失われたら、必要な参照を読み直します。
 - **Knowledgeの説明生成**：`codex` CLIとそのログインが必要です。
 - **保存先**：設定・制作記憶・技術的知見は `~/.agents/harness/` をCodexと共有します。
-- **authoringスキル**：HTML計画は `harness:codex-html-plan`、ほかのauthoringスキルも同様にプラグインのスキルとして使えます。
+- **authoringスキル**：HTML計画は上の「HTML仕様書」に従います。ほかのauthoringスキルはプラグインのスキルとして使えます。
 - **計測**：`measure record` はホストに依存しないので、そのまま使います。
