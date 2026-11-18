@@ -224,7 +224,7 @@ function validModelMapping(role: Json): boolean {
   return Boolean(role.model.trim()) && REASONING_EFFORTS.includes(role.reasoning_effort);
 }
 
-function invalidPreferenceTarget(preferences: Json): boolean {
+export function invalidPreferenceTarget(preferences: Json): boolean {
   if (!preferences.repository && !preferences.project_key) return false;
   return !REPOSITORY_PATTERN.test(preferences.repository)
     || (preferences.project_key && !PROJECT_KEY_PATTERN.test(preferences.project_key))

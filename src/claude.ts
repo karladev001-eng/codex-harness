@@ -10,7 +10,7 @@ export const MARKETPLACE = 'codex-harness';
 export const PLUGIN = 'harness@' + MARKETPLACE;
 export interface ClaudeArgs { home?: string }
 
-interface CliResult { ok: boolean; command: string; output: string }
+export interface CliResult { ok: boolean; command: string; output: string }
 
 export const claudeHome = (home?: string): string => {
   const configured = home
@@ -22,7 +22,8 @@ export const claudeHome = (home?: string): string => {
 // Built next to dist/skill; an installed Codex copy has no marketplace and cannot install for Claude.
 export const marketplaceSource = (): string => path.resolve(sourceRoot, '..', 'claude-marketplace');
 
-function cli(args: string[], home?: string): CliResult {
+// `keep` bounds the returned output; callers that search it for a name must pass a larger limit.
+export function cli(args: string[], home?: string, keep = 2000): CliResult {
   const env = home ? { ...process.env, CLAUDE_CONFIG_DIR: claudeHome(home) } : process.env;
   const result = spawnSync('claude', args, {
     encoding: 'utf8',
@@ -33,7 +34,7 @@ function cli(args: string[], home?: string): CliResult {
   });
   const command = ['claude', ...args].join(' ');
   if (result.error) return { ok: false, command, output: String(result.error.message) };
-  return { ok: result.status === 0, command, output: (result.stdout + result.stderr).trim().slice(-2000) };
+  return { ok: result.status === 0, command, output: (result.stdout + result.stderr).trim().slice(-keep) };
 }
 
 /** Adds (or updates) the marketplace and plugin; on failure, returns the commands to run by hand. */

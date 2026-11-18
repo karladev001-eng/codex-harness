@@ -13,7 +13,7 @@ export const END = '<!-- codex-harness:end -->';
 export const REQUIRED_SOURCE_FILES = [
   'SKILL.md', 'read-sections.cjs', 'references/section-index.json', 'references/section-map.md',
   'runtime.js', 'lib.js', 'install.js', 'authoring.js', 'preferences.js', 'records.js', 'identity.js', 'lessons.js',
-  'claude.js', 'package.json',
+  'claude.js', 'setup.js', 'package.json',
   'consult-claude/SKILL.md', 'consult-claude/agents/openai.yaml', 'consult-claude/scripts/consult.mjs',
   'consult-codex/SKILL.md', 'consult-codex/scripts/consult.mjs',
   'codex-image/SKILL.md', 'codex-image/scripts/image.mjs',

@@ -1,6 +1,6 @@
 # 非公開npm配布を準備・検証する
 
-0.5.0のGitHub Packages向け非公開配布を準備・検証します。ソースの `private: true` はnpm publishを禁止する設定で、非公開registry設定そのものではありません。`UNLICENSED`も維持します。この手順はbuild、配布用staging、dry-run、ローカルtarballと隔離検証までです。実registry送信、公開、push、認証操作、ライセンス変更は別途指示まで行いません。
+0.5.0のGitHub Packages向け非公開配布を準備・検証します。ソースの `private: true` はnpm publishを禁止する設定で、非公開registry設定そのものではありません。`UNLICENSED`も維持します。この手順はbuild、配布用staging、dry-run、ローカルtarballと隔離検証までです。実registry送信、公開、push、認証操作、ライセンス変更は別途指示まで行いません。GitHub Releaseへのtgz添付は[下の節](#github-releaseへtgzを添付する)に分けて記します。
 
 ## ビルドと配布内容
 
@@ -86,6 +86,40 @@ npx --yes --package /tmp/codex-harness-release/karladev001-eng-codex-harness-0.5
 再installで `unchanged`、無関係なAGENTS/設定/制作記憶の保持を確認します。別版からの更新・編集済み拒否・失敗時の復元は既存テストで確認し、新版で回帰があれば修正します。Windowsで一時ホームを指定する場合は、存在する絶対ディレクトリを `--home` と `--project` に渡します。実機未検証ならその旨を記録します。
 
 authoringは `authoring install --project "$task_project" --skill inspect-harness` と対応するuninstallで単体選択を確認します。0.5.0では `--skill codex-slide-plan` の明示導入・再実行・解除も確認し、runtime/CSS/JS、quality-review.md、revision-notes.md、サンプルが導入先に揃うこととHTML生成を検査します。指定なしのauthoring操作と本体install/updateでは任意スキルを変更しないことも確認します。本体installと所有記録が別で、本体の有効化を行わないことを確認します。Knowledge stateも一時絶対パスにし、登録・外部送信は実行しません。
+
+## GitHub Releaseへtgzを添付する
+
+利用者は、Releaseに添付したtgzのURLを `npx` へ直接渡して `setup` を実行します（[導入ガイド](../guides/installation.md#1コマンドで導入するsetup)）。公開リポジトリなので、取得にnpm認証やPATは要りません。GitHub Packagesやnpmjsへの送信とは別の経路です。**Releaseの作成は外部への公開操作**なので、作成前にユーザーの明示的な指示を得ます。この節の手順は、指示を受けてから行います。
+
+作成前に確認する事項：
+
+- `package.json` の版と、作成するタグ `v<version>`（例：`v0.5.0`）が一致し、そのタグのReleaseがまだ存在しない（`gh release view v0.5.0` が見つからない）。
+- Releaseの元にするcommitがpush済みで、`npm test` と `npm run check:docs` がそのcommitで通っている。追跡ファイルに個人のパスやtokenがない。
+- tgzは、そのcommitのcheckoutで `npm pack` したもの。`tar -tzf` で一覧を確認し、`dist/skill/setup.js` が入っている。
+- 一時ホームで、tgzからの `setup --home <一時ディレクトリ> --host codex --html-plan false` が成功し、再実行が `unchanged` になる。実ホームの `~/.claude` などへ試験導入しない。
+- `gh auth status` が対象リポジトリへ書けるアカウントでログイン済み。ログインや権限の変更は利用者自身が行う。
+- Release本文にtoken・個人情報・未公開の情報を入れていない。
+
+作成手順（macOS/Linux）：
+
+```sh
+mkdir -p "/tmp/codex-harness-release"
+npm pack --pack-destination "/tmp/codex-harness-release"
+shasum -a 256 "/tmp/codex-harness-release/karladev001-eng-codex-harness-0.5.0.tgz"
+gh release create v0.5.0 "/tmp/codex-harness-release/karladev001-eng-codex-harness-0.5.0.tgz" \
+  --title "v0.5.0" \
+  --notes "Codex Harness 0.5.0. Install with: npx --yes --package <this tgz URL> codex-harness setup"
+```
+
+PowerShellでは `Get-FileHash -Algorithm SHA256 <tgz>` でSHA-256を求め、行継続の `\` を外して1行で実行します。`gh release create` は添付するtgzを検証済みの同じファイルにします。作成後に再packしたものは別の配布物で、SHA-256も変わります。
+
+`npm pack` で作ったtgzのSHA-256は、Releaseを作る前に[VALIDATION](../../VALIDATION.md)へ日付つきで記録します（Release本文にも書けます）。作成後に、添付したtgzをダウンロードし直してSHA-256が記録と一致すること、次のURLで取得できることを確認します。
+
+```sh
+https://github.com/karladev001-eng/codex-harness/releases/download/v0.5.0/karladev001-eng-codex-harness-0.5.0.tgz
+```
+
+誤って作成した場合の修正（`gh release delete`・タグの扱い）も公開操作なので、ユーザーへ確認してから行います。
 
 ## 文書と記録
 
