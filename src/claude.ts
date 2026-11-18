@@ -10,7 +10,8 @@ export const MARKETPLACE = 'codex-harness';
 export const PLUGIN = 'harness@' + MARKETPLACE;
 export interface ClaudeArgs { home?: string }
 
-export interface CliResult { ok: boolean; command: string; output: string }
+/** `output` is stdout and stderr together; `stdout` alone is for callers that parse it. */
+export interface CliResult { ok: boolean; command: string; output: string; stdout: string }
 
 export const claudeHome = (home?: string): string => {
   const configured = home
@@ -33,8 +34,9 @@ export function cli(args: string[], home?: string, keep = 2000): CliResult {
     shell: process.platform === 'win32',
   });
   const command = ['claude', ...args].join(' ');
-  if (result.error) return { ok: false, command, output: String(result.error.message) };
-  return { ok: result.status === 0, command, output: (result.stdout + result.stderr).trim().slice(-keep) };
+  if (result.error) return { ok: false, command, output: String(result.error.message), stdout: '' };
+  const output = (result.stdout + result.stderr).trim().slice(-keep);
+  return { ok: result.status === 0, command, output, stdout: result.stdout.trim().slice(-keep) };
 }
 
 /** Adds (or updates) the marketplace and plugin; on failure, returns the commands to run by hand. */

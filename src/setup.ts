@@ -7,7 +7,7 @@ import { isDeepStrictEqual } from 'node:util';
 import { spawnSync } from 'node:child_process';
 import {
   DEFAULTS, REPOSITORY_PATTERN, dataHome, exists, invalidPreferenceTarget, isObject, Json, mergeSettings,
-  migrateData, rejectSymlink,
+  migrateData, readJson, rejectSymlink, validateSettings,
 } from './lib';
 import { install } from './install';
 import { cli, installClaude, MARKETPLACE, PLUGIN } from './claude';
@@ -71,30 +71,32 @@ function codexStep(home?: string): Json {
   return { ...install({ home }), data: migrateData(home) };
 }
 
+interface Installed { version?: string; enabled: boolean }
+
 /**
- * Whether `plugin list --json` shows `id` installed at user scope and enabled. The text match is only a
- * fallback for output that cannot be parsed as JSON; it cannot see scope or enabled state.
+ * Finds `id` at user scope in `plugin list --json` (stdout only, so stderr warnings cannot break the parse).
+ * Only when that command fails or prints something that is not a JSON array is the plain `plugin list` text
+ * matched instead; the text shows neither scope, enabled state nor version.
  */
-function pluginInstalled(output: string, id: string): boolean {
+function findPlugin(home: string | undefined, id: string): Installed | null {
+  const listed = cli(['plugin', 'list', '--json'], home, FULL_OUTPUT);
   let entries: unknown = null;
   try {
-    entries = JSON.parse(output);
+    entries = listed.ok ? JSON.parse(listed.stdout) : null;
   } catch { /* not JSON */ }
-  if (!Array.isArray(entries)) return lists(output, id);
-  return entries.some(entry => isObject(entry) && entry.id === id && entry.scope === 'user' && entry.enabled !== false);
+  if (Array.isArray(entries)) {
+    const entry = entries.find(item => isObject(item) && item.id === id && item.scope === 'user');
+    if (!entry) return null;
+    return { version: typeof entry.version === 'string' ? entry.version : undefined, enabled: entry.enabled !== false };
+  }
+  const text = cli(['plugin', 'list'], home, FULL_OUTPUT);
+  return text.ok && lists(text.output, id) ? { enabled: true } : null;
 }
 
 interface MarketplaceRef { name: string; add: string[] }
 
-/** Installs `plugin` at user scope unless already there; adds its marketplace first when it is not registered. */
-function ensurePlugin(home: string | undefined, plugin: string, marketplace: MarketplaceRef): Json {
-  const installed = cli(['plugin', 'list', '--json'], home, FULL_OUTPUT);
-  if (installed.ok && pluginInstalled(installed.output, plugin)) return { status: 'unchanged' };
-  const known = cli(['plugin', 'marketplace', 'list'], home, FULL_OUTPUT);
-  const steps = [['plugin', 'install', plugin, '--scope', 'user']];
-  if (!(known.ok && lists(known.output, marketplace.name))) {
-    steps.unshift(['plugin', 'marketplace', 'add', ...marketplace.add]);
-  }
+/** Runs the commands in order, stopping at the first failure, which is reported with all of them. */
+function runCommands(home: string | undefined, steps: string[][], done: string): Json {
   const commands = steps.map(step => ['claude', ...step].join(' '));
   const results = [];
   for (const step of steps) {
@@ -102,35 +104,83 @@ function ensurePlugin(home: string | undefined, plugin: string, marketplace: Mar
     results.push(result);
     if (!result.ok) return { ok: false, status: 'failed', results, run_manually: commands };
   }
-  return { status: 'installed', commands };
+  return { status: done, commands };
+}
+
+/** Installs `plugin` at user scope; adds its marketplace first when it is not registered. */
+function installPlugin(home: string | undefined, plugin: string, marketplace: MarketplaceRef): Json {
+  const known = cli(['plugin', 'marketplace', 'list'], home, FULL_OUTPUT);
+  const steps = [['plugin', 'install', plugin, '--scope', 'user']];
+  if (!(known.ok && lists(known.output, marketplace.name))) {
+    steps.unshift(['plugin', 'marketplace', 'add', ...marketplace.add]);
+  }
+  return runCommands(home, steps, 'installed');
+}
+
+/**
+ * An entry that is present counts as installed whether or not it is enabled: `claude plugin install` on a
+ * disabled plugin exits 0 and enables it again (observed on Claude Code 2.1.319), which would undo the
+ * user's choice on every run. A disabled entry is reported with the command to enable it.
+ */
+const presence = (id: string, found: Installed): Json => found.enabled
+  ? { status: 'unchanged' }
+  : { status: 'unchanged', enabled: false, hint: `claude plugin enable ${id} --scope user` };
+
+function ensurePlugin(home: string | undefined, plugin: string, marketplace: MarketplaceRef): Json {
+  const found = findPlugin(home, plugin);
+  return found ? presence(plugin, found) : installPlugin(home, plugin, marketplace);
 }
 
 const htmlPlanStep = (home?: string): Json =>
   ensurePlugin(home, HTML_PLAN, { name: COMMUNITY, add: [COMMUNITY_SOURCE] });
+
+/** The version staged from this package, which the installed plugin must match. */
+function bundledVersion(target: string): string | undefined {
+  try {
+    const manifest = readJson(path.join(target, 'plugins/harness/.claude-plugin/plugin.json'));
+    return isObject(manifest) && typeof manifest.version === 'string' ? manifest.version : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 function claudeStep(home?: string): Json {
   const result = installClaude({ home });
   const manual = result.registration?.run_manually;
   if (manual) return { ...result, run_manually: manual };
   if (result.status !== 'unchanged') return result;
-  // installClaude reports `unchanged` without registering, so a run whose registration failed would look healthy.
-  const repaired = ensurePlugin(home, PLUGIN, { name: MARKETPLACE, add: [result.target, '--scope', 'user'] });
-  if (repaired.status === 'unchanged') return result;
-  return { ...result, ...repaired, status: repaired.status === 'installed' ? 'registered' : repaired.status };
+  // installClaude reports `unchanged` without registering or updating, because it records the new files before
+  // it registers; a run whose registration or update failed would look healthy. Compare with what Claude holds.
+  const marketplace = { name: MARKETPLACE, add: [result.target, '--scope', 'user'] };
+  const found = findPlugin(home, PLUGIN);
+  if (!found) {
+    const repaired = installPlugin(home, PLUGIN, marketplace);
+    return { ...result, ...repaired, status: repaired.status === 'installed' ? 'registered' : repaired.status };
+  }
+  if (!found.enabled) return { ...result, ...presence(PLUGIN, found) };
+  const wanted = bundledVersion(result.target);
+  if (!wanted || !found.version || found.version === wanted) return result;
+  const updated = runCommands(home, [['plugin', 'marketplace', 'update', MARKETPLACE],
+    ['plugin', 'update', PLUGIN, '--scope', 'user']], 'updated');
+  return { ...result, ...updated };
 }
 
 /**
- * Writes through a temporary file in the same directory so a crash never leaves partial settings. The file is
- * created with its final mode (0o600 when new). `snapshot` is the content the new data was derived from: just
+ * Writes through a temporary file in the same directory so a crash never leaves partial settings. The file ends
+ * with the destination's exact mode (0o600 when new), whatever the umask. `snapshot` is the content the new data was derived from: just
  * before the rename the destination is read again and, if it changed, nothing is written and false is returned.
- * This narrows the race with another writer but does not eliminate it.
+ * This narrows the race with another writer but does not eliminate it: a change between that read and the
+ * rename is lost, so concurrent setup runs editing the same settings are not supported.
  */
 export function writeSettings(file: string, data: Json, snapshot: Buffer | null): boolean {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   const mode = snapshot ? fs.statSync(file).mode & 0o777 : 0o600;
   const temporary = `${file}.${process.pid}.${Date.now()}.tmp`;
   try {
-    fs.writeFileSync(temporary, JSON.stringify(data, null, 2) + '\n', { encoding: 'utf8', flag: 'wx', mode });
+    fs.writeFileSync(temporary, JSON.stringify(data, null, 2) + '\n', { encoding: 'utf8', flag: 'wx', mode: 0o600 });
+    // Created owner-only so the content is never readable more widely than the final file; then set the exact
+    // mode (the umask would otherwise alter it) before the file becomes visible.
+    fs.chmodSync(temporary, mode);
     const current = exists(file) ? fs.readFileSync(file) : null;
     const changed = snapshot ? !current?.equals(snapshot) : current !== null;
     if (changed) {
@@ -169,8 +219,9 @@ function knowledgeStep(home: string | undefined, repository: string, branch: str
   }
   const next = { ...current, preferences: { ...existing, repository, branch, autosave: true } };
   if (isDeepStrictEqual(current, next)) return { status: 'unchanged', file };
-  // Refuse to write a file the harness itself would reject when it reads its settings.
-  mergeSettings(structuredClone(DEFAULTS), next);
+  // Refuse to write a file the harness itself would reject when it reads its settings: key and type checks
+  // (mergeSettings) plus the value checks the runtime applies after merging.
+  validateSettings(mergeSettings(structuredClone(DEFAULTS), next));
   if (!writeSettings(file, next, snapshot)) {
     return {
       ok: false,

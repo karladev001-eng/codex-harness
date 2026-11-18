@@ -206,6 +206,28 @@ export function projectSettings(project: string): string[] {
   return [...new Set(files.map(file => canonical(file)))];
 }
 
+/** The value checks every resolved configuration must pass; shared so `setup` can vet a file before writing it. */
+export function validateSettings(result: Json): void {
+  if (result.schema_version !== 1 || result.max_agents < 1) {
+    throw new Error('Unsupported schema_version or invalid max_agents');
+  }
+  if (!['auto', 'fixed'].includes(result.model_selection)) {
+    throw new Error('Invalid model_selection: expected auto or fixed');
+  }
+  const modelTables = [result.models, ...Object.values<Json>(result.hosts).map(entry => entry.models)];
+  for (const role of modelTables.flatMap(Object.values) as Json[]) {
+    if (!validModelMapping(role)) throw new Error('Invalid model mapping');
+  }
+  if (invalidPreferenceTarget(result.preferences)) {
+    throw new Error('preferences requires valid repository, branch and project_key');
+  }
+  for (const [task, mode] of Object.entries(result.collaboration)) {
+    if (!COLLABORATION_MODES.includes(mode as string)) {
+      throw new Error(`Invalid collaboration.${task}: expected ${COLLABORATION_MODES.join(', ')}`);
+    }
+  }
+}
+
 // Resolve configuration and model origins together so provenance cannot diverge from values.
 export const HOSTS = ['codex', 'claude'] as const;
 
@@ -262,24 +284,7 @@ export function resolveSettings(
   // Before 0.4, the four disabled features meant inactive. Preserve that opt-out
   // unless a layer explicitly sets the new feature, including an explicit true.
   if (!explicitLoop && LEGACY_FLAGS.every(key => result[key] === false)) result.improvement_loop = false;
-  if (result.schema_version !== 1 || result.max_agents < 1) {
-    throw new Error('Unsupported schema_version or invalid max_agents');
-  }
-  if (!['auto', 'fixed'].includes(result.model_selection)) {
-    throw new Error('Invalid model_selection: expected auto or fixed');
-  }
-  const modelTables = [result.models, ...Object.values<Json>(result.hosts).map(entry => entry.models)];
-  for (const role of modelTables.flatMap(Object.values) as Json[]) {
-    if (!validModelMapping(role)) throw new Error('Invalid model mapping');
-  }
-  if (invalidPreferenceTarget(result.preferences)) {
-    throw new Error('preferences requires valid repository, branch and project_key');
-  }
-  for (const [task, mode] of Object.entries(result.collaboration)) {
-    if (!COLLABORATION_MODES.includes(mode as string)) {
-      throw new Error(`Invalid collaboration.${task}: expected ${COLLABORATION_MODES.join(', ')}`);
-    }
-  }
+  validateSettings(result);
   if (host !== 'codex') result.models = result.hosts[host].models;
   delete result.hosts;
   return {

@@ -5,7 +5,8 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const lib = require('../dist/skill/lib.js');
 const { writeSettings } = require('../dist/skill/setup.js');
-const { fixture, write, run, cli } = require('./helpers.cjs');
+const { fixture, write, run, cli, root } = require('./helpers.cjs');
+const version = lib.readJson(path.join(root, 'package.json')).version;
 // The fake CLIs are POSIX shebang scripts, which Windows cannot execute from PATH.
 const posix = { skip: process.platform === 'win32' };
 const community = 'anthropics/claude-plugins-community';
@@ -23,7 +24,8 @@ function fakeClaude(f, { failInstall } = {}) {
   write(path.join(bin, 'claude'), `#!/bin/sh
 echo "$CLAUDE_CONFIG_DIR|$*" >> "${log}"
 case "$*" in
-  "plugin list --json") ${show('plugins.json')};;
+  "plugin list --json") if [ -f "${path.join(state, 'jsonfail')}" ]; then exit 2; fi; if [ -f "${path.join(state, 'stderrwarn')}" ]; then echo "warning: update available" >&2; fi; if [ -f "${path.join(state, 'plugins.json')}" ]; then ${show('plugins.json')}; else echo "[]"; fi;;
+  "plugin update"*) if [ -f "${path.join(state, 'failupdate')}" ]; then exit 3; fi;;
   "plugin list") ${show('plugins')};;
   "plugin marketplace add"*) if [ -f "${path.join(state, 'failadd')}" ]; then exit 3; fi;;
   "plugin marketplace list") ${show('marketplaces')};;
@@ -63,7 +65,7 @@ test('setup installs Codex and Claude Code into a temporary home and a rerun rep
   assert.equal(step(first, 'doctor').ok, true);
   // Nothing was asked for the knowledge repository, so the personal settings are not created.
   assert.equal(fs.existsSync(shared(f)), false);
-  claude.state('plugins.json', listing(entry('harness@codex-harness'), entry('html-plan@claude-community')));
+  claude.state('plugins.json', listing(entry('harness@codex-harness', { version }), entry('html-plan@claude-community')));
   const again = setup(f);
   assert.equal(again.code, 0, again.error);
   assert.deepEqual(['codex', 'claude', 'html-plan'].map(name => step(again, name).status), ['unchanged', 'unchanged', 'unchanged']);
@@ -83,8 +85,7 @@ test('setup registers html-plan only when it is missing and skips the marketplac
   // A similarly named plugin, another marketplace, another scope or a disabled entry is not a match.
   const near = fixture(t), lookalike = fakeClaude(near);
   lookalike.state('plugins.json', listing(entry('my-html-plan@claude-community'), entry('html-plan@other'),
-    entry('html-plan@claude-community', { scope: 'project' }), entry('html-plan@claude-community', { scope: 'local' }),
-    entry('html-plan@claude-community', { enabled: false })));
+    entry('html-plan@claude-community', { scope: 'project' }), entry('html-plan@claude-community', { scope: 'local' })));
   lookalike.state('marketplaces', 'claude-plugins-community\n');
   assert.equal(setup(near, '--host', 'claude').code, 0);
   assert.deepEqual(lookalike.calls().slice(-2), [`plugin marketplace add ${community}`, 'plugin install html-plan@claude-community --scope user']);
@@ -98,7 +99,8 @@ test('setup registers html-plan only when it is missing and skips the marketplac
 
   // Only when the output is not JSON does the plain-text match apply.
   const text = fixture(t), plain = fakeClaude(text);
-  plain.state('plugins.json', 'first\n' + 'x'.repeat(5000) + '\n  html-plan@claude-community  Version: 1\n');
+  plain.state('plugins.json', 'not json at all\n');
+  plain.state('plugins', 'first\n' + 'x'.repeat(5000) + '\n  html-plan@claude-community  Version: 1\n');
   assert.equal(step(setup(text, '--host', 'claude'), 'html-plan').status, 'unchanged');
   assert.equal(plain.calls().some(call => call.startsWith('plugin install html-plan')), false);
 });
@@ -184,7 +186,7 @@ test('a different repository or branch already configured is reported and left u
 
 test('invalid or unreadable personal settings fail the knowledge step without writing', posix, t => {
   const f = fixture(t); fakeGh(f);
-  for (const bad of ['{not json', '[]', '{"preferences": 3}', '{"nonsense": true}']) {
+  for (const bad of ['{not json', '[]', '{"preferences": 3}', '{"nonsense": true}', '{"max_agents": 0}', '{"model_selection": "sometimes"}']) {
     write(shared(f), bad);
     const result = setup(f, '--host', 'codex', '--knowledge-repo', 'owner/repo');
     assert.equal(result.code, 2, bad); assert.equal(step(result, 'knowledge').status, 'failed', bad);
@@ -261,13 +263,13 @@ test('a failed Claude registration is reported with its commands and a rerun ret
   assert.deepEqual(claude.calls().slice(-4), ['plugin list --json', 'plugin marketplace list', `plugin marketplace add ${target} --scope user`, 'plugin install harness@codex-harness --scope user']);
 
   // Once the plugin is listed at user scope, nothing is installed again.
-  claude.state('plugins.json', listing(entry('harness@codex-harness')));
+  claude.state('plugins.json', listing(entry('harness@codex-harness', { version })));
   const before = claude.calls().length;
   assert.equal(step(setup(f, '--host', 'claude', '--html-plan', 'false'), 'claude').status, 'unchanged');
   assert.deepEqual(claude.calls().slice(before), ['--version', 'plugin list --json']);
 
-  // A project-scope or disabled entry does not count, and a registered marketplace is not added again.
-  claude.state('plugins.json', listing(entry('harness@codex-harness', { scope: 'project' }), entry('harness@codex-harness', { enabled: false })));
+  // A project-scope entry does not count, and a registered marketplace is not added again.
+  claude.state('plugins.json', listing(entry('harness@codex-harness', { scope: 'project' })));
   claude.state('marketplaces', 'codex-harness\n');
   const mark = claude.calls().length;
   assert.equal(step(setup(f, '--host', 'claude', '--html-plan', 'false'), 'claude').status, 'registered');
@@ -299,6 +301,70 @@ test('settings are written through a temporary file with the final mode and refu
   assert.equal(writeSettings(file, { a: 5 }, null), false);
   assert.equal(fs.readFileSync(file, 'utf8'), '{"a":3}');
   assert.deepEqual(fs.readdirSync(path.dirname(file)), ['settings.json']);
+  // A restrictive umask must not change the existing file's exact mode.
+  fs.chmodSync(file, 0o664);
+  const umask = process.umask(0o077);
+  try { assert.equal(writeSettings(file, { a: 6 }, fs.readFileSync(file)), true); } finally { process.umask(umask); }
+  assert.equal(fs.statSync(file).mode & 0o777, 0o664);
+});
+
+test('a disabled user-scope plugin is left alone and reported with the command to enable it', posix, t => {
+  const f = fixture(t), claude = fakeClaude(f);
+  claude.state('plugins.json', listing(entry('html-plan@claude-community', { enabled: false })));
+  const result = setup(f, '--host', 'claude');
+  assert.equal(result.code, 0, result.error);
+  assert.deepEqual(step(result, 'html-plan'), { name: 'html-plan', ok: true, status: 'unchanged', enabled: false, hint: 'claude plugin enable html-plan@claude-community --scope user' });
+  assert.equal(claude.calls().some(call => call.startsWith('plugin install html-plan')), false);
+  // The same holds for the harness plugin itself on a rerun, and nothing is installed or updated.
+  claude.state('plugins.json', listing(entry('harness@codex-harness', { version: '0.0.1', enabled: false })));
+  const before = claude.calls().length;
+  const again = setup(f, '--host', 'claude', '--html-plan', 'false');
+  assert.equal(step(again, 'claude').status, 'unchanged'); assert.equal(step(again, 'claude').enabled, false);
+  assert.equal(step(again, 'claude').hint, 'claude plugin enable harness@codex-harness --scope user');
+  assert.deepEqual(claude.calls().slice(before), ['--version', 'plugin list --json']);
+});
+
+test('a rerun after a failed plugin update retries it, and a matching version does nothing', posix, t => {
+  const f = fixture(t), claude = fakeClaude(f);
+  assert.equal(setup(f, '--host', 'claude', '--html-plan', 'false').code, 0);
+  claude.state('plugins.json', listing(entry('harness@codex-harness', { version: '0.0.1' })));
+  claude.state('failupdate', '');
+  const failed = setup(f, '--host', 'claude', '--html-plan', 'false');
+  const commands = ['claude plugin marketplace update codex-harness', 'claude plugin update harness@codex-harness --scope user'];
+  assert.equal(failed.code, 2); assert.equal(step(failed, 'claude').status, 'failed'); assert.deepEqual(failed.data.run_manually, commands);
+
+  fs.rmSync(path.join(f.base, 'state/failupdate'));
+  const before = claude.calls().length;
+  const updated = setup(f, '--host', 'claude', '--html-plan', 'false');
+  assert.equal(updated.code, 0, updated.error); assert.equal(step(updated, 'claude').status, 'updated');
+  assert.deepEqual(claude.calls().slice(before), ['--version', 'plugin list --json', 'plugin marketplace update codex-harness', 'plugin update harness@codex-harness --scope user']);
+
+  claude.state('plugins.json', listing(entry('harness@codex-harness', { version })));
+  const mark = claude.calls().length;
+  assert.equal(step(setup(f, '--host', 'claude', '--html-plan', 'false'), 'claude').status, 'unchanged');
+  assert.deepEqual(claude.calls().slice(mark), ['--version', 'plugin list --json']);
+});
+
+test('plugin detection reads stdout only and falls back to the text list when --json fails', posix, t => {
+  // A stderr warning must not push detection to the text match: the project-scope entry means "not installed".
+  const f = fixture(t), warned = fakeClaude(f);
+  warned.state('stderrwarn', '');
+  warned.state('plugins.json', listing(entry('html-plan@claude-community', { scope: 'project' })));
+  assert.equal(step(setup(f, '--host', 'claude'), 'html-plan').status, 'installed');
+  assert.equal(warned.calls().filter(call => call === 'plugin list').length, 0);
+
+  // With a user-scope entry and a stderr warning, the JSON is still understood.
+  const g = fixture(t), quiet = fakeClaude(g);
+  quiet.state('stderrwarn', ''); quiet.state('plugins.json', listing(entry('html-plan@claude-community')));
+  assert.equal(step(setup(g, '--host', 'claude'), 'html-plan').status, 'unchanged');
+
+  // `plugin list --json` exits nonzero: the plain list is consulted before anything is installed.
+  const h = fixture(t), broken = fakeClaude(h);
+  broken.state('jsonfail', ''); broken.state('plugins', 'harness@codex-harness\nhtml-plan@claude-community\n');
+  const result = setup(h, '--host', 'claude');
+  assert.equal(step(result, 'html-plan').status, 'unchanged');
+  assert.equal(broken.calls().some(call => call.startsWith('plugin install html-plan')), false);
+  assert.ok(broken.calls().includes('plugin list'));
 });
 
 test('--help lists the setup command and its options', t => {

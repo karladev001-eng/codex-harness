@@ -95,27 +95,38 @@ authoringは `authoring install --project "$task_project" --skill inspect-harnes
 
 - `package.json` の版と、作成するタグ `v<version>`（例：`v0.5.0`）が一致し、そのタグのReleaseがまだ存在しない（`gh release view v0.5.0` が見つからない）。
 - Releaseの元にするcommit（完全なSHA。`git rev-parse HEAD`）がpush済みで、作業ツリーに未コミットの変更がなく、`npm test` と `npm run check:docs` がそのcommitで通っている。追跡ファイルに個人のパスやtokenがない。
-- tgzは、そのcommitそのものをcheckoutして `npm pack` したもの（packした時点の `git rev-parse HEAD` が、Releaseの元にするSHAと一致する）。`tar -tzf` で一覧を確認し、`dist/skill/setup.js` が入っている。
+- tgzは、そのcommitそのものをcheckoutして `npm pack` したもの（packした時点の `git rev-parse HEAD` が、Releaseの元にするSHAと一致する）。`tar -tzf` で一覧を確認し、`dist/skill/setup.js` が入っている。検査・smoke試験・SHA-256の記録・添付は、すべて同じ1つのtgzファイルに対して行う。
 - 一時ホームで、tgzからの `setup --home <一時ディレクトリ> --host codex --html-plan false` が成功し、再実行が `unchanged` になる。実ホームの `~/.claude` などへ試験導入しない。
 - `gh auth status` が対象リポジトリへ書けるアカウントでログイン済み。ログインや権限の変更は利用者自身が行う。
 - Release本文にtoken・個人情報・未公開の情報を入れていない。
 
-作成手順（macOS/Linux）：
+手順は「用意」と「作成」に分けます。tgzは**用意の段階で1回だけ**作り、検査・smoke試験・SHA-256の記録をそのファイルに対して行います。作成の段階では `npm pack` を再実行せず、そのファイルをそのまま添付します。保存先は、上のregistry用stagingの手順（`/tmp/codex-harness-release` 直下）とは別の専用ディレクトリにし、片方の手順がもう片方のtgzを上書きしないようにします。
+
+用意（macOS/Linux）：
 
 ```sh
-mkdir -p "/tmp/codex-harness-release"
-npm pack --pack-destination "/tmp/codex-harness-release"
-shasum -a 256 "/tmp/codex-harness-release/karladev001-eng-codex-harness-0.5.0.tgz"
-commit="$(git rev-parse HEAD)"   # packしたcommitそのもの。短縮形やブランチ名は使わない
-gh release create v0.5.0 "/tmp/codex-harness-release/karladev001-eng-codex-harness-0.5.0.tgz" \
+release_dir="/tmp/codex-harness-github-release"
+mkdir -p "$release_dir"
+commit="$(git rev-parse HEAD)"   # packするcommitそのもの。短縮形やブランチ名は使わない
+npm pack --pack-destination "$release_dir"
+tgz="$release_dir/karladev001-eng-codex-harness-0.5.0.tgz"
+tar -tzf "$tgz" | grep dist/skill/setup.js
+shasum -a 256 "$tgz"
+```
+
+この `$tgz` に対して、上の「作成前に確認する事項」の一時ホームでの `setup` 試験を行い、SHA-256を[VALIDATION](../../VALIDATION.md)へ日付つきで記録します（Release本文にも書けます）。
+
+作成（ユーザーの明示的な指示を受けた後）：
+
+```sh
+shasum -a 256 "$tgz"   # 記録したSHA-256と一致することを、作成の直前にもう一度確認する
+gh release create v0.5.0 "$tgz" \
   --target "$commit" \
   --title "v0.5.0" \
   --notes "Codex Harness 0.5.0. Install with: npx --yes --package <this tgz URL> codex-harness setup"
 ```
 
-PowerShellでは `Get-FileHash -Algorithm SHA256 <tgz>` でSHA-256を求め、行継続の `\` を外して1行で実行します。`gh release create` は添付するtgzを検証済みの同じファイルにし、`--target` でタグを作るcommitをpackしたcommitに固定します（既にタグをpushしてある場合は `--target` の代わりに `--verify-tag` を使い、そのタグが同じcommitを指すことを `git rev-parse v0.5.0^{commit}` で確認します）。作成後に再packしたものは別の配布物で、SHA-256も変わります。
-
-`npm pack` で作ったtgzのSHA-256は、Releaseを作る前に[VALIDATION](../../VALIDATION.md)へ日付つきで記録します（Release本文にも書けます）。作成後に、添付したtgzをダウンロードし直してSHA-256が記録と一致すること、次のURLで取得できることを確認します。
+PowerShellでは `Get-FileHash -Algorithm SHA256 <tgz>` でSHA-256を求め、行継続の `\` を外して1行で実行します。SHA-256が記録と違う場合はReleaseを作らず、原因を調べます。`--target` でタグを作るcommitをpackしたcommitに固定します（既にタグをpushしてある場合は `--target` の代わりに `--verify-tag` を使い、そのタグが同じcommitを指すことを `git rev-parse v0.5.0^{commit}` で確認します）。作成後に再packしたものは別の配布物で、SHA-256も変わるため、添付しません。作成後に、添付したtgzをダウンロードし直してSHA-256が記録と一致すること、次のURLで取得できることを確認します。
 
 ```sh
 https://github.com/karladev001-eng/codex-harness/releases/download/v0.5.0/karladev001-eng-codex-harness-0.5.0.tgz
