@@ -83,6 +83,7 @@ test('install --host claude copies the marketplace, registers it, detects edits 
 
   const removed = run(['uninstall', '--host', 'claude', '--home', f.home], { env: claude.env });
   assert.equal(removed.data.status, 'uninstalled'); assert.equal(fs.existsSync(target), false);
+  assert.deepEqual(removed.data.registration.results.map(result => Object.keys(result).sort()), [['command', 'ok', 'output'], ['command', 'ok', 'output']]);
   assert.deepEqual(claude.calls().slice(-2), [`${config}|plugin uninstall harness@codex-harness --scope user`, `${config}|plugin marketplace remove codex-harness`]);
   assert.equal(run(['uninstall', '--host', 'claude', '--home', f.home], { env: claude.env }).data.status, 'not_installed');
 });
@@ -102,8 +103,16 @@ test('without a working claude CLI the files are kept and the manual commands ar
   assert.match(result.data.registration.run_manually[0], /^claude plugin marketplace add .+ --scope user$/);
   assert.ok(fs.existsSync(path.join(f.home, '.agents/claude-marketplaces/codex-harness/.claude-plugin/marketplace.json')));
   const failing = fakeClaude(f, { fail: true });
+  // The failed registration is remembered in the manifest, so a rerun retries it instead of reporting unchanged.
   const update = run(['install', '--host', 'claude', '--home', f.home], { env: failing.env });
-  assert.equal(update.data.status, 'unchanged');
+  assert.equal(update.code, 2); assert.equal(update.data.status, 'installed'); assert.equal(update.data.ok, false);
+  // Results carry no stdout field: the install/uninstall JSON keeps its shape.
+  assert.ok(update.data.registration.results.length > 0); assert.equal(update.data.registration.results.some(result => 'stdout' in result), false);
+  const working = fakeClaude(f);
+  const retried = run(['install', '--host', 'claude', '--home', f.home], { env: working.env });
+  assert.equal(retried.code, 0, retried.error); assert.equal(retried.data.status, 'installed'); assert.equal(retried.data.registration.ok, true);
+  assert.equal(run(['install', '--host', 'claude', '--home', f.home], { env: working.env }).data.status, 'unchanged');
+  assert.equal(lib.readJson(path.join(f.home, '.claude/harness/install.json')).registered, true);
   assert.equal(run(['install', '--host', 'mars', '--home', f.home]).code, 1);
 });
 

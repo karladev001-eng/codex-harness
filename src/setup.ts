@@ -10,7 +10,7 @@ import {
   migrateData, readJson, rejectSymlink, validateSettings,
 } from './lib';
 import { install } from './install';
-import { cli, installClaude, MARKETPLACE, PLUGIN } from './claude';
+import { capture, cli, installClaude, MARKETPLACE, PLUGIN } from './claude';
 
 export interface SetupArgs {
   home?: string;
@@ -76,10 +76,11 @@ interface Installed { version?: string; enabled: boolean }
 /**
  * Finds `id` at user scope in `plugin list --json` (stdout only, so stderr warnings cannot break the parse).
  * Only when that command fails or prints something that is not a JSON array is the plain `plugin list` text
- * matched instead; the text shows neither scope, enabled state nor version.
+ * matched instead; the text shows neither scope, enabled state nor version. When neither command works the
+ * answer is 'unknown', which callers must not treat as "not installed".
  */
-function findPlugin(home: string | undefined, id: string): Installed | null {
-  const listed = cli(['plugin', 'list', '--json'], home, FULL_OUTPUT);
+function findPlugin(home: string | undefined, id: string): Installed | null | 'unknown' {
+  const listed = capture(['plugin', 'list', '--json'], home, FULL_OUTPUT);
   let entries: unknown = null;
   try {
     entries = listed.ok ? JSON.parse(listed.stdout) : null;
@@ -89,8 +90,9 @@ function findPlugin(home: string | undefined, id: string): Installed | null {
     if (!entry) return null;
     return { version: typeof entry.version === 'string' ? entry.version : undefined, enabled: entry.enabled !== false };
   }
-  const text = cli(['plugin', 'list'], home, FULL_OUTPUT);
-  return text.ok && lists(text.output, id) ? { enabled: true } : null;
+  const text = capture(['plugin', 'list'], home, FULL_OUTPUT);
+  if (!text.ok) return 'unknown';
+  return lists(text.output, id) ? { enabled: true } : null;
 }
 
 interface MarketplaceRef { name: string; add: string[] }
@@ -117,6 +119,20 @@ function installPlugin(home: string | undefined, plugin: string, marketplace: Ma
   return runCommands(home, steps, 'installed');
 }
 
+/** The step result when the installed plugins cannot be read: nothing is installed on a guess. */
+function unreadable(plugin: string, marketplace: MarketplaceRef): Json {
+  return {
+    ok: false,
+    status: 'failed',
+    reason: 'could not read the installed plugins (claude plugin list failed)',
+    run_manually: [
+      'claude plugin list',
+      ['claude', 'plugin', 'marketplace', 'add', ...marketplace.add].join(' '),
+      `claude plugin install ${plugin} --scope user`,
+    ],
+  };
+}
+
 /**
  * An entry that is present counts as installed whether or not it is enabled: `claude plugin install` on a
  * disabled plugin exits 0 and enables it again (observed on Claude Code 2.1.319), which would undo the
@@ -128,6 +144,7 @@ const presence = (id: string, found: Installed): Json => found.enabled
 
 function ensurePlugin(home: string | undefined, plugin: string, marketplace: MarketplaceRef): Json {
   const found = findPlugin(home, plugin);
+  if (found === 'unknown') return unreadable(plugin, marketplace);
   return found ? presence(plugin, found) : installPlugin(home, plugin, marketplace);
 }
 
@@ -153,6 +170,7 @@ function claudeStep(home?: string): Json {
   // it registers; a run whose registration or update failed would look healthy. Compare with what Claude holds.
   const marketplace = { name: MARKETPLACE, add: [result.target, '--scope', 'user'] };
   const found = findPlugin(home, PLUGIN);
+  if (found === 'unknown') return { ...result, ...unreadable(PLUGIN, marketplace) };
   if (!found) {
     const repaired = installPlugin(home, PLUGIN, marketplace);
     return { ...result, ...repaired, status: repaired.status === 'installed' ? 'registered' : repaired.status };

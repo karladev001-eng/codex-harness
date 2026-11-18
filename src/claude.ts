@@ -10,8 +10,9 @@ export const MARKETPLACE = 'codex-harness';
 export const PLUGIN = 'harness@' + MARKETPLACE;
 export interface ClaudeArgs { home?: string }
 
+export interface CliResult { ok: boolean; command: string; output: string }
 /** `output` is stdout and stderr together; `stdout` alone is for callers that parse it. */
-export interface CliResult { ok: boolean; command: string; output: string; stdout: string }
+export interface CapturedResult extends CliResult { stdout: string }
 
 export const claudeHome = (home?: string): string => {
   const configured = home
@@ -24,7 +25,7 @@ export const claudeHome = (home?: string): string => {
 export const marketplaceSource = (): string => path.resolve(sourceRoot, '..', 'claude-marketplace');
 
 // `keep` bounds the returned output; callers that search it for a name must pass a larger limit.
-export function cli(args: string[], home?: string, keep = 2000): CliResult {
+export function capture(args: string[], home?: string, keep = 2000): CapturedResult {
   const env = home ? { ...process.env, CLAUDE_CONFIG_DIR: claudeHome(home) } : process.env;
   const result = spawnSync('claude', args, {
     encoding: 'utf8',
@@ -37,6 +38,12 @@ export function cli(args: string[], home?: string, keep = 2000): CliResult {
   if (result.error) return { ok: false, command, output: String(result.error.message), stdout: '' };
   const output = (result.stdout + result.stderr).trim().slice(-keep);
   return { ok: result.status === 0, command, output, stdout: result.stdout.trim().slice(-keep) };
+}
+
+/** Like `capture` without `stdout`: this is the shape that install/uninstall return to their callers. */
+export function cli(args: string[], home?: string, keep = 2000): CliResult {
+  const { ok, command, output } = capture(args, home, keep);
+  return { ok, command, output };
 }
 
 /** Adds (or updates) the marketplace and plugin; on failure, returns the commands to run by hand. */
@@ -54,6 +61,22 @@ function register(target: string, update: boolean, home?: string): Json {
     if (!result.ok) return { ok: false, results, run_manually: commands };
   }
   return { ok: true, results };
+}
+
+const writeManifest = (manifest: string, record: Json): void =>
+  fs.writeFileSync(manifest, JSON.stringify(record, null, 2) + '\n');
+
+/**
+ * Registers, then records whether it worked so a later run can retry it. The manifest is written before
+ * registering (ownership first) with `registered: false`; if the final write fails it stays false, which only
+ * causes a harmless retry.
+ */
+function registerAndRecord(manifest: string, record: Json, update: boolean, home?: string): Json {
+  const registration = register(record.target, update, home);
+  try {
+    writeManifest(manifest, { ...record, registered: registration.ok, registration_update: update });
+  } catch { /* see above */ }
+  return registration;
 }
 
 function isOwnershipManifest(state: unknown): state is Json {
@@ -86,7 +109,14 @@ export function installClaude(args: ClaudeArgs, source = marketplaceSource()): J
   rejectSymlink(target, 'Claude marketplace target');
   if (!state && exists(target)) throw new Error('Unowned Claude marketplace target already exists: ' + target);
   const files = inventory(source);
-  if (state && equalFiles(state.files, files)) return { status: 'unchanged', host: 'claude', target };
+  if (state && equalFiles(state.files, files)) {
+    // Older manifests have no `registered` field and keep reporting unchanged.
+    if (state.registered !== false) return { status: 'unchanged', host: 'claude', target };
+    // The files were recorded but registering failed last time; repeat it the same way.
+    const update = state.registration_update === true;
+    const registration = registerAndRecord(manifest, { schema_version: 1, target, files }, update, args.home);
+    return { ok: registration.ok, status: update ? 'updated' : 'installed', host: 'claude', target, registration };
+  }
 
   fs.mkdirSync(path.dirname(target), { recursive: true });
   const temporary = fs.mkdtempSync(path.join(path.dirname(target), '.harness-stage-'));
@@ -97,7 +127,7 @@ export function installClaude(args: ClaudeArgs, source = marketplaceSource()): J
     if (exists(target)) fs.renameSync(target, previous);
     fs.renameSync(staged, target);
     fs.mkdirSync(path.dirname(manifest), { recursive: true });
-    fs.writeFileSync(manifest, JSON.stringify({ schema_version: 1, target, files }, null, 2) + '\n');
+    writeManifest(manifest, { schema_version: 1, target, files, registered: false, registration_update: Boolean(state) });
   } catch (error) {
     if (exists(previous)) {
       fs.rmSync(target, { recursive: true, force: true });
@@ -107,7 +137,7 @@ export function installClaude(args: ClaudeArgs, source = marketplaceSource()): J
     throw error;
   }
   fs.rmSync(temporary, { recursive: true, force: true });
-  const registration = register(target, Boolean(state), args.home);
+  const registration = registerAndRecord(manifest, { schema_version: 1, target, files }, Boolean(state), args.home);
   return { ok: registration.ok, status: state ? 'updated' : 'installed', host: 'claude', target, registration };
 }
 

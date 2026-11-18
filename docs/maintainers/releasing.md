@@ -105,21 +105,29 @@ authoringは `authoring install --project "$task_project" --skill inspect-harnes
 用意（macOS/Linux）：
 
 ```sh
+set -e   # どこかが失敗したら先へ進まない
 release_dir="/tmp/codex-harness-github-release"
 mkdir -p "$release_dir"
+rm -f "$release_dir"/karladev001-eng-codex-harness-*.tgz   # 以前のtgzが残っていて取り違えないようにする
 commit="$(git rev-parse HEAD)"   # packするcommitそのもの。短縮形やブランチ名は使わない
-npm pack --pack-destination "$release_dir"
-tgz="$release_dir/karladev001-eng-codex-harness-0.5.0.tgz"
+tgz="$release_dir/$(npm pack --pack-destination "$release_dir" | tail -n 1)"   # 実際にできたファイル名をnpm packの出力から得る
 tar -tzf "$tgz" | grep dist/skill/setup.js
 shasum -a 256 "$tgz"
+echo "commit=$commit"
+echo "tgz=$tgz"
 ```
 
-この `$tgz` に対して、上の「作成前に確認する事項」の一時ホームでの `setup` 試験を行い、SHA-256を[VALIDATION](../../VALIDATION.md)へ日付つきで記録します（Release本文にも書けます）。
+この `$tgz` に対して、上の「作成前に確認する事項」の一時ホームでの `setup` 試験を行い、表示された `commit`、tgzのパス、SHA-256を[VALIDATION](../../VALIDATION.md)へ日付つきで記録します（Release本文にも書けます）。
 
 作成（ユーザーの明示的な指示を受けた後）：
 
 ```sh
-shasum -a 256 "$tgz"   # 記録したSHA-256と一致することを、作成の直前にもう一度確認する
+set -e
+# 別のシェルで行う場合に備え、用意で記録した値を明示的に設定し直す（<...> は記録した値に置き換える）
+commit="<用意で記録した完全なcommit SHA>"
+tgz="<用意で記録したtgzのパス>"
+test "$(git rev-parse HEAD)" = "$commit"   # 作業ツリーが、packしたcommitのままであること
+echo "<記録したSHA-256>  $tgz" | shasum -a 256 -c -   # 記録したSHA-256と一致することを、作成の直前にもう一度確認する
 gh release create v0.5.0 "$tgz" \
   --target "$commit" \
   --title "v0.5.0" \

@@ -26,7 +26,7 @@ echo "$CLAUDE_CONFIG_DIR|$*" >> "${log}"
 case "$*" in
   "plugin list --json") if [ -f "${path.join(state, 'jsonfail')}" ]; then exit 2; fi; if [ -f "${path.join(state, 'stderrwarn')}" ]; then echo "warning: update available" >&2; fi; if [ -f "${path.join(state, 'plugins.json')}" ]; then ${show('plugins.json')}; else echo "[]"; fi;;
   "plugin update"*) if [ -f "${path.join(state, 'failupdate')}" ]; then exit 3; fi;;
-  "plugin list") ${show('plugins')};;
+  "plugin list") if [ -f "${path.join(state, 'textfail')}" ]; then exit 2; fi; ${show('plugins')};;
   "plugin marketplace add"*) if [ -f "${path.join(state, 'failadd')}" ]; then exit 3; fi;;
   "plugin marketplace list") ${show('marketplaces')};;
   "plugin install html-plan@claude-community"*) ${failInstall ? 'exit 3' : ':'};;
@@ -259,8 +259,10 @@ test('a failed Claude registration is reported with its commands and a rerun ret
   // The files are already staged, so installClaude alone would now say unchanged; setup registers anyway.
   fs.rmSync(path.join(f.base, 'state/failadd'));
   const retried = setup(f, '--host', 'claude', '--html-plan', 'false');
-  assert.equal(retried.code, 0, retried.error); assert.equal(step(retried, 'claude').status, 'registered');
-  assert.deepEqual(claude.calls().slice(-4), ['plugin list --json', 'plugin marketplace list', `plugin marketplace add ${target} --scope user`, 'plugin install harness@codex-harness --scope user']);
+  assert.equal(retried.code, 0, retried.error); assert.equal(step(retried, 'claude').status, 'installed');
+  // The manifest remembers the failed registration, so installClaude itself repeats it.
+  assert.deepEqual(claude.calls().slice(-3), ['--version', `plugin marketplace add ${target} --scope user`, 'plugin install harness@codex-harness --scope user']);
+  assert.equal(lib.readJson(path.join(f.home, '.claude/harness/install.json')).registered, true);
 
   // Once the plugin is listed at user scope, nothing is installed again.
   claude.state('plugins.json', listing(entry('harness@codex-harness', { version })));
@@ -343,6 +345,46 @@ test('a rerun after a failed plugin update retries it, and a matching version do
   const mark = claude.calls().length;
   assert.equal(step(setup(f, '--host', 'claude', '--html-plan', 'false'), 'claude').status, 'unchanged');
   assert.deepEqual(claude.calls().slice(mark), ['--version', 'plugin list --json']);
+});
+
+test('a failed update with an unchanged version is remembered and retried on the next run', posix, t => {
+  const f = fixture(t), claude = fakeClaude(f), target = path.join(f.home, '.agents/claude-marketplaces/codex-harness');
+  const manifestFile = path.join(f.home, '.claude/harness/install.json');
+  assert.equal(setup(f, '--host', 'claude', '--html-plan', 'false').code, 0);
+  assert.equal(lib.readJson(manifestFile).registered, true);
+  // Simulate an older staged copy: a consistent manifest whose files differ from the package, so this run updates.
+  write(path.join(target, 'older.txt'), 'older');
+  write(manifestFile, { ...lib.readJson(manifestFile), files: lib.inventory(target) });
+  claude.state('plugins.json', listing(entry('harness@codex-harness', { version })));
+  claude.state('failupdate', '');
+  const failed = setup(f, '--host', 'claude', '--html-plan', 'false');
+  assert.equal(failed.code, 2); assert.equal(step(failed, 'claude').status, 'updated'); assert.equal(step(failed, 'claude').ok, false);
+  const commands = ['claude plugin marketplace update codex-harness', 'claude plugin update harness@codex-harness --scope user'];
+  assert.deepEqual(failed.data.run_manually, commands);
+  assert.equal(lib.readJson(manifestFile).registered, false);
+  assert.equal(fs.existsSync(path.join(target, 'older.txt')), false);
+
+  // The files and the listed version now match the package, yet the rerun repeats the update.
+  fs.rmSync(path.join(f.base, 'state/failupdate'));
+  const before = claude.calls().length;
+  const retried = setup(f, '--host', 'claude', '--html-plan', 'false');
+  assert.equal(retried.code, 0, retried.error); assert.equal(step(retried, 'claude').status, 'updated');
+  assert.deepEqual(claude.calls().slice(before), ['--version', '--version', 'plugin marketplace update codex-harness', 'plugin update harness@codex-harness --scope user']);
+  assert.equal(lib.readJson(manifestFile).registered, true);
+  assert.equal(step(setup(f, '--host', 'claude', '--html-plan', 'false'), 'claude').status, 'unchanged');
+});
+
+test('when the installed plugins cannot be read nothing is installed and the commands are returned', posix, t => {
+  const f = fixture(t), claude = fakeClaude(f);
+  assert.equal(setup(f, '--host', 'claude').code, 0);
+  claude.state('jsonfail', ''); claude.state('textfail', '');
+  const before = claude.calls().length;
+  const result = setup(f, '--host', 'claude');
+  assert.equal(result.code, 2);
+  for (const name of ['claude', 'html-plan']) { assert.equal(step(result, name).ok, false); assert.equal(step(result, name).status, 'failed'); assert.match(step(result, name).reason, /could not read/); }
+  assert.deepEqual(step(result, 'html-plan').run_manually, ['claude plugin list', `claude plugin marketplace add ${community}`, 'claude plugin install html-plan@claude-community --scope user']);
+  assert.equal(step(result, 'claude').run_manually[0], 'claude plugin list'); assert.match(step(result, 'claude').run_manually[2], /^claude plugin install harness@codex-harness --scope user$/);
+  assert.equal(claude.calls().slice(before).some(call => /^plugin (install|marketplace add|update)/.test(call)), false);
 });
 
 test('plugin detection reads stdout only and falls back to the text list when --json fails', posix, t => {
