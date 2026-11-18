@@ -91,7 +91,7 @@ npx --yes --package https://github.com/karladev001-eng/codex-harness/releases/do
   codex-harness setup --knowledge-repo karladev001-eng/harness-knowledge-base
 ```
 
-`setup` は、Codex導入、Claude Code導入、Claude Code用の上流 `html-plan` プラグイン導入、`--knowledge-repo` で指定した記憶共有設定の追記、`gh` のログイン確認、最後の状態確認を1回で行います。再実行が更新です。`claude` CLIがなければClaude Code側の手順はスキップし、失敗した手順は手で実行するコマンドを返します。`gh auth login` やCLIへのログインは代行しません。`--host codex|claude|all`・`--html-plan false`・`--knowledge-repo` の省略などの指定、詳しい動作、取得できない場合は[導入ガイド](docs/guides/installation.md)にあります。上のURLはRelease v0.5.0の作成後に有効になります（作成前は[導入ガイド](docs/guides/installation.md#配布状況)の他の経路を使います）。
+`setup` は、Codex導入、Claude Code導入、Claude Code用の上流 `html-plan` プラグイン導入、`--knowledge-repo` で指定した記憶共有設定の追記、`gh` のログイン確認、最後の状態確認を1回で行います。再実行が更新です。`claude` CLIがなければClaude Code側の手順はスキップし、失敗した手順は手で実行するコマンドを返します。`gh auth login` やCLIへのログインは代行しません。`--host codex|claude|all`・`--html-plan false`・`--knowledge-repo` の省略などの指定、詳しい動作、取得できない場合は[導入ガイド](docs/guides/installation.md)にあります。上のURLは[Release v0.5.0](https://github.com/karladev001-eng/codex-harness/releases/tag/v0.5.0)の添付ファイルです（SHA-256はRelease本文に記載）。
 
 補足として、GitHub Packagesの非公開npm配布（0.4.3まで配布済み。npm認証が必要）と、tarball・checkoutからの導入もあります。認証、版固定、更新、解除、PowerShell、競合時の対応は[導入ガイド](docs/guides/installation.md)にまとめています。導入後は新しいチャットで、対象プロジェクトを開いて依頼します。
 

@@ -108,7 +108,7 @@ authoringは `authoring install --project "$task_project" --skill inspect-harnes
 set -e   # どこかが失敗したら先へ進まない
 release_dir="/tmp/codex-harness-github-release"
 mkdir -p "$release_dir"
-rm -f "$release_dir"/karladev001-eng-codex-harness-*.tgz   # 以前のtgzが残っていて取り違えないようにする
+find "$release_dir" -maxdepth 1 -name 'karladev001-eng-codex-harness-*.tgz' -delete   # 以前のtgzが残っていて取り違えないようにする（zshでも一致なしで止まらない）
 commit="$(git rev-parse HEAD)"   # packするcommitそのもの。短縮形やブランチ名は使わない
 tgz="$release_dir/$(npm pack --pack-destination "$release_dir" | tail -n 1)"   # 実際にできたファイル名をnpm packの出力から得る
 tar -tzf "$tgz" | grep dist/skill/setup.js

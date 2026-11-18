@@ -11,7 +11,7 @@ npx --yes --package https://github.com/karladev001-eng/codex-harness/releases/do
   codex-harness setup --knowledge-repo karladev001-eng/harness-knowledge-base
 ```
 
-PowerShellでは行継続の `\` を外して1行で実行します。このURLはRelease v0.5.0の作成後に有効です。作成前や取得できない環境では、後述のローカルtarball・checkoutの経路で同じ `setup` を実行できます（tgzのパスを置き換えるだけです）。
+PowerShellでは行継続の `\` を外して1行で実行します。このURLは[Release v0.5.0](https://github.com/karladev001-eng/codex-harness/releases/tag/v0.5.0)の添付ファイルです（SHA-256 `225f934f5e798792182ab462bad020d29c6264bf113436401e514605ef423450`）。取得できない環境では、後述のローカルtarball・checkoutの経路で同じ `setup` を実行できます（tgzのパスを置き換えるだけです）。
 
 `setup [--home PATH] [--host codex|claude|all] [--knowledge-repo OWNER/REPO] [--knowledge-branch BRANCH] [--html-plan true|false]`
 
